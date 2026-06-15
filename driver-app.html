@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a3c34">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IE Driver">
+  <meta name="description" content="Island Explorer - Driver Companion App">
+  <title>Island Explorer - Driver</title>
+
+  <!-- Inline Manifest -->
+  <link rel="manifest" id="manifest-link">
+
+  <!-- Inline Icons (SVG as data URIs) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%231a3c34' width='192' height='192' rx='24'/%3E%3Ctext x='96' y='115' font-size='72' text-anchor='middle' fill='%23f4f1eb' font-family='Arial'%3EIE%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%231a3c34' width='180' height='180' rx='20'/%3E%3Ctext x='90' y='108' font-size='68' text-anchor='middle' fill='%23f4f1eb' font-family='Arial'%3EIE%3C/text%3E%3C/svg%3E">
+
+  <style>
+    :root {
+      --forest: #1a3c34;
+      --forest-dark: #142d27;
+      --cream: #f4f1eb;
+      --cream-dark: #e8e4db;
+      --amber: #dd9a2b;
+      --amber-light: #f0b84e;
+      --danger: #c0392b;
+      --success: #27ae60;
+      --text: #2d2d2d;
+      --text-light: #666;
+      --white: #ffffff;
+      --card-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow: hidden;
+      overscroll-behavior-y: none;
+    }
+
+    #app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ===== LOGIN SCREEN ===== */
+    .login-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      background: var(--cream);
+      position: relative;
+    }
+
+    .login-screen.hidden {
+      display: none;
+    }
+
+    .login-logo {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-logo h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--forest);
+      letter-spacing: 1px;
+    }
+
+    .login-logo .subtitle {
+      font-size: 0.875rem;
+      color: var(--amber);
+      font-weight: 600;
+      letter-spacing: 4px;
+      margin-top: 4px;
+    }
+
+    .login-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--forest);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 4px 20px rgba(26,60,52,0.25);
+    }
+
+    .login-icon span {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--cream);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 340px;
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .login-card h2 {
+      font-size: 1.125rem;
+      margin-bottom: 1.25rem;
+      color: var(--forest);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.375rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: var(--white);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--forest);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: var(--white);
+    }
+
+    .btn-primary:active {
+      background: var(--amber-light);
+    }
+
+    .btn-forest {
+      background: var(--forest);
+      color: var(--white);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: var(--white);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--forest);
+      color: var(--forest);
+    }
+
+    .btn-small {
+      padding: 0.625rem 1rem;
+      font-size: 0.875rem;
+      width: auto;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-row .btn {
+      flex: 1;
+    }
+
+    .login-error {
+      color: var(--danger);
+      font-size: 0.8125rem;
+      margin-top: 0.75rem;
+      text-align: center;
+      display: none;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .demo-keys {
+      margin-top: 1.5rem;
+      text-align: center;
+      max-width: 340px;
+    }
+
+    .demo-keys p {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-key-chip {
+      display: inline-block;
+      padding: 0.375rem 0.75rem;
+      background: var(--white);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      color: var(--forest);
+      margin: 3px;
+      border: 1px solid var(--cream-dark);
+    }
+
+    /* ===== MAIN APP LAYOUT ===== */
+    .main-app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .main-app.hidden {
+      display: none;
+    }
+
+    /* Header */
+    .app-header {
+      background: var(--forest);
+      color: var(--white);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .app-header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .offline-badge {
+      display: none;
+      padding: 0.25rem 0.625rem;
+      background: var(--danger);
+      border-radius: 20px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+    }
+
+    .offline-badge.show {
+      display: block;
+    }
+
+    /* Content area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 1rem;
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+
+    .content-area::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Screen management */
+    .screen {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 0.75rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .card-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--forest);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-subtitle {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Driver info */
+    .driver-welcome {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .driver-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--forest);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--cream);
+      flex-shrink: 0;
+    }
+
+    .driver-name {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .driver-key {
+      font-size: 0.75rem;
+      font-family: 'Courier New', monospace;
+      color: var(--text-light);
+      background: var(--cream);
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    /* Quick actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .action-btn {
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      padding: 1rem 0.5rem;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.96);
+    }
+
+    .action-icon {
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .action-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Assignment */
+    .assignment-card {
+      background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+      color: var(--white);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .assignment-card .card-title {
+      color: var(--cream);
+    }
+
+    .assignment-detail {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .assignment-detail:last-child {
+      border-bottom: none;
+    }
+
+    .assignment-detail .label {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      width: 60px;
+    }
+
+    .assignment-detail .value {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+
+    .assignment-detail .vehicle {
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    /* Trip list */
+    .trip-list {
+      list-style: none;
+    }
+
+    .trip-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.875rem;
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+
+    .trip-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .trip-dot.active {
+      background: var(--amber);
+      box-shadow: 0 0 0 3px rgba(221,154,43,0.2);
+    }
+
+    .trip-dot.completed {
+      background: var(--success);
+    }
+
+    .trip-dot.synced {
+      background: var(--success);
+    }
+
+    .trip-dot.pending {
+      background: var(--text-light);
+    }
+
+    .trip-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .trip-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trip-meta {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .trip-status {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 0.125rem 0.5rem;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    .trip-status.ongoing {
+      background: rgba(221,154,43,0.15);
+      color: var(--amber);
+    }
+
+    .trip-status.completed {
+      background: rgba(39,174,96,0.1);
+      color: var(--success);
+    }
+
+    .trip-status.pending {
+      background: rgba(102,102,102,0.1);
+      color: var(--text-light);
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: var(--white);
+      border-top: 1px solid var(--cream-dark);
+      padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.375rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-light);
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--forest);
+    }
+
+    .nav-icon {
+      font-size: 1.375rem;
+      margin-bottom: 2px;
+    }
+
+    .nav-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+    }
+
+    /* ===== FORMS ===== */
+    .form-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-section h3 {
+      font-size: 1rem;
+      color: var(--forest);
+      margin-bottom: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .gps-display {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .gps-display .coords {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8125rem;
+      color: var(--text);
+    }
+
+    .gps-display .status {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+    }
+
+    .gps-status.acquiring {
+      color: var(--amber);
+    }
+
+    .gps-status.acquired {
+      color: var(--success);
+    }
+
+    .gps-status.error {
+      color: var(--danger);
+    }
+
+    /* Odometer */
+    .odometer-input {
+      font-size: 1.5rem;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      letter-spacing: 2px;
+    }
+
+    .km-calculated {
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--forest);
+      margin-top: 0.5rem;
+    }
+
+    .km-label {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    /* Timer */
+    .timer-display {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 300;
+      font-variant-numeric: tabular-nums;
+      color: var(--forest);
+      margin: 1rem 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.3;
+    }
+
+    .empty-text {
+      font-size: 0.9375rem;
+      color: var(--text-light);
+    }
+
+    /* Install banner */
+    .install-banner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--forest);
+      color: var(--white);
+      padding: 0.75rem 1rem;
+      z-index: 100;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .install-banner.show {
+      display: flex;
+    }
+
+    .install-banner p {
+      font-size: 0.8125rem;
+      flex: 1;
+    }
+
+    .install-banner button {
+      background: var(--amber);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      color: var(--white);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      cursor: pointer;
+    }
+
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--white);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s;
+      pointer-events: auto;
+    }
+
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.info { background: var(--forest); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+
+    /* Profile screen */
+    .profile-section {
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: var(--forest);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cream);
+      margin: 0 auto 0.75rem;
+    }
+
+    .profile-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .profile-key {
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-top: 0.25rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .stat-box {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 0.5rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--forest);
+    }
+
+    .stat-label {
+      font-size: 0.6875rem;
+      color: var(--text-light);
+      margin-top: 0.125rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 50;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-sheet {
+      background: var(--cream);
+      width: 100%;
+      max-height: 85vh;
+      border-radius: var(--radius) var(--radius) 0 0;
+      overflow-y: auto;
+      animation: sheetUp 0.3s ease;
+    }
+
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: var(--white);
+      border-radius: var(--radius) var(--radius) 0 0;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .modal-header h3 {
+      font-size: 1.0625rem;
+      color: var(--forest);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-light);
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .modal-close:active {
+      background: var(--cream);
+    }
+
+    .modal-body {
+      padding: 1.25rem;
+    }
+
+    /* Detail row */
+    .detail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 0.8125rem;
+      color: var(--text-light);
+    }
+
+    .detail-value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Scrollbar hide */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Notes textarea */
+    textarea.form-input {
+      resize: none;
+      min-height: 80px;
+    }
+
+    /* Select styling */
+    select.form-input {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.875rem center;
+    }
+
+    /* Number input styling */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+
+    /* Fuel log specific */
+    .fuel-type-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .fuel-option {
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+      border: 2px solid var(--cream-dark);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: var(--white);
+      transition: all 0.15s;
+    }
+
+    .fuel-option.selected {
+      border-color: var(--forest);
+      background: rgba(26,60,52,0.05);
+      color: var(--forest);
+    }
+
+    /* Responsive */
+    @media (min-width: 480px) {
+      .login-card {
+        max-width: 380px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Install Banner -->
+    <div class="install-banner" id="install-banner">
+      <p>Install Island Explorer Driver for quick access</p>
+      <button onclick="app.installPWA()">Install</button>
+      <button class="modal-close" onclick="app.dismissInstall()" style="color:#fff; width:auto;">&times;</button>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ============ LOGIN SCREEN ============ -->
+    <div class="login-screen" id="login-screen">
+      <div class="login-logo">
+        <div class="login-icon"><span>IE</span></div>
+        <h1>Island Explorer</h1>
+        <div class="subtitle">DRIVER COMPANION</div>
+      </div>
+      <div class="login-card">
+        <h2>Sign In</h2>
+        <div class="form-group">
+          <label for="access-key">Access Key</label>
+          <input type="text" class="form-input" id="access-key" placeholder="IEO-XXXXXX" maxlength="12" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" onclick="app.login()">Sign In</button>
+        <div class="login-error" id="login-error">Invalid access key. Please try again.</div>
+      </div>
+      <div class="demo-keys">
+        <p>Demo Access Keys</p>
+        <span class="demo-key-chip" onclick="app.fillKey('IEO-FCYLQP')">IEO-FCYLQP (Suresh)</span>
+        <span class="demo-key-chip" onclick="app.fillKey('IEO-PWQBMA')">IEO-PWQBMA (Anil)</span>
+        <span class="demo-key-chip" onclick="app.fillKey('IEO-348VB2')">IEO-348VB2 (Vikram)</span>
+      </div>
+    </div>
+
+    <!-- ============ MAIN APP ============ -->
+    <div class="main-app hidden" id="main-app">
+      <!-- Header -->
+      <div class="app-header">
+        <h1>Island Explorer</h1>
+        <div class="header-right">
+          <span class="offline-badge" id="offline-badge">OFFLINE</span>
+          <span id="header-date" style="font-size:0.8125rem; opacity:0.9;"></span>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area" id="content-area">
+
+        <!-- ===== DASHBOARD SCREEN ===== -->
+        <div class="screen active" id="screen-dashboard">
+          <div class="driver-welcome">
+            <div class="driver-avatar" id="dash-avatar">S</div>
+            <div>
+              <div class="driver-name" id="dash-name">Driver</div>
+              <span class="driver-key" id="dash-key">IEO-XXXXXX</span>
+            </div>
+          </div>
+
+          <div class="assignment-card" id="assignment-card">
+            <div class="card-title">
+              <span>Today's Assignment</span>
+              <span style="font-size:0.75rem; opacity:0.7;">15 May 2026</span>
+            </div>
+            <div class="assignment-detail">
+              <span class="label">TOUR</span>
+              <span class="value" id="assign-tour">South Island Circle</span>
+            </div>
+            <div class="assignment-detail">
+              <span class="label">VEHICLE</span>
+              <span class="vehicle" id="assign-vehicle">PB-05-2026 (Swift Dzire)</span>
+            </div>
+            <div class="assignment-detail">
+              <span class="label">PICKUP</span>
+              <span class="value" id="assign-pickup">09:30 - Hotel Aquagreen</span>
+            </div>
+            <div class="assignment-detail">
+              <span class="label">GUESTS</span>
+              <span class="value" id="assign-guests">4 guests</span>
+            </div>
+          </div>
+
+          <div style="font-size:0.9375rem; font-weight:600; color:var(--forest); margin-bottom:0.75rem;">Quick Actions</div>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="app.openTripModal()">
+              <div class="action-icon">&#9654;</div>
+              <div class="action-label">Start Trip</div>
+            </button>
+            <button class="action-btn" onclick="app.openFuelModal()">
+              <div class="action-icon">&#9981;</div>
+              <div class="action-label">Log Fuel</div>
+            </button>
+            <button class="action-btn" onclick="app.endDay()">
+              <div class="action-icon">&#127749;</div>
+              <div class="action-label">End Day</div>
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>Recent Trips</span>
+              <button class="btn btn-small btn-outline" onclick="app.navigate('trips')">View All</button>
+            </div>
+            <ul class="trip-list" id="dash-trip-list"></ul>
+          </div>
+        </div>
+
+        <!-- ===== TRIPS SCREEN ===== -->
+        <div class="screen" id="screen-trips">
+          <h2 style="font-size:1.25rem; margin-bottom:1rem; color:var(--forest);">Trip History</h2>
+          <div class="card" style="padding:0; overflow:hidden;">
+            <div style="padding:1rem 1.25rem; border-bottom:1px solid var(--cream-dark); display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:600; color:var(--forest);">All Trips</span>
+              <span id="trip-count" style="font-size:0.8125rem; color:var(--text-light);">0 trips</span>
+            </div>
+            <div style="padding:0.5rem;" id="trips-list-container"></div>
+          </div>
+        </div>
+
+        <!-- ===== PROFILE SCREEN ===== -->
+        <div class="screen" id="screen-profile">
+          <div class="profile-section">
+            <div class="profile-avatar" id="profile-avatar">S</div>
+            <div class="profile-name" id="profile-name">Driver</div>
+            <div class="profile-key" id="profile-key">IEO-XXXXXX</div>
+            <div class="stats-grid">
+              <div class="stat-box">
+                <div class="stat-value" id="stat-trips">0</div>
+                <div class="stat-label">Trips Today</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value" id="stat-km">0</div>
+                <div class="stat-label">KM Driven</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-value" id="stat-hours">0</div>
+                <div class="stat-label">Hours</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">App Info</div>
+            <div class="detail-row">
+              <span class="detail-label">Version</span>
+              <span class="detail-value">1.0.0</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Offline Support</span>
+              <span class="detail-value" id="offline-status">Enabled</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Sync Status</span>
+              <span class="detail-value" id="sync-status">All synced</span>
+            </div>
+          </div>
+
+          <div style="margin-top:1.5rem;">
+            <button class="btn btn-outline" onclick="app.installPWA()" style="margin-bottom:0.75rem;">Install to Home Screen</button>
+            <button class="btn btn-danger" onclick="app.logout()">Logout</button>
+          </div>
+
+          <div style="text-align:center; margin-top:1.5rem; font-size:0.6875rem; color:var(--text-light);">
+            Island Explorer Driver Companion<br>
+            Press Ctrl+Shift+A to access admin tools
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Tab Navigation -->
+      <div class="bottom-nav">
+        <button class="nav-item active" data-screen="dashboard" onclick="app.navigate('dashboard')">
+          <span class="nav-icon">&#8962;</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+        <button class="nav-item" data-screen="trips" onclick="app.navigate('trips')">
+          <span class="nav-icon">&#9992;</span>
+          <span class="nav-label">Trips</span>
+        </button>
+        <button class="nav-item" data-screen="profile" onclick="app.navigate('profile')">
+          <span class="nav-icon">&#9786;</span>
+          <span class="nav-label">Profile</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ============ START TRIP MODAL ============ -->
+    <div class="modal-overlay" id="trip-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Start New Trip</h3>
+          <button class="modal-close" onclick="app.closeModal('trip-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-section">
+            <h3>Trip Details</h3>
+            <div class="form-group">
+              <label for="trip-tour">Tour Name</label>
+              <select class="form-input" id="trip-tour">
+                <option value="South Island Circle">South Island Circle</option>
+                <option value="North Island Explorer">North Island Explorer</option>
+                <option value="Ross Island Heritage">Ross Island Heritage</option>
+                <option value="Neil Island Day Trip">Neil Island Day Trip</option>
+                <option value="Havelock Getaway">Havelock Getaway</option>
+                <option value="Baratang Adventure">Baratang Adventure</option>
+                <option value="Custom">Custom Trip</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="trip-vehicle">Vehicle</label>
+              <select class="form-input" id="trip-vehicle">
+                <option value="PB-05-2026 (Swift Dzire)">PB-05-2026 (Swift Dzire)</option>
+                <option value="PB-12-7890 (Toyota Innova)">PB-12-7890 (Toyota Innova)</option>
+                <option value="PB-08-4567 (Ertiga)">PB-08-4567 (Ertiga)</option>
+                <option value="PB-03-1234 (Scorpio)">PB-03-1234 (Scorpio)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="trip-guests">Guests</label>
+                <input type="number" class="form-input" id="trip-guests" min="1" max="20" value="4">
+              </div>
+              <div class="form-group">
+                <label for="trip-odometer-start">Odometer (km)</label>
+                <input type="number" class="form-input odometer-input" id="trip-odometer-start" placeholder="00000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="trip-notes">Notes</label>
+              <textarea class="form-input" id="trip-notes" placeholder="Any special instructions..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>GPS Location</h3>
+            <div class="gps-display">
+              <div class="coords" id="start-coords">--.------, --.------</div>
+              <div class="status" id="start-gps-status">Tap Start to capture GPS</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="start-trip-btn" onclick="app.startTrip()">Start Trip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ END TRIP MODAL ============ -->
+    <div class="modal-overlay" id="end-trip-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>End Trip</h3>
+          <button class="modal-close" onclick="app.closeModal('end-trip-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-section">
+            <h3>Current Trip</h3>
+            <div id="end-trip-summary"></div>
+          </div>
+
+          <div class="timer-display" id="trip-timer">00:00:00</div>
+
+          <div class="form-section">
+            <h3>End Details</h3>
+            <div class="form-group">
+              <label for="trip-odometer-end">Ending Odometer (km)</label>
+              <input type="number" class="form-input odometer-input" id="trip-odometer-end" placeholder="00000">
+            </div>
+            <div class="km-calculated" id="total-km">0 KM</div>
+            <div class="km-label">Distance driven</div>
+
+            <div class="gps-display" style="margin-top:1rem;">
+              <div class="coords" id="end-coords">--.------, --.------</div>
+              <div class="status" id="end-gps-status">Acquiring GPS...</div>
+            </div>
+
+            <div class="form-group" style="margin-top:1rem;">
+              <label for="end-notes">End Notes</label>
+              <textarea class="form-input" id="end-notes" placeholder="Trip notes, issues, feedback..."></textarea>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="app.endTrip()">Complete Trip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FUEL LOG MODAL ============ -->
+    <div class="modal-overlay" id="fuel-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Log Fuel</h3>
+          <button class="modal-close" onclick="app.closeModal('fuel-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-section">
+            <h3>Fuel Details</h3>
+            <div class="fuel-type-options">
+              <div class="fuel-option selected" data-fuel="petrol" onclick="app.selectFuel(this)">Petrol</div>
+              <div class="fuel-option" data-fuel="diesel" onclick="app.selectFuel(this)">Diesel</div>
+              <div class="fuel-option" data-fuel="cng" onclick="app.selectFuel(this)">CNG</div>
+            </div>
+            <div class="form-group">
+              <label for="fuel-vehicle">Vehicle</label>
+              <select class="form-input" id="fuel-vehicle">
+                <option value="PB-05-2026">PB-05-2026 (Swift Dzire)</option>
+                <option value="PB-12-7890">PB-12-7890 (Toyota Innova)</option>
+                <option value="PB-08-4567">PB-08-4567 (Ertiga)</option>
+                <option value="PB-03-1234">PB-03-1234 (Scorpio)</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fuel-litres">Litres</label>
+                <input type="number" class="form-input" id="fuel-litres" step="0.01" placeholder="0.00">
+              </div>
+              <div class="form-group">
+                <label for="fuel-amount">Amount (Rs)</label>
+                <input type="number" class="form-input" id="fuel-amount" step="0.01" placeholder="0.00">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fuel-odometer">Odometer Reading</label>
+              <input type="number" class="form-input odometer-input" id="fuel-odometer" placeholder="00000">
+            </div>
+            <div class="form-group">
+              <label for="fuel-station">Station Name</label>
+              <input type="text" class="form-input" id="fuel-station" placeholder="Petrol pump name">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="app.logFuel()">Save Fuel Log</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ TRIP DETAIL MODAL ============ -->
+    <div class="modal-overlay" id="detail-modal">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <h3>Trip Details</h3>
+          <button class="modal-close" onclick="app.closeModal('detail-modal')">&times;</button>
+        </div>
+        <div class="modal-body" id="detail-modal-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ============================
+  // SERVICE WORKER (Inline via Blob)
+  // ============================
+  const swCode = `
+    const CACHE_NAME = 'ie-driver-v1';
+    const urlsToCache = ['/'];
+
+    self.addEventListener('install', event => {
+      event.waitUntil(
+        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+      );
+      self.skipWaiting();
+    });
+
+    self.addEventListener('activate', event => {
+      event.waitUntil(self.clients.claim());
+    });
+
+    self.addEventListener('fetch', event => {
+      event.respondWith(
+        caches.match(event.request).then(response => {
+          return response || fetch(event.request).catch(() => {
+            return new Response('Offline', { status: 503 });
+          });
+        })
+      );
+    });
+
+    self.addEventListener('sync', event => {
+      if (event.tag === 'sync-trips') {
+        event.waitUntil(
+          self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+              client.postMessage({ type: 'sync-trips' });
+            });
+          })
+        );
+      }
+    });
+  `;
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(() => {
+      // Silently fail for file:// or unsupported contexts
+    });
+  }
+
+  // ============================
+  // INLINE MANIFEST (Data URI)
+  // ============================
+  const manifest = {
+    name: "Island Explorer Driver",
+    short_name: "IE Driver",
+    description: "Driver companion app for Island Explorer tours",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#f4f1eb",
+    theme_color: "#1a3c34",
+    orientation: "portrait",
+    scope: ".",
+    icons: [
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%231a3c34' width='192' height='192' rx='24'/%3E%3Ctext x='96' y='115' font-size='72' text-anchor='middle' fill='%23f4f1eb' font-family='Arial'%3EIE%3C/text%3E%3C/svg%3E",
+        sizes: "192x192",
+        type: "image/svg+xml"
+      },
+      {
+        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%231a3c34' width='512' height='512' rx='48'/%3E%3Ctext x='256' y='310' font-size='200' text-anchor='middle' fill='%23f4f1eb' font-family='Arial'%3EIE%3C/text%3E%3C/svg%3E",
+        sizes: "512x512",
+        type: "image/svg+xml"
+      }
+    ]
+  };
+
+  const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+
+  // ============================
+  // DEMO DATA
+  // ============================
+  const DRIVERS = {
+    'IEO-FCYLQP': { name: 'Suresh Kumar', initials: 'SK', tour: 'South Island Circle', vehicle: 'PB-05-2026 (Swift Dzire)', pickup: '09:30 - Hotel Aquagreen', guests: '4 guests' },
+    'IEO-PWQBMA': { name: 'Anil Rao', initials: 'AR', tour: 'North Island Explorer', vehicle: 'PB-12-7890 (Toyota Innova)', pickup: '10:00 - Port Blair Jetty', guests: '6 guests' },
+    'IEO-348VB2': { name: 'Vikram Singh', initials: 'VS', tour: 'Havelock Getaway', vehicle: 'PB-08-4567 (Ertiga)', pickup: '07:00 - Govind Nagar', guests: '5 guests' }
+  };
+
+  // ============================
+  // MAIN APP
+  // ============================
+  const app = {
+    state: {
+      currentDriver: null,
+      activeTrip: null,
+      trips: [],
+      fuelLogs: [],
+      timerInterval: null,
+      timerSeconds: 0,
+      deferredPrompt: null,
+      currentScreen: 'dashboard',
+      selectedFuel: 'petrol'
+    },
+
+    // ----- Init -----
+    init() {
+      // Check for existing session
+      const saved = localStorage.getItem('ie_driver_session');
+      if (saved) {
+        try {
+          const session = JSON.parse(saved);
+          if (session.key && DRIVERS[session.key]) {
+            this.login(session.key);
+          }
+        } catch (e) {
+          localStorage.removeItem('ie_driver_session');
+        }
+      }
+
+      // Load stored data
+      this.loadTrips();
+      this.loadFuelLogs();
+
+      // Set header date
+      this.updateHeaderDate();
+
+      // Check online status
+      this.updateOnlineStatus();
+      window.addEventListener('online', () => this.updateOnlineStatus());
+      window.addEventListener('offline', () => this.updateOnlineStatus());
+
+      // Before install prompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        this.state.deferredPrompt = e;
+        document.getElementById('install-banner').classList.add('show');
+      });
+
+      // Enter key on login
+      document.getElementById('access-key').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') this.login();
+      });
+
+      // Odometer change calc
+      document.getElementById('trip-odometer-end').addEventListener('input', () => this.calcKm());
+
+      // Listen for sync messages from SW
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'sync-trips') {
+            this.syncPendingTrips();
+          }
+        });
+      }
+
+      // Check if there's an active trip in progress
+      const activeTrip = localStorage.getItem('ie_active_trip');
+      if (activeTrip) {
+        this.state.activeTrip = JSON.parse(activeTrip);
+        this.showEndTripModal();
+      }
+    },
+
+    // ----- Login -----
+    fillKey(key) {
+      document.getElementById('access-key').value = key;
+    },
+
+    login(key) {
+      const input = key || document.getElementById('access-key').value.trim().toUpperCase();
+      const errorEl = document.getElementById('login-error');
+
+      if (!DRIVERS[input]) {
+        errorEl.classList.add('show');
+        return;
+      }
+
+      errorEl.classList.remove('show');
+      this.state.currentDriver = { key: input, ...DRIVERS[input] };
+
+      // Save session
+      localStorage.setItem('ie_driver_session', JSON.stringify({ key: input }));
+
+      // Show main app
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+
+      // Update UI
+      this.updateDriverUI();
+      this.renderTrips();
+      this.updateStats();
+
+      this.toast('Welcome, ' + this.state.currentDriver.name, 'success');
+    },
+
+    logout() {
+      if (!confirm('Are you sure you want to logout?')) return;
+
+      // Clear session
+      localStorage.removeItem('ie_driver_session');
+
+      // Reset state
+      this.state.currentDriver = null;
+      this.state.activeTrip = null;
+      this.state.timerSeconds = 0;
+      clearInterval(this.state.timerInterval);
+
+      // Show login
+      document.getElementById('main-app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('access-key').value = '';
+      document.getElementById('login-error').classList.remove('show');
+    },
+
+    // ----- UI Updates -----
+    updateDriverUI() {
+      const d = this.state.currentDriver;
+      document.getElementById('dash-name').textContent = d.name;
+      document.getElementById('dash-key').textContent = d.key;
+      document.getElementById('dash-avatar').textContent = d.initials;
+      document.getElementById('profile-name').textContent = d.name;
+      document.getElementById('profile-key').textContent = d.key;
+      document.getElementById('profile-avatar').textContent = d.initials;
+
+      // Update assignment card
+      document.getElementById('assign-tour').textContent = d.tour;
+      document.getElementById('assign-vehicle').textContent = d.vehicle;
+      document.getElementById('assign-pickup').textContent = d.pickup;
+      document.getElementById('assign-guests').textContent = d.guests;
+    },
+
+    updateHeaderDate() {
+      const now = new Date();
+      const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+      const el = document.getElementById('header-date');
+      if (el) el.textContent = now.toLocaleDateString('en-GB', opts);
+    },
+
+    updateOnlineStatus() {
+      const isOnline = navigator.onLine;
+      document.getElementById('offline-badge').classList.toggle('show', !isOnline);
+
+      const syncStatus = document.getElementById('sync-status');
+      if (syncStatus) {
+        const pending = this.state.trips.filter(t => t.status === 'pending').length;
+        syncStatus.textContent = isOnline
+          ? (pending > 0 ? pending + ' pending sync' : 'All synced')
+          : pending + ' queued';
+      }
+
+      if (isOnline) {
+        this.syncPendingTrips();
+      }
+    },
+
+    // ----- Navigation -----
+    navigate(screen) {
+      // Hide all screens
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+      // Show target
+      const target = document.getElementById('screen-' + screen);
+      if (target) target.classList.add('active');
+
+      // Update nav
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.screen === screen);
+      });
+
+      this.state.currentScreen = screen;
+
+      // Refresh data on navigate
+      if (screen === 'trips') this.renderTrips();
+      if (screen === 'profile') this.updateStats();
+      if (screen === 'dashboard') {
+        this.renderTrips();
+        this.updateStats();
+      }
+    },
+
+    // ----- Trip Management -----
+    openTripModal() {
+      if (this.state.activeTrip) {
+        this.toast('You have an active trip. End it first.', 'error');
+        this.showEndTripModal();
+        return;
+      }
+      // Reset form
+      document.getElementById('trip-tour').value = this.state.currentDriver.tour;
+      document.getElementById('trip-vehicle').value = this.state.currentDriver.vehicle;
+      document.getElementById('trip-guests').value = '4';
+      document.getElementById('trip-odometer-start').value = '';
+      document.getElementById('trip-notes').value = '';
+      document.getElementById('start-coords').textContent = '--.------, --.------';
+      document.getElementById('start-gps-status').textContent = 'Tap Start to capture GPS';
+      this.openModal('trip-modal');
+    },
+
+    openModal(id) {
+      document.getElementById(id).classList.add('show');
+      document.body.style.overflow = 'hidden';
+    },
+
+    closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+      document.body.style.overflow = '';
+    },
+
+    getGPS(callback) {
+      if (!navigator.geolocation) {
+        callback(null, 'GPS not supported');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          callback({
+            lat: pos.coords.latitude.toFixed(6),
+            lng: pos.coords.longitude.toFixed(6),
+            accuracy: pos.coords.accuracy,
+            timestamp: Date.now()
+          }, null);
+        },
+        (err) => {
+          callback(null, 'GPS: ' + (err.message || 'Unable to get location'));
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    },
+
+    startTrip() {
+      const odometer = parseFloat(document.getElementById('trip-odometer-start').value);
+      if (!odometer || odometer <= 0) {
+        this.toast('Please enter starting odometer reading', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('start-trip-btn');
+      btn.textContent = 'Acquiring GPS...';
+      btn.disabled = true;
+
+      this.getGPS((coords, error) => {
+        btn.textContent = 'Start Trip';
+        btn.disabled = false;
+
+        if (error) {
+          this.toast('GPS: ' + error + '. Using manual start.', 'info');
+        }
+
+        const trip = {
+          id: 'trip_' + Date.now(),
+          tour: document.getElementById('trip-tour').value,
+          vehicle: document.getElementById('trip-vehicle').value,
+          guests: parseInt(document.getElementById('trip-guests').value) || 1,
+          notes: document.getElementById('trip-notes').value,
+          odometerStart: odometer,
+          startCoords: coords,
+          startTime: Date.now(),
+          driverKey: this.state.currentDriver.key,
+          driverName: this.state.currentDriver.name,
+          status: 'ongoing'
+        };
+
+        this.state.activeTrip = trip;
+        localStorage.setItem('ie_active_trip', JSON.stringify(trip));
+
+        this.closeModal('trip-modal');
+        this.showEndTripModal();
+        this.toast('Trip started! GPS ' + (coords ? 'captured' : 'unavailable'), 'success');
+
+        // Schedule background sync
+        if ('serviceWorker' in navigator && 'sync' in registration) {
+          registration.sync.register('sync-trips').catch(() => {});
+        }
+      });
+    },
+
+    showEndTripModal() {
+      const trip = this.state.activeTrip;
+      if (!trip) return;
+
+      const startTime = new Date(trip.startTime);
+      const timeStr = startTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById('end-trip-summary').innerHTML = `
+        <div class="detail-row"><span class="detail-label">Tour</span><span class="detail-value">${trip.tour}</span></div>
+        <div class="detail-row"><span class="detail-label">Started</span><span class="detail-value">${timeStr}</span></div>
+        <div class="detail-row"><span class="detail-label">Odometer</span><span class="detail-value">${trip.odometerStart} km</span></div>
+        <div class="detail-row"><span class="detail-label">Guests</span><span class="detail-value">${trip.guests}</span></div>
+        <div class="detail-row"><span class="detail-label">Vehicle</span><span class="detail-value">${trip.vehicle}</span></div>
+      `;
+
+      document.getElementById('trip-odometer-end').value = '';
+      document.getElementById('total-km').textContent = '0 KM';
+      document.getElementById('end-coords').textContent = '--.------, --.------';
+      document.getElementById('end-gps-status').textContent = 'Acquiring GPS...';
+      document.getElementById('end-notes').value = '';
+
+      this.state.timerSeconds = Math.floor((Date.now() - trip.startTime) / 1000);
+      this.updateTimer();
+      clearInterval(this.state.timerInterval);
+      this.state.timerInterval = setInterval(() => {
+        this.state.timerSeconds++;
+        this.updateTimer();
+      }, 1000);
+
+      // Get end GPS in background
+      this.getGPS((coords, error) => {
+        if (coords) {
+          document.getElementById('end-coords').textContent = coords.lat + ', ' + coords.lng;
+          document.getElementById('end-gps-status').textContent = 'GPS acquired';
+          document.getElementById('end-gps-status').className = 'status gps-status acquired';
+          this.state.activeTrip.endCoords = coords;
+        } else {
+          document.getElementById('end-gps-status').textContent = error || 'GPS unavailable';
+          document.getElementById('end-gps-status').className = 'status gps-status error';
+        }
+      });
+
+      this.openModal('end-trip-modal');
+    },
+
+    updateTimer() {
+      const s = this.state.timerSeconds;
+      const hrs = String(Math.floor(s / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+      const secs = String(s % 60).padStart(2, '0');
+      document.getElementById('trip-timer').textContent = hrs + ':' + mins + ':' + secs;
+    },
+
+    calcKm() {
+      const trip = this.state.activeTrip;
+      if (!trip) return;
+      const endOdo = parseFloat(document.getElementById('trip-odometer-end').value) || 0;
+      const diff = Math.max(0, endOdo - trip.odometerStart);
+      document.getElementById('total-km').textContent = diff.toFixed(1) + ' KM';
+    },
+
+    endTrip() {
+      const trip = this.state.activeTrip;
+      if (!trip) return;
+
+      const endOdo = parseFloat(document.getElementById('trip-odometer-end').value);
+      if (!endOdo || endOdo <= trip.odometerStart) {
+        this.toast('Please enter valid ending odometer', 'error');
+        return;
+      }
+
+      const endNotes = document.getElementById('end-notes').value;
+
+      // Finalize trip
+      trip.endTime = Date.now();
+      trip.odometerEnd = endOdo;
+      trip.totalKm = parseFloat((endOdo - trip.odometerStart).toFixed(1));
+      trip.duration = Math.floor((trip.endTime - trip.startTime) / 1000);
+      trip.endNotes = endNotes;
+      trip.status = navigator.onLine ? 'completed' : 'pending';
+
+      // Save trip
+      this.state.trips.unshift(trip);
+      this.saveTrips();
+
+      // Clear active trip
+      this.state.activeTrip = null;
+      localStorage.removeItem('ie_active_trip');
+      clearInterval(this.state.timerInterval);
+
+      this.closeModal('end-trip-modal');
+      this.renderTrips();
+      this.updateStats();
+
+      this.toast('Trip completed! ' + trip.totalKm + ' km driven', 'success');
+
+      // Attempt sync
+      if (navigator.onLine) {
+        this.syncPendingTrips();
+      } else {
+        this.toast('Trip saved offline. Will sync when online.', 'info');
+      }
+    },
+
+    openFuelModal() {
+      document.getElementById('fuel-litres').value = '';
+      document.getElementById('fuel-amount').value = '';
+      document.getElementById('fuel-odometer').value = '';
+      document.getElementById('fuel-station').value = '';
+      this.openModal('fuel-modal');
+    },
+
+    selectFuel(el) {
+      document.querySelectorAll('.fuel-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      this.state.selectedFuel = el.dataset.fuel;
+    },
+
+    logFuel() {
+      const litres = parseFloat(document.getElementById('fuel-litres').value);
+      const amount = parseFloat(document.getElementById('fuel-amount').value);
+      const odometer = parseFloat(document.getElementById('fuel-odometer').value);
+
+      if (!litres || !amount || !odometer) {
+        this.toast('Please fill all fuel details', 'error');
+        return;
+      }
+
+      const log = {
+        id: 'fuel_' + Date.now(),
+        type: this.state.selectedFuel,
+        vehicle: document.getElementById('fuel-vehicle').value,
+        litres,
+        amount,
+        odometer,
+        station: document.getElementById('fuel-station').value || 'Unknown',
+        timestamp: Date.now(),
+        driverKey: this.state.currentDriver.key,
+        status: navigator.onLine ? 'synced' : 'pending'
+      };
+
+      this.state.fuelLogs.unshift(log);
+      this.saveFuelLogs();
+
+      this.closeModal('fuel-modal');
+      this.toast('Fuel log saved: Rs ' + amount.toFixed(2), 'success');
+    },
+
+    endDay() {
+      if (this.state.activeTrip) {
+        this.toast('Please end your active trip first', 'error');
+        this.showEndTripModal();
+        return;
+      }
+
+      if (!confirm('End your day? This will sign off all trips.')) return;
+
+      this.toast('Day ended. Drive safe!', 'success');
+      this.updateStats();
+    },
+
+    // ----- Data Persistence -----
+    loadTrips() {
+      try {
+        const stored = localStorage.getItem('ie_trips');
+        if (stored) this.state.trips = JSON.parse(stored);
+      } catch (e) {
+        this.state.trips = [];
+      }
+    },
+
+    saveTrips() {
+      localStorage.setItem('ie_trips', JSON.stringify(this.state.trips));
+    },
+
+    loadFuelLogs() {
+      try {
+        const stored = localStorage.getItem('ie_fuel_logs');
+        if (stored) this.state.fuelLogs = JSON.parse(stored);
+      } catch (e) {
+        this.state.fuelLogs = [];
+      }
+    },
+
+    saveFuelLogs() {
+      localStorage.setItem('ie_fuel_logs', JSON.stringify(this.state.fuelLogs));
+    },
+
+    syncPendingTrips() {
+      const pending = this.state.trips.filter(t => t.status === 'pending');
+      if (pending.length === 0) return;
+
+      // Mark all pending as completed
+      pending.forEach(t => { t.status = 'completed'; });
+      this.saveTrips();
+      this.renderTrips();
+      this.updateStats();
+
+      this.toast(pending.length + ' trip(s) synced', 'success');
+
+      const syncStatus = document.getElementById('sync-status');
+      if (syncStatus) syncStatus.textContent = 'All synced';
+    },
+
+    // ----- Rendering -----
+    renderTrips() {
+      const todayTrips = this.state.trips.slice(0, 5);
+
+      // Dashboard list
+      const dashList = document.getElementById('dash-trip-list');
+      if (todayTrips.length === 0) {
+        dashList.innerHTML = '<li class="empty-state"><div class="empty-text">No trips yet today</div></li>';
+      } else {
+        dashList.innerHTML = todayTrips.map(t => this.tripHtml(t)).join('');
+      }
+
+      // Full trips list
+      const allList = document.getElementById('trips-list-container');
+      const countEl = document.getElementById('trip-count');
+      if (this.state.trips.length === 0) {
+        allList.innerHTML = '<div class="empty-state"><div class="empty-icon">&#9992;</div><div class="empty-text">No trips recorded yet</div></div>';
+        countEl.textContent = '0 trips';
+      } else {
+        allList.innerHTML = this.state.trips.map(t => this.tripHtml(t, true)).join('');
+        countEl.textContent = this.state.trips.length + ' trip(s)';
+      }
+    },
+
+    tripHtml(trip, showAll) {
+      const startTime = new Date(trip.startTime);
+      const timeStr = startTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const statusClass = trip.status;
+      const statusText = trip.status === 'ongoing' ? 'ONGOING'
+        : trip.status === 'pending' ? 'PENDING'
+        : 'COMPLETED';
+
+      const duration = trip.duration
+        ? Math.floor(trip.duration / 60) + 'm'
+        : trip.status === 'ongoing'
+          ? Math.floor((Date.now() - trip.startTime) / 60000) + 'm'
+          : '';
+
+      const kmInfo = trip.totalKm ? trip.totalKm + ' km' : '';
+
+      return `<li class="trip-item" onclick="app.showTripDetail('${trip.id}')">
+        <div class="trip-dot ${trip.status === 'ongoing' ? 'active' : trip.status === 'pending' ? 'pending' : 'synced'}"></div>
+        <div class="trip-info">
+          <div class="trip-title">${trip.tour}</div>
+          <div class="trip-meta">${timeStr} &middot; ${trip.vehicle.split('(')[1]?.replace(')', '') || trip.vehicle} ${duration ? '&middot; ' + duration : ''} ${kmInfo ? '&middot; ' + kmInfo : ''}</div>
+        </div>
+        <span class="trip-status ${statusClass}">${statusText}</span>
+      </li>`;
+    },
+
+    showTripDetail(tripId) {
+      const trip = this.state.trips.find(t => t.id === tripId);
+      if (!trip) return;
+
+      const startTime = new Date(trip.startTime);
+      const timeStr = startTime.toLocaleTimeString('en-GB');
+      const dateStr = startTime.toLocaleDateString('en-GB');
+
+      let html = `
+        <div class="detail-row"><span class="detail-label">Tour</span><span class="detail-value">${trip.tour}</span></div>
+        <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">${dateStr}</span></div>
+        <div class="detail-row"><span class="detail-label">Started</span><span class="detail-value">${timeStr}</span></div>
+      `;
+
+      if (trip.endTime) {
+        const endTime = new Date(trip.endTime);
+        html += `<div class="detail-row"><span class="detail-label">Ended</span><span class="detail-value">${endTime.toLocaleTimeString('en-GB')}</span></div>`;
+      }
+
+      html += `
+        <div class="detail-row"><span class="detail-label">Vehicle</span><span class="detail-value">${trip.vehicle}</span></div>
+        <div class="detail-row"><span class="detail-label">Guests</span><span class="detail-value">${trip.guests}</span></div>
+        <div class="detail-row"><span class="detail-label">Odo Start</span><span class="detail-value">${trip.odometerStart} km</span></div>
+      `;
+
+      if (trip.odometerEnd) {
+        html += `<div class="detail-row"><span class="detail-label">Odo End</span><span class="detail-value">${trip.odometerEnd} km</span></div>`;
+        html += `<div class="detail-row"><span class="detail-label">Distance</span><span class="detail-value" style="color:var(--forest);">${trip.totalKm} km</span></div>`;
+      }
+
+      if (trip.startCoords) {
+        html += `<div class="detail-row"><span class="detail-label">Start GPS</span><span class="detail-value">${trip.startCoords.lat}, ${trip.startCoords.lng}</span></div>`;
+      }
+
+      if (trip.endCoords) {
+        html += `<div class="detail-row"><span class="detail-label">End GPS</span><span class="detail-value">${trip.endCoords.lat}, ${trip.endCoords.lng}</span></div>`;
+      }
+
+      if (trip.notes) {
+        html += `<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value">${trip.notes}</span></div>`;
+      }
+
+      if (trip.endNotes) {
+        html += `<div class="detail-row"><span class="detail-label">End Notes</span><span class="detail-value">${trip.endNotes}</span></div>`;
+      }
+
+      html += `<div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="text-transform:uppercase;">${trip.status}</span></div>`;
+
+      document.getElementById('detail-modal-body').innerHTML = html;
+      this.openModal('detail-modal');
+    },
+
+    updateStats() {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const todayTrips = this.state.trips.filter(t => t.startTime >= todayStart.getTime());
+      const totalKm = todayTrips.reduce((sum, t) => sum + (t.totalKm || 0), 0);
+      const totalSeconds = todayTrips.reduce((sum, t) => sum + (t.duration || 0), 0);
+      const totalHours = (totalSeconds / 3600).toFixed(1);
+
+      document.getElementById('stat-trips').textContent = todayTrips.length;
+      document.getElementById('stat-km').textContent = totalKm.toFixed(1);
+      document.getElementById('stat-hours').textContent = totalHours;
+    },
+
+    // ----- Install -----
+    installPWA() {
+      if (this.state.deferredPrompt) {
+        this.state.deferredPrompt.prompt();
+        this.state.deferredPrompt.userChoice.then(() => {
+          this.state.deferredPrompt = null;
+          document.getElementById('install-banner').classList.remove('show');
+        });
+      } else {
+        // iOS or already installed
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS) {
+          this.toast('Tap Share, then "Add to Home Screen"', 'info');
+        } else {
+          this.toast('Install from browser menu: Add to Home Screen', 'info');
+        }
+      }
+    },
+
+    dismissInstall() {
+      document.getElementById('install-banner').classList.remove('show');
+    },
+
+    // ----- Toast -----
+    toast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  };
+
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+  });
+  </script>
+</body>
+</html>

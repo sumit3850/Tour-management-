@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Island Explorer Ops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16241d;--ink-soft:#3f5249;--forest:#1b4d3e;--forest-deep:#143a2e;
+  --sea:#107a86;--sea-soft:#e3f1f1;--amber:#dd9a2b;--amber-soft:#fbeccb;
+  --coral:#d65a3f;--coral-soft:#f8e2da;--paper:#f6f2e9;--surface:#ffffff;--surface-2:#fbf9f3;
+  --line:#e6e0d2;--line-soft:#efe9dd;
+  --shadow:0 1px 2px rgba(20,40,30,.04),0 8px 24px -12px rgba(20,40,30,.16);
+  --shadow-lg:0 12px 40px -12px rgba(20,40,30,.28);
+  --r:14px;--r-sm:10px;--r-lg:20px;--sidebar-w:248px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{line-height:1.2;font-weight:600}
+.display{font-family:'Calistoga',Georgia,serif;font-weight:400;letter-spacing:-.01em}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+::selection{background:var(--amber-soft)}
+
+.app{display:flex;min-height:100dvh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--forest);color:#dfe9e3;display:flex;flex-direction:column;position:sticky;top:0;height:100dvh}
+.brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px}
+.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--sea),var(--forest-deep));display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.brand .name{font-family:'Calistoga',serif;font-size:18px;color:#fff;line-height:1.05}
+.brand .sub{font-size:11px;color:#8fb3a4;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.nav{flex:1;overflow-y:auto;padding:6px 12px 18px}
+.nav-group{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#6f9384;margin:16px 10px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#c4d6cd;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s}
+.nav-item svg{width:18px;height:18px;stroke:currentColor;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff}
+.nav-item.active svg{stroke:var(--amber)}
+.nav-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
+.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--forest-deep);display:grid;place-items:center;font-weight:700;font-size:13px}
+.nav-foot .who{font-size:13px;color:#fff;font-weight:600}
+.nav-foot .role{font-size:11px;color:#8fb3a4}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:30;background:rgba(246,242,233,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;gap:14px}
+.hamburger,.backbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface);place-items:center}
+.hamburger{display:none}.hamburger svg{width:20px;height:20px;stroke:var(--ink)}
+.backbtn{display:none}.backbtn.show{display:grid}.backbtn svg{width:20px;height:20px;stroke:var(--ink)}
+.page-title{font-size:13px;color:var(--ink-soft);font-weight:500}
+.page-title b{display:block;font-size:20px;color:var(--ink);font-weight:700;letter-spacing:-.01em}
+.search{margin-left:auto;display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:9px 13px;width:280px;max-width:34vw}
+.search svg{width:17px;height:17px;stroke:var(--ink-soft);flex-shrink:0}
+.search input{border:none;outline:none;background:none;font-size:14px;width:100%;color:var(--ink)}
+.iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;position:relative}
+.iconbtn svg{width:19px;height:19px;stroke:var(--ink)}
+.iconbtn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--coral);border:1.5px solid var(--surface)}
+.content{padding:28px;max-width:1320px;width:100%;margin:0 auto}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:11px;font-weight:600;font-size:14px;transition:transform .12s,box-shadow .15s,background .15s;white-space:nowrap}
+.btn svg{width:17px;height:17px;stroke:currentColor}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--amber);color:#3a2906;box-shadow:0 1px 0 rgba(0,0,0,.05)}
+.btn-primary:hover{background:#e9a73a}
+.btn-ghost{background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{background:var(--surface-2);border-color:#d8d0bf}
+.btn-sea{background:var(--sea);color:#fff}.btn-sea:hover{background:#0e6b75}
+.btn-red{background:var(--coral);color:#fff}.btn-red:hover{background:#c44e35}
+.btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card-pad{padding:20px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--sea);font-weight:600}
+.h-sec{font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.6}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.open{background:var(--sea-soft);color:#0c656f}
+.pill.full{background:var(--coral-soft);color:#a9402a}
+.pill.closed{background:#ece7da;color:#6b6452}
+.pill.completed{background:#e4ece6;color:#3f6d57}
+.pill.plain{background:#edeae0;color:#5b6660}
+.pill.plain::before{display:none}
+
+.cat{display:inline-flex;align-items:center;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:600}
+.cat.southandaman{background:#e4ece6;color:#1b4d3e}.cat.littleandaman{background:#e3f1f1;color:#0c656f}
+.cat.nicobar{background:#e6ebf3;color:#3a527d}.cat.session{background:#fbeccb;color:#7a5410}.cat.custom{background:#f1e9df;color:#7a5a37}
+
+.bar{height:6px;background:var(--line-soft);border-radius:999px;overflow:hidden}
+.bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sea),var(--forest))}
+.bar.warn > span{background:linear-gradient(90deg,var(--amber),var(--coral))}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;padding:11px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 16px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s}tbody tr:hover{background:var(--surface-2)}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+th.ctr,td.ctr{text-align:center}
+td.strong{font-weight:600;color:var(--ink)}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.view{display:none;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kpi{padding:16px}
+.kpi .lab{font-size:13px;color:var(--ink-soft);font-weight:500;display:flex;align-items:center;gap:8px}
+.kpi .lab svg{width:16px;height:16px;stroke:var(--sea)}
+.kpi .val{font-size:28px;letter-spacing:-.02em;margin-top:8px;font-family:'Calistoga',serif}
+.kpi .trend{font-size:12px;font-weight:600;margin-top:4px}
+.up{color:#2f7d5b}.down{color:var(--coral)}
+
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+
+.chart{display:flex;align-items:flex-end;gap:14px;height:140px;padding-top:10px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
+.chart .stk{width:100%;max-width:34px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--sea),var(--forest));transition:height .6s cubic-bezier(.2,.7,.2,1)}
+.chart .cl{font-size:11px;color:var(--ink-soft);text-align:center}
+
+.list-row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line-soft)}
+.list-row:last-child{border-bottom:none}
+.list-row .ic{width:32px;height:32px;border-radius:9px;background:var(--sea-soft);display:grid;place-items:center;flex-shrink:0}
+.list-row .ic svg{width:16px;height:16px;stroke:var(--sea)}
+.list-row .meta{flex:1;min-width:0}
+.list-row .t{font-weight:600;font-size:14px}
+.list-row .s{font-size:12px;color:var(--ink-soft)}
+
+.tour-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tour-card{padding:16px;cursor:pointer;transition:transform .15s,box-shadow .2s,border-color .15s}
+.tour-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:#d8d0bf}
+.tour-card .nm{font-size:15px;font-weight:700;margin:10px 0 3px;letter-spacing:-.01em}
+.tour-card .dt{font-size:12px;color:var(--ink-soft)}
+.tour-card .capline{display:flex;justify-content:space-between;font-size:12px;margin:12px 0 6px;color:var(--ink-soft)}
+.tour-card .capline b{color:var(--ink)}
+.tour-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+
+.tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;width:max-content;max-width:100%;overflow-x:auto}
+.tab{padding:7px 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
+.tab.active{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+
+.cal-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.cal-nav{display:flex;align-items:center;gap:6px}
+.cal-nav button{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.cal-nav button svg{width:18px;height:18px;stroke:var(--ink)}
+.cal-sel{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
+.cal-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;min-width:660px}
+.cal .dow{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:600;text-align:center;padding-bottom:4px}
+.cal .cell{min-height:84px;border:1px solid var(--line-soft);border-radius:11px;padding:7px;background:var(--surface);position:relative}
+.cal .cell.dim{background:var(--surface-2);opacity:.5}
+.cal .cell.today{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.cal .dn{font-size:12px;font-weight:600;color:var(--ink-soft)}
+.cal .span{font-size:10px;font-weight:600;color:#fff;border-radius:6px;padding:2px 6px;margin-top:3px;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;cursor:pointer}
+.cal .span.cont{border-radius:6px;opacity:.9}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:16px}
+.legend .lg{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-soft);cursor:pointer}
+.legend .sw{width:13px;height:13px;border-radius:4px;flex-shrink:0}
+
+.calc-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
+.input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.input:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px var(--sea-soft)}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%233f5249' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.fieldset{border:1px solid var(--line-soft);border-radius:13px;padding:16px;margin-bottom:16px}
+.fieldset legend{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--sea);font-weight:600;padding:0 6px}
+.result{position:sticky;top:92px;padding:20px;background:linear-gradient(160deg,var(--forest),var(--forest-deep));color:#dfe9e3;border:none}
+.result h3{color:#fff;font-family:'Calistoga',serif;font-size:18px;margin-bottom:14px}
+.res-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px}
+.res-row span{color:#a9c4b9}.res-row b{font-weight:600;color:#fff}
+.res-row.big{border-bottom:none;margin-top:8px;padding-top:14px}
+.res-row.big b{font-size:22px;color:var(--amber);font-family:'Calistoga',serif}
+
+.sheet-link{display:flex;align-items:center;gap:10px;background:var(--sea-soft);border:1px dashed #a9d2d6;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px}
+.sheet-link .ok{color:#0c656f;font-weight:600}
+.sheet-link button{margin-left:auto;min-height:36px;padding:0 14px;border-radius:8px;font-size:12px;font-weight:700;background:var(--sea);color:#fff}
+.sheet-link button:hover{background:#0e6b75}
+
+.item-row{display:grid;grid-template-columns:1fr 130px 38px;gap:8px;align-items:center;margin-bottom:8px}
+.item-row .rm{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);display:grid;place-items:center;color:var(--coral)}
+.item-row .rm:hover{background:var(--coral-soft);border-color:#e6b5a8}
+.item-row .rm svg{width:16px;height:16px;stroke:currentColor}
+.add-item{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--sea);padding:8px 12px;border-radius:9px;border:1px dashed #a9d2d6;background:var(--sea-soft)}
+.add-item:hover{background:#d4e9ea}.add-item svg{width:15px;height:15px;stroke:currentColor}
+
+.ops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.op-card{padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
+.op-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px}
+.op-top b{font-size:14px;letter-spacing:-.01em}
+.op-date{font-size:12px;color:var(--ink-soft);margin-bottom:10px}
+.op-rows{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px}
+.op-rows .k{color:var(--ink-soft)}
+.op-rows .v{font-weight:500;text-align:right}
+.op-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.op-actions button{flex:1;min-height:32px;border-radius:7px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
+.op-actions .btn-edit{background:var(--sea-soft);border:1px solid var(--sea);color:#0c5760}
+.op-actions .btn-del{background:var(--coral-soft);border:1px solid #e6b5a8;color:var(--coral)}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.form-grid .full{grid-column:1/-1}
+.kmline{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:11px;padding:12px 14px;margin:4px 0 4px}
+.kmline .lab{font-size:12px;color:var(--ink-soft)}
+.kmline .big{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-left:auto;color:var(--sea)}
+.driver-note{display:flex;gap:9px;align-items:flex-start;background:var(--amber-soft);border:1px solid #eccf8e;border-radius:11px;padding:11px 13px;font-size:12px;color:#7a5410;margin-bottom:16px}
+.driver-note svg{width:16px;height:16px;stroke:#a9760f;flex-shrink:0;margin-top:1px}
+.time-row{display:flex;gap:8px}
+.time-row .input{flex:1}
+.now-btn{padding:0 14px;border-radius:10px;border:1px solid var(--sea);background:var(--sea-soft);color:#0c656f;font-weight:700;font-size:12px;letter-spacing:.04em}
+.now-btn:hover{background:#d4e9ea}
+.time-chip{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;padding:9px 12px;margin:2px 0 14px}
+.time-chip b{margin-left:auto;color:var(--sea);font-family:'JetBrains Mono',monospace}
+.keytag{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:#0c656f;background:var(--sea-soft);border:1px solid #bfe0e2;border-radius:8px;padding:3px 9px}
+.copybtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:600;color:var(--ink-soft)}
+.copybtn:hover{background:var(--surface-2)}
+
+.kanban{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}
+.kcol{background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:10px;min-width:200px}
+.kcol h4{font-size:13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:var(--ink)}
+.kcol .ct{font-size:11px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--ink-soft)}
+.lead{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow)}
+.lead .ln{font-weight:600;font-size:14px}.lead .lc{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.lead .lt{font-size:11px;color:var(--sea);margin-top:7px;font-weight:600}
+.lead .mv{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.lead .mv button{font-size:11px;padding:4px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-soft)}
+.lead .mv button:hover{background:var(--sea-soft);color:#0c656f;border-color:#a9d2d6}
+.lead .del-btn{font-size:11px;padding:4px 8px;border-radius:7px;border:1px solid #e6b5a8;background:var(--coral-soft);color:var(--coral);margin-top:6px;width:100%}
+.lead .del-btn:hover{background:var(--coral);color:#fff}
+
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.media{aspect-ratio:4/3;border-radius:12px;position:relative;overflow:hidden;border:1px solid var(--line);display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;text-align:center;padding:10px}
+.plat{position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:7px;background:rgba(0,0,0,.35);display:grid;place-items:center}
+.plat svg{width:14px;height:14px;stroke:#fff;fill:none}
+
+.ai-wrap{display:grid;grid-template-columns:1fr 240px;gap:16px;align-items:start}
+.chat{display:flex;flex-direction:column;height:520px}
+.chat-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:80%;padding:12px 15px;border-radius:15px;font-size:14px;line-height:1.5}
+.msg.bot{background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start;white-space:pre-wrap}
+.msg.me{background:var(--forest);color:#eaf2ee;border-bottom-right-radius:5px;align-self:flex-end}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.chip{font-size:12.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-weight:500}
+.chip:hover{background:var(--sea-soft);border-color:#a9d2d6;color:#0c656f}
+.chat-in{display:flex;gap:9px;padding:12px 16px;border-top:1px solid var(--line)}
+.chat-in input{flex:1;border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-size:14px;font-family:inherit;outline:none}
+.chat-in input:focus{border-color:var(--sea);box-shadow:0 0 0 3px var(--sea-soft)}
+
+.set-row{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--line-soft)}
+.set-row:last-child{border-bottom:none}
+.set-row .si{width:40px;height:40px;border-radius:11px;background:var(--sea-soft);display:grid;place-items:center}
+.set-row .si svg{width:19px;height:19px;stroke:var(--sea)}
+.set-row .sm{flex:1}.set-row .sm b{font-size:14px;display:block}.set-row .sm span{font-size:12px;color:var(--ink-soft)}
+.toggle{width:46px;height:26px;border-radius:999px;background:var(--line);position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--sea)}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle.on::after{left:23px}
+
+.scrim{position:fixed;inset:0;background:rgba(20,30,25,.5);backdrop-filter:blur(2px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.scrim.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);width:100%;max-width:640px;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line)}
+.modal-head .x{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center}
+.modal-head .x svg{width:18px;height:18px;stroke:var(--ink)}
+.modal-body{padding:20px 24px}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:4px 0 16px}
+.stat-strip .s{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:11px;padding:10px;text-align:center}
+.stat-strip .s .v{font-size:20px;font-family:'Calistoga',serif}
+.stat-strip .s .l{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.empty{text-align:center;padding:30px;color:var(--ink-soft)}
+
+.tbl-actions{display:flex;gap:6px;justify-content:flex-end}
+.tbl-actions button{width:32px;height:32px;border-radius:7px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.tbl-actions button:hover{background:var(--surface-2)}
+.tbl-actions .edit-btn{color:var(--sea)}
+.tbl-actions .del-btn{color:var(--coral)}
+
+@media(max-width:1080px){.grid-2{grid-template-columns:1fr}.calc-grid{grid-template-columns:1fr}.result{position:static}.ai-wrap{grid-template-columns:1fr}}
+@media(max-width:860px){
+  .sidebar{position:fixed;left:0;top:0;z-index:80;transform:translateX(-100%);transition:transform .25s ease;box-shadow:var(--shadow-lg)}
+  .sidebar.open{transform:none}
+  .hamburger{display:grid}
+  .kpis{grid-template-columns:1fr 1fr}.stat-strip{grid-template-columns:1fr 1fr}
+  .search{width:auto;flex:1}.content{padding:18px}.topbar{padding:12px 16px}
+  .scrim-side{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:70;display:none}
+  .scrim-side.show{display:block}
+  .form-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){.kpis{grid-template-columns:1fr 1fr}.page-title b{font-size:17px}}
+@media print{
+  .sidebar,.topbar,.scrim-side{display:none!important}
+  .main{margin-left:0!important}
+  .content{padding:0!important;max-width:none!important}
+  body{background:#fff!important}
+  .card{box-shadow:none!important;border:1px solid #ddd!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console</div></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="nav-foot"><div class="av">SR</div><div><div class="who">Dr. Sumit Rao</div><div class="role">Owner · Lead Guide</div></div></div>
+  </aside>
+  <div class="scrim-side" id="scrimSide" onclick="toggleNav(false)"></div>
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+      <div class="page-title"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
+      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg><input placeholder="Search tours, leads, customers…"></div>
+      <button class="iconbtn" aria-label="Notifications"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    </header>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
+
+<script>
+
+const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const todayISO="2026-06-14";
+const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session",custom:"Custom"};
+const TOURCOLORS=["#1b4d3e","#107a86","#dd9a2b","#8a3d70","#3a527d","#c2603f","#5b8c3e","#a14b8a"];
+const XBTN="<button class='x' onclick='closeModal()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg></button>";
+
+let tours=[
+  {id:"T1",name:"5-Night South Andaman",cat:"southandaman",start:"2026-06-18",end:"2026-06-23",cap:8,status:"open",guide:"Sumit Rao",pickup:"Veer Savarkar Airport",startLoc:"Sippighat Wetlands",stay:"SeaShell, Port Blair"},
+  {id:"T2",name:"12-Night Great Nicobar",cat:"nicobar",start:"2026-06-25",end:"2026-07-07",cap:6,status:"open",guide:"Sumit Rao",pickup:"Campbell Bay Jetty",startLoc:"Galathea NP",stay:"Forest Guest House"},
+  {id:"T3",name:"7-Night South & Little Andaman",cat:"littleandaman",start:"2026-07-02",end:"2026-07-09",cap:8,status:"open",guide:"A. Kumar",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Hawksbill Nest"},
+  {id:"T4",name:"8-Night South & Little Andaman",cat:"littleandaman",start:"2026-06-15",end:"2026-06-23",cap:6,status:"full",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Hawksbill Nest"},
+  {id:"T5",name:"Guided Session — Full Day",cat:"session",start:"2026-06-20",end:"2026-06-20",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Day session"},
+  {id:"T6",name:"Guided Session — Night",cat:"session",start:"2026-05-28",end:"2026-05-28",cap:8,status:"completed",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Mount Harriet",stay:"Night session"},
+];
+let bookings=[
+  {id:"B1",tour:"T1",guest:"Helen Marsh",party:2,country:"UK",status:"Confirmed",pay:"Paid",notes:"Vegetarian"},
+  {id:"B2",tour:"T1",guest:"Klaus Vogel",party:2,country:"Germany",status:"Confirmed",pay:"Deposit",notes:""},
+  {id:"B3",tour:"T1",guest:"Mei Tan",party:1,country:"Singapore",status:"Confirmed",pay:"Paid",notes:"Early riser"},
+  {id:"B4",tour:"T2",guest:"David Olsen",party:2,country:"USA",status:"Confirmed",pay:"Paid",notes:"Megapode focus"},
+  {id:"B5",tour:"T2",guest:"P. Sharma",party:2,country:"India",status:"Confirmed",pay:"Deposit",notes:""},
+  {id:"B6",tour:"T3",guest:"Anna Roy",party:2,country:"India",status:"Confirmed",pay:"Paid",notes:""},
+  {id:"B7",tour:"T4",guest:"J. Fernández",party:3,country:"Spain",status:"Confirmed",pay:"Paid",notes:"Tripods"},
+  {id:"B8",tour:"T4",guest:"BNHS group",party:3,country:"India",status:"Confirmed",pay:"Paid",notes:"Society group"},
+  {id:"B9",tour:"T5",guest:"L. Bianchi",party:2,country:"Italy",status:"Confirmed",pay:"Deposit",notes:""},
+];
+const waitlist={T4:[{guest:"M. Costa",party:2}]};
+let leads=[
+  {id:"L1",name:"Sophie Bernard",country:"France",tour:"Great Nicobar 12-Night",date:"2026-11",stage:"New",src:"Website"},
+  {id:"L2",name:"Tom Hughes",country:"Australia",tour:"5-Night Endemic",date:"2026-10",stage:"New",src:"Instagram"},
+  {id:"L3",name:"Yuki Sato",country:"Japan",tour:"Photography",date:"2026-12",stage:"Contacted",src:"Referral"},
+  {id:"L4",name:"R. Menon",country:"India",tour:"South & Little Andaman",date:"2026-09",stage:"Proposal",src:"Email"},
+  {id:"L5",name:"Greta Nilsson",country:"Sweden",tour:"Great Nicobar 12-Night",date:"2027-01",stage:"FollowUp",src:"Website"},
+  {id:"L6",name:"Carlos Ruiz",country:"Mexico",tour:"Endemic",date:"2026-11",stage:"Confirmed",src:"eBird"},
+];
+const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
+let customers=[
+  {name:"Helen Marsh",country:"UK",tours:3,pay:"Paid",repeat:true,pref:"Vegetarian, slow pace"},
+  {name:"David Olsen",country:"USA",tours:2,pay:"Paid",repeat:true,pref:"Photography priority"},
+  {name:"Mei Tan",country:"Singapore",tours:1,pay:"Paid",repeat:false,pref:"Early starts"},
+  {name:"J. Fernández",country:"Spain",tours:2,pay:"Paid",repeat:true,pref:"Tripod hide"},
+  {name:"Anna Roy",country:"India",tours:1,pay:"Balance due",repeat:false,pref:"—"},
+];
+let vehicles=[
+  {name:"Tempo Traveller",reg:"AN-01-C-4421",type:"12-seater van",cap:12,driver:"Suresh",avail:"On Tour"},
+  {name:"Bolero",reg:"AN-01-B-9087",type:"SUV",cap:7,driver:"Anil",avail:"Available"},
+  {name:"Innova Crysta",reg:"AN-01-A-3310",type:"SUV",cap:7,driver:"Vikram",avail:"Available"},
+  {name:"Boat — Galathea",reg:"AN-BT-118",type:"Fibre boat",cap:8,driver:"Boatman R.",avail:"Maintenance"},
+];
+let drivers=[
+  {name:"Suresh",phone:"+91 94760 11223",veh:"Tempo Traveller",tour:"5-Night Endemic"},
+  {name:"Anil",phone:"+91 94760 44556",veh:"Bolero",tour:"—"},
+  {name:"Vikram",phone:"+91 94760 77889",veh:"Innova Crysta",tour:"Photography"},
+];
+let ops=[
+  {id:"O1",tour:"Chidiya Tapu Photography",start:"2026-06-15",end:"2026-06-15",dateDisplay:"15 Jun",clients:"Fernández +2",pax:3,veh:"Innova",driver:"Vikram",guide:"Sumit",pickup:"Port Blair 04:30",birding:"Chidiya Tapu",stay:"Wild Grass",status:"Scheduled"},
+  {id:"O2",tour:"5-Night Endemic",start:"2026-06-18",end:"2026-06-23",dateDisplay:"18-23 Jun",clients:"Marsh, Vogel, Tan",pax:5,veh:"Tempo",driver:"Suresh",guide:"Sumit",pickup:"Airport 09:00",birding:"Sippighat",stay:"SeaShell",status:"Scheduled"},
+  {id:"O3",tour:"Mt Harriet Herping",start:"2026-06-20",end:"2026-06-20",dateDisplay:"20 Jun",clients:"Bianchi +1",pax:2,veh:"Bolero",driver:"Anil",guide:"R. Das",pickup:"Bamboo Flat 17:00",birding:"Mt Harriet",stay:"Day trip",status:"Scheduled"},
+];
+let posts=[
+  {plat:"instagram",type:"Reel",day:16,cap:"Andaman Woodpecker drumming at dawn",color:"#c13584"},
+  {plat:"youtube",type:"Video",day:19,cap:"Galathea NP — Nicobar Megapode",color:"#ff0000"},
+  {plat:"facebook",type:"Post",day:22,cap:"Monsoon birding: what to pack",color:"#1877f2"},
+  {plat:"instagram",type:"Reel",day:24,cap:"Endemic species checklist 2026",color:"#c13584"},
+];
+const platIcon={
+  instagram:"<rect x='3' y='3' width='18' height='18' rx='5'/><circle cx='12' cy='12' r='4'/><circle cx='17.5' cy='6.5' r='1' fill='#fff' stroke='none'/>",
+  youtube:"<rect x='3' y='6' width='18' height='12' rx='3'/><path d='m10 9 5 3-5 3z' fill='#fff' stroke='none'/>",
+  facebook:"<path d='M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.5l.5-3H14V9z'/>",
+};
+
+const TOUR_RATES={
+  "5-Night South Andaman":{
+    accommodation:15000,vehicle:12000,driver:8000,ferry:4000,
+    boat:0,guideFees:15000,entryPermits:5000,food:10000,fuel:8000,misc:5000
+  },
+  "12-Night Great Nicobar":{
+    accommodation:35000,vehicle:28000,driver:18000,ferry:12000,
+    boat:8000,guideFees:35000,entryPermits:12000,food:22000,fuel:15000,misc:12000
+  },
+  "7-Night South & Little Andaman":{
+    accommodation:21000,vehicle:18000,driver:11000,ferry:6000,
+    boat:2000,guideFees:21000,entryPermits:7000,food:14000,fuel:10000,misc:7000
+  },
+  "8-Night South & Little Andaman":{
+    accommodation:24000,vehicle:20000,driver:13000,ferry:7000,
+    boat:3000,guideFees:24000,entryPermits:8000,food:16000,fuel:12000,misc:8000
+  },
+  "Guided Session — Full Day":{
+    accommodation:0,vehicle:3000,driver:2000,ferry:0,
+    boat:0,guideFees:5000,entryPermits:1000,food:1500,fuel:2000,misc:500
+  },
+  "Guided Session — Night":{
+    accommodation:0,vehicle:3500,driver:2500,ferry:0,
+    boat:0,guideFees:6000,entryPermits:1000,food:1000,fuel:2500,misc:500
+  }
+};
+
+function loadLogs(){
+  try{
+    const sync=localStorage.getItem("ieo_sync_trips");
+    if(sync)return JSON.parse(sync);
+  }catch(e){}
+  return [
+    {id:"TR1",date:"2026-06-13",veh:"Innova Crysta",driver:"Vikram",startKm:48210,endKm:48355,totalKm:145,loc:"Port Blair → Chidiya Tapu → Port Blair",time:"6h 30m",startT:"04:30",endT:"11:00"},
+    {id:"TR2",date:"2026-06-13",veh:"Tempo Traveller",driver:"Suresh",startKm:91140,endKm:91262,totalKm:122,loc:"Airport → Sippighat → SeaShell",time:"4h 15m",startT:"09:00",endT:"13:15"},
+    {id:"TR3",date:"2026-06-12",veh:"Bolero",driver:"Anil",startKm:67500,endKm:67611,totalKm:111,loc:"Bamboo Flat → Mt Harriet (night)",time:"5h 00m",startT:"17:00",endT:"22:00"},
+  ];
+}
+let tripLogs=loadLogs();
+function saveLogs(){try{localStorage.setItem("ieo_trips",JSON.stringify(tripLogs))}catch(e){}}
+
+function driverKey(name){
+  let h=2166136261>>>0;const s="ISLANDEXPLORER::"+(name||"").trim().toLowerCase();
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let out="";
+  for(let i=0;i<6;i++){out+=A[h%32];h=Math.floor(h/32)+(i+1)*101;}
+  return "IEO-"+out;
+}
+function copyKey(k,btn){navigator.clipboard&&navigator.clipboard.writeText(k);if(btn){const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1200);}}
+
+const booked=id=>bookings.filter(b=>b.tour===id).reduce((s,b)=>s+b.party,0);
+const status=t=>booked(t.id)>=t.cap?(t.status==="completed"?"completed":"full"):t.status;
+const durNights=t=>Math.round((new Date(t.end)-new Date(t.start))/864e5);
+const dShort=s=>new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+const tourColor=id=>TOURCOLORS[tours.findIndex(t=>t.id===id)%TOURCOLORS.length];
+function pill(s){const m={open:"Open",full:"Full",closed:"Closed",completed:"Completed"};return "<span class='pill "+s+"'>"+m[s]+"</span>"}
+function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='lab'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg>"+lab+"</div><div class='val'>"+val+"</div><div class='trend "+dir+"'>"+trend+"</div></div>"}
+
+/* ===== NAV + history ===== */
+const NAV=[
+  ["group","Overview"],
+  ["dashboard","Dashboard","M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"],
+  ["group","Sales & Ops"],
+  ["tours","Tours","M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"],
+  ["calendar","Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"],
+  ["bookings","Bookings","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
+  ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
+  ["logistics","Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
+  ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
+  ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
+  ["group","Growth"],
+  ["social","Social Media","M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4"],
+  ["ai","AI Assistant","M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-1 8H9a4 4 0 0 1-1-8V6a4 4 0 0 1 4-4zM9 21h6M12 17v4"],
+  ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
+];
+const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+let curView="dashboard",navStack=[];
+function buildNav(){
+  var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
+}
+function attachClickHandlers(){
+  var content=document.getElementById('content');if(!content)return;
+  content.onclick=function(e){
+    var t=e.target.closest('[data-action]');if(!t)return;
+    var a=t.dataset.action;
+    if(a==='go')go(t.dataset.arg);
+    else if(a==='setNow')setNow(t.dataset.arg);
+    else if(a==='filterTours')filterTours(t.dataset.arg,e.target);
+    else if(a==='logTab')logTab(t.dataset.arg,e.target);
+    else if(a==='openTour')openTour(t.dataset.arg);
+    else if(a==='editBooking')editBooking(t.dataset.arg);
+    else if(a==='deleteBooking')deleteBooking(t.dataset.arg);
+    else if(a==='editVehicle')editVehicle(t.dataset.arg);
+    else if(a==='deleteVehicle')deleteVehicle(t.dataset.arg);
+    else if(a==='copyKey')copyKey(t.dataset.arg,t);
+    else if(a==='editDriver')editDriver(t.dataset.arg);
+    else if(a==='deleteDriver')deleteDriver(t.dataset.arg);
+    else if(a==='editOp')editOp(t.dataset.arg);
+    else if(a==='deleteOp')deleteOp(t.dataset.arg);
+    else if(a==='moveLead'){var parts=t.dataset.arg.split(',');moveLead(parts[0],parts[1]);}
+    else if(a==='deleteLead')deleteLead(t.dataset.arg);
+    else if(a==='editCustomer')editCustomer(t.dataset.arg);
+    else if(a==='deleteCustomer')deleteCustomer(t.dataset.arg);
+    else if(a==='aiAct')aiAct(t.dataset.arg);
+    else if(a==='openAddBooking')openAddBooking(t.dataset.arg);
+    else if(a==='editPost')editPost(t.dataset.arg);
+    else if(a==='deletePost')deletePost(t.dataset.arg);
+  };
+}
+function go(v,isBack){
+  if(!isBack&&v!==curView)navStack.push(curView);
+  setTimeout(attachClickHandlers,50);
+  curView=v;
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
+  document.querySelectorAll(".view").forEach(el=>el.classList.toggle("active",el.id==="v-"+v));
+  document.getElementById("crumb").textContent=TITLES[v][0]||"";
+  document.getElementById("ptitle").textContent=TITLES[v][1];
+  document.getElementById("backBtn").classList.toggle("show",navStack.length>0);
+  window.scrollTo(0,0);toggleNav(false);
+}
+function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
+function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
+function openScrim(){document.getElementById("scrim").classList.add("show")}
+function closeModal(){document.getElementById("scrim").classList.remove("show")}
+
+/* ===== DASHBOARD ===== */
+function viewDashboard(){
+  const upcoming=tours.filter(t=>status(t)!=="completed").length;
+  const seats=tours.reduce((s,t)=>status(t)==="completed"?s:s+(t.cap-booked(t.id)),0);
+  const occ=tours.filter(t=>status(t)!=="completed").slice(0,5).map(t=>({n:t.name.split(" ")[0],pct:Math.round(booked(t.id)/t.cap*100)}));
+  return "<section class='view' id='v-dashboard'>"+
+    "<div class='kpis'>"+
+      kpi("Upcoming Tours",upcoming,"+2 this month","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
+      kpi("Seats Available",seats,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
+      kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"4 to follow up","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
+      kpi("Revenue · June",fmt(642000),"+18% vs May","up","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6")+
+    "</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+
+      "<div class='card card-pad'>"+
+        "<div class='section-head'><div><div class='eyebrow'>Field movements</div><div class='h-sec'>Upcoming operations</div></div><button class='btn btn-ghost btn-sm' data-action='go' data-arg='logistics'>Open board</button></div>"+
+        ops.map(o=>"<div class='list-row'><div class='ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 13h13V6H3zM16 8h3l3 3v2h-6z'/><circle cx='7' cy='18' r='1.5'/><circle cx='18' cy='18' r='1.5'/></svg></div>"+
+          "<div class='meta'><div class='t'>"+o.tour+"</div><div class='s'>"+o.date+" · "+o.driver+" · "+o.veh+" · "+o.pickup+"</div></div>"+
+          "<span class='pill open'>"+o.status+"</span></div>").join("")+
+      "</div>"+
+      "<div class='card card-pad'>"+
+        "<div class='section-head'><div class='h-sec'>Occupancy by departure</div></div>"+
+        "<div class='chart'>"+occ.map(d=>"<div class='col'><div class='stk' style='height:"+Math.max(d.pct,6)+"%'></div><div class='cl'>"+d.n+"<br><b class='mono'>"+d.pct+"%</b></div></div>").join("")+"</div>"+
+      "</div>"+
+    "</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+
+      "<div class='card card-pad'>"+
+        "<div class='h-sec' style='margin-bottom:8px;font-size:15px'>Pending follow-ups</div>"+
+        leads.filter(l=>["New","Contacted","FollowUp"].includes(l.stage)).slice(0,4).map(l=>"<div class='list-row'><div class='ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M22 16.92v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.7.6 2.5a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.6-1.6a2 2 0 0 1 2.1-.5c.8.3 1.6.5 2.5.6a2 2 0 0 1 1.7 2z'/></svg></div><div class='meta'><div class='t'>"+l.name+" · "+l.country+"</div><div class='s'>"+l.tour+"</div></div><span class='pill plain'>"+STAGES.find(s=>s[0]===l.stage)[1]+"</span></div>").join("")+
+      "</div>"+
+      "<div class='card card-pad'>"+
+        "<div class='h-sec' style='margin-bottom:8px;font-size:15px'>Vehicle status</div>"+
+        vehicles.map(v=>"<div class='list-row'><div class='meta'><div class='t'>"+v.name+"</div><div class='s'>"+v.driver+" · "+v.cap+" seats</div></div><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></div>").join("")+
+      "</div>"+
+    "</div>"+
+  "</section>";
+}
+
+/* ===== TOURS ===== */
+let curTab="All";
+function viewTours(){
+  return "<section class='view' id='v-tours'>"+
+    "<div class='section-head'>"+
+      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='\"+t+\"'>"+t+"</button>").join("")+"</div>"+
+      "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button>"+
+    "</div>"+
+    "<div class='tour-grid' id='tourGrid'></div>"+
+  "</section>";
+}
+function renderTours(filter=curTab){
+  const grid=document.getElementById("tourGrid");if(!grid)return;
+  const list=tours.filter(t=>{const s=status(t);
+    if(filter==="Completed")return s==="completed";
+    if(filter==="Upcoming")return s!=="completed"&&new Date(t.start)>new Date(todayISO);
+    if(filter==="Ongoing")return s!=="completed"&&new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO);
+    return true;});
+  grid.innerHTML=list.map(t=>{const b=booked(t.id),pct=Math.round(b/t.cap*100),s=status(t);
+    return "<div class='card tour-card' data-action='openTour' data-arg='\"+t.id+\"'>"+
+      "<span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span>"+
+      "<div class='nm'>"+t.name+"</div>"+
+      "<div class='dt'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div>"+
+      "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
+      "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
+      "<div class='foot'>"+pill(s)+"<span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
+    "</div>";}).join("")||"<div class='empty'>No tours in this view.</div>";
+}
+function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderTours(f);}
+
+/* ===== CALENDAR ===== */
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+let calY=2026,calM=5;
+function viewCalendar(){
+  return "<section class='view' id='v-calendar'>"+
+    "<div class='cal-bar'>"+
+      "<div class='cal-nav'><button onclick='calStep(-1)' aria-label='Previous month'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button>"+
+        "<button onclick='calStep(1)' aria-label='Next month'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div>"+
+      "<select class='cal-sel' id='calMonth' onchange='calM=+this.value;renderCalendar()'>"+MONTHS.map((m,i)=>"<option value='"+i+"'>"+m+"</option>").join("")+"</select>"+
+      "<select class='cal-sel' id='calYear' onchange='calY=+this.value;renderCalendar()'>"+[2025,2026,2027].map(y=>"<option value='"+y+"'>"+y+"</option>").join("")+"</select>"+
+      "<button class='btn btn-ghost btn-sm' onclick='calY=2026;calM=5;renderCalendar()' style='margin-left:auto'>Jump to June 2026</button>"+
+    "</div>"+
+    "<div class='card card-pad'><div class='cal-scroll'><div class='cal' id='calGrid'></div></div><div class='legend' id='calLegend'></div></div>"+
+  "</section>";
+}
+function calStep(d){calM+=d;if(calM<0){calM=11;calY--}if(calM>11){calM=0;calY++}renderCalendar();}
+function renderCalendar(){
+  const grid=document.getElementById("calGrid");if(!grid)return;
+  document.getElementById("calMonth").value=calM;document.getElementById("calYear").value=calY;
+  const first=new Date(calY,calM,1),startDow=(first.getDay()+6)%7,days=new Date(calY,calM+1,0).getDate();
+  const iso=d=>calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+  const monthTours=tours.filter(t=>t.start<=iso(days)&&t.end>=iso(1));
+  let html=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>"<div class='dow'>"+d+"</div>").join("");
+  for(let i=0;i<startDow;i++)html+="<div class='cell dim'></div>";
+  for(let d=1;d<=days;d++){
+    const date=iso(d);
+    const spans=monthTours.filter(t=>date>=t.start&&date<=t.end).map(t=>{
+      const isStart=date===t.start;
+      return "<div class='span "+(isStart?"":"cont")+"' style='background:"+tourColor(t.id)+"' title='"+t.name+" ("+dShort(t.start)+"–"+dShort(t.end)+")' data-action='openTour' data-arg='\"+t.id+\"'>"+(isStart?t.name.split(" ").slice(0,2).join(" "):"·")+"</div>";
+    }).join("");
+    html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+spans+"</div>";
+  }
+  grid.innerHTML=html;
+  document.getElementById("calLegend").innerHTML=monthTours.length?monthTours.map(t=>"<div class='lg' data-action='openTour' data-arg='\"+t.id+\"'><span class='sw' style='background:"+tourColor(t.id)+"'></span>"+t.name+" · "+dShort(t.start)+"–"+dShort(t.end)+"</div>").join(""):"<div class='lg'>No departures this month.</div>";
+}
+
+/* ===== BOOKINGS ===== */
+function viewBookings(){
+  return "<section class='view' id='v-bookings'>"+
+    "<div class='section-head'><div class='h-sec'>All bookings</div><button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Date</th><th class='num'>Party</th><th>Country</th><th>Status</th><th>Payment</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
+  "</section>";
+}
+function renderBookings(){
+  const b=document.getElementById("bkBody");if(!b)return;
+  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td>"+(t?dShort(t.start):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='\"+x.id+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='\"+x.id+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+}
+function editBooking(id){
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  const tOpts=tours.map(t=>"<option value='"+t.id+"' "+(t.id===b.tour?"selected":"")+">"+t.name+"</option>").join("");
+  modalForm("Edit booking","Update booking","<div class='form-grid'>"+
+    "<div class='field full'><label>Tour</label><select class='input' id='eb_tour'>"+tOpts+"</select></div>"+
+    "<div class='field'><label>Guest name</label><input class='input' id='eb_guest' value='"+b.guest+"'></div>"+
+    "<div class='field'><label>Party size</label><input class='input mono' type='number' id='eb_party' value='"+b.party+"'></div>"+
+    "<div class='field'><label>Country</label><input class='input' id='eb_country' value='"+b.country+"'></div>"+
+    "<div class='field'><label>Payment</label><select class='input' id='eb_pay'>"+
+      "<option value='Deposit' "+(b.pay==="Deposit"?"selected":"")+">Deposit</option>"+
+      "<option value='Paid' "+(b.pay==="Paid"?"selected":"")+">Paid</option>"+
+      "<option value='Balance due' "+(b.pay==="Balance due"?"selected":"")+">Balance due</option>"+
+    "</select></div>"+
+    "<div class='field full'><label>Notes</label><input class='input' id='eb_notes' value='"+(b.notes||"")+"'></div>"+
+  "</div>","saveEditBooking","Update booking");
+  document.getElementById("modal").dataset.bid=id;
+}
+function saveEditBooking(){
+  const id=document.getElementById("modal").dataset.bid;
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  b.tour=document.getElementById("eb_tour").value;
+  b.guest=document.getElementById("eb_guest").value;
+  b.party=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
+  b.country=document.getElementById("eb_country").value;
+  b.pay=document.getElementById("eb_pay").value;
+  b.notes=document.getElementById("eb_notes").value;
+  closeModal();renderBookings();renderTours();renderCalendar();
+}
+function deleteBooking(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>b.id!==id);renderBookings();renderTours();renderCalendar();}
+
+/* ===== CALCULATOR ===== */
+function viewCalc(){
+  const defaultCosts=[
+    {name:'Accommodation',val:48000},{name:'Vehicle',val:22000},{name:'Driver',val:9000},
+    {name:'Ferry',val:7000},{name:'Boat',val:12000},{name:'Guide fees',val:25000},
+    {name:'Entry permits',val:6000},{name:'Food',val:18000},{name:'Fuel',val:8000},
+    {name:'Miscellaneous',val:5000}
+  ];
+  const groupOpts=[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>"<option value='"+n+"' "+(n===6?"selected":"")+">"+n+" pax</option>").join("");
+  return "<section class='view' id='v-calc'><div class='calc-grid'>"+
+    "<div class='card card-pad'>"+
+      "<div class='sheet-link'><svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='#0c656f' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Link to <span class='ok'>Google Sheet 'Andaman Costing 2026'</span>"+
+        "<button onclick='linkSheet()'>Link Sheet</button></div>"+
+      "<div class='cost-grid'>"+
+        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Tour preset</legend><div class='cost-grid'>"+
+          "<div class='field'><label>Tour category</label><select class='input' id='calcCategory' onchange='applyCategoryRates()'><option value=''>Select a tour...</option>"+Object.keys(TOUR_RATES).map(c=>"<option value='"+c+"'>"+c+"</option>").join("")+"<option value='Custom'>Custom</option></select></div>"+
+          "<div class='field'><label>Group size</label><select class='input mono' id='calcGroupSize' onchange='calc()'>"+groupOpts+"</select></div>"+
+        "</div></fieldset>"+
+        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Per-tour costs</legend><div class='cost-grid' id='costItems'>"+
+          defaultCosts.map((it,i)=>costRow(it.name,it.val,i)).join('')+
+        "</div></fieldset>"+
+        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Custom items</legend><div id='customItems'></div>"+
+          "<button class='add-item' onclick='addCostItem()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add cost item</button></fieldset>"+
+        "<fieldset class='fieldset'><legend>Pricing</legend>"+cf("Taxes %","c_tax",5,"%")+"</fieldset>"+
+        "<fieldset class='fieldset'><legend>Margin</legend>"+cf("Markup %","c_markup",25,"%")+cf("Profit margin %","c_margin",15,"%")+"</fieldset>"+
+      "</div>"+
+    "</div>"+
+    "<div class='card result' id='calcResult'></div>"+
+  "</div></section>";
+}
+function cf(label,id,val,unit){return "<div class='field'><label>"+label+(unit?" <span style='color:var(--ink-soft);font-weight:400'>("+unit+")</span>":"")+"</label><input class='input mono' id='"+id+"' type='number' value='"+val+"' oninput='calc()'></div>"}
+function costRow(name,val,idx){
+  const ids=['c_stay','c_veh','c_drv','c_ferry','c_boat','c_guide','c_permit','c_food','c_fuel','c_misc'];
+  return cf(name,ids[idx]||'c_extra_'+idx,val);
+}
+function applyCategoryRates(){
+  const cat=document.getElementById('calcCategory').value;
+  if(!cat||cat==='Custom'||!TOUR_RATES[cat])return;
+  const rates=TOUR_RATES[cat];
+  const defaults=[
+    {name:'Accommodation',val:rates.accommodation},{name:'Vehicle',val:rates.vehicle},{name:'Driver',val:rates.driver},
+    {name:'Ferry',val:rates.ferry},{name:'Boat',val:rates.boat},{name:'Guide fees',val:rates.guideFees},
+    {name:'Entry permits',val:rates.entryPermits},{name:'Food',val:rates.food},{name:'Fuel',val:rates.fuel},{name:'Miscellaneous',val:rates.misc}
+  ];
+  document.getElementById('costItems').innerHTML=defaults.map((it,i)=>costRow(it.name,it.val,i)).join('');
+  calc();
+}
+function generateQuotation(){
+  // Gather data from calculator
+  const cat = document.getElementById('calcCategory')?.value || 'Custom';
+  const pax = parseInt(document.getElementById('calcGroupSize')?.value) ||
+              parseInt(document.getElementById('c_pax')?.value) || 6;
+  const totalCost = document.getElementById('c_total')?.textContent || '\u20b91,68,000';
+  const perPerson = document.getElementById('c_per')?.textContent || '\u20b928,000';
+  const sellingPrice = document.getElementById('c_sell')?.textContent || '\u20b92,10,000';
+  const netProfit = document.getElementById('c_net')?.textContent || '\u20b942,000';
+  const pricePerPerson = document.getElementById('c_price')?.textContent || '\u20b935,000';
+
+  // Get selected tour info
+  const tourName = cat !== 'Custom' ? cat : 'Custom Birding Expedition';
+  const qid = 'IEO-Q-' + Date.now().toString(36).toUpperCase();
+  const today = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const validUntil = new Date(Date.now() + 14*864e5).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+
+  // Build the modal content
+  const html = `
+    <div class="modal-head">
+      <div><div class="eyebrow">Quotation</div><div class="h-sec">${tourName}</div><div style="font-size:12px;color:var(--ink-soft);margin-top:2px">${qid} \u00b7 ${today}</div></div>
+      ${XBTN}
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div id="quotationBody" style="padding:24px;background:#fff">
+        <!-- Quotation Header -->
+        <div style="text-align:center;border-bottom:2px solid var(--forest);padding-bottom:16px;margin-bottom:20px">
+          <div style="font-family:'Calistoga',serif;font-size:22px;color:var(--forest)">Island Explorer</div>
+          <div style="font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase">Birding Tours \u00b7 Andaman & Nicobar Islands</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Dr. Sumit Rao \u00b7 +91 98765 43210 \u00b7 sumit@islandexplorer.in</div>
+        </div>
+
+        <!-- Quotation Info -->
+        <div style="display:flex;justify-content:space-between;margin-bottom:20px;font-size:13px">
+          <div>
+            <div style="font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em">Quotation To</div>
+            <div style="font-weight:600;margin-top:2px">Guest Name</div>
+            <div style="color:var(--ink-soft)">Country</div>
+          </div>
+          <div style="text-align:right">
+            <div><span style="color:var(--ink-soft)">Quotation #:</span> <b>${qid}</b></div>
+            <div><span style="color:var(--ink-soft)">Date:</span> ${today}</div>
+            <div><span style="color:var(--ink-soft)">Valid Until:</span> ${validUntil}</div>
+          </div>
+        </div>
+
+        <!-- Tour Details -->
+        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--forest)">${tourName}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div><span style="color:var(--ink-soft)">Group Size:</span> <b>${pax} guests</b></div>
+            <div><span style="color:var(--ink-soft)">Duration:</span> <b>${cat !== 'Custom' ? (cat.includes('12') ? '12 nights' : cat.includes('8') ? '8 nights' : cat.includes('7') ? '7 nights' : cat.includes('5') ? '5 nights' : '1 day') : 'Custom'}</b></div>
+            <div><span style="color:var(--ink-soft)">Guide:</span> <b>Dr. Sumit Rao</b></div>
+            <div><span style="color:var(--ink-soft)">Category:</span> <b>${cat}</b></div>
+          </div>
+        </div>
+
+        <!-- Cost Breakdown -->
+        <table style="width:100%;font-size:13px;margin-bottom:16px;border-collapse:collapse">
+          <thead><tr style="border-bottom:2px solid var(--line)">
+            <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Description</th>
+            <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Amount</th>
+          </tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Total Tour Cost</td><td style="padding:8px 4px;text-align:right;font-weight:600">${totalCost}</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Cost Per Person</td><td style="padding:8px 4px;text-align:right">${perPerson}</td></tr>
+            <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 4px">Selling Price (incl. margin)</td><td style="padding:8px 4px;text-align:right;color:var(--sea);font-weight:700">${sellingPrice}</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td style="padding:10px 4px;font-size:14px"><b>Price Per Person</b></td><td style="padding:10px 4px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:var(--forest)"><b>${pricePerPerson}</b></td></tr>
+            <tr><td style="padding:4px;font-size:11px;color:var(--ink-soft)">Net profit after taxes</td><td style="padding:4px;text-align:right;font-size:11px;color:var(--sea)"><b>${netProfit}</b></td></tr>
+          </tfoot>
+        </table>
+
+        <!-- Inclusions -->
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:16px">
+          <div style="font-weight:600;color:var(--ink);margin-bottom:4px">Includes:</div>
+          Private vehicle, forest permits, lodge stay, meals, expert guiding, ferry transfers
+        </div>
+
+        <!-- Terms -->
+        <div style="font-size:11px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px">
+          <div style="font-weight:600;color:var(--ink);margin-bottom:4px">Terms & Conditions</div>
+          \u2022 50% deposit required to confirm booking \u00b7 Balance due 30 days before departure<br>
+          \u2022 Prices are in Indian Rupees (INR) \u00b7 Subject to availability<br>
+          \u2022 Cancellation: Full refund 60+ days \u00b7 50% refund 30-60 days \u00b7 No refund &lt;30 days<br>
+          \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid var(--forest)">
+          <div style="font-family:'Calistoga',serif;font-size:16px;color:var(--forest)">Island Explorer Birding Tours</div>
+          <div style="font-size:11px;color:var(--ink-soft)">Port Blair \u00b7 Andaman & Nicobar Islands \u00b7 India</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-sea" onclick="shareQuotationEmail('${qid}','${tourName}','${pricePerPerson}','${pax}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M4 4h16v16H4zM4 9l8 5 8-5"/></svg>
+        Email
+      </button>
+      <button class="btn btn-primary" onclick="shareQuotationWhatsApp('${qid}','${tourName}','${pricePerPerson}','${pax}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5a8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        WhatsApp
+      </button>
+      <button class="btn btn-primary" onclick="printQuotation()" style="background:var(--forest)">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+        PDF / Print
+      </button>
+    </div>
+  `;
+
+  document.getElementById('modal').innerHTML = html;
+  openScrim();
+}
+
+function shareQuotationWhatsApp(qid, tourName, pricePerPerson, pax) {
+  const text = encodeURIComponent(
+    '*Island Explorer Birding Tours*\n\n' +
+    'Quotation: ' + qid + '\n' +
+    'Tour: ' + tourName + '\n' +
+    'Group Size: ' + pax + ' guests\n' +
+    'Price Per Person: ' + pricePerPerson + '\n\n' +
+    '*Includes:* Private vehicle, forest permits, lodge stay, meals, expert guiding\n\n' +
+    'To confirm: 50% deposit required\n' +
+    'Valid for 14 days\n\n' +
+    'Contact: Dr. Sumit Rao\n+91 98765 43210'
+  );
+  window.open('https://wa.me/?text=' + text, '_blank');
+}
+
+function shareQuotationEmail(qid, tourName, pricePerPerson, pax) {
+  const subject = encodeURIComponent('Quotation ' + qid + ' - ' + tourName);
+  const body = encodeURIComponent(
+    'Dear Guest,\n\n' +
+    'Thank you for your interest in Island Explorer Birding Tours.\n\n' +
+    'QUOTATION DETAILS\n' +
+    'Tour: ' + tourName + '\n' +
+    'Group Size: ' + pax + ' guests\n' +
+    'Price Per Person: ' + pricePerPerson + '\n' +
+    'Quotation #: ' + qid + '\n\n' +
+    'INCLUDES\n' +
+    '\u2022 Private vehicle\n' +
+    '\u2022 Forest permits\n' +
+    '\u2022 Lodge stay\n' +
+    '\u2022 Meals\n' +
+    '\u2022 Expert birding guide\n' +
+    '\u2022 Ferry transfers\n\n' +
+    'TERMS\n' +
+    '\u2022 50% deposit to confirm\n' +
+    '\u2022 Balance due 30 days before departure\n' +
+    '\u2022 Valid for 14 days\n\n' +
+    'To proceed with booking, please reply to this email or WhatsApp us at +91 98765 43210.\n\n' +
+    'Best regards,\n' +
+    'Dr. Sumit Rao\n' +
+    'Island Explorer Birding Tours\n' +
+    'Port Blair, Andaman & Nicobar Islands'
+  );
+  window.open('mailto:?subject=' + subject + '&body=' + body, '_blank');
+}
+
+function printQuotation() {
+  const body = document.getElementById('quotationBody');
+  if (!body) return;
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Quotation - Island Explorer</title>
+      <meta charset="UTF-8">
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Inter',system-ui,sans-serif;font-size:13px;line-height:1.5;color:#16241d;padding:40px;max-width:800px;margin:0 auto}
+        .header{text-align:center;border-bottom:2px solid #1b4d3e;padding-bottom:16px;margin-bottom:20px}
+        .header h1{font-family:'Calistoga',Georgia,serif;font-size:22px;color:#1b4d3e}
+        .header p{font-size:11px;color:#3f5249}
+        .info{display:flex;justify-content:space-between;margin-bottom:20px;font-size:13px}
+        .tour-box{background:#fbf9f3;border-radius:10px;padding:14px;margin-bottom:16px}
+        .tour-box h3{font-size:15px;color:#1b4d3e;margin-bottom:8px}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        table{width:100%;font-size:13px;margin-bottom:16px;border-collapse:collapse}
+        th{text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;color:#3f5249;border-bottom:2px solid #e6e0d2}
+        td{padding:8px 4px;border-bottom:1px solid #efe9dd}
+        td:last-child{text-align:right;font-weight:600}
+        .total{font-size:18px;font-family:'Calistoga',serif;color:#1b4d3e}
+        .terms{font-size:11px;color:#3f5249;border-top:1px solid #efe9dd;padding-top:10px}
+        .footer{text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #1b4d3e}
+        .footer h2{font-family:'Calistoga',serif;font-size:16px;color:#1b4d3e}
+        @media print{body{padding:0}}
+      </style>
+    </head>
+    <body>
+      ${body.innerHTML}
+      <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+function calc(){
+  const g=id=>parseFloat(document.getElementById(id)?.value||0);
+  let base=["c_stay","c_veh","c_drv","c_ferry","c_boat","c_guide","c_permit","c_food","c_fuel","c_misc"].reduce((s,k)=>s+g(k),0);
+  document.querySelectorAll(".c_custom").forEach(i=>base+=parseFloat(i.value||0));
+  const pax=Math.max(parseInt(document.getElementById('calcGroupSize')?.value)||g("c_pax")||1,1);
+  const withTax=base*(1+g("c_tax")/100),sell=withTax*(1+g("c_markup")/100);
+  const gross=sell-base,net=sell-withTax,profitPct=sell?Math.round(net/sell*100):0;
+  const r=document.getElementById("calcResult");if(!r)return;
+  r.innerHTML="<h3>Costing summary</h3>"+
+    "<div class='res-row'><span>Total tour cost</span><b class='mono'>"+fmt(withTax)+"</b></div>"+
+    "<div class='res-row'><span>Cost per person</span><b class='mono'>"+fmt(withTax/pax)+"</b></div>"+
+    "<div class='res-row'><span>Selling price</span><b class='mono'>"+fmt(sell)+"</b></div>"+
+    "<div class='res-row'><span>Gross profit</span><b class='mono'>"+fmt(gross)+"</b></div>"+
+    "<div class='res-row'><span>Net profit</span><b class='mono'>"+fmt(net)+"</b></div>"+
+    "<div class='res-row big'><span>Price / person · "+profitPct+"% margin</span><b class='mono'>"+fmt(sell/pax)+"</b></div>"+
+    "<button class='btn btn-primary' onclick='generateQuotation()' style='margin-top:12px;width:100%'>"+
+      "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>"+
+      "Generate Quotation"+
+    "</button>";
+}
+function linkSheet(){
+  const url=prompt("Enter Google Sheet URL or ID:");
+  if(!url)return;
+  const sheetData={c_stay:52000,c_veh:24000,c_drv:10000,c_fuel:9000};
+  Object.entries(sheetData).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
+  calc();
+  alert("Linked! Costs updated from sheet. You can edit any field below.");
+}
+function addCostItem(){
+  const wrap=document.getElementById("customItems");if(!wrap)return;
+  const row=document.createElement("div");row.className="item-row";
+  row.innerHTML="<input class='input' placeholder='Item name (e.g. Drone permit)'><input class='input mono c_custom' type='number' placeholder='0' value='' oninput='calc()'><button class='rm' onclick='this.parentElement.remove();calc()' aria-label='Remove'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>";
+  wrap.appendChild(row);calc();
+}
+
+/* ===== LOGISTICS ===== */
+const LOGTABS=["Operations Board","Daily Activity","Vehicles","Drivers"];
+function viewLogistics(){
+  return "<section class='view' id='v-logistics'>"+
+    "<div class='tabs' id='logTabs' style='margin-bottom:18px'>"+LOGTABS.map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='logTab' data-arg='\"+t+\"'>"+t+"</button>").join("")+"</div>"+
+    "<div id='logBody'></div>"+
+  "</section>";
+}
+function logTab(t,el){document.querySelectorAll("#logTabs .tab").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");else document.querySelectorAll("#logTabs .tab").forEach(x=>{if(x.textContent.trim()===t)x.classList.add("active")});renderLog(t);}
+function renderLog(t="Operations Board"){
+  const b=document.getElementById("logBody");if(!b)return;
+  if(t==="Vehicles"){
+    b.innerHTML="<div class='section-head'><div class='h-sec'>Vehicles</div><button class='btn btn-primary btn-sm' onclick='openAddVehicle()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Vehicle</button></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Vehicle</th><th>Reg. No.</th><th>Type</th><th class='num'>Seats</th><th>Driver</th><th>Status</th><th></th></tr></thead><tbody>"+
+    vehicles.map(v=>"<tr><td class='strong'>"+v.name+"</td><td class='mono'>"+v.reg+"</td><td>"+v.type+"</td><td class='num mono'>"+v.cap+"</td><td>"+v.driver+"</td><td><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></td><td class='num'><div class='tbl-actions'><button class='edit-btn' data-action='editVehicle' data-arg='\"+v.name+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteVehicle' data-arg='\"+v.name+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
+    "</tbody></table></div></div>";
+  }else if(t==="Drivers"){
+    b.innerHTML="<div class='section-head'><div class='h-sec'>Drivers</div><button class='btn btn-primary btn-sm' onclick='openAddDriver()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Driver</button></div>"+
+    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px'>Each driver has a personal <b>access key</b> for the separate <b>Driver Log</b> app. They log in with their key and only their own trips are recorded — these appear here under Daily Activity.</p>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Driver</th><th>Contact</th><th>Assigned Vehicle</th><th>Assigned Tour</th><th>Driver Log key</th><th></th></tr></thead><tbody>"+
+    drivers.map(d=>{const k=driverKey(d.name);return "<tr><td class='strong'>"+d.name+"</td><td class='mono'>"+d.phone+"</td><td>"+d.veh+"</td><td>"+d.tour+"</td><td><span class='keytag'>"+k+"</span> <button class='copybtn' data-action='copyKey' data-arg='\"+k+\"'>Copy</button></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editDriver' data-arg='\"+d.name+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteDriver' data-arg='\"+d.name+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("")+
+    "</tbody></table></div></div>";
+  }else if(t==="Daily Activity"){
+    tripLogs=loadLogs();
+    const month=todayISO.slice(0,7);
+    const monthKm=tripLogs.filter(r=>r.date.slice(0,7)===month).reduce((s,r)=>s+r.totalKm,0);
+    const todays=tripLogs.filter(r=>r.date===todayISO).length;
+    const activeVeh=new Set(tripLogs.filter(r=>r.date===todayISO).map(r=>r.veh)).size;
+    const rows=[...tripLogs].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+    b.innerHTML="<div class='section-head'><div><div class='eyebrow'>Field movement</div><div class='h-sec'>Daily vehicle activity</div></div><button class='btn btn-primary' onclick='openDriverLog()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Log a trip</button></div>"+
+    "<div class='kpis' style='margin-bottom:16px'>"+
+      kpi("Total km · "+MONTHS[+month.slice(5)-1].slice(0,3),monthKm.toLocaleString("en-IN"),"all vehicles","","M3 13h13V6H3zM16 8h3l3 3v2h-6z")+
+      kpi("Trips today",todays,todays?"updated live":"none yet","","M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z")+
+      kpi("Vehicles active",activeVeh,"on the road","","M5 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0M3 13h13V6H3z")+
+      kpi("Trips on record",tripLogs.length,"this device","","M9 11l3 3 8-8")+
+    "</div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th></tr></thead><tbody>"+
+    rows.map(r=>"<tr><td class='strong'>"+new Date(r.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td></tr>").join("")||"<tr><td colspan='8' class='empty'>No trips logged yet.</td></tr>"+
+    "</tbody></table></div></div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
+  }else{
+    b.innerHTML="<div class='section-head'><div class='h-sec'>Operations Board</div><button class='btn btn-primary btn-sm' onclick='openAddOp()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Operation</button></div>"+
+    "<div class='ops-grid'>"+ops.map(o=>"<div class='op-card'><div class='op-top'><b>"+o.tour+"</b><span class='pill open'>"+o.status+"</span></div><div class='op-date'>"+o.dateDisplay+" · "+o.pax+" pax · "+o.clients+"</div>"+
+`<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'>`+
+  `<span class='mono'>${o.start}</span> → <span class='mono'>${o.end}</span>`+
+`</div>`+
+"<div class='op-rows'><span class='k'>Vehicle</span><span class='v'>"+o.veh+"</span><span class='k'>Driver</span><span class='v'>"+o.driver+"</span><span class='k'>Guide</span><span class='v'>"+o.guide+"</span><span class='k'>Pickup</span><span class='v'>"+o.pickup+"</span><span class='k'>Birding start</span><span class='v'>"+o.birding+"</span><span class='k'>Stay</span><span class='v'>"+o.stay+"</span></div><div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='\"+o.id+\"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='\"+o.id+\"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div></div>").join("")+"</div>";
+  }
+}
+function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+o.end+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle</label><input class='input' id='eo_veh' value='"+o.veh+"'></div><div class='field'><label>Driver</label><input class='input' id='eo_driver' value='"+o.driver+"'></div><div class='field'><label>Guide</label><input class='input' id='eo_guide' value='"+o.guide+"'></div><div class='field full'><label>Pickup</label><input class='input' id='eo_pickup' value='"+o.pickup+"'></div></div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
+function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=document.getElementById("eo_driver").value;o.guide=document.getElementById("eo_guide").value;o.pickup=document.getElementById("eo_pickup").value;closeModal();renderLog("Operations Board");}
+function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id);renderLog("Operations Board");}
+function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Date</label><input class='input' id='no_date' value='"+todayISO.slice(5,7)+" "+todayISO.slice(8,10)+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle</label><input class='input' id='no_veh' placeholder='e.g. Innova'></div><div class='field'><label>Driver</label><input class='input' id='no_driver' placeholder='Driver name'></div><div class='field'><label>Guide</label><input class='input' id='no_guide' value='Sumit'></div><div class='field full'><label>Pickup</label><input class='input' id='no_pickup' placeholder='e.g. Port Blair 04:30'></div></div>","saveNewOp","Add operation");}
+function saveNewOp(){ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:document.getElementById("no_date").value||"—",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:document.getElementById("no_driver").value||"—",guide:document.getElementById("no_guide").value||"—",pickup:document.getElementById("no_pickup").value||"—",birding:"—",stay:"—",status:"Scheduled"});closeModal();renderLog("Operations Board");}
+function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
+function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;closeModal();renderLog("Vehicles");}
+function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles");}
+function openAddVehicle(){modalForm("New vehicle","Add vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nv_name' placeholder='e.g. Scorpio'></div><div class='field'><label>Reg. No.</label><input class='input' id='nv_reg' placeholder='AN-01-...'></div><div class='field'><label>Type</label><input class='input' id='nv_type' placeholder='e.g. SUV'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='nv_cap' value='7'></div><div class='field'><label>Driver</label><input class='input' id='nv_driver' placeholder='Driver name'></div><div class='field'><label>Status</label><select class='input' id='nv_avail'><option>Available</option><option>On Tour</option><option>Maintenance</option></select></div></div>","saveNewVehicle","Add vehicle");}
+function saveNewVehicle(){vehicles.push({name:document.getElementById("nv_name").value||"—",reg:document.getElementById("nv_reg").value||"—",type:document.getElementById("nv_type").value||"—",cap:parseInt(document.getElementById("nv_cap").value)||0,driver:document.getElementById("nv_driver").value||"—",avail:document.getElementById("nv_avail").value});closeModal();renderLog("Vehicles");}
+function editDriver(name){const d=drivers.find(x=>x.name===name);if(!d)return;modalForm("Edit driver","Update driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ed_name' value='"+d.name+"'></div><div class='field'><label>Phone</label><input class='input' id='ed_phone' value='"+d.phone+"'></div><div class='field'><label>Vehicle</label><input class='input' id='ed_veh' value='"+d.veh+"'></div><div class='field'><label>Tour</label><input class='input' id='ed_tour' value='"+d.tour+"'></div></div>","saveEditDriver","Update");document.getElementById("modal").dataset.dname=name;}
+function saveEditDriver(){const name=document.getElementById("modal").dataset.dname;const d=drivers.find(x=>x.name===name);if(!d)return;d.name=document.getElementById("ed_name").value;d.phone=document.getElementById("ed_phone").value;d.veh=document.getElementById("ed_veh").value;d.tour=document.getElementById("ed_tour").value;closeModal();renderLog("Drivers");}
+function deleteDriver(name){if(!confirm("Delete "+name+"?"))return;drivers=drivers.filter(d=>d.name!==name);renderLog("Drivers");}
+function openAddDriver(){modalForm("New driver","Add driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nd_name' placeholder='Full name'></div><div class='field'><label>Phone</label><input class='input' id='nd_phone' placeholder='+91 ...'></div><div class='field'><label>Vehicle</label><input class='input' id='nd_veh' placeholder='Assigned vehicle'></div><div class='field'><label>Tour</label><input class='input' id='nd_tour' placeholder='Current tour or —'></div></div>","saveNewDriver","Add driver");}
+function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").value||"—",phone:document.getElementById("nd_phone").value||"—",veh:document.getElementById("nd_veh").value||"—",tour:document.getElementById("nd_tour").value||"—"});closeModal();renderLog("Drivers");}
+
+/* ===== CRM ===== */
+function viewCRM(){
+  const conv=Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100);
+  return "<section class='view' id='v-crm'>"+
+    "<div class='section-head'><div><div class='eyebrow'>Pipeline · "+conv+"% conversion</div><div class='h-sec'>"+leads.length+" leads</div></div><button class='btn btn-primary' onclick='openAddLead()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Lead</button></div>"+
+    "<div class='kanban' id='kanban'></div>"+
+  "</section>";
+}
+function renderCRM(){
+  const k=document.getElementById("kanban");if(!k)return;
+  k.innerHTML=STAGES.map(([key,label])=>{const items=leads.filter(l=>l.stage===key);
+    return "<div class='kcol'><h4>"+label+"<span class='ct'>"+items.length+"</span></h4>"+(items.map(l=>{const idx=STAGES.findIndex(s=>s[0]===l.stage);const prev=idx>0?STAGES[idx-1]:null,next=idx<STAGES.length-1?STAGES[idx+1]:null;
+      return "<div class='lead'><div class='ln'>"+l.name+"</div><div class='lc'>"+l.country+" · "+l.src+"</div><div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='\"+l.id+\",\"+prev[0]+\"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='\"+l.id+\",\"+next[0]+\"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='\"+l.id+\"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
+}
+function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}
+function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();}
+
+/* ===== CUSTOMERS ===== */
+function viewCustomers(){
+  return "<section class='view' id='v-customers'>"+
+    "<div class='section-head'><div class='h-sec'>Customer database</div><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody>"+
+    customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editCustomer' data-arg='\"+c.name+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='\"+c.name+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
+    "</tbody></table></div></div>"+
+  "</section>";
+}
+function editCustomer(name){const c=customers.find(x=>x.name===name);if(!c)return;modalForm("Edit customer","Update customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ec_name' value='"+c.name+"'></div><div class='field'><label>Country</label><input class='input' id='ec_country' value='"+c.country+"'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='ec_tours' value='"+c.tours+"'></div><div class='field'><label>Payment</label><select class='input' id='ec_pay'><option "+(c.pay==="Paid"?"selected":"")+">Paid</option><option "+(c.pay==="Balance due"?"selected":"")+">Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='ec_pref' value='"+c.pref+"'></div></div>","saveEditCustomer","Update");document.getElementById("modal").dataset.cname=name;}
+function saveEditCustomer(){const name=document.getElementById("modal").dataset.cname;const c=customers.find(x=>x.name===name);if(!c)return;c.name=document.getElementById("ec_name").value;c.country=document.getElementById("ec_country").value;c.tours=parseInt(document.getElementById("ec_tours").value)||0;c.pay=document.getElementById("ec_pay").value;c.pref=document.getElementById("ec_pref").value;closeModal();go("customers");}
+function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);go("customers");}
+function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
+function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();go("customers");}
+
+/* ===== SOCIAL ===== */
+function viewSocial(){
+  return "<section class='view' id='v-social'><div class='grid-2'>"+
+    "<div class='card card-pad'>"+
+      "<div class='section-head'><div class='h-sec'>Content calendar · June</div><button class='btn btn-sea btn-sm' onclick='openSchedulePost()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Schedule Post</button></div>"+
+      "<div id='socialPosts'></div>"+
+    "</div>"+
+    "<div class='card card-pad'>"+
+      "<div class='h-sec' style='margin-bottom:8px'>Engagement · last 30 days</div>"+
+      "<div class='stat-strip' style='grid-template-columns:1fr 1fr'>"+
+        "<div class='s'><div class='v mono'>3.1k</div><div class='l'>Reach</div></div><div class='s'><div class='v mono'>412</div><div class='l'>Saves</div></div>"+
+        "<div class='s'><div class='v mono'>89</div><div class='l'>DM enquiries</div></div><div class='s'><div class='v mono'>6.4%</div><div class='l'>Engagement</div></div>"+
+      "</div>"+
+      "<div class='h-sec' style='margin:14px 0 10px;font-size:15px'>Media library</div>"+
+      "<div class='media-grid'>"+
+        "<div class='media' style='background:linear-gradient(135deg,#1b4d3e,#107a86)'><div class='plat'><svg viewBox='0 0 24 24'>"+platIcon.instagram+"</svg></div>Woodpecker</div>"+
+        "<div class='media' style='background:linear-gradient(135deg,#107a86,#dd9a2b)'><div class='plat'><svg viewBox='0 0 24 24'>"+platIcon.youtube+"</svg></div>Galathea</div>"+
+        "<div class='media' style='background:linear-gradient(135deg,#8a3d70,#d65a3f)'><div class='plat'><svg viewBox='0 0 24 24'>"+platIcon.instagram+"</svg></div>Butterflies</div>"+
+      "</div>"+
+    "</div>"+
+  "</div></section>";
+}
+function renderSocial(){
+  const el=document.getElementById("socialPosts");if(!el)return;
+  el.innerHTML=[...posts].sort((a,b)=>a.day-b.day).map(p=>"<div class='list-row'><div class='ic' style='background:"+p.color+"1a'><svg viewBox='0 0 24 24' fill='none' stroke='"+p.color+"' stroke-width='2'>"+platIcon[p.plat]+"</svg></div><div class='meta'><div class='t'>"+p.cap+"</div><div class='s'>"+p.type+" · "+p.plat[0].toUpperCase()+p.plat.slice(1)+"</div></div><span class='pill plain'>Jun "+p.day+"</span><div class='tbl-actions'><button class='edit-btn' data-action='editPost' data-arg='"+p.day+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deletePost' data-arg='"+p.day+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></div>").join("");
+}
+function editPost(day){const p=posts.find(x=>x.day===day);if(!p)return;modalForm("Edit post","Update post","<div class='form-grid'><div class='field'><label>Platform</label><select class='input' id='ep_plat'>"+["instagram","youtube","facebook"].map(pl=>"<option value='"+pl+"' "+(pl===p.plat?"selected":"")+">"+pl[0].toUpperCase()+pl.slice(1)+"</option>").join("")+"</select></div><div class='field'><label>Type</label><select class='input' id='ep_type'>"+["Post","Reel","Video"].map(t=>"<option "+(t===p.type?"selected":"")+">"+t+"</option>").join("")+"</select></div><div class='field'><label>Day (June)</label><input class='input mono' type='number' id='ep_day' value='"+p.day+"' min='1' max='30'></div><div class='field full'><label>Caption</label><input class='input' id='ep_cap' value='"+p.cap+"'></div></div>","saveEditPost","Update");document.getElementById("modal").dataset.pday=day;}
+function saveEditPost(){const day=parseInt(document.getElementById("modal").dataset.pday);const p=posts.find(x=>x.day===day);if(!p)return;p.plat=document.getElementById("ep_plat").value;p.type=document.getElementById("ep_type").value;p.day=parseInt(document.getElementById("ep_day").value)||20;p.cap=document.getElementById("ep_cap").value;const colors={instagram:"#c13584",youtube:"#ff0000",facebook:"#1877f2"};p.color=colors[p.plat];closeModal();renderSocial();}
+function deletePost(day){if(!confirm("Delete this post?"))return;posts=posts.filter(p=>p.day!==day);renderSocial();}
+
+/* ===== AI ===== */
+function viewAI(){
+  return "<section class='view' id='v-ai'><div class='ai-wrap'>"+
+    "<div class='card chat'>"+
+      "<div class='chat-log' id='chatLog'><div class='msg bot'>Hi Sumit — I'm your ops co-pilot. I can draft quotations, emails and WhatsApp replies, build itineraries, summarise leads, and read your tour, booking and customer records. What do you need?</div></div>"+
+      "<div class='chips'>"+["Generate quotation","Draft email","Draft WhatsApp reply","Generate itinerary","Summarize leads","Analyze occupancy","Suggest pricing","Social caption"].map(c=>"<button class='chip' data-action='aiAct' data-arg='\"+c+\"'>"+c+"</button>").join("")+"</div>"+
+      "<div class='chat-in'><input id='aiInput' placeholder='Ask anything about your tours, leads or finances…' onkeydown='if(event.key===\'Enter\')aiSend()'><button class='btn btn-primary' onclick='aiSend()'>Send</button></div>"+
+    "</div>"+
+    "<div class='card card-pad'><div class='eyebrow'>Context</div><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Records it can read</div>"+
+      [["Tours",tours.length],["Bookings",bookings.length],["Leads",leads.length],["Customers",customers.length],["Cost sheets","1 synced"]].map(r=>"<div class='list-row'><div class='meta'><div class='t' style='font-size:13.5px'>"+r[0]+"</div></div><span class='pill plain'>"+r[1]+"</span></div>").join("")+
+    "</div>"+
+  "</div></section>";
+}
+function addMsg(who,text){const log=document.getElementById("chatLog");const d=document.createElement("div");d.className="msg "+who;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+function aiSend(){const i=document.getElementById("aiInput");if(!i.value.trim())return;const q=i.value;addMsg("me",q);i.value="";setTimeout(()=>aiReply(q),350);}
+function aiAct(c){addMsg("me",c);setTimeout(()=>aiReply(c),350);}
+function aiReply(q){q=q.toLowerCase();
+  if(q.includes("quotation")){const t=tours.find(x=>x.id==="T2");addMsg("bot",`Draft quotation — ${t.name}
+
+Dear guest,
+
+Thank you for your interest in our ${durNights(t)}-night Great Nicobar birding expedition (departs ${dShort(t.start)} 2026). Target species include the endemic Nicobar Megapode, Nicobar Serpent Eagle and Nicobar Parakeet.
+
+• Duration: ${durNights(t)} nights, max ${t.cap} guests
+• Price per person: ₹1,18,500 (twin share)
+• Includes: private vehicle, forest permits, lodge stay, meals, guiding
+• Excludes: flights, alcohol, personal insurance
+
+Shall I add a cost breakdown or draft a follow-up email?`);}
+  else if(q.includes("email")||q.includes("draft message")){addMsg("bot",`Subject: Great Nicobar 12-Night — Booking Confirmation
+
+Dear Helen,
+
+Thank you for booking the Great Nicobar 12-Night expedition (25 Jun – 7 Jul 2026).
+
+Pickup: Campbell Bay Jetty at 08:00
+Guide: Sumit Rao
+Vehicle: Tempo Traveller
+What to bring: waterproof boots, sun protection, binoculars
+
+We will share the permit checklist 7 days before departure.
+
+Best,
+Sumit Rao
+Island Explorer Birding Tours`);}
+  else if(q.includes("whatsapp")){addMsg("bot",`Hi Helen,
+
+Your Great Nicobar tour is confirmed! 🦜
+
+Dates: 25 Jun – 7 Jul
+Pickup: Campbell Bay Jetty, 08:00
+Guide: Sumit Rao
+
+Please reply with your flight details so we can coordinate pickup.
+
+Cheers,
+Sumit`);}
+  else if(q.includes("itinerary")||q.includes("schedule")){addMsg("bot",`Great Nicobar 12-Night — Day-by-day
+
+Day 1: Arrive Campbell Bay. Afternoon: Galathea trail
+Day 2: Galathea NP — Nicobar Megapode, serpent eagle
+Day 3: Ansell Bay heronry. Night: frog survey
+Day 4: Campbell Bay wetland — waders & rails
+Day 5: Great Nicobar Biosphere Reserve
+Day 6: Kanyakumari beach — terns, waders
+Day 7: Campbell to Afra Bay. Afternoon: forest edge
+Day 8: Afra Bay — Nicobar Parakeet focus
+Day 9: Western Ghats trail — mixed flocks
+Day 10: Rest morning. Optional: turtle nesting beach
+Day 11: Return Campbell Bay. Final checklist
+Day 12: Departure`);}
+  else if(q.includes("lead")||q.includes("pipeline")){const active=leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed");addMsg("bot","Pipeline snapshot\n\n"+active.map((l,i)=>`${i+1}. ${l.name} — ${l.tour} — ${STAGES.find(s=>s[0]===l.stage)[1]}`).join("\n")+`\n\nTotal active: ${active.length}`);}
+  else if(q.includes("occupancy")){addMsg("bot","Upcoming departures\n\n"+tours.filter(t=>status(t)!=="completed").map(t=>`${t.name}: ${booked(t.id)}/${t.cap} booked`).join("\n"));}
+  else if(q.includes("price")||q.includes("cost")){addMsg("bot","Pricing tiers\n\n• South Andaman 5-Night: ₹48,500 pp\n• South & Little Andaman 7-Night: ₹72,000 pp\n• Great Nicobar 12-Night: ₹1,18,500 pp\n• Guided Session: ₹8,500 pp/day\n\nAll twin-share. Single supplement +25%.");}
+  else if(q.includes("social")||q.includes("caption")){addMsg("bot",`Monsoon birding tip: carry a rain cover for your binoculars. The Andamans reward patience — 147 endemics recorded this season.
+
+Hashtags: #AndamanBirding #NicobarMegapode #IslandExplorer #BirdsOfIndia #EndemicBirding`);}
+  else addMsg("bot","I can help with that. Try a quick action below, or ask me to draft a quote, summarise your pipeline, or check occupancy. (Demo UI — wiring the model to your real records happens at build time.)");}
+
+/* ===== SETTINGS ===== */
+function viewSettings(){
+  const integ=[["Google Sheets","Cost data sync","M3 3h18v18H3zM3 9h18M9 3v18",true],["Google Maps","Pickup & birding locations","M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z",true],["WhatsApp","Booking & lead replies","M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5z",true],["Email","Quotations & confirmations","M4 4h16v16H4zM4 7l8 6 8-6",false]];
+  return "<section class='view' id='v-settings'><div class='grid-2'>"+
+    "<div class='card card-pad'><div class='eyebrow'>Connections</div><div class='h-sec' style='margin-bottom:6px'>Integrations</div>"+
+      integ.map(s=>"<div class='set-row'><div class='si'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+s[2]+"'/></svg></div><div class='sm'><b>"+s[0]+"</b><span>"+s[1]+"</span></div><div class='toggle "+(s[3]?"on":"")+"' onclick='this.classList.toggle(\'on\')'></div></div>").join("")+
+    "</div>"+
+    "<div class='card card-pad'><div class='eyebrow'>Access</div><div class='h-sec' style='margin-bottom:6px'>User roles</div>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>User</th><th>Role</th><th>Access</th></tr></thead><tbody>"+
+        "<tr><td class='strong'>Dr. Sumit Rao</td><td><span class='pill completed'>Admin</span></td><td style='color:var(--ink-soft)'>All modules</td></tr>"+
+        "<tr><td>A. Kumar</td><td><span class='pill open'>Operations</span></td><td style='color:var(--ink-soft)'>Tours, Logistics</td></tr>"+
+        "<tr><td>R. Das</td><td><span class='pill plain'>Guide</span></td><td style='color:var(--ink-soft)'>Ops board (view)</td></tr>"+
+        "<tr><td>Sales desk</td><td><span class='pill plain'>Sales</span></td><td style='color:var(--ink-soft)'>CRM, Bookings</td></tr>"+
+      "</tbody></table></div>"+
+    "</div>"+
+  "</div></section>";
+}
+
+/* ===== MODALS / FORMS ===== */
+function modalForm(eyebrow,title,body,saveFn,saveLabel){
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>"+eyebrow+"</span><h2 class='display' style='font-size:21px;margin-top:6px'>"+title+"</h2></div>"+XBTN+"</div><div class='modal-body'>"+body+"</div><div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Cancel</button><button class='btn btn-primary' onclick='"+saveFn+"()'>"+(saveLabel||"Save")+"</button></div>";
+  openScrim();
+}
+const opt=(v,sel)=>"<option value='"+v+"' "+(v===sel?"selected":"")+">"+v+"</option>";
+
+function openCreateTour(){
+  modalForm("New tour","Create a tour","<div class='form-grid'>"+
+    "<div class='field full'><label>Tour name</label><input class='input' id='nt_name' placeholder='e.g. North Andaman Endemic 4-Night'></div>"+
+    "<div class='field'><label>Category</label><select class='input' id='nt_cat'>"+Object.entries(CATS).map(([k,v])=>"<option value='"+k+"'>"+v+"</option>").join("")+"</select></div>"+
+    "<div class='field'><label>Status</label><select class='input' id='nt_status'>"+["open","full","closed","completed"].map(s=>"<option value='"+s+"'>"+s[0].toUpperCase()+s.slice(1)+"</option>").join("")+"</select></div>"+
+    "<div class='field'><label>Start date</label><input class='input' type='date' id='nt_start' value='2026-07-01'></div>"+
+    "<div class='field'><label>End date</label><input class='input' type='date' id='nt_end' value='2026-07-05'></div>"+
+    "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='nt_cap' value='8'></div>"+
+    "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Rao'></div>"+
+    "<div class='field full'><label>Pickup point</label><input class='input' id='nt_pickup' placeholder='e.g. Port Blair'></div>"+
+  "</div>","saveTour","Create tour");
+}
+function saveTour(){
+  const name=document.getElementById("nt_name").value.trim();
+  const start=document.getElementById("nt_start").value,end=document.getElementById("nt_end").value;
+  if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
+  tours.push({id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:end,
+    cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
+    guide:document.getElementById("nt_guide").value||"—",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—"});
+  closeModal();renderTours();renderCalendar();
+}
+
+function openAddBooking(tourId){
+  const tOpts=tours.map(t=>"<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+t.name+"</option>").join("");
+  modalForm("New booking","Add a booking","<div class='form-grid'>"+
+    "<div class='field full'><label>Tour</label><select class='input' id='nb_tour'>"+tOpts+"</select></div>"+
+    "<div class='field'><label>Guest name</label><input class='input' id='nb_guest' placeholder='Full name'></div>"+
+    "<div class='field'><label>Party size</label><input class='input mono' type='number' id='nb_party' value='2'></div>"+
+    "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
+    "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(p=>opt(p)).join("")+"</select></div>"+
+    "<div class='field full'><label>Notes</label><input class='input' id='nb_notes' placeholder='Dietary, interests, etc.'></div>"+
+  "</div>","saveBooking","Add booking");
+}
+function saveBooking(){
+  const guest=document.getElementById("nb_guest").value.trim();
+  if(!guest){alert("Enter a guest name.");return;}
+  const tour=document.getElementById("nb_tour").value;
+  bookings.push({id:"B"+Date.now(),tour,guest,party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
+    country:document.getElementById("nb_country").value||"—",status:"Confirmed",pay:document.getElementById("nb_pay").value,
+    notes:document.getElementById("nb_notes").value||""});
+  closeModal();renderBookings();renderTours();renderCalendar();
+}
+
+function openAddLead(){
+  modalForm("New lead","Add a lead","<div class='form-grid'>"+
+    "<div class='field'><label>Name</label><input class='input' id='nl_name' placeholder='Full name'></div>"+
+    "<div class='field'><label>Country</label><input class='input' id='nl_country' placeholder='Country'></div>"+
+    "<div class='field'><label>Email</label><input class='input' id='nl_email' placeholder='name@email.com'></div>"+
+    "<div class='field'><label>Phone</label><input class='input' id='nl_phone' placeholder='+91…'></div>"+
+    "<div class='field'><label>Source</label><select class='input' id='nl_src'>"+["Website","Instagram","Referral","eBird","Email","Other"].map(s=>opt(s)).join("")+"</select></div>"+
+    "<div class='field'><label>Stage</label><select class='input' id='nl_stage'>"+STAGES.map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("")+"</select></div>"+
+    "<div class='field'><label>Interested tour</label><input class='input' id='nl_tour' placeholder='e.g. Great Nicobar'></div>"+
+    "<div class='field'><label>Travel date</label><input class='input' id='nl_date' placeholder='e.g. 2026-11' value='2026-'></div>"+
+  "</div>","saveLead","Add lead");
+}
+function saveLead(){
+  const name=document.getElementById("nl_name").value.trim();
+  if(!name){alert("Enter a name.");return;}
+  leads.push({id:"L"+Date.now(),name,country:document.getElementById("nl_country").value||"—",
+    tour:document.getElementById("nl_tour").value||"—",date:document.getElementById("nl_date").value||"—",
+    stage:document.getElementById("nl_stage").value,src:document.getElementById("nl_src").value});
+  closeModal();renderCRM();
+}
+
+function openSchedulePost(){
+  modalForm("New post","Schedule a post","<div class='form-grid'>"+
+    "<div class='field'><label>Platform</label><select class='input' id='sp_plat'>"+["instagram","youtube","facebook"].map(p=>"<option value='"+p+"'>"+p[0].toUpperCase()+p.slice(1)+"</option>").join("")+"</select></div>"+
+    "<div class='field'><label>Type</label><select class='input' id='sp_type'>"+["Post","Reel","Video"].map(t=>opt(t)).join("")+"</select></div>"+
+    "<div class='field'><label>Day (June)</label><input class='input mono' type='number' id='sp_day' value='20' min='1' max='30'></div>"+
+    "<div class='field full'><label>Caption</label><input class='input' id='sp_cap' placeholder='Write a caption…'></div>"+
+  "</div>","savePost","Schedule");
+}
+function savePost(){
+  const cap=document.getElementById("sp_cap").value.trim();if(!cap){alert("Enter a caption.");return;}
+  const plat=document.getElementById("sp_plat").value;const colors={instagram:"#c13584",youtube:"#ff0000",facebook:"#1877f2"};
+  posts.push({plat,type:document.getElementById("sp_type").value,day:parseInt(document.getElementById("sp_day").value)||20,cap,color:colors[plat]});
+  closeModal();renderSocial();
+}
+
+/* ===== TOUR DETAIL ===== */
+function openTour(id){
+  const t=tours.find(x=>x.id===id);if(!t)return;const b=booked(id),bs=bookings.filter(x=>x.tour===id),wl=waitlist[id]||[];
+  document.getElementById("modal").innerHTML=
+    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span><h2 class='display' style='font-size:22px;margin-top:8px'>"+t.name+"</h2><div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights · Guide: "+t.guide+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Seats sold</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
+      "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
+      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
+        "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Birding start</span><br><b>"+t.startLoc+"</b></div>"+
+        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+"</div>"+
+      "</div>"+
+      "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='\"+id+\"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
+      "<div class='tbl-wrap'><table><tbody>"+bs.map(x=>"<tr><td class='strong'>"+x.guest+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+" pax</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td></tr>").join("")||"<tr><td class='empty'>No bookings yet.</td></tr>"+"</tbody></table></div>"+
+      (wl.length?"<div class='h-sec' style='font-size:14px;margin:16px 0 6px'>Waitlist</div>"+wl.map(w=>"<div class='list-row'><div class='meta'><div class='t'>"+w.guest+"</div></div><span class='pill plain'>"+w.party+" pax</span></div>").join(""):
+"")+
+    "</div>";
+  openScrim();
+}
+
+/* ===== DRIVER LOG ===== */
+function openDriverLog(){
+  const vehOpts=vehicles.map(v=>"<option value='"+v.name+"' data-d='"+v.driver+"'>"+v.name+"</option>").join("");
+  document.getElementById("modal").innerHTML=
+    "<div class='modal-head'><div><span class='eyebrow'>Driver entry</span><h2 class='display' style='font-size:21px;margin-top:6px'>Log today's trip</h2></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<div class='driver-note'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/></svg>This is the owner's entry screen. On save, the trip appears under Daily Activity.</div>"+
+      "<div class='form-grid'>"+
+        "<div class='field'><label>Date</label><input class='input' type='date' id='dl_date' value='"+todayISO+"'></div>"+
+        "<div class='field'><label>Vehicle</label><select class='input' id='dl_veh' onchange='syncDriver()'>"+vehOpts+"</select></div>"+
+        "<div class='field'><label>Driver</label><input class='input' id='dl_driver' placeholder='Driver name'></div>"+
+        "<div class='field'><label>Start time</label><div class='time-row'><input class='input' type='time' id='dl_start_t' oninput='updateTripTime()'><button class='now-btn' data-action='setNow' data-arg='dl_start_t'>NOW</button></div></div>"+
+        "<div class='field'><label>End time</label><div class='time-row'><input class='input' type='time' id='dl_end_t' oninput='updateTripTime()'><button class='now-btn' data-action='setNow' data-arg='dl_end_t'>NOW</button></div></div>"+
+        "<div class='field'><label>Start km</label><input class='input mono' type='number' id='dl_start' placeholder='0' oninput='recalcKm()'></div>"+
+        "<div class='field'><label>End km</label><input class='input mono' type='number' id='dl_end' placeholder='0' oninput='recalcKm()'></div>"+
+        "<div class='field full'><label>Location / route</label><input class='input' id='dl_loc' placeholder='e.g. Port Blair → Chidiya Tapu → Port Blair'></div>"+
+      "</div>"+
+      "<div class='time-chip'><svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='#3f5249' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2' stroke-linecap='round'/></svg>Duration<b id='dl_dur'>—</b></div>"+
+      "<div class='kmline'><span class='lab'>Total distance</span><span class='big' id='dl_total'>0 km</span></div>"+
+    "</div>"+
+    "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Cancel</button><button class='btn btn-primary' onclick='saveDriverLog()'>Save trip</button></div>";
+  openScrim();
+}
+function syncDriver(){const sel=document.getElementById("dl_veh");const d=sel.options[sel.selectedIndex].dataset.d;const f=document.getElementById("dl_driver");if(f&&d)f.value=d;}
+function setNow(id){const d=new Date();document.getElementById(id).value=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");updateTripTime();}
+function updateTripTime(){
+  const s=document.getElementById("dl_start_t")?.value,e=document.getElementById("dl_end_t")?.value,el=document.getElementById("dl_dur");if(!el)return;
+  if(s&&e){let[sh,sm]=s.split(":").map(Number),[eh,em]=e.split(":").map(Number);let mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=1440;el.textContent=Math.floor(mins/60)+"h "+String(mins%60).padStart(2,"0")+"m";}
+  else el.textContent="—";
+}
+function recalcKm(){const s=parseFloat(document.getElementById("dl_start")?.value||0),e=parseFloat(document.getElementById("dl_end")?.value||0);const el=document.getElementById("dl_total");if(el)el.textContent=Math.max(e-s,0).toLocaleString("en-IN")+" km";}
+function saveDriverLog(){
+  const start=parseFloat(document.getElementById("dl_start").value||0),end=parseFloat(document.getElementById("dl_end").value||0),veh=document.getElementById("dl_veh").value;
+  if(!veh||end<=start){alert("Choose a vehicle and enter an end km greater than start km.");return;}
+  const dur=document.getElementById("dl_dur").textContent.replace("—","").trim();
+  tripLogs.push({id:"TR"+Date.now(),date:document.getElementById("dl_date").value||todayISO,veh,driver:document.getElementById("dl_driver").value||"—",startKm:start,endKm:end,totalKm:end-start,loc:document.getElementById("dl_loc").value||"—",time:dur||"—",startT:document.getElementById("dl_start_t").value||"",endT:document.getElementById("dl_end_t").value||""});
+  saveLogs();closeModal();go("logistics");logTab("Daily Activity");
+}
+
+/* ===== BOOT ===== */
+function boot(){
+  buildNav();
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewCalc(),viewLogistics(),viewCRM(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
+  go("dashboard");
+  renderTours();renderCalendar();renderBookings();calc();renderLog();renderCRM();renderSocial();
+  navStack=[];document.getElementById("backBtn").classList.remove("show");
+}
+boot();
+</script>
+</body>
+</html>
