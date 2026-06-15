@@ -511,8 +511,15 @@ function resetData(){
 
 /* ===== CLOUD SYNC — optional Supabase backend, configured in Settings ===== */
 const SB_CFG_KEY="ieo_supabase";
+/* Default project — auto-connects every device with no setup. The publishable
+   key is browser-safe (public by design). Anyone with these + the workspace
+   name can read/write this data, which is the accepted trade-off for zero-setup sync. */
+const SB_DEFAULTS={url:"https://tbxzxfjumlnciczizols.supabase.co",key:"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss",ws:"island-explorer",auto:true};
 let _sb=null, _sbReady=false, _sbApplying=false, _sbPushTimer=null;
-function sbConfig(){try{return JSON.parse(localStorage.getItem(SB_CFG_KEY)||"null");}catch(e){return null;}}
+function sbConfig(){
+  try{var s=localStorage.getItem(SB_CFG_KEY);if(s){var c=JSON.parse(s);if(c&&c.url)return c;}}catch(e){}
+  return SB_DEFAULTS;
+}
 function sbClient(){
   if(_sb)return _sb;
   var c=sbConfig();
@@ -574,7 +581,7 @@ function cloudAutoPush(){
 }
 async function cloudInit(){
   var c=sbConfig();
-  if(c&&c.auto&&sbClient()){await cloudPull(true);}
+  if(c&&c.auto&&sbClient()){await cloudPull(true);await cloudPush(true);}
   _sbReady=true;
 }
 
