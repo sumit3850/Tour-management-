@@ -108,6 +108,8 @@ td{padding:12px 16px;border-bottom:1px solid var(--line-soft);font-size:14px;ver
 tr:last-child td{border-bottom:none}
 tbody tr{transition:background .12s}tbody tr:hover{background:var(--surface-2)}
 th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.nowrap,th.nowrap{white-space:nowrap}
+td{vertical-align:middle}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -446,6 +448,64 @@ const platIcon={
   facebook:"<path d='M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.5l.5-3H14V9z'/>",
 };
 
+/* ===== PERSISTENCE — offline saving on this device ===== */
+const DATA_KEY="ieo_data_v1";
+function persistData(){
+  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts}));}catch(e){}
+}
+(function loadData(){
+  try{
+    var s=localStorage.getItem(DATA_KEY);if(!s)return;
+    var d=JSON.parse(s);
+    if(d.tours)tours=d.tours;
+    if(d.bookings)bookings=d.bookings;
+    if(d.accommodations)accommodations=d.accommodations;
+    if(d.leads)leads=d.leads;
+    if(d.customers)customers=d.customers;
+    if(d.vehicles)vehicles=d.vehicles;
+    if(d.drivers)drivers=d.drivers;
+    if(d.ops)ops=d.ops;
+    if(d.posts)posts=d.posts;
+  }catch(e){}
+})();
+/* Backup / restore — a portable file you can move between devices (manual sync) */
+function exportData(){
+  var payload={version:DATA_KEY,exportedAt:new Date().toISOString(),
+    data:{tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts},
+    trips:(typeof tripLogs!=="undefined"?tripLogs:[])};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);var a=document.createElement("a");
+  a.href=url;a.download="island-explorer-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importData(input){
+  var file=input.files&&input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var p=JSON.parse(reader.result);var d=p.data||p;
+      if(d.tours)tours=d.tours;
+      if(d.bookings)bookings=d.bookings;
+      if(d.accommodations)accommodations=d.accommodations;
+      if(d.leads)leads=d.leads;
+      if(d.customers)customers=d.customers;
+      if(d.vehicles)vehicles=d.vehicles;
+      if(d.drivers)drivers=d.drivers;
+      if(d.ops)ops=d.ops;
+      if(d.posts)posts=d.posts;
+      if(p.trips){tripLogs=p.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
+      persistData();boot();
+      alert("Backup restored successfully.");
+    }catch(e){alert("Could not read that file. Please choose a valid Island Explorer backup (.json).");}
+  };
+  reader.readAsText(file);input.value="";
+}
+function resetData(){
+  if(!confirm("This will erase every change saved on this device and restore the original sample data. Continue?"))return;
+  try{localStorage.removeItem(DATA_KEY);}catch(e){}
+  location.reload();
+}
+
 const TOUR_RATES={
   "5-Night South Andaman":{
     accommodation:15000,vehicle:12000,driver:8000,ferry:4000,
@@ -573,6 +633,7 @@ function renderAccommodation(){
       "</div>"+
     "</div>";
   }).join("")+"</div>";
+  persistData();
 }
 function renderAccCalendar(){
   var b=document.getElementById("accBody");if(!b)return;
@@ -735,7 +796,7 @@ function renderTours(filter=curTab){
     var gNames=bookings.filter(function(x){return x.tour===t.id;}).map(function(x){return x.guest;}).join(", ");
     var cost=t.guests&&t.guests.length>0?"<div class='cost-line'>Cost: "+fmt(t.guests.length*TOUR_COSTS[t.id]["indian"])+" ("+t.guests.length+" pax)</div>":"";
     return "<div class='card tour-card' data-action='openTour' data-arg='"+t.id+"'>"+
-      "<button class='tour-del' data-action='deleteTour' data-arg='"+t.id+"' title='Delete tour' onclick='event.stopPropagation()'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
+      "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
       "<span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span>"+
       "<div class='nm'>"+t.name+"</div>"+
       "<div class='dt'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div>"+
@@ -744,6 +805,7 @@ function renderTours(filter=curTab){
       (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
       "<div class='foot'>"+pill(s)+"<span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
     "</div>";}).join("")||"<div class='empty'>No tours in this view.</div>";
+  persistData();
 }
 function deleteTour(id){if(!confirm("Delete this tour?"))return;tours=tours.filter(function(t){return t.id!==id;});renderTours();renderCalendar();}
 function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderTours(f);}
@@ -793,7 +855,8 @@ function viewBookings(){
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
-  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td>"+bookingLastPendingDate(x)+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  persistData();
 }
 function editBooking(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
@@ -3579,6 +3642,7 @@ function renderLog(t="Operations Board"){
 `</div>`+
 "<div class='op-rows'><span class='k'>Vehicle</span><span class='v'>"+o.veh+"</span><span class='k'>Driver</span><span class='v'>"+o.driver+"</span><span class='k'>Guide</span><span class='v'>"+o.guide+"</span><span class='k'>Pickup</span><span class='v'>"+o.pickup+"</span><span class='k'>Birding start</span><span class='v'>"+o.birding+"</span><span class='k'>Stay</span><span class='v'>"+o.stay+"</span></div><div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div></div>").join("")+"</div>";
   }
+  persistData();
 }
 function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+o.end+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle</label><input class='input' id='eo_veh' value='"+o.veh+"'></div><div class='field'><label>Driver</label><input class='input' id='eo_driver' value='"+o.driver+"'></div><div class='field'><label>Guide</label><input class='input' id='eo_guide' value='"+o.guide+"'></div><div class='field full'><label>Pickup</label><input class='input' id='eo_pickup' value='"+o.pickup+"'></div></div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
 function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=document.getElementById("eo_driver").value;o.guide=document.getElementById("eo_guide").value;o.pickup=document.getElementById("eo_pickup").value;closeModal();renderLog("Operations Board");}
@@ -3609,6 +3673,7 @@ function renderCRM(){
   k.innerHTML=STAGES.map(([key,label])=>{const items=leads.filter(l=>l.stage===key);
     return "<div class='kcol'><h4>"+label+"<span class='ct'>"+items.length+"</span></h4>"+(items.map(l=>{const idx=STAGES.findIndex(s=>s[0]===l.stage);const prev=idx>0?STAGES[idx-1]:null,next=idx<STAGES.length-1?STAGES[idx+1]:null;
       return "<div class='lead'><div class='ln'>"+l.name+"</div><div class='lc'>"+l.country+" · "+l.src+"</div><div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='"+l.id+","+prev[0]+"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='"+l.id+","+next[0]+"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
+  persistData();
 }
 function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}
 function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();var dash=document.getElementById("v-dashboard");if(dash){dash.outerHTML=viewDashboard();}attachClickHandlers();}
@@ -3617,16 +3682,19 @@ function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filt
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
     "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'><button class='btn btn-sea btn-sm' onclick='openCustomerSheet(\"\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open in Google Sheets</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody>"+
-    customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='openCustomerSheet' data-arg='"+c.name+"' title='Open in Sheets'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
-    "</tbody></table></div></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
 }
+function renderCustomers(){
+  const b=document.getElementById("custBody");if(!b)return;
+  b.innerHTML=customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='openCustomerSheet' data-arg='"+c.name+"' title='Open in Sheets'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='6' class='empty'>No customers yet.</td></tr>";
+  persistData();
+}
 function editCustomer(name){const c=customers.find(x=>x.name===name);if(!c)return;modalForm("Edit customer","Update customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ec_name' value='"+c.name+"'></div><div class='field'><label>Country</label><input class='input' id='ec_country' value='"+c.country+"'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='ec_tours' value='"+c.tours+"'></div><div class='field'><label>Payment</label><select class='input' id='ec_pay'><option "+(c.pay==="Paid"?"selected":"")+">Paid</option><option "+(c.pay==="Balance due"?"selected":"")+">Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='ec_pref' value='"+c.pref+"'></div></div>","saveEditCustomer","Update");document.getElementById("modal").dataset.cname=name;}
-function saveEditCustomer(){const name=document.getElementById("modal").dataset.cname;const c=customers.find(x=>x.name===name);if(!c)return;c.name=document.getElementById("ec_name").value;c.country=document.getElementById("ec_country").value;c.tours=parseInt(document.getElementById("ec_tours").value)||0;c.pay=document.getElementById("ec_pay").value;c.pref=document.getElementById("ec_pref").value;closeModal();go("customers");}
-function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);go("customers");}
+function saveEditCustomer(){const name=document.getElementById("modal").dataset.cname;const c=customers.find(x=>x.name===name);if(!c)return;c.name=document.getElementById("ec_name").value;c.country=document.getElementById("ec_country").value;c.tours=parseInt(document.getElementById("ec_tours").value)||0;c.pay=document.getElementById("ec_pay").value;c.pref=document.getElementById("ec_pref").value;closeModal();renderCustomers();}
+function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();}
 function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
-function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();go("customers");}
+function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();renderCustomers();}
 function openCustomerSheet(name){var c=customers.find(function(x){return x.name===name;});if(!c)return;var url="https://docs.google.com/spreadsheets/create?title=Customer:+"+encodeURIComponent(c.name)+"&usp=sheets_web";window.open(url,"_blank");}
 
 /* ===== SOCIAL ===== */
@@ -3654,6 +3722,7 @@ function viewSocial(){
 function renderSocial(){
   const el=document.getElementById("socialPosts");if(!el)return;
   el.innerHTML=[...posts].sort((a,b)=>a.day-b.day).map(p=>"<div class='list-row'><div class='ic' style='background:"+p.color+"1a'><svg viewBox='0 0 24 24' fill='none' stroke='"+p.color+"' stroke-width='2'>"+platIcon[p.plat]+"</svg></div><div class='meta'><div class='t'>"+p.cap+"</div><div class='s'>"+p.type+" · "+p.plat[0].toUpperCase()+p.plat.slice(1)+"</div></div><span class='pill plain'>Jun "+p.day+"</span><div class='tbl-actions'><button class='edit-btn' data-action='editPost' data-arg='"+p.day+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deletePost' data-arg='"+p.day+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></div>").join("");
+  persistData();
 }
 function editPost(day){const p=posts.find(x=>x.day===day);if(!p)return;modalForm("Edit post","Update post","<div class='form-grid'><div class='field'><label>Platform</label><select class='input' id='ep_plat'>"+["instagram","youtube","facebook"].map(pl=>"<option value='"+pl+"' "+(pl===p.plat?"selected":"")+">"+pl[0].toUpperCase()+pl.slice(1)+"</option>").join("")+"</select></div><div class='field'><label>Type</label><select class='input' id='ep_type'>"+["Post","Reel","Video"].map(t=>"<option "+(t===p.type?"selected":"")+">"+t+"</option>").join("")+"</select></div><div class='field'><label>Day (June)</label><input class='input mono' type='number' id='ep_day' value='"+p.day+"' min='1' max='30'></div><div class='field full'><label>Caption</label><input class='input' id='ep_cap' value='"+p.cap+"'></div></div>","saveEditPost","Update");document.getElementById("modal").dataset.pday=day;}
 function saveEditPost(){const day=parseInt(document.getElementById("modal").dataset.pday);const p=posts.find(x=>x.day===day);if(!p)return;p.plat=document.getElementById("ep_plat").value;p.type=document.getElementById("ep_type").value;p.day=parseInt(document.getElementById("ep_day").value)||20;p.cap=document.getElementById("ep_cap").value;const colors={instagram:"#c13584",youtube:"#ff0000",facebook:"#1877f2"};p.color=colors[p.plat];closeModal();renderSocial();}
@@ -3753,7 +3822,17 @@ function viewSettings(){
         "<tr><td>Sales desk</td><td><span class='pill plain'>Sales</span></td><td style='color:var(--ink-soft)'>CRM, Bookings</td></tr>"+
       "</tbody></table></div>"+
     "</div>"+
-  "</div></section>";
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Storage</div><div class='h-sec' style='margin-bottom:6px'>Data &amp; Backup</div>"+
+    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:640px'>All your tours, bookings, accommodation, leads and customers are saved automatically on <b>this device</b> (offline, in the browser). There is no cloud server yet, so data does not sync between devices on its own. To move data to another device — phone, laptop — export a backup here and import it there.</p>"+
+    "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
+      "<button class='btn btn-primary btn-sm' onclick='exportData()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export backup</button>"+
+      "<label class='btn btn-sea btn-sm' style='cursor:pointer'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 8l5-5 5 5M12 3v12'/></svg>Import backup<input type='file' accept='application/json,.json' style='display:none' onchange='importData(this)'></label>"+
+      "<button class='btn btn-ghost btn-sm' onclick='resetData()' style='color:var(--coral)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Reset to sample data</button>"+
+    "</div>"+
+  "</div>"+
+  "</section>";
 }
 
 /* ===== MODALS / FORMS ===== */
@@ -3779,7 +3858,7 @@ function saveTour(){
   const name=document.getElementById("nt_name").value.trim();
   const start=document.getElementById("nt_start").value,end=document.getElementById("nt_end").value;
   if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
-  tours.push({id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:end,
+  tours.push({id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
     guide:document.getElementById("nt_guide").value||"—",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—"});
   closeModal();renderTours();renderCalendar();
@@ -3934,7 +4013,7 @@ function boot(){
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   go("dashboard");
-  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();
+  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();

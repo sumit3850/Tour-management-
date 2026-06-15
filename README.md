@@ -90,6 +90,20 @@ All data is stored in-memory as JavaScript arrays, persisted to `localStorage` o
 
 ---
 
+## Data, Offline Saving & Sync
+
+The app runs entirely in the browser — **there is no backend server, database, or Supabase connection.** Every edit (add / edit / delete across all modules) is saved automatically to the browser's `localStorage` under the key `ieo_data_v1`, so your data survives refreshes and works fully **offline** on that device.
+
+Because storage is per-device, data does **not** sync between devices on its own. To move data between a phone and a laptop, use **Settings → Data & Backup**:
+
+- **Export backup** — downloads a `.json` file with all your data and trip logs.
+- **Import backup** — restores that file on another device.
+- **Reset to sample data** — clears this device's saved data and restores the original demo content.
+
+> Want true real-time multi-device sync? That requires a hosted backend (e.g. Supabase or Firebase). The current build is intentionally serverless; wiring in Supabase is a planned upgrade.
+
+---
+
 ## Cost Calculator
 
 The calculator supports 6 tour categories with pre-loaded rate sheets:

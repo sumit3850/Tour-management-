@@ -6,20 +6,27 @@
 <title>Island Explorer Ops</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#16241d;--ink-soft:#3f5249;--forest:#1b4d3e;--forest-deep:#143a2e;
-  --sea:#107a86;--sea-soft:#e3f1f1;--amber:#dd9a2b;--amber-soft:#fbeccb;
+  --sea:#1976d2;--sea-soft:#e3f2fd;--amber:#dd9a2b;--amber-soft:#fbeccb;
   --coral:#d65a3f;--coral-soft:#f8e2da;--paper:#f6f2e9;--surface:#ffffff;--surface-2:#fbf9f3;
   --line:#e6e0d2;--line-soft:#efe9dd;
   --shadow:0 1px 2px rgba(20,40,30,.04),0 8px 24px -12px rgba(20,40,30,.16);
   --shadow-lg:0 12px 40px -12px rgba(20,40,30,.28);
   --r:14px;--r-sm:10px;--r-lg:20px;--sidebar-w:248px;
+
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', monospace;
+  --shadow-card: 0 1px 3px rgba(22,36,29,0.04), 0 1px 2px rgba(22,36,29,0.06);
+  --shadow-card-hover: 0 4px 12px rgba(22,36,29,0.08), 0 2px 4px rgba(22,36,29,0.04);
+  --ease-default: cubic-bezier(0.4,0,0.2,1);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
 h1,h2,h3,h4{line-height:1.2;font-weight:600}
 .display{font-family:'Calistoga',Georgia,serif;font-weight:400;letter-spacing:-.01em}
@@ -29,22 +36,22 @@ svg{display:block}
 ::selection{background:var(--amber-soft)}
 
 .app{display:flex;min-height:100dvh}
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--forest);color:#dfe9e3;display:flex;flex-direction:column;position:sticky;top:0;height:100dvh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:linear-gradient(180deg,rgba(227,242,253,0.97) 0%,rgba(200,230,255,0.95) 100%);color:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100dvh;border-right:1px solid rgba(25,118,210,0.1)}
 .brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px}
-.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--sea),var(--forest-deep));display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.brand .name{font-family:'Calistoga',serif;font-size:18px;color:#fff;line-height:1.05}
-.brand .sub{font-size:11px;color:#8fb3a4;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--sea),#0d47a1);display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.brand .name{font-family:'Calistoga',serif;font-size:18px;color:var(--ink);line-height:1.05}
+.brand .sub{font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
 .nav{flex:1;overflow-y:auto;padding:6px 12px 18px}
-.nav-group{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#6f9384;margin:16px 10px 6px;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#c4d6cd;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s}
+.nav-group{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#5a7d9a;margin:16px 10px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#4a6b7c;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s}
 .nav-item svg{width:18px;height:18px;stroke:currentColor;flex-shrink:0}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-item.active{background:rgba(255,255,255,.12);color:#fff}
-.nav-item.active svg{stroke:var(--amber)}
-.nav-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
-.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--forest-deep);display:grid;place-items:center;font-weight:700;font-size:13px}
-.nav-foot .who{font-size:13px;color:#fff;font-weight:600}
-.nav-foot .role{font-size:11px;color:#8fb3a4}
+.nav-item:hover{background:rgba(25,118,210,0.08);color:var(--ink)}
+.nav-item.active{background:rgba(25,118,210,0.15);color:var(--ink)}
+.nav-item.active svg{stroke:var(--sea)}
+.nav-foot{padding:14px 18px;border-top:1px solid rgba(25,118,210,0.12);display:flex;align-items:center;gap:11px}
+.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:13px}
+.nav-foot .who{font-size:13px;color:var(--ink);font-weight:600}
+.nav-foot .role{font-size:11px;color:#6a8fa8}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:0;z-index:30;background:rgba(246,242,233,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;gap:14px}
@@ -101,6 +108,8 @@ td{padding:12px 16px;border-bottom:1px solid var(--line-soft);font-size:14px;ver
 tr:last-child td{border-bottom:none}
 tbody tr{transition:background .12s}tbody tr:hover{background:var(--surface-2)}
 th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.nowrap,th.nowrap{white-space:nowrap}
+td{vertical-align:middle}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -140,6 +149,9 @@ td.strong{font-weight:600;color:var(--ink)}
 .tour-card .capline{display:flex;justify-content:space-between;font-size:12px;margin:12px 0 6px;color:var(--ink-soft)}
 .tour-card .capline b{color:var(--ink)}
 .tour-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.tour-del{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--coral-soft);color:var(--coral);display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s}
+.tour-card:hover .tour-del{opacity:1}.tour-del:hover{background:var(--coral);color:#fff}
+.tour-card{position:relative}.tour-card .guests{font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;width:max-content;max-width:100%;overflow-x:auto}
 .tab{padding:7px 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
@@ -164,6 +176,8 @@ td.strong{font-weight:600;color:var(--ink)}
 .legend .sw{width:13px;height:13px;border-radius:4px;flex-shrink:0}
 
 .calc-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+.tourist-toggle{display:flex;gap:6px}
+.per-pax-box{background:rgba(255,255,255,.08);border-radius:8px;padding:6px 10px;margin:4px 0}
 .field{margin-bottom:13px}
 .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
 .input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);transition:border-color .15s,box-shadow .15s}
@@ -172,7 +186,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
 .fieldset{border:1px solid var(--line-soft);border-radius:13px;padding:16px;margin-bottom:16px}
 .fieldset legend{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--sea);font-weight:600;padding:0 6px}
-.result{position:sticky;top:92px;padding:20px;background:linear-gradient(160deg,var(--forest),var(--forest-deep));color:#dfe9e3;border:none}
+.result{position:sticky;top:92px;padding:20px;background:linear-gradient(160deg,#1565c0,#0d47a1);color:#fff;border:none}
 .result h3{color:#fff;font-family:'Calistoga',serif;font-size:18px;margin-bottom:14px}
 .res-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px}
 .res-row span{color:#a9c4b9}.res-row b{font-weight:600;color:#fff}
@@ -244,7 +258,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .chat-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
 .msg{max-width:80%;padding:12px 15px;border-radius:15px;font-size:14px;line-height:1.5}
 .msg.bot{background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start;white-space:pre-wrap}
-.msg.me{background:var(--forest);color:#eaf2ee;border-bottom-right-radius:5px;align-self:flex-end}
+.msg.me{background:var(--sea);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
 .chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
 .chip{font-size:12.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-weight:500}
 .chip:hover{background:var(--sea-soft);border-color:#a9d2d6;color:#0c656f}
@@ -332,7 +346,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 
 const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
 const todayISO="2026-06-14";
-const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session",custom:"Custom"};
+const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session","guided-half":"Guided Session - Half Day",narcondam:"Narcondam Expedition",custom:"Custom"};
 const TOURCOLORS=["#1b4d3e","#107a86","#dd9a2b","#8a3d70","#3a527d","#c2603f","#5b8c3e","#a14b8a"];
 const XBTN="<button class='x' onclick='closeModal()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg></button>";
 
@@ -343,17 +357,51 @@ let tours=[
   {id:"T4",name:"8-Night South & Little Andaman",cat:"littleandaman",start:"2026-06-15",end:"2026-06-23",cap:6,status:"full",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Hawksbill Nest"},
   {id:"T5",name:"Guided Session — Full Day",cat:"session",start:"2026-06-20",end:"2026-06-20",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Day session"},
   {id:"T6",name:"Guided Session — Night",cat:"session",start:"2026-05-28",end:"2026-05-28",cap:8,status:"completed",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Mount Harriet",stay:"Night session"},
+  {id:"T7",name:"Guided Session — Half Day",cat:"guided-half",start:"2026-06-22",end:"2026-06-22",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Sippighat Wetlands",stay:"Half day session"},
+  {id:"T8",name:"Narcondam Expedition",cat:"narcondam",start:"2026-08-10",end:"2026-08-17",cap:4,status:"open",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
 ];
+const TOUR_COSTS={
+  T1:{indian:48500,foreigner:62500},
+  T2:{indian:118500,foreigner:148000},
+  T3:{indian:72000,foreigner:92000},
+  T4:{indian:78000,foreigner:98000},
+  T5:{indian:8500,foreigner:12000},
+  T6:{indian:9500,foreigner:13500},
+  T7:{indian:5500,foreigner:8500},
+  T8:{indian:95000,foreigner:125000},
+};
+const DEFAULT_COSTS={
+  T1:{indian:{accommodation:12000,vehicle:10000,ferry:3500,food:8000,guide:12000,entry:4000},foreigner:{accommodation:18000,vehicle:10000,ferry:3500,food:8000,guide:12000,entry:7000}},
+  T2:{indian:{accommodation:28000,vehicle:24000,ferry:10000,food:18000,guide:28000,entry:10000},foreigner:{accommodation:42000,vehicle:24000,ferry:10000,food:18000,guide:28000,entry:18000}},
+  T3:{indian:{accommodation:17000,vehicle:15000,ferry:5000,food:11000,guide:17000,entry:6000},foreigner:{accommodation:25000,vehicle:15000,ferry:5000,food:11000,guide:17000,entry:11000}},
+  T4:{indian:{accommodation:20000,vehicle:17000,ferry:6000,food:13000,guide:20000,entry:7000},foreigner:{accommodation:30000,vehicle:17000,ferry:6000,food:13000,guide:20000,entry:13000}},
+  T5:{indian:{accommodation:0,vehicle:2500,ferry:0,food:1200,guide:4500,entry:800},foreigner:{accommodation:0,vehicle:2500,ferry:0,food:1200,guide:4500,entry:1500}},
+  T6:{indian:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:800},foreigner:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:1500}},
+};
+var touristType="indian";
+var currentCalcTourId="";
 let bookings=[
-  {id:"B1",tour:"T1",guest:"Helen Marsh",party:2,country:"UK",status:"Confirmed",pay:"Paid",notes:"Vegetarian"},
-  {id:"B2",tour:"T1",guest:"Klaus Vogel",party:2,country:"Germany",status:"Confirmed",pay:"Deposit",notes:""},
-  {id:"B3",tour:"T1",guest:"Mei Tan",party:1,country:"Singapore",status:"Confirmed",pay:"Paid",notes:"Early riser"},
-  {id:"B4",tour:"T2",guest:"David Olsen",party:2,country:"USA",status:"Confirmed",pay:"Paid",notes:"Megapode focus"},
-  {id:"B5",tour:"T2",guest:"P. Sharma",party:2,country:"India",status:"Confirmed",pay:"Deposit",notes:""},
-  {id:"B6",tour:"T3",guest:"Anna Roy",party:2,country:"India",status:"Confirmed",pay:"Paid",notes:""},
-  {id:"B7",tour:"T4",guest:"J. Fernández",party:3,country:"Spain",status:"Confirmed",pay:"Paid",notes:"Tripods"},
-  {id:"B8",tour:"T4",guest:"BNHS group",party:3,country:"India",status:"Confirmed",pay:"Paid",notes:"Society group"},
-  {id:"B9",tour:"T5",guest:"L. Bianchi",party:2,country:"Italy",status:"Confirmed",pay:"Deposit",notes:""},
+  {id:"B1",tour:"T1",guest:"Helen Marsh",party:2,country:"UK",status:"Confirmed",pay:"Paid",notes:"Vegetarian",start:"2026-06-18",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B2",tour:"T1",guest:"Klaus Vogel",party:2,country:"Germany",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-18",end:"2026-06-23",deposit:50000,lastPendingDate:"2026-05-19"},
+  {id:"B3",tour:"T1",guest:"Mei Tan",party:1,country:"Singapore",status:"Confirmed",pay:"Paid",notes:"Early riser",start:"2026-06-18",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B4",tour:"T2",guest:"David Olsen",party:2,country:"USA",status:"Confirmed",pay:"Paid",notes:"Megapode focus",start:"2026-06-25",end:"2026-07-07",deposit:0,lastPendingDate:""},
+  {id:"B5",tour:"T2",guest:"P. Sharma",party:2,country:"India",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-25",end:"2026-07-07",deposit:120000,lastPendingDate:"2026-05-26"},
+  {id:"B6",tour:"T3",guest:"Anna Roy",party:2,country:"India",status:"Confirmed",pay:"Paid",notes:"",start:"2026-07-02",end:"2026-07-09",deposit:0,lastPendingDate:""},
+  {id:"B7",tour:"T4",guest:"J. Fernández",party:3,country:"Spain",status:"Confirmed",pay:"Paid",notes:"Tripods",start:"2026-06-15",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B8",tour:"T4",guest:"BNHS group",party:3,country:"India",status:"Confirmed",pay:"Paid",notes:"Society group",start:"2026-06-15",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B9",tour:"T5",guest:"L. Bianchi",party:2,country:"Italy",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-20",end:"2026-06-20",deposit:15000,lastPendingDate:"2026-06-06"},
+];
+function bookingTotalCost(b){var t=tours.find(function(x){return x.id===b.tour;});if(!t||!TOUR_COSTS[t.id])return 0;var costPP=TOUR_COSTS[t.id][b.country==="India"?"indian":"foreigner"];return costPP*b.party;}
+function bookingDeposit(b){return b.deposit||0;}
+function bookingPending(b){return Math.max(bookingTotalCost(b)-bookingDeposit(b),0);}
+function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
+function bookingPaymentStatus(b){var pend=bookingPending(b);if(pend<=0)return"Fully Paid";if(bookingDeposit(b)>0)return"Partial";return"Unpaid";}
+function bookingPaymentStatusClass(b){var s=bookingPaymentStatus(b);return s==="Fully Paid"?"completed":s==="Partial"?"open":"full";}
+let accommodations=[
+  {id:"acc-1",name:"Wild Grass Resort",location:"Chidiya Tapu",type:"Eco Resort",rooms:12,amenities:["AC","Restaurant","WiFi"],status:"Active",notes:"Birders' favourite"},
+  {id:"acc-2",name:"SeaShell Neil",location:"Neil Island",type:"Beach Resort",rooms:18,amenities:["AC","Pool","Restaurant","WiFi"],status:"Active",notes:"Premium property"},
+  {id:"acc-3",name:"Bamboo Flat Lodge",location:"Bamboo Flat",type:"Budget Lodge",rooms:8,amenities:["Fan","Restaurant"],status:"Active",notes:"Close to ferry"},
+  {id:"acc-4",name:"Dolphin Resort Havelock",location:"Havelock",type:"Govt Resort",rooms:20,amenities:["AC","Restaurant","Beach Access"],status:"Maintenance",notes:"Renovation till July"}
 ];
 const waitlist={T4:[{guest:"M. Costa",party:2}]};
 let leads=[
@@ -399,6 +447,64 @@ const platIcon={
   youtube:"<rect x='3' y='6' width='18' height='12' rx='3'/><path d='m10 9 5 3-5 3z' fill='#fff' stroke='none'/>",
   facebook:"<path d='M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v6h3v-6h2.5l.5-3H14V9z'/>",
 };
+
+/* ===== PERSISTENCE — offline saving on this device ===== */
+const DATA_KEY="ieo_data_v1";
+function persistData(){
+  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts}));}catch(e){}
+}
+(function loadData(){
+  try{
+    var s=localStorage.getItem(DATA_KEY);if(!s)return;
+    var d=JSON.parse(s);
+    if(d.tours)tours=d.tours;
+    if(d.bookings)bookings=d.bookings;
+    if(d.accommodations)accommodations=d.accommodations;
+    if(d.leads)leads=d.leads;
+    if(d.customers)customers=d.customers;
+    if(d.vehicles)vehicles=d.vehicles;
+    if(d.drivers)drivers=d.drivers;
+    if(d.ops)ops=d.ops;
+    if(d.posts)posts=d.posts;
+  }catch(e){}
+})();
+/* Backup / restore — a portable file you can move between devices (manual sync) */
+function exportData(){
+  var payload={version:DATA_KEY,exportedAt:new Date().toISOString(),
+    data:{tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts},
+    trips:(typeof tripLogs!=="undefined"?tripLogs:[])};
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob);var a=document.createElement("a");
+  a.href=url;a.download="island-explorer-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function importData(input){
+  var file=input.files&&input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var p=JSON.parse(reader.result);var d=p.data||p;
+      if(d.tours)tours=d.tours;
+      if(d.bookings)bookings=d.bookings;
+      if(d.accommodations)accommodations=d.accommodations;
+      if(d.leads)leads=d.leads;
+      if(d.customers)customers=d.customers;
+      if(d.vehicles)vehicles=d.vehicles;
+      if(d.drivers)drivers=d.drivers;
+      if(d.ops)ops=d.ops;
+      if(d.posts)posts=d.posts;
+      if(p.trips){tripLogs=p.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
+      persistData();boot();
+      alert("Backup restored successfully.");
+    }catch(e){alert("Could not read that file. Please choose a valid Island Explorer backup (.json).");}
+  };
+  reader.readAsText(file);input.value="";
+}
+function resetData(){
+  if(!confirm("This will erase every change saved on this device and restore the original sample data. Continue?"))return;
+  try{localStorage.removeItem(DATA_KEY);}catch(e){}
+  location.reload();
+}
 
 const TOUR_RATES={
   "5-Night South Andaman":{
@@ -466,6 +572,7 @@ const NAV=[
   ["tours","Tours","M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"],
   ["calendar","Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"],
   ["bookings","Bookings","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
+  ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
   ["logistics","Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
@@ -475,11 +582,109 @@ const NAV=[
   ["ai","AI Assistant","M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-1 8H9a4 4 0 0 1-1-8V6a4 4 0 0 1 4-4zM9 21h6M12 17v4"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
-const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
+  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
 }
+
+function viewAccommodation(){
+  return "<section class='view' id='v-accommodation'>"+
+    "<div class='section-head'><div class='h-sec'>Accommodation</div><button class='btn btn-primary btn-sm' onclick='openAddAccommodation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Property</button></div>"+
+    "<div class='tabs' id='accTabs' style='margin-bottom:18px'>"+["Properties","Availability Calendar"].map(function(t,i){return"<button class='tab "+(i===0?"active":"")+"' data-action='accTab' data-arg='"+t+"'>"+t+"</button>";}).join("")+"</div>"+
+    "<div id='accBody'></div>"+
+  "</section>";
+}
+function accTab(t,el){
+  document.querySelectorAll("#accTabs .tab").forEach(function(x){x.classList.remove("active");});
+  if(el) el.classList.add("active");
+  else document.querySelectorAll("#accTabs .tab").forEach(function(x){if(x.textContent.trim()===t)x.classList.add("active");});
+  if(t==="Availability Calendar") renderAccCalendar(); else renderAccommodation();
+}
+function renderAccommodation(){
+  var b=document.getElementById("accBody");if(!b)return;
+  var active=accommodations.filter(function(a){return a.status==="Active";}).length;
+  var maint=accommodations.filter(function(a){return a.status==="Maintenance";}).length;
+  var totalRooms=accommodations.reduce(function(s,a){return s+a.rooms;},0);
+  b.innerHTML="<div class='kpis' style='margin-bottom:16px'>"+
+    kpi("Properties",accommodations.length,"","","M3 13h13V6H3zM16 8h3l3 3v2h-6z")+
+    kpi("Active",active,"","","M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z")+
+    kpi("Under Maintenance",maint,maint?"attention needed":"all good","",maint?"M12 9v2m0 4h.01M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z":"M9 12l2 2 4-4")+
+    kpi("Total Rooms",totalRooms,"","","M3 13h13V6H3zM16 8h3l3 3v2h-6z")+
+  "</div>"+
+  "<div class='acc-grid'>"+accommodations.map(function(a){
+    return "<div class='card acc-card'>"+
+      "<div class='acc-head'>"+
+        "<div><div class='acc-name'>"+a.name+"</div><div class='acc-loc'>"+a.location+"</div></div>"+
+        "<span class='pill "+(a.status==="Active"?"active":"maintenance")+"'>"+a.status+"</span>"+
+      "</div>"+
+      "<div class='acc-meta'>"+
+        "<div><span class='k'>Type</span><br><span class='v'>"+a.type+"</span></div>"+
+        "<div><span class='k'>Rooms</span><br><span class='v'>"+a.rooms+"</span></div>"+
+      "</div>"+
+      "<div class='acc-amen'>"+a.amenities.map(function(am){return"<span class='amenity-pill'>"+am+"</span>";}).join("")+"</div>"+
+      "<div class='acc-foot'>"+
+        "<span style='font-size:12px;color:var(--ink-soft)'>"+a.notes+"</span>"+
+        "<div class='tbl-actions'>"+
+          "<button class='edit-btn' data-action='editAccommodation' data-arg='"+a.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button>"+
+          "<button class='del-btn' data-action='deleteAccommodation' data-arg='"+a.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
+        "</div>"+
+      "</div>"+
+    "</div>";
+  }).join("")+"</div>";
+  persistData();
+}
+function renderAccCalendar(){
+  var b=document.getElementById("accBody");if(!b)return;
+  var monthTours=tours.filter(function(t){var iso=function(d){return calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};return t.start<=iso(new Date(calY,calM+1,0).getDate())&&t.end>=iso(1);});
+  var html="<div class='cal-bar' style='margin-bottom:14px'><div class='cal-nav'><button onclick='calStep(-1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button><button onclick='calStep(1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div><select class='cal-sel' id='accCalMonth' onchange='calM=+this.value;renderAccCalendar()'>"+MONTHS.map(function(m,i){return"<option value='"+i+"' "+(i===calM?"selected":"")+">"+m+"</option>";}).join("")+"</select><select class='cal-sel' id='accCalYear' onchange='calY=+this.value;renderAccCalendar()'><option value='2025'>2025</option><option value='2026' selected>2026</option><option value='2027'>2027</option></select></div>";
+  html+="<div class='acc-prop-strip'>"+accommodations.map(function(a){return"<div class='acc-prop-item'><span class='sw' style='background:"+tourColor(a.id)+"'></span>"+a.name+"</div>";}).join("")+"</div>";
+  var first=new Date(calY,calM,1),startDow=(first.getDay()+6)%7,days=new Date(calY,calM+1,0).getDate();
+  var iso=function(d){return calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};
+  html+="<div class='acc-cal-grid'>"+["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(function(d){return"<div class='dow'>"+d+"</div>";}).join("")+"</div>";
+  html+="<div class='acc-cal-grid'>";
+  for(var i=0;i<startDow;i++) html+="<div class='cell dim'></div>";
+  for(var d=1;d<=days;d++){
+    var date=iso(d);
+    var booked=accommodations.filter(function(a){return monthTours.some(function(t){return date>=t.start&&date<=t.end&&t.stay&&t.stay.indexOf(a.name)>=0;});});
+    html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+booked.map(function(a){return"<div class='booked'>"+a.name.split(" ").slice(0,2).join(" ")+"</div>";}).join("")+"</div>";
+  }
+  html+="</div>";
+  b.innerHTML=html;
+}
+function openAddAccommodation(){
+  modalForm("New property","Add property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='na_name' placeholder='Resort name'></div><div class='field'><label>Location</label><input class='input' id='na_loc' placeholder='e.g. Chidiya Tapu'></div><div class='field'><label>Type</label><select class='input' id='na_type'><option>Eco Resort</option><option>Beach Resort</option><option>Budget Lodge</option><option>Govt Resort</option><option>Homestay</option></select></div><div class='field'><label>Rooms</label><input class='input mono' type='number' id='na_rooms' value='10' min='1'></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='na_amen' placeholder='AC, Restaurant, WiFi'></div><div class='field full'><label>Notes</label><input class='input' id='na_notes' placeholder='Special notes'></div></div>","saveNewAccommodation","Add property");
+}
+function saveNewAccommodation(){
+  var name=document.getElementById("na_name").value||"New Property";
+  var amenities=(document.getElementById("na_amen").value||"").split(",").map(function(s){return s.trim();}).filter(function(s){return s;});
+  accommodations.push({id:"acc-"+Date.now(),name:name,location:document.getElementById("na_loc").value||"—",type:document.getElementById("na_type").value,rooms:parseInt(document.getElementById("na_rooms").value)||1,amenities:amenities,status:"Active",notes:document.getElementById("na_notes").value||"—"});
+  closeModal();renderAccommodation();
+}
+function editAccommodation(id){
+  var a=accommodations.find(function(x){return x.id===id;});if(!a)return;
+  modalForm("Edit property","Update property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='ea_name' value='"+a.name+"'></div><div class='field'><label>Location</label><input class='input' id='ea_loc' value='"+a.location+"'></div><div class='field'><label>Type</label><select class='input' id='ea_type'>"+["Eco Resort","Beach Resort","Budget Lodge","Govt Resort","Homestay"].map(function(t){return"<option "+(t===a.type?"selected":"")+">"+t+"</option>";}).join("")+"</select></div><div class='field'><label>Rooms</label><input class='input mono' type='number' id='ea_rooms' value='"+a.rooms+"' min='1'></div><div class='field'><label>Status</label><select class='input' id='ea_status'><option "+(a.status==="Active"?"selected":"")+">Active</option><option "+(a.status==="Maintenance"?"selected":"")+">Maintenance</option></select></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='ea_amen' value='"+a.amenities.join(", ")+"'></div><div class='field full'><label>Notes</label><input class='input' id='ea_notes' value='"+a.notes+"'></div></div>","saveEditAccommodation","Update");
+  document.getElementById("modal").dataset.aid=id;
+}
+function saveEditAccommodation(){
+  var id=document.getElementById("modal").dataset.aid;
+  var a=accommodations.find(function(x){return x.id===id;});if(!a)return;
+  a.name=document.getElementById("ea_name").value;
+  a.location=document.getElementById("ea_loc").value;
+  a.type=document.getElementById("ea_type").value;
+  a.rooms=parseInt(document.getElementById("ea_rooms").value)||1;
+  a.status=document.getElementById("ea_status").value;
+  a.amenities=(document.getElementById("ea_amen").value||"").split(",").map(function(s){return s.trim();}).filter(function(s){return s;});
+  a.notes=document.getElementById("ea_notes").value;
+  closeModal();renderAccommodation();
+}
+function deleteAccommodation(id){
+  if(!confirm("Delete this property?"))return;
+  accommodations=accommodations.filter(function(a){return a.id!==id;});
+  renderAccommodation();
+}
+
 function attachClickHandlers(){
   var content=document.getElementById('content');if(!content)return;
   content.onclick=function(e){
@@ -507,6 +712,13 @@ function attachClickHandlers(){
     else if(a==='openAddBooking')openAddBooking(t.dataset.arg);
     else if(a==='editPost')editPost(t.dataset.arg);
     else if(a==='deletePost')deletePost(t.dataset.arg);
+    else if(a==='accTab')accTab(t.dataset.arg,e.target);
+    else if(a==='editAccommodation')editAccommodation(t.dataset.arg);
+    else if(a==='deleteAccommodation')deleteAccommodation(t.dataset.arg);
+    else if(a==='deleteTour')deleteTour(t.dataset.arg);
+    else if(a==='editTrip')editTrip(t.dataset.arg);
+    else if(a==='deleteTrip')deleteTrip(t.dataset.arg);
+    else if(a==='openCustomerSheet')openCustomerSheet(t.dataset.arg);
   };
 }
 function go(v,isBack){
@@ -552,7 +764,7 @@ function viewDashboard(){
     "<div class='grid-2' style='margin-top:16px'>"+
       "<div class='card card-pad'>"+
         "<div class='h-sec' style='margin-bottom:8px;font-size:15px'>Pending follow-ups</div>"+
-        leads.filter(l=>["New","Contacted","FollowUp"].includes(l.stage)).slice(0,4).map(l=>"<div class='list-row'><div class='ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M22 16.92v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.7.6 2.5a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.6-1.6a2 2 0 0 1 2.1-.5c.8.3 1.6.5 2.5.6a2 2 0 0 1 1.7 2z'/></svg></div><div class='meta'><div class='t'>"+l.name+" · "+l.country+"</div><div class='s'>"+l.tour+"</div></div><span class='pill plain'>"+STAGES.find(s=>s[0]===l.stage)[1]+"</span></div>").join("")+
+        leads.filter(l=>["New","Contacted","FollowUp"].includes(l.stage)).slice(0,4).map(l=>"<div class='list-row'><div class='ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M22 16.92v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.7.6 2.5a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.6-1.6a2 2 0 0 1 2.1-.5c.8.3 1.6.5 2.5.6a2 2 0 0 1 1.7 2z'/></svg></div><div class='meta'><div class='t'>"+l.name+" · "+l.country+"</div><div class='s'>"+l.tour+"</div></div><span class='pill plain'>"+STAGES.find(s=>s[0]===l.stage)[1]+"</span><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"' title='Delete' style='width:32px;height:32px;border-radius:7px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--coral);flex-shrink:0'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div>").join("")+
       "</div>"+
       "<div class='card card-pad'>"+
         "<div class='h-sec' style='margin-bottom:8px;font-size:15px'>Vehicle status</div>"+
@@ -567,7 +779,7 @@ let curTab="All";
 function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
-      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='\"+t+\"'>"+t+"</button>").join("")+"</div>"+
+      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
       "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button>"+
     "</div>"+
     "<div class='tour-grid' id='tourGrid'></div>"+
@@ -581,15 +793,21 @@ function renderTours(filter=curTab){
     if(filter==="Ongoing")return s!=="completed"&&new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO);
     return true;});
   grid.innerHTML=list.map(t=>{const b=booked(t.id),pct=Math.round(b/t.cap*100),s=status(t);
-    return "<div class='card tour-card' data-action='openTour' data-arg='\"+t.id+\"'>"+
+    var gNames=bookings.filter(function(x){return x.tour===t.id;}).map(function(x){return x.guest;}).join(", ");
+    var cost=t.guests&&t.guests.length>0?"<div class='cost-line'>Cost: "+fmt(t.guests.length*TOUR_COSTS[t.id]["indian"])+" ("+t.guests.length+" pax)</div>":"";
+    return "<div class='card tour-card' data-action='openTour' data-arg='"+t.id+"'>"+
+      "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
       "<span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span>"+
       "<div class='nm'>"+t.name+"</div>"+
       "<div class='dt'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div>"+
       "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
       "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
+      (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
       "<div class='foot'>"+pill(s)+"<span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
     "</div>";}).join("")||"<div class='empty'>No tours in this view.</div>";
+  persistData();
 }
+function deleteTour(id){if(!confirm("Delete this tour?"))return;tours=tours.filter(function(t){return t.id!==id;});renderTours();renderCalendar();}
 function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderTours(f);}
 
 /* ===== CALENDAR ===== */
@@ -620,30 +838,33 @@ function renderCalendar(){
     const date=iso(d);
     const spans=monthTours.filter(t=>date>=t.start&&date<=t.end).map(t=>{
       const isStart=date===t.start;
-      return "<div class='span "+(isStart?"":"cont")+"' style='background:"+tourColor(t.id)+"' title='"+t.name+" ("+dShort(t.start)+"–"+dShort(t.end)+")' data-action='openTour' data-arg='\"+t.id+\"'>"+(isStart?t.name.split(" ").slice(0,2).join(" "):"·")+"</div>";
+      return "<div class='span "+(isStart?"":"cont")+"' style='background:"+tourColor(t.id)+"' title='"+t.name+" ("+dShort(t.start)+"–"+dShort(t.end)+")' data-action='openTour' data-arg='"+t.id+"'>"+(isStart?t.name.split(" ").slice(0,2).join(" "):"·")+"</div>";
     }).join("");
     html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+spans+"</div>";
   }
   grid.innerHTML=html;
-  document.getElementById("calLegend").innerHTML=monthTours.length?monthTours.map(t=>"<div class='lg' data-action='openTour' data-arg='\"+t.id+\"'><span class='sw' style='background:"+tourColor(t.id)+"'></span>"+t.name+" · "+dShort(t.start)+"–"+dShort(t.end)+"</div>").join(""):"<div class='lg'>No departures this month.</div>";
+  document.getElementById("calLegend").innerHTML=monthTours.length?monthTours.map(t=>"<div class='lg' data-action='openTour' data-arg='"+t.id+"'><span class='sw' style='background:"+tourColor(t.id)+"'></span>"+t.name+" · "+dShort(t.start)+"–"+dShort(t.end)+"</div>").join(""):"<div class='lg'>No departures this month.</div>";
 }
 
 /* ===== BOOKINGS ===== */
 function viewBookings(){
   return "<section class='view' id='v-bookings'>"+
     "<div class='section-head'><div class='h-sec'>All bookings</div><button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Date</th><th class='num'>Party</th><th>Country</th><th>Status</th><th>Payment</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total Cost</th><th class='num'>Deposit</th><th class='num'>Pending</th><th>Last Pending</th><th>Payment Status</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
-  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td>"+(t?dShort(t.start):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='\"+x.id+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='\"+x.id+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  persistData();
 }
 function editBooking(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
   const tOpts=tours.map(t=>"<option value='"+t.id+"' "+(t.id===b.tour?"selected":"")+">"+t.name+"</option>").join("");
   modalForm("Edit booking","Update booking","<div class='form-grid'>"+
     "<div class='field full'><label>Tour</label><select class='input' id='eb_tour'>"+tOpts+"</select></div>"+
+    "<div class='field'><label>Start date</label><input class='input' type='date' id='eb_start' value='"+(b.start||"")+"'></div>"+
+    "<div class='field'><label>End date</label><input class='input' type='date' id='eb_end' value='"+(b.end||"")+"'></div>"+
     "<div class='field'><label>Guest name</label><input class='input' id='eb_guest' value='"+b.guest+"'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='eb_party' value='"+b.party+"'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='eb_country' value='"+b.country+"'></div>"+
@@ -652,6 +873,8 @@ function editBooking(id){
       "<option value='Paid' "+(b.pay==="Paid"?"selected":"")+">Paid</option>"+
       "<option value='Balance due' "+(b.pay==="Balance due"?"selected":"")+">Balance due</option>"+
     "</select></div>"+
+    "<div class='field'><label>Deposit Amount</label><input class='input mono' type='number' id='eb_deposit' value='"+(b.deposit||0)+"'></div>"+
+    "<div class='field'><label>Last Pending Date</label><input class='input' type='date' id='eb_lastpend' value='"+(b.lastPendingDate||"")+"'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='eb_notes' value='"+(b.notes||"")+"'></div>"+
   "</div>","saveEditBooking","Update booking");
   document.getElementById("modal").dataset.bid=id;
@@ -659,11 +882,17 @@ function editBooking(id){
 function saveEditBooking(){
   const id=document.getElementById("modal").dataset.bid;
   const b=bookings.find(x=>x.id===id);if(!b)return;
+  var newStart=document.getElementById("eb_start").value;
+  var newEnd=document.getElementById("eb_end").value;
+  if(!newStart||!newEnd||newEnd<newStart){alert("Enter valid start and end dates.");return;}
   b.tour=document.getElementById("eb_tour").value;
+  b.start=newStart;b.end=newEnd;
   b.guest=document.getElementById("eb_guest").value;
   b.party=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
   b.country=document.getElementById("eb_country").value;
   b.pay=document.getElementById("eb_pay").value;
+  b.deposit=parseFloat(document.getElementById("eb_deposit").value)||0;
+  b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
   b.notes=document.getElementById("eb_notes").value;
   closeModal();renderBookings();renderTours();renderCalendar();
 }
@@ -692,8 +921,10 @@ function viewCalc(){
         "</div></fieldset>"+
         "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Custom items</legend><div id='customItems'></div>"+
           "<button class='add-item' onclick='addCostItem()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add cost item</button></fieldset>"+
+        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Tourist Type</legend><div class='tourist-toggle'><button class='btn btn-sm "+(touristType==="indian"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"indian\")'>Indian</button><button class='btn btn-sm "+(touristType==="foreigner"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"foreigner\")'>Foreigner</button></div></fieldset>"+
         "<fieldset class='fieldset'><legend>Pricing</legend>"+cf("Taxes %","c_tax",5,"%")+"</fieldset>"+
         "<fieldset class='fieldset'><legend>Margin</legend>"+cf("Markup %","c_markup",25,"%")+cf("Profit margin %","c_margin",15,"%")+"</fieldset>"+
+        "<div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='fillDefaults()'>Fill Defaults</button><button class='btn btn-ghost btn-sm' onclick='resetToDefaults()'>Reset</button></div>"+
       "</div>"+
     "</div>"+
     "<div class='card result' id='calcResult'></div>"+
@@ -705,15 +936,40 @@ function costRow(name,val,idx){
   return cf(name,ids[idx]||'c_extra_'+idx,val);
 }
 function applyCategoryRates(){
-  const cat=document.getElementById('calcCategory').value;
+  var sel=document.getElementById('calcCategory');
+  var cat=sel.value;
   if(!cat||cat==='Custom'||!TOUR_RATES[cat])return;
-  const rates=TOUR_RATES[cat];
-  const defaults=[
+  var tid='';
+  for(var i=0;i<tours.length;i++){if(tours[i].name===cat){tid=tours[i].id;break;}}
+  currentCalcTourId=tid;
+  var rates=TOUR_RATES[cat];
+  var defaults=[
     {name:'Accommodation',val:rates.accommodation},{name:'Vehicle',val:rates.vehicle},{name:'Driver',val:rates.driver},
     {name:'Ferry',val:rates.ferry},{name:'Boat',val:rates.boat},{name:'Guide fees',val:rates.guideFees},
     {name:'Entry permits',val:rates.entryPermits},{name:'Food',val:rates.food},{name:'Fuel',val:rates.fuel},{name:'Miscellaneous',val:rates.misc}
   ];
-  document.getElementById('costItems').innerHTML=defaults.map((it,i)=>costRow(it.name,it.val,i)).join('');
+  document.getElementById('costItems').innerHTML=defaults.map(function(it,i){return costRow(it.name,it.val,i);}).join('');
+  calc();
+}
+function setTouristType(type){
+  touristType=type;
+  var btns=document.querySelectorAll('.tourist-toggle .btn');
+  btns.forEach(function(b){if(b.textContent.toLowerCase().trim()===type){b.classList.remove('btn-ghost');b.classList.add('btn-primary');}else{b.classList.remove('btn-primary');b.classList.add('btn-ghost');}});
+  if(currentCalcTourId&&DEFAULT_COSTS[currentCalcTourId]){fillDefaults();}
+  calc();
+}
+function fillDefaults(){
+  if(!currentCalcTourId||!DEFAULT_COSTS[currentCalcTourId])return;
+  var costs=DEFAULT_COSTS[currentCalcTourId][touristType];
+  if(!costs)return;
+  var map={c_stay:costs.accommodation,c_veh:costs.vehicle,c_ferry:costs.ferry,c_food:costs.food,c_guide:costs.guide,c_permit:costs.entry};
+  for(var k in map){var el=document.getElementById(k);if(el)el.value=map[k];}
+  calc();
+}
+function resetToDefaults(){
+  var items=['c_stay','c_veh','c_drv','c_ferry','c_boat','c_guide','c_permit','c_food','c_fuel','c_misc'];
+  items.forEach(function(id){var el=document.getElementById(id);if(el)el.value=0;});
+  document.querySelectorAll('.c_custom').forEach(function(i){i.value=0;});
   calc();
 }
 function generateQuotation(){
@@ -743,6 +999,7 @@ function generateQuotation(){
       <div id="quotationBody" style="padding:24px;background:#fff">
         <!-- Quotation Header -->
         <div style="text-align:center;border-bottom:2px solid var(--forest);padding-bottom:16px;margin-bottom:20px">
+          <img src="logo.jpg" style="max-width:180px;margin-bottom:10px" onerror="this.style.display='none'">
           <div style="font-family:'Calistoga',serif;font-size:22px;color:var(--forest)">Island Explorer</div>
           <div style="font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase">Birding Tours \u00b7 Andaman & Nicobar Islands</div>
           <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Dr. Sumit Rao \u00b7 +91 98765 43210 \u00b7 sumit@islandexplorer.in</div>
@@ -780,9 +1037,12 @@ function generateQuotation(){
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Amount</th>
           </tr></thead>
           <tbody>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Total Tour Cost</td><td style="padding:8px 4px;text-align:right;font-weight:600">${totalCost}</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Cost Per Person</td><td style="padding:8px 4px;text-align:right">${perPerson}</td></tr>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 4px">Selling Price (incl. margin)</td><td style="padding:8px 4px;text-align:right;color:var(--sea);font-weight:700">${sellingPrice}</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Accommodation</td><td style="padding:8px 4px;text-align:right;font-weight:600" id="q_accom">${totalCost}</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Vehicle Transportation</td><td style="padding:8px 4px;text-align:right" id="q_veh">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Ship / Ferry</td><td style="padding:8px 4px;text-align:right" id="q_ferry">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Food</td><td style="padding:8px 4px;text-align:right" id="q_food">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Guide</td><td style="padding:8px 4px;text-align:right" id="q_guide">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 4px">Entry / Permit</td><td style="padding:8px 4px;text-align:right;font-weight:600" id="q_entry">${perPerson}</td></tr>
           </tbody>
           <tfoot>
             <tr><td style="padding:10px 4px;font-size:14px"><b>Price Per Person</b></td><td style="padding:10px 4px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:var(--forest)"><b>${pricePerPerson}</b></td></tr>
@@ -802,7 +1062,15 @@ function generateQuotation(){
           \u2022 50% deposit required to confirm booking \u00b7 Balance due 30 days before departure<br>
           \u2022 Prices are in Indian Rupees (INR) \u00b7 Subject to availability<br>
           \u2022 Cancellation: Full refund 60+ days \u00b7 50% refund 30-60 days \u00b7 No refund &lt;30 days<br>
-          \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply
+          \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply<br>
+          \u2022 All permits subject to Forest Department approval \u00b7 Itinerary may change due to weather/sea conditions<br>
+          \u2022 Guests must carry valid ID proof \u00b7 Single supplement +25% on twin-share rates
+        </div>
+
+        <!-- Signature -->
+        <div style="margin-top:20px;padding:14px;background:var(--surface-2);border-radius:10px;display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px">SR</div>
+          <div><div style="font-weight:700;font-size:13px">Dr. Sumit Rao</div><div style="font-size:11px;color:var(--ink-soft)">Ornithologist \u00b7 Lead Guide \u00b7 Island Explorer</div><div style="font-size:11px;color:var(--sea)">+91 98765 43210 \u00b7 sumit@islandexplorer.in</div></div>
         </div>
 
         <!-- Footer -->
@@ -909,13 +1177,2377 @@ function printQuotation() {
         .footer{text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #1b4d3e}
         .footer h2{font-family:'Calistoga',serif;font-size:16px;color:#1b4d3e}
         @media print{body{padding:0}}
-      </style>
+      
+/* ===== DESIGN REFRESH ===== */
+/* ============================================================
+   SECTION 2: GLOBAL FONT UPDATES
+   INSERT AFTER existing body rule (after line 22)
+   These rules OVERRIDE existing declarations.
+   ============================================================ */
+
+body {
+  font-family: var(--font-body);
+  font-weight: 500;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   SECTION 3: SELECTION & SCROLL BEHAVIORS
+   INSERT AFTER existing ::selection rule (after line 29)
+   ============================================================ */
+
+::selection {
+  background: var(--amber-soft);
+  color: var(--ink);
+}
+
+/* Smooth scroll on all containers */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Custom scrollbar - thin, green-tinted */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 122, 134, 0.25);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 122, 134, 0.4);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 122, 134, 0.25) transparent;
+}
+
+/* ============================================================
+   SECTION 4: SIDEBAR ENHANCEMENTS
+   INSERT AFTER existing .sidebar rule (after line 32)
+   ============================================================ */
+
+.sidebar {
+  background: var(--sidebar-gradient);
+  box-shadow: var(--shadow-nav);
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  transition: transform 0.25s var(--ease-default);
+}
+
+/* Brand enhancements */
+.brand .name {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.brand .sub {
+  font-size: 11px;
+  color: #8fb3a4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.brand .mark {
+  transition: transform 0.2s var(--ease-default), box-shadow 0.2s var(--ease-default);
+}
+
+.brand:hover .mark {
+  transform: scale(1.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Navigation group heading */
+.nav-group {
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6f9384;
+  margin: 18px 10px 6px;
+  font-weight: 600;
+  transition: color 0.15s var(--ease-default);
+}
+
+/* Nav item hover micro-interaction */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  color: #c4d6cd;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
+  transition: background 0.15s var(--ease-default), color 0.15s var(--ease-default), transform 0.1s var(--ease-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px;
+  height: 18px;
+  background: var(--amber);
+  border-radius: 0 2px 2px 0;
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  transform: translateX(1px);
+}
+
+.nav-item.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.nav-item.active::before {
+  transform: translateY(-50%) scaleY(1);
+}
+
+.nav-item.active svg {
+  stroke: var(--amber);
+  filter: drop-shadow(0 0 4px rgba(221, 154, 43, 0.3));
+}
+
+.nav-item svg {
+  transition: stroke 0.15s var(--ease-default), filter 0.15s var(--ease-default);
+}
+
+/* ============================================================
+   SECTION 5: CONTENT AREA PAPER TEXTURE
+   INSERT AFTER existing .content rule (after line 62)
+   ============================================================ */
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  /* Subtle paper grain via CSS */
+  background-image:
+    radial-gradient(ellipse at 10% 20%, rgba(221, 154, 43, 0.015) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 80%, rgba(16, 122, 134, 0.012) 0%, transparent 50%);
+}
+
+.content {
+  padding: 28px;
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   SECTION 6: TOPBAR ENHANCEMENTS
+   INSERT AFTER existing .topbar rule (after line 50)
+   ============================================================ */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(246, 242, 233, 0.88);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow 0.2s var(--ease-default);
+}
+
+.topbar.scrolled {
+  box-shadow: 0 1px 8px rgba(22, 36, 29, 0.06);
+}
+
+.page-title {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+.page-title b {
+  display: block;
+  font-size: 20px;
+  color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 1px;
+}
+
+/* ============================================================
+   SECTION 7: BUTTON MICRO-INTERACTIONS
+   INSERT AFTER existing .btn:active rule (after line 66)
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 11px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: transform 0.12s var(--ease-default),
+              box-shadow 0.15s var(--ease-default),
+              background 0.15s var(--ease-default),
+              filter 0.15s var(--ease-default);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.15s var(--ease-default);
+  pointer-events: none;
+}
+
+.btn:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+.btn:hover::after {
+  opacity: 1;
+}
+
+.btn:active {
+  transform: translateY(1px) scale(1);
+  filter: brightness(0.98);
+  transition-duration: 0.05s;
+}
+
+.btn-primary {
+  background: var(--amber);
+  color: #3a2906;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 1px 3px rgba(221, 154, 43, 0.2);
+}
+
+.btn-primary:hover {
+  background: #e9a73a;
+  box-shadow: 0 2px 6px rgba(221, 154, 43, 0.25), 0 1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-ghost {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.btn-ghost:hover {
+  background: var(--surface-2);
+  border-color: #d8d0bf;
+  box-shadow: 0 1px 4px rgba(22, 36, 29, 0.04);
+}
+
+.btn-sea {
+  background: var(--sea);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 1px 3px rgba(16, 122, 134, 0.2);
+}
+
+.btn-sea:hover {
+  background: #0e6b75;
+  box-shadow: 0 2px 6px rgba(16, 122, 134, 0.25);
+}
+
+.btn-red {
+  background: var(--coral);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 1px 3px rgba(214, 90, 63, 0.2);
+}
+
+.btn-red:hover {
+  background: #c44e35;
+  box-shadow: 0 2px 6px rgba(214, 90, 63, 0.25);
+}
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 13px;
+  border-radius: 9px;
+}
+
+/* Icon buttons */
+.iconbtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition: background 0.15s var(--ease-default),
+              border-color 0.15s var(--ease-default),
+              transform 0.12s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+}
+
+.iconbtn:hover {
+  background: var(--surface-2);
+  border-color: #d8d0bf;
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(22, 36, 29, 0.06);
+}
+
+.iconbtn:active {
+  transform: scale(0.97);
+}
+
+/* ============================================================
+   SECTION 8: CARD ENHANCEMENTS
+   INSERT AFTER existing .card rule (after line 75)
+   ============================================================ */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s var(--ease-default);
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 40%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: #ddd5c5;
+}
+
+.card.card-pad {
+  padding: 20px;
+}
+
+/* ============================================================
+   SECTION 9: SECTION HEADERS & TYPOGRAPHY
+   INSERT AFTER existing .h-sec rule (after line 79)
+   ============================================================ */
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sea);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.h-sec {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+/* ============================================================
+   SECTION 10: TAB ENHANCEMENTS WITH SMOOTH UNDERLINE
+   INSERT AFTER existing .tab.active rule (after line 146)
+   ============================================================ */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 4px;
+  border-radius: 12px;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  box-shadow: inset 0 1px 2px rgba(22, 36, 29, 0.03);
+}
+
+.tab {
+  padding: 7px 14px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  position: relative;
+  transition: all 0.2s var(--ease-default);
+  cursor: pointer;
+  border: none;
+  background: none;
+  overflow: hidden;
+}
+
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 20px;
+  height: 2px;
+  background: var(--sea);
+  border-radius: 999px;
+  transition: transform 0.25s var(--ease-spring);
+}
+
+.tab:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tab.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+}
+
+.tab.active::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* ============================================================
+   SECTION 11: KPI CARD ENHANCEMENTS
+   INSERT AFTER existing .down rule (after line 118)
+   ============================================================ */
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.kpi {
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi .lab {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.005em;
+}
+
+.kpi .lab svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--sea);
+  opacity: 0.8;
+}
+
+.kpi .val {
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1.1;
+  /* CSS-only count-up preparation: numbers start slightly offset */
+  animation: kpiReveal 0.6s var(--ease-out) forwards;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.kpi:nth-child(1) .val { animation-delay: 0.1s; }
+.kpi:nth-child(2) .val { animation-delay: 0.2s; }
+.kpi:nth-child(3) .val { animation-delay: 0.3s; }
+.kpi:nth-child(4) .val { animation-delay: 0.4s; }
+
+@keyframes kpiReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kpi .trend {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 5px;
+  letter-spacing: 0.01em;
+}
+
+.up { color: #2f7d5b; }
+.down { color: var(--coral); }
+
+/* KPI icon background circle (subtle) */
+.kpi::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sea-soft) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-default);
+  pointer-events: none;
+}
+
+.kpi:hover::after {
+  opacity: 0.6;
+}
+
+/* ============================================================
+   SECTION 12: TABLE ENHANCEMENTS
+   INSERT AFTER existing .tbl-wrap rule (after line 106)
+   ============================================================ */
+
+.tbl-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Sticky table headers */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  font-family: var(--font-body);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 14px;
+  vertical-align: middle;
+  font-family: var(--font-body);
+  font-weight: 500;
+  transition: background 0.12s var(--ease-default);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr {
+  transition: background 0.15s var(--ease-default);
+}
+
+tbody tr:hover {
+  background: var(--surface-2);
+}
+
+th.num, td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+th.ctr, td.ctr {
+  text-align: center;
+}
+
+td.strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ============================================================
+   SECTION 13: TOUR CARD ENHANCEMENTS
+   INSERT AFTER existing .tour-card .foot rule (after line 142)
+   ============================================================ */
+
+.tour-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.tour-card {
+  padding: 18px;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease-default),
+              box-shadow 0.25s var(--ease-default),
+              border-color 0.2s var(--ease-default);
+}
+
+.tour-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-elevated);
+  border-color: #d0c8b6;
+}
+
+.tour-card:active {
+  transform: translateY(-1px);
+  transition-duration: 0.08s;
+}
+
+.tour-card .nm {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 10px 0 3px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.tour-card .dt {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.tour-card .capline {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin: 12px 0 6px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.tour-card .capline b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tour-card .foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+/* ============================================================
+   SECTION 14: MODAL ENHANCEMENTS
+   INSERT AFTER existing .scrim.show rule (after line 266)
+   ============================================================ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 30, 25, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+  transition: opacity 0.2s var(--ease-default);
+}
+
+.scrim.show {
+  display: flex;
+  animation: scrimFade 0.25s var(--ease-default);
+}
+
+@keyframes scrimFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(22, 36, 29, 0.04);
+  width: 100%;
+  max-width: 640px;
+  animation: pop 0.3s var(--ease-spring);
+  overflow: hidden;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+}
+
+.modal-head .x {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  transition: background 0.15s var(--ease-default),
+              border-color 0.15s var(--ease-default),
+              transform 0.12s var(--ease-default);
+  cursor: pointer;
+  background: var(--surface);
+}
+
+.modal-head .x:hover {
+  background: var(--coral-soft);
+  border-color: #e6b5a8;
+  transform: rotate(90deg);
+}
+
+.modal-head .x svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--ink);
+  transition: stroke 0.15s var(--ease-default);
+}
+
+.modal-head .x:hover svg {
+  stroke: var(--coral);
+}
+
+.modal-body {
+  padding: 20px 24px;
+}
+
+.modal-foot {
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: var(--surface-2);
+}
+
+/* ============================================================
+   SECTION 15: INPUT & FORM ENHANCEMENTS
+   INSERT AFTER existing .input:focus rule (after line 170)
+   ============================================================ */
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 0.15s var(--ease-default),
+              box-shadow 0.15s var(--ease-default),
+              background 0.15s var(--ease-default);
+}
+
+.input:hover {
+  border-color: #d0c8b6;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--sea);
+  box-shadow: 0 0 0 3px var(--sea-soft), 0 0 0 1px var(--sea);
+  background: #fff;
+}
+
+/* Accessible focus ring for interactive elements */
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: 9px;
+}
+
+.input:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* Search bar enhancement */
+.search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 9px 13px;
+  width: 280px;
+  max-width: 34vw;
+  transition: border-color 0.15s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+}
+
+.search:hover {
+  border-color: #d0c8b6;
+}
+
+.search:focus-within {
+  border-color: var(--sea);
+  box-shadow: 0 0 0 3px var(--sea-soft);
+}
+
+.search svg {
+  width: 17px;
+  height: 17px;
+  stroke: var(--ink-soft);
+  flex-shrink: 0;
+  transition: stroke 0.15s var(--ease-default);
+}
+
+.search:focus-within svg {
+  stroke: var(--sea);
+}
+
+.search input {
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 14px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  width: 100%;
+  color: var(--ink);
+}
+
+/* ============================================================
+   SECTION 16: CHAT & AI ASSISTANT ENHANCEMENTS
+   INSERT AFTER existing .chat-in input:focus rule (after line 253)
+   ============================================================ */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+}
+
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.msg {
+  max-width: 80%;
+  padding: 12px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.55;
+  font-family: var(--font-body);
+  font-weight: 500;
+  animation: msgSlide 0.25s var(--ease-out) forwards;
+  opacity: 0;
+}
+
+@keyframes msgSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.msg.bot {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-bottom-left-radius: 5px;
+  align-self: flex-start;
+  white-space: pre-wrap;
+}
+
+.msg.me {
+  background: var(--forest);
+  color: #eaf2ee;
+  border-bottom-right-radius: 5px;
+  align-self: flex-end;
+  box-shadow: 0 2px 8px rgba(27, 77, 62, 0.2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.chip {
+  font-size: 12.5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 500;
+  transition: all 0.15s var(--ease-default);
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: var(--sea-soft);
+  border-color: #a9d2d6;
+  color: #0c656f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(16, 122, 134, 0.1);
+}
+
+.chip:active {
+  transform: translateY(0);
+}
+
+.chat-in {
+  display: flex;
+  gap: 9px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.chat-in input {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 10px 13px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.15s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+}
+
+.chat-in input:focus {
+  border-color: var(--sea);
+  box-shadow: 0 0 0 3px var(--sea-soft);
+}
+
+/* ============================================================
+   SECTION 17: LEAD CARD & KANBAN ENHANCEMENTS
+   INSERT AFTER existing .lead .del-btn:hover rule (after line 235)
+   ============================================================ */
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(200px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+
+.kcol {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 10px;
+  min-width: 200px;
+  transition: border-color 0.15s var(--ease-default);
+}
+
+.kcol:hover {
+  border-color: #d8d0bf;
+}
+
+.kcol h4 {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.kcol .ct {
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lead {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px;
+  margin-bottom: 9px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s var(--ease-default);
+  cursor: grab;
+}
+
+.lead:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+  border-color: #d8d0bf;
+}
+
+.lead:active {
+  cursor: grabbing;
+}
+
+.lead .ln {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.005em;
+}
+
+.lead .lc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.lead .lt {
+  font-size: 11px;
+  color: var(--sea);
+  margin-top: 7px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+.lead .mv {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+  flex-wrap: wrap;
+}
+
+.lead .mv button {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.lead .mv button:hover {
+  background: var(--sea-soft);
+  color: #0c656f;
+  border-color: #a9d2d6;
+  transform: translateY(-1px);
+}
+
+.lead .mv button:active {
+  transform: translateY(0);
+}
+
+.lead .del-btn {
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: 1px solid #e6b5a8;
+  background: var(--coral-soft);
+  color: var(--coral);
+  margin-top: 6px;
+  width: 100%;
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.lead .del-btn:hover {
+  background: var(--coral);
+  color: #fff;
+  border-color: var(--coral);
+}
+
+/* ============================================================
+   SECTION 18: LIST ROW ENHANCEMENTS
+   INSERT AFTER existing .list-row .s rule (after line 133)
+   ============================================================ */
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background 0.12s var(--ease-default);
+  border-radius: 8px;
+  margin: 0 -4px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.list-row:last-child {
+  border-bottom: none;
+}
+
+.list-row:hover {
+  background: var(--surface-2);
+}
+
+.list-row .ic {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--sea-soft);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: transform 0.15s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+}
+
+.list-row:hover .ic {
+  transform: scale(1.08);
+  box-shadow: 0 2px 6px rgba(16, 122, 134, 0.12);
+}
+
+.list-row .ic svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--sea);
+}
+
+.list-row .meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-row .t {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.005em;
+}
+
+.list-row .s {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+/* ============================================================
+   SECTION 19: PILL & CATEGORY ENHANCEMENTS
+   INSERT AFTER existing .cat.custom rule (after line 92)
+   ============================================================ */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.005em;
+  transition: transform 0.1s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+  white-space: nowrap;
+}
+
+.pill::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.pill:hover {
+  transform: scale(1.03);
+}
+
+.pill.open {
+  background: var(--sea-soft);
+  color: #0c656f;
+}
+
+.pill.full {
+  background: var(--coral-soft);
+  color: #a9402a;
+}
+
+.pill.closed {
+  background: #ece7da;
+  color: #6b6452;
+}
+
+.pill.completed {
+  background: #e4ece6;
+  color: #3f6d57;
+}
+
+.pill.plain {
+  background: #edeae0;
+  color: #5b6660;
+}
+
+.pill.plain::before {
+  display: none;
+}
+
+.cat {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  transition: transform 0.1s var(--ease-default);
+}
+
+.cat:hover {
+  transform: scale(1.03);
+}
+
+/* ============================================================
+   SECTION 20: PULSE & LIVE INDICATOR ANIMATIONS
+   INSERT AFTER existing media/print rules (after line 304)
+   ============================================================ */
+
+/* Pulse animation for live indicators */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+.iconbtn .dot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--coral);
+  border: 1.5px solid var(--surface);
+  animation: pulse 2s var(--ease-default) infinite;
+}
+
+/* Skeleton shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    var(--surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Toggle enhancement */
+.toggle {
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--line);
+  position: relative;
+  transition: background 0.2s var(--ease-default);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle.on {
+  background: var(--sea);
+  box-shadow: 0 0 8px rgba(16, 122, 134, 0.3);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.25s var(--ease-spring), box-shadow 0.2s var(--ease-default);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle.on::after {
+  left: 23px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.toggle:active::after {
+  width: 24px;
+}
+
+.toggle.on:active::after {
+  left: 19px;
+}
+
+/* ============================================================
+   SECTION 21: CHART & BAR ENHANCEMENTS
+   INSERT AFTER existing .chart .cl rule (after line 125)
+   ============================================================ */
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 140px;
+  padding-top: 10px;
+}
+
+.chart .col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart .stk {
+  width: 100%;
+  max-width: 34px;
+  border-radius: 6px 6px 3px 3px;
+  background: linear-gradient(180deg, var(--sea), var(--forest));
+  transition: height 0.6s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.2s var(--ease-default);
+}
+
+.chart .stk:hover {
+  filter: brightness(1.1);
+}
+
+.chart .cl {
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.bar {
+  height: 6px;
+  background: var(--line-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sea), var(--forest));
+  transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.bar.warn > span {
+  background: linear-gradient(90deg, var(--amber), var(--coral));
+}
+
+/* ============================================================
+   SECTION 22: STAT STRIP & CALCULATOR ENHANCEMENTS
+   INSERT AFTER existing .stat-strip .s .l rule (after line 277)
+   ============================================================ */
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 4px 0 16px;
+}
+
+.stat-strip .s {
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  padding: 12px 10px;
+  text-align: center;
+  transition: all 0.15s var(--ease-default);
+}
+
+.stat-strip .s:hover {
+  background: var(--surface);
+  border-color: var(--line);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.stat-strip .s .v {
+  font-size: 20px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.stat-strip .s .l {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* Calculator result panel */
+.result {
+  position: sticky;
+  top: 92px;
+  padding: 22px;
+  background: linear-gradient(160deg, var(--forest), var(--forest-deep));
+  color: #dfe9e3;
+  border: none;
+  border-radius: var(--r);
+  box-shadow: var(--shadow-elevated);
+}
+
+.result h3 {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin-bottom: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.res-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.res-row span {
+  color: #a9c4b9;
+}
+
+.res-row b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: #fff;
+}
+
+.res-row.big {
+  border-bottom: none;
+  margin-top: 8px;
+  padding-top: 14px;
+}
+
+.res-row.big b {
+  font-size: 24px;
+  color: var(--amber);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* KM line display */
+.kmline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  padding: 12px 14px;
+  margin: 4px 0 4px;
+  transition: border-color 0.15s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+}
+
+.kmline:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+.kmline .lab {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.kmline .big {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-left: auto;
+  color: var(--sea);
+  letter-spacing: -0.02em;
+}
+
+/* Keytag */
+.keytag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: #0c656f;
+  background: var(--sea-soft);
+  border: 1px solid #bfe0e2;
+  border-radius: 8px;
+  padding: 3px 9px;
+  letter-spacing: -0.005em;
+  transition: all 0.12s var(--ease-default);
+}
+
+.keytag:hover {
+  border-color: var(--sea);
+  box-shadow: 0 0 0 2px var(--sea-soft);
+}
+
+/* Time chip */
+.time-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin: 2px 0 14px;
+  font-weight: 500;
+  transition: border-color 0.15s var(--ease-default);
+}
+
+.time-chip:hover {
+  border-color: var(--line);
+}
+
+.time-chip b {
+  margin-left: auto;
+  color: var(--sea);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* ============================================================
+   SECTION 23: OPERATIONS CARD ENHANCEMENTS
+   INSERT AFTER existing .op-actions rule (after line 203)
+   ============================================================ */
+
+.ops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.op-card {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s var(--ease-default);
+}
+
+.op-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: #d8d0bf;
+}
+
+.op-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+
+.op-top b {
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.op-date {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.op-rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  font-size: 12px;
+}
+
+.op-rows .k {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.op-rows .v {
+  font-weight: 500;
+  text-align: right;
+}
+
+.op-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.op-actions button {
+  flex: 1;
+  min-height: 32px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.op-actions .btn-edit {
+  background: var(--sea-soft);
+  border: 1px solid var(--sea);
+  color: #0c5760;
+}
+
+.op-actions .btn-edit:hover {
+  background: #d4e9ea;
+  transform: translateY(-1px);
+}
+
+.op-actions .btn-del {
+  background: var(--coral-soft);
+  border: 1px solid #e6b5a8;
+  color: var(--coral);
+}
+
+.op-actions .btn-del:hover {
+  background: var(--coral);
+  color: #fff;
+  border-color: var(--coral);
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+   SECTION 24: CALENDAR ENHANCEMENTS
+   INSERT AFTER existing .legend .sw rule (after line 164)
+   ============================================================ */
+
+.cal-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-nav button {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.cal-nav button:hover {
+  background: var(--surface-2);
+  border-color: #d8d0bf;
+  transform: scale(1.05);
+}
+
+.cal-nav button:active {
+  transform: scale(0.97);
+}
+
+.cal-nav button svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--ink);
+}
+
+.cal-sel {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease-default),
+              box-shadow 0.15s var(--ease-default);
+}
+
+.cal-sel:hover {
+  border-color: #d8d0bf;
+}
+
+.cal-sel:focus {
+  outline: none;
+  border-color: var(--sea);
+  box-shadow: 0 0 0 3px var(--sea-soft);
+}
+
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  min-width: 660px;
+}
+
+.cal .dow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: 4px;
+  font-family: var(--font-body);
+}
+
+.cal .cell {
+  min-height: 84px;
+  border: 1px solid var(--line-soft);
+  border-radius: 11px;
+  padding: 7px;
+  background: var(--surface);
+  position: relative;
+  transition: all 0.15s var(--ease-default);
+}
+
+.cal .cell:hover {
+  border-color: var(--line);
+  box-shadow: var(--shadow-card);
+}
+
+.cal .cell.dim {
+  background: var(--surface-2);
+  opacity: 0.5;
+}
+
+.cal .cell.today {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 1px var(--amber), 0 2px 8px rgba(221, 154, 43, 0.15);
+}
+
+.cal .dn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.cal .span {
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-top: 3px;
+  line-height: 1.2;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: opacity 0.12s var(--ease-default), transform 0.12s var(--ease-default);
+}
+
+.cal .span:hover {
+  opacity: 0.9;
+  transform: translateX(1px);
+}
+
+.cal .span.cont {
+  border-radius: 6px;
+  opacity: 0.9;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 16px;
+}
+
+.legend .lg {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background 0.12s var(--ease-default);
+}
+
+.legend .lg:hover {
+  background: var(--surface-2);
+}
+
+.legend .sw {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: transform 0.12s var(--ease-default);
+}
+
+.legend .lg:hover .sw {
+  transform: scale(1.15);
+}
+
+/* ============================================================
+   SECTION 25: TABLE ACTION BUTTONS
+   INSERT AFTER existing .tbl-actions .del-btn rule (after line 284)
+   ============================================================ */
+
+.tbl-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.tbl-actions button {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.tbl-actions button:hover {
+  background: var(--surface-2);
+  transform: scale(1.08);
+  box-shadow: 0 2px 4px rgba(22, 36, 29, 0.06);
+}
+
+.tbl-actions button:active {
+  transform: scale(0.96);
+}
+
+.tbl-actions .edit-btn {
+  color: var(--sea);
+}
+
+.tbl-actions .edit-btn:hover {
+  background: var(--sea-soft);
+  border-color: #a9d2d6;
+}
+
+.tbl-actions .del-btn {
+  color: var(--coral);
+}
+
+.tbl-actions .del-btn:hover {
+  background: var(--coral-soft);
+  border-color: #e6b5a8;
+}
+
+/* ============================================================
+   SECTION 26: SETTINGS ROW ENHANCEMENTS
+   INSERT AFTER existing .set-row .sm span rule (after line 259)
+   ============================================================ */
+
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line-soft);
+  transition: padding 0.15s var(--ease-default);
+}
+
+.set-row:last-child {
+  border-bottom: none;
+}
+
+.set-row:hover {
+  padding-left: 4px;
+  padding-right: 4px;
+  margin: 0 -4px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 15px 12px;
+}
+
+.set-row .si {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--sea-soft);
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s var(--ease-default), box-shadow 0.15s var(--ease-default);
+  flex-shrink: 0;
+}
+
+.set-row:hover .si {
+  transform: scale(1.08);
+  box-shadow: 0 2px 6px rgba(16, 122, 134, 0.12);
+}
+
+.set-row .si svg {
+  width: 19px;
+  height: 19px;
+  stroke: var(--sea);
+}
+
+.set-row .sm {
+  flex: 1;
+}
+
+.set-row .sm b {
+  font-size: 14px;
+  display: block;
+  font-weight: 600;
+}
+
+.set-row .sm span {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+/* ============================================================
+   SECTION 27: COPY BUTTON ENHANCEMENT
+   INSERT AFTER existing .copybtn:hover rule (after line 222)
+   ============================================================ */
+
+.copybtn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--ink-soft);
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.copybtn:hover {
+  background: var(--sea-soft);
+  color: #0c656f;
+  border-color: #a9d2d6;
+  transform: translateY(-1px);
+}
+
+.copybtn:active {
+  transform: translateY(0);
+}
+
+/* Now button */
+.now-btn {
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--sea);
+  background: var(--sea-soft);
+  color: #0c656f;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  font-family: var(--font-body);
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.now-btn:hover {
+  background: #d4e9ea;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(16, 122, 134, 0.1);
+}
+
+.now-btn:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   SECTION 28: MEDIA ENHANCEMENTS
+   INSERT AFTER existing .plat svg rule (after line 240)
+   ============================================================ */
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.media {
+  aspect-ratio: 4/3;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  text-align: center;
+  padding: 10px;
+  transition: all 0.2s var(--ease-default);
+  cursor: pointer;
+}
+
+.media:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: var(--shadow-elevated);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.media:active {
+  transform: translateY(0) scale(1);
+}
+
+.plat {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  transition: transform 0.15s var(--ease-default), background 0.15s var(--ease-default);
+}
+
+.media:hover .plat {
+  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.plat svg {
+  width: 14px;
+  height: 14px;
+  stroke: #fff;
+  fill: none;
+}
+
+/* ============================================================
+   SECTION 29: DRIVER NOTE ENHANCEMENT
+   INSERT AFTER existing .driver-note svg rule (after line 213)
+   ============================================================ */
+
+.driver-note {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  background: var(--amber-soft);
+  border: 1px solid #eccf8e;
+  border-radius: 11px;
+  padding: 11px 13px;
+  font-size: 12px;
+  color: #7a5410;
+  margin-bottom: 16px;
+  font-weight: 500;
+  transition: box-shadow 0.15s var(--ease-default);
+}
+
+.driver-note:hover {
+  box-shadow: 0 2px 8px rgba(221, 154, 43, 0.1);
+}
+
+.driver-note svg {
+  width: 16px;
+  height: 16px;
+  stroke: #a9760f;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Add-item button */
+.add-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--sea);
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px dashed #a9d2d6;
+  background: var(--sea-soft);
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.add-item:hover {
+  background: #d4e9ea;
+  border-color: var(--sea);
+  border-style: solid;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(16, 122, 134, 0.08);
+}
+
+.add-item:active {
+  transform: translateY(0);
+}
+
+.add-item svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+}
+
+/* Item row remove button */
+.item-row .rm {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  color: var(--coral);
+  transition: all 0.12s var(--ease-default);
+  cursor: pointer;
+}
+
+.item-row .rm:hover {
+  background: var(--coral-soft);
+  border-color: #e6b5a8;
+  transform: scale(1.05);
+}
+
+.item-row .rm:active {
+  transform: scale(0.97);
+}
+
+.item-row .rm svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+/* ============================================================
+   SECTION 30: RESPONSIVE ENHANCEMENTS
+   MERGE INTO existing @media blocks at end of file
+   ============================================================ */
+
+@media (max-width: 1080px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .calc-grid { grid-template-columns: 1fr; }
+  .result { position: static; }
+  .ai-wrap { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 80;
+    transform: translateX(-100%);
+    transition: transform 0.25s var(--ease-default);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: none; }
+  .hamburger { display: grid; }
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .stat-strip { grid-template-columns: 1fr 1fr; }
+  .search { width: auto; flex: 1; }
+  .content { padding: 18px; }
+  .topbar { padding: 12px 16px; }
+  .scrim-side {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 70;
+    display: none;
+    backdrop-filter: blur(2px);
+  }
+  .scrim-side.show { display: block; }
+  .form-grid { grid-template-columns: 1fr; }
+  .kanban { grid-template-columns: repeat(3, minmax(200px, 1fr)); }
+}
+
+@media (max-width: 520px) {
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .page-title b { font-size: 17px; }
+  .kanban { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+}
+
+/* Print styles (preserve existing) */
+@media print {
+  .sidebar, .topbar, .scrim-side { display: none !important; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 0 !important; max-width: none !important; }
+  body { background: #fff !important; }
+  .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+}
+
+/* ===== ACCOMMODATION MODULE ===== */
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.acc-card{padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);transition:transform .15s,box-shadow .2s,border-color .15s}
+.acc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:#d8d0bf}
+.acc-card .acc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.acc-card .acc-name{font-size:16px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.acc-card .acc-loc{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.acc-card .acc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:12px;margin:10px 0}
+.acc-card .acc-meta .k{color:var(--ink-soft)}.acc-card .acc-meta .v{font-weight:600}
+.acc-card .acc-amen{display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+.acc-card .acc-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.amenity-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--sea-soft);color:#0c5760}
+.pill.active{background:#e4ece6;color:#1b4d3e}
+.pill.maintenance{background:#fce8e6;color:#9e2a2b}
+.acc-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.acc-cal-grid .cell{padding:10px;border:1px solid var(--line);border-radius:8px;font-size:12px;min-height:80px}
+.acc-cal-grid .cell .dn{font-weight:700;margin-bottom:4px}
+.acc-cal-grid .cell .booked{background:#107a86;color:#fff;padding:2px 6px;border-radius:4px;font-size:11px;margin:2px 0}
+.acc-prop-strip{display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.acc-prop-item{display:flex;align-items:center;gap:6px;font-size:13px}
+.acc-prop-item .sw{width:12px;height:12px;border-radius:3px}
+@media(max-width:860px){.acc-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.acc-grid{grid-template-columns:1fr}}
+
+</style>
     </head>
     <body>
       ${body.innerHTML}
       <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
-    </body>
-    </html>
+    <\/body>
+    <\/html>
   `);
   printWindow.document.close();
 }
@@ -926,14 +3558,22 @@ function calc(){
   const pax=Math.max(parseInt(document.getElementById('calcGroupSize')?.value)||g("c_pax")||1,1);
   const withTax=base*(1+g("c_tax")/100),sell=withTax*(1+g("c_markup")/100);
   const gross=sell-base,net=sell-withTax,profitPct=sell?Math.round(net/sell*100):0;
+  var altType=touristType==="indian"?"foreigner":"indian";
+  var altLabel=touristType==="indian"?"Foreigner":"Indian";
+  var altCost="";
+  if(currentCalcTourId&&TOUR_COSTS[currentCalcTourId]){
+    var altPp=TOUR_COSTS[currentCalcTourId][altType];
+    altCost="<div class='res-row per-pax-box'><span>Per person ("+altLabel+")</span><b class='mono'>"+fmt(altPp)+"</b></div>";
+  }
   const r=document.getElementById("calcResult");if(!r)return;
   r.innerHTML="<h3>Costing summary</h3>"+
-    "<div class='res-row'><span>Total tour cost</span><b class='mono'>"+fmt(withTax)+"</b></div>"+
-    "<div class='res-row'><span>Cost per person</span><b class='mono'>"+fmt(withTax/pax)+"</b></div>"+
-    "<div class='res-row'><span>Selling price</span><b class='mono'>"+fmt(sell)+"</b></div>"+
+    "<div class='res-row'><span>Total tour cost</span><b class='mono' id='c_total'>"+fmt(withTax)+"</b></div>"+
+    "<div class='res-row'><span>Cost per person ("+touristType+")</span><b class='mono' id='c_per'>"+fmt(withTax/pax)+"</b></div>"+
+    altCost+
+    "<div class='res-row'><span>Selling price</span><b class='mono' id='c_sell'>"+fmt(sell)+"</b></div>"+
     "<div class='res-row'><span>Gross profit</span><b class='mono'>"+fmt(gross)+"</b></div>"+
-    "<div class='res-row'><span>Net profit</span><b class='mono'>"+fmt(net)+"</b></div>"+
-    "<div class='res-row big'><span>Price / person · "+profitPct+"% margin</span><b class='mono'>"+fmt(sell/pax)+"</b></div>"+
+    "<div class='res-row'><span>Net profit</span><b class='mono' id='c_net'>"+fmt(net)+"</b></div>"+
+    "<div class='res-row big'><span>Price / person · "+profitPct+"% margin</span><b class='mono' id='c_price'>"+fmt(sell/pax)+"</b></div>"+
     "<button class='btn btn-primary' onclick='generateQuotation()' style='margin-top:12px;width:100%'>"+
       "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>"+
       "Generate Quotation"+
@@ -958,7 +3598,7 @@ function addCostItem(){
 const LOGTABS=["Operations Board","Daily Activity","Vehicles","Drivers"];
 function viewLogistics(){
   return "<section class='view' id='v-logistics'>"+
-    "<div class='tabs' id='logTabs' style='margin-bottom:18px'>"+LOGTABS.map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='logTab' data-arg='\"+t+\"'>"+t+"</button>").join("")+"</div>"+
+    "<div class='tabs' id='logTabs' style='margin-bottom:18px'>"+LOGTABS.map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='logTab' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
     "<div id='logBody'></div>"+
   "</section>";
 }
@@ -968,13 +3608,13 @@ function renderLog(t="Operations Board"){
   if(t==="Vehicles"){
     b.innerHTML="<div class='section-head'><div class='h-sec'>Vehicles</div><button class='btn btn-primary btn-sm' onclick='openAddVehicle()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Vehicle</button></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Vehicle</th><th>Reg. No.</th><th>Type</th><th class='num'>Seats</th><th>Driver</th><th>Status</th><th></th></tr></thead><tbody>"+
-    vehicles.map(v=>"<tr><td class='strong'>"+v.name+"</td><td class='mono'>"+v.reg+"</td><td>"+v.type+"</td><td class='num mono'>"+v.cap+"</td><td>"+v.driver+"</td><td><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></td><td class='num'><div class='tbl-actions'><button class='edit-btn' data-action='editVehicle' data-arg='\"+v.name+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteVehicle' data-arg='\"+v.name+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
+    vehicles.map(v=>"<tr><td class='strong'>"+v.name+"</td><td class='mono'>"+v.reg+"</td><td>"+v.type+"</td><td class='num mono'>"+v.cap+"</td><td>"+v.driver+"</td><td><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></td><td class='num'><div class='tbl-actions'><button class='edit-btn' data-action='editVehicle' data-arg='"+v.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteVehicle' data-arg='"+v.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
     "</tbody></table></div></div>";
   }else if(t==="Drivers"){
     b.innerHTML="<div class='section-head'><div class='h-sec'>Drivers</div><button class='btn btn-primary btn-sm' onclick='openAddDriver()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Driver</button></div>"+
     "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px'>Each driver has a personal <b>access key</b> for the separate <b>Driver Log</b> app. They log in with their key and only their own trips are recorded — these appear here under Daily Activity.</p>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Driver</th><th>Contact</th><th>Assigned Vehicle</th><th>Assigned Tour</th><th>Driver Log key</th><th></th></tr></thead><tbody>"+
-    drivers.map(d=>{const k=driverKey(d.name);return "<tr><td class='strong'>"+d.name+"</td><td class='mono'>"+d.phone+"</td><td>"+d.veh+"</td><td>"+d.tour+"</td><td><span class='keytag'>"+k+"</span> <button class='copybtn' data-action='copyKey' data-arg='\"+k+\"'>Copy</button></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editDriver' data-arg='\"+d.name+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteDriver' data-arg='\"+d.name+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("")+
+    drivers.map(d=>{const k=driverKey(d.name);return "<tr><td class='strong'>"+d.name+"</td><td class='mono'>"+d.phone+"</td><td>"+d.veh+"</td><td>"+d.tour+"</td><td><span class='keytag'>"+k+"</span> <button class='copybtn' data-action='copyKey' data-arg='"+k+"'>Copy</button></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editDriver' data-arg='"+d.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteDriver' data-arg='"+d.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("")+
     "</tbody></table></div></div>";
   }else if(t==="Daily Activity"){
     tripLogs=loadLogs();
@@ -990,8 +3630,8 @@ function renderLog(t="Operations Board"){
       kpi("Vehicles active",activeVeh,"on the road","","M5 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0M3 13h13V6H3z")+
       kpi("Trips on record",tripLogs.length,"this device","","M9 11l3 3 8-8")+
     "</div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th></tr></thead><tbody>"+
-    rows.map(r=>"<tr><td class='strong'>"+new Date(r.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td></tr>").join("")||"<tr><td colspan='8' class='empty'>No trips logged yet.</td></tr>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th><th></th></tr></thead><tbody>"+
+    rows.map(r=>"<tr><td class='strong'>"+new Date(r.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='9' class='empty'>No trips logged yet.</td></tr>"+
     "</tbody></table></div></div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
   }else{
@@ -1000,8 +3640,9 @@ function renderLog(t="Operations Board"){
 `<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'>`+
   `<span class='mono'>${o.start}</span> → <span class='mono'>${o.end}</span>`+
 `</div>`+
-"<div class='op-rows'><span class='k'>Vehicle</span><span class='v'>"+o.veh+"</span><span class='k'>Driver</span><span class='v'>"+o.driver+"</span><span class='k'>Guide</span><span class='v'>"+o.guide+"</span><span class='k'>Pickup</span><span class='v'>"+o.pickup+"</span><span class='k'>Birding start</span><span class='v'>"+o.birding+"</span><span class='k'>Stay</span><span class='v'>"+o.stay+"</span></div><div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='\"+o.id+\"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='\"+o.id+\"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div></div>").join("")+"</div>";
+"<div class='op-rows'><span class='k'>Vehicle</span><span class='v'>"+o.veh+"</span><span class='k'>Driver</span><span class='v'>"+o.driver+"</span><span class='k'>Guide</span><span class='v'>"+o.guide+"</span><span class='k'>Pickup</span><span class='v'>"+o.pickup+"</span><span class='k'>Birding start</span><span class='v'>"+o.birding+"</span><span class='k'>Stay</span><span class='v'>"+o.stay+"</span></div><div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div></div>").join("")+"</div>";
   }
+  persistData();
 }
 function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+o.end+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle</label><input class='input' id='eo_veh' value='"+o.veh+"'></div><div class='field'><label>Driver</label><input class='input' id='eo_driver' value='"+o.driver+"'></div><div class='field'><label>Guide</label><input class='input' id='eo_guide' value='"+o.guide+"'></div><div class='field full'><label>Pickup</label><input class='input' id='eo_pickup' value='"+o.pickup+"'></div></div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
 function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=document.getElementById("eo_driver").value;o.guide=document.getElementById("eo_guide").value;o.pickup=document.getElementById("eo_pickup").value;closeModal();renderLog("Operations Board");}
@@ -1031,25 +3672,30 @@ function renderCRM(){
   const k=document.getElementById("kanban");if(!k)return;
   k.innerHTML=STAGES.map(([key,label])=>{const items=leads.filter(l=>l.stage===key);
     return "<div class='kcol'><h4>"+label+"<span class='ct'>"+items.length+"</span></h4>"+(items.map(l=>{const idx=STAGES.findIndex(s=>s[0]===l.stage);const prev=idx>0?STAGES[idx-1]:null,next=idx<STAGES.length-1?STAGES[idx+1]:null;
-      return "<div class='lead'><div class='ln'>"+l.name+"</div><div class='lc'>"+l.country+" · "+l.src+"</div><div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='\"+l.id+\",\"+prev[0]+\"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='\"+l.id+\",\"+next[0]+\"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='\"+l.id+\"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
+      return "<div class='lead'><div class='ln'>"+l.name+"</div><div class='lc'>"+l.country+" · "+l.src+"</div><div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='"+l.id+","+prev[0]+"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='"+l.id+","+next[0]+"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
+  persistData();
 }
 function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}
-function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();}
+function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();var dash=document.getElementById("v-dashboard");if(dash){dash.outerHTML=viewDashboard();}attachClickHandlers();}
 
 /* ===== CUSTOMERS ===== */
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
-    "<div class='section-head'><div class='h-sec'>Customer database</div><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody>"+
-    customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editCustomer' data-arg='\"+c.name+\"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='\"+c.name+\"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
-    "</tbody></table></div></div>"+
+    "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'><button class='btn btn-sea btn-sm' onclick='openCustomerSheet(\"\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open in Google Sheets</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
 }
+function renderCustomers(){
+  const b=document.getElementById("custBody");if(!b)return;
+  b.innerHTML=customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='openCustomerSheet' data-arg='"+c.name+"' title='Open in Sheets'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='6' class='empty'>No customers yet.</td></tr>";
+  persistData();
+}
 function editCustomer(name){const c=customers.find(x=>x.name===name);if(!c)return;modalForm("Edit customer","Update customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ec_name' value='"+c.name+"'></div><div class='field'><label>Country</label><input class='input' id='ec_country' value='"+c.country+"'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='ec_tours' value='"+c.tours+"'></div><div class='field'><label>Payment</label><select class='input' id='ec_pay'><option "+(c.pay==="Paid"?"selected":"")+">Paid</option><option "+(c.pay==="Balance due"?"selected":"")+">Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='ec_pref' value='"+c.pref+"'></div></div>","saveEditCustomer","Update");document.getElementById("modal").dataset.cname=name;}
-function saveEditCustomer(){const name=document.getElementById("modal").dataset.cname;const c=customers.find(x=>x.name===name);if(!c)return;c.name=document.getElementById("ec_name").value;c.country=document.getElementById("ec_country").value;c.tours=parseInt(document.getElementById("ec_tours").value)||0;c.pay=document.getElementById("ec_pay").value;c.pref=document.getElementById("ec_pref").value;closeModal();go("customers");}
-function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);go("customers");}
+function saveEditCustomer(){const name=document.getElementById("modal").dataset.cname;const c=customers.find(x=>x.name===name);if(!c)return;c.name=document.getElementById("ec_name").value;c.country=document.getElementById("ec_country").value;c.tours=parseInt(document.getElementById("ec_tours").value)||0;c.pay=document.getElementById("ec_pay").value;c.pref=document.getElementById("ec_pref").value;closeModal();renderCustomers();}
+function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();}
 function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
-function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();go("customers");}
+function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();renderCustomers();}
+function openCustomerSheet(name){var c=customers.find(function(x){return x.name===name;});if(!c)return;var url="https://docs.google.com/spreadsheets/create?title=Customer:+"+encodeURIComponent(c.name)+"&usp=sheets_web";window.open(url,"_blank");}
 
 /* ===== SOCIAL ===== */
 function viewSocial(){
@@ -1076,6 +3722,7 @@ function viewSocial(){
 function renderSocial(){
   const el=document.getElementById("socialPosts");if(!el)return;
   el.innerHTML=[...posts].sort((a,b)=>a.day-b.day).map(p=>"<div class='list-row'><div class='ic' style='background:"+p.color+"1a'><svg viewBox='0 0 24 24' fill='none' stroke='"+p.color+"' stroke-width='2'>"+platIcon[p.plat]+"</svg></div><div class='meta'><div class='t'>"+p.cap+"</div><div class='s'>"+p.type+" · "+p.plat[0].toUpperCase()+p.plat.slice(1)+"</div></div><span class='pill plain'>Jun "+p.day+"</span><div class='tbl-actions'><button class='edit-btn' data-action='editPost' data-arg='"+p.day+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deletePost' data-arg='"+p.day+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></div>").join("");
+  persistData();
 }
 function editPost(day){const p=posts.find(x=>x.day===day);if(!p)return;modalForm("Edit post","Update post","<div class='form-grid'><div class='field'><label>Platform</label><select class='input' id='ep_plat'>"+["instagram","youtube","facebook"].map(pl=>"<option value='"+pl+"' "+(pl===p.plat?"selected":"")+">"+pl[0].toUpperCase()+pl.slice(1)+"</option>").join("")+"</select></div><div class='field'><label>Type</label><select class='input' id='ep_type'>"+["Post","Reel","Video"].map(t=>"<option "+(t===p.type?"selected":"")+">"+t+"</option>").join("")+"</select></div><div class='field'><label>Day (June)</label><input class='input mono' type='number' id='ep_day' value='"+p.day+"' min='1' max='30'></div><div class='field full'><label>Caption</label><input class='input' id='ep_cap' value='"+p.cap+"'></div></div>","saveEditPost","Update");document.getElementById("modal").dataset.pday=day;}
 function saveEditPost(){const day=parseInt(document.getElementById("modal").dataset.pday);const p=posts.find(x=>x.day===day);if(!p)return;p.plat=document.getElementById("ep_plat").value;p.type=document.getElementById("ep_type").value;p.day=parseInt(document.getElementById("ep_day").value)||20;p.cap=document.getElementById("ep_cap").value;const colors={instagram:"#c13584",youtube:"#ff0000",facebook:"#1877f2"};p.color=colors[p.plat];closeModal();renderSocial();}
@@ -1086,7 +3733,7 @@ function viewAI(){
   return "<section class='view' id='v-ai'><div class='ai-wrap'>"+
     "<div class='card chat'>"+
       "<div class='chat-log' id='chatLog'><div class='msg bot'>Hi Sumit — I'm your ops co-pilot. I can draft quotations, emails and WhatsApp replies, build itineraries, summarise leads, and read your tour, booking and customer records. What do you need?</div></div>"+
-      "<div class='chips'>"+["Generate quotation","Draft email","Draft WhatsApp reply","Generate itinerary","Summarize leads","Analyze occupancy","Suggest pricing","Social caption"].map(c=>"<button class='chip' data-action='aiAct' data-arg='\"+c+\"'>"+c+"</button>").join("")+"</div>"+
+      "<div class='chips'>"+["Generate quotation","Draft email","Draft WhatsApp reply","Generate itinerary","Summarize leads","Analyze occupancy","Suggest pricing","Social caption"].map(c=>"<button class='chip' data-action='aiAct' data-arg='"+c+"'>"+c+"</button>").join("")+"</div>"+
       "<div class='chat-in'><input id='aiInput' placeholder='Ask anything about your tours, leads or finances…' onkeydown='if(event.key===\'Enter\')aiSend()'><button class='btn btn-primary' onclick='aiSend()'>Send</button></div>"+
     "</div>"+
     "<div class='card card-pad'><div class='eyebrow'>Context</div><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Records it can read</div>"+
@@ -1175,7 +3822,17 @@ function viewSettings(){
         "<tr><td>Sales desk</td><td><span class='pill plain'>Sales</span></td><td style='color:var(--ink-soft)'>CRM, Bookings</td></tr>"+
       "</tbody></table></div>"+
     "</div>"+
-  "</div></section>";
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Storage</div><div class='h-sec' style='margin-bottom:6px'>Data &amp; Backup</div>"+
+    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:640px'>All your tours, bookings, accommodation, leads and customers are saved automatically on <b>this device</b> (offline, in the browser). There is no cloud server yet, so data does not sync between devices on its own. To move data to another device — phone, laptop — export a backup here and import it there.</p>"+
+    "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
+      "<button class='btn btn-primary btn-sm' onclick='exportData()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export backup</button>"+
+      "<label class='btn btn-sea btn-sm' style='cursor:pointer'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 8l5-5 5 5M12 3v12'/></svg>Import backup<input type='file' accept='application/json,.json' style='display:none' onchange='importData(this)'></label>"+
+      "<button class='btn btn-ghost btn-sm' onclick='resetData()' style='color:var(--coral)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Reset to sample data</button>"+
+    "</div>"+
+  "</div>"+
+  "</section>";
 }
 
 /* ===== MODALS / FORMS ===== */
@@ -1201,7 +3858,7 @@ function saveTour(){
   const name=document.getElementById("nt_name").value.trim();
   const start=document.getElementById("nt_start").value,end=document.getElementById("nt_end").value;
   if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
-  tours.push({id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:end,
+  tours.push({id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
     guide:document.getElementById("nt_guide").value||"—",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—"});
   closeModal();renderTours();renderCalendar();
@@ -1209,8 +3866,13 @@ function saveTour(){
 
 function openAddBooking(tourId){
   const tOpts=tours.map(t=>"<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+t.name+"</option>").join("");
+  const defTour=tours.find(t=>t.id===tourId);
+  const defStart=defTour?defTour.start:"2026-06-18";
+  const defEnd=defTour?defTour.end:"2026-06-23";
   modalForm("New booking","Add a booking","<div class='form-grid'>"+
     "<div class='field full'><label>Tour</label><select class='input' id='nb_tour'>"+tOpts+"</select></div>"+
+    "<div class='field'><label>Start date</label><input class='input' type='date' id='nb_start' value='"+defStart+"'></div>"+
+    "<div class='field'><label>End date</label><input class='input' type='date' id='nb_end' value='"+defEnd+"'></div>"+
     "<div class='field'><label>Guest name</label><input class='input' id='nb_guest' placeholder='Full name'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='nb_party' value='2'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
@@ -1222,9 +3884,12 @@ function saveBooking(){
   const guest=document.getElementById("nb_guest").value.trim();
   if(!guest){alert("Enter a guest name.");return;}
   const tour=document.getElementById("nb_tour").value;
+  const start=document.getElementById("nb_start").value;
+  const end=document.getElementById("nb_end").value;
+  if(!start||!end||end<start){alert("Enter valid start and end dates.");return;}
   bookings.push({id:"B"+Date.now(),tour,guest,party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
     country:document.getElementById("nb_country").value||"—",status:"Confirmed",pay:document.getElementById("nb_pay").value,
-    notes:document.getElementById("nb_notes").value||""});
+    notes:document.getElementById("nb_notes").value||"",start:start,end:end});
   closeModal();renderBookings();renderTours();renderCalendar();
 }
 
@@ -1276,8 +3941,8 @@ function openTour(id){
         "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Birding start</span><br><b>"+t.startLoc+"</b></div>"+
         "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+"</div>"+
       "</div>"+
-      "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='\"+id+\"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
-      "<div class='tbl-wrap'><table><tbody>"+bs.map(x=>"<tr><td class='strong'>"+x.guest+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+" pax</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td></tr>").join("")||"<tr><td class='empty'>No bookings yet.</td></tr>"+"</tbody></table></div>"+
+      "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='"+id+"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th></tr></thead><tbody>"+bs.map(x=>"<tr><td class='strong'>"+x.guest+"</td><td>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td></tr>").join("")||"<tr><td colspan='5' class='empty'>No bookings yet.</td></tr>"+"</tbody></table></div>"+
       (wl.length?"<div class='h-sec' style='font-size:14px;margin:16px 0 6px'>Waitlist</div>"+wl.map(w=>"<div class='list-row'><div class='meta'><div class='t'>"+w.guest+"</div></div><span class='pill plain'>"+w.party+" pax</span></div>").join(""):
 "")+
     "</div>";
@@ -1322,13 +3987,33 @@ function saveDriverLog(){
   tripLogs.push({id:"TR"+Date.now(),date:document.getElementById("dl_date").value||todayISO,veh,driver:document.getElementById("dl_driver").value||"—",startKm:start,endKm:end,totalKm:end-start,loc:document.getElementById("dl_loc").value||"—",time:dur||"—",startT:document.getElementById("dl_start_t").value||"",endT:document.getElementById("dl_end_t").value||""});
   saveLogs();closeModal();go("logistics");logTab("Daily Activity");
 }
+function editTrip(id){
+  var tr=tripLogs.find(function(x){return x.id===id;});if(!tr)return;
+  var vehOpts=vehicles.map(function(v){return"<option value='"+v.name+"' "+(v.name===tr.veh?"selected":"")+">"+v.name+"</option>";}).join("");
+  modalForm("Edit trip","Update trip record","<div class='form-grid'><div class='field'><label>Date</label><input class='input' type='date' id='et_date' value='"+tr.date+"'></div><div class='field'><label>Vehicle</label><select class='input' id='et_veh'>"+vehOpts+"</select></div><div class='field'><label>Driver</label><input class='input' id='et_driver' value='"+tr.driver+"'></div><div class='field'><label>Start km</label><input class='input mono' type='number' id='et_startKm' value='"+tr.startKm+"'></div><div class='field'><label>End km</label><input class='input mono' type='number' id='et_endKm' value='"+tr.endKm+"'></div><div class='field'><label>Total km</label><input class='input mono' type='number' id='et_totalKm' value='"+tr.totalKm+"'></div><div class='field full'><label>Location</label><input class='input' id='et_loc' value='"+tr.loc+"'></div><div class='field'><label>Time</label><input class='input' id='et_time' value='"+tr.time+"'></div></div>","saveEditTrip","Update");
+  document.getElementById("modal").dataset.trid=id;
+}
+function saveEditTrip(){
+  var id=document.getElementById("modal").dataset.trid;
+  var tr=tripLogs.find(function(x){return x.id===id;});if(!tr)return;
+  tr.date=document.getElementById("et_date").value;
+  tr.veh=document.getElementById("et_veh").value;
+  tr.driver=document.getElementById("et_driver").value;
+  tr.startKm=parseFloat(document.getElementById("et_startKm").value)||0;
+  tr.endKm=parseFloat(document.getElementById("et_endKm").value)||0;
+  tr.totalKm=parseFloat(document.getElementById("et_totalKm").value)||0;
+  tr.loc=document.getElementById("et_loc").value;
+  tr.time=document.getElementById("et_time").value;
+  saveLogs();closeModal();renderLog("Daily Activity");
+}
+function deleteTrip(id){if(!confirm("Delete this trip record?"))return;tripLogs=tripLogs.filter(function(x){return x.id!==id;});saveLogs();renderLog("Daily Activity");}
 
 /* ===== BOOT ===== */
 function boot(){
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewCalc(),viewLogistics(),viewCRM(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   go("dashboard");
-  renderTours();renderCalendar();renderBookings();calc();renderLog();renderCRM();renderSocial();
+  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();
