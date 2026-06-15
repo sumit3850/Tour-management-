@@ -119,6 +119,12 @@ td{vertical-align:middle}
 .tour-col .tour-card:last-child{margin-bottom:0}
 .rate-card{background:var(--sea-soft);border:1px solid var(--sea);border-radius:12px;padding:12px 14px;margin-bottom:14px}
 .rate-card-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--sea);font-weight:700;margin-bottom:6px}
+.calc-sub{font-size:12.5px;color:var(--ink-soft);margin:-4px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+.tourist-toggle{display:flex;gap:6px}
+.acc-avail{display:flex;align-items:center;gap:8px;font-size:12px;margin:2px 0 4px}
+.acc-avail .bar{flex:1;height:7px;border-radius:5px;background:var(--line);overflow:hidden}
+.acc-avail .bar span{display:block;height:100%;background:var(--sea)}
+.acc-avail .num{font-weight:700;color:var(--ink);white-space:nowrap}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -418,6 +424,10 @@ const DEFAULT_COSTS={
   T5:{indian:{accommodation:0,vehicle:2500,ferry:0,food:1200,guide:4500,entry:800},foreigner:{accommodation:0,vehicle:2500,ferry:0,food:1200,guide:4500,entry:1500}},
   T6:{indian:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:800},foreigner:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:1500}},
 };
+/* ===== Real costing data imported from the Birding Tour Expense Calculator sheet ===== */
+const SHEET_DATA={"T1":{"title":"South Andaman Endemic Birding Tour (5 Nights_15.05.2026_Update)","indian":{"1":{"rooms":1,"nights":5,"ship":0,"accommodation":27500,"vehicle":27500,"guide":15000,"entry":600,"food":6500,"total":77100,"perPerson":77100},"2":{"rooms":1,"nights":5,"ship":0,"accommodation":27500,"vehicle":27500,"guide":15000,"entry":1200,"food":13000,"total":84200,"perPerson":42100},"3":{"rooms":2,"nights":5,"ship":0,"accommodation":55000,"vehicle":27500,"guide":15000,"entry":1800,"food":19500,"total":118800,"perPerson":39600},"4":{"rooms":2,"nights":5,"ship":0,"accommodation":55000,"vehicle":27500,"guide":15000,"entry":2400,"food":26000,"total":125900,"perPerson":31500},"5":{"rooms":3,"nights":5,"ship":0,"accommodation":82500,"vehicle":27500,"guide":15000,"entry":3000,"food":32500,"total":160500,"perPerson":32100},"6":{"rooms":3,"nights":5,"ship":0,"accommodation":82500,"vehicle":55000,"guide":15000,"entry":3600,"food":39000,"total":195100,"perPerson":32500},"7":{"rooms":4,"nights":5,"ship":0,"accommodation":110000,"vehicle":55000,"guide":15000,"entry":4200,"food":45500,"total":229700,"perPerson":32800},"8":{"rooms":4,"nights":5,"ship":0,"accommodation":110000,"vehicle":55000,"guide":15000,"entry":4800,"food":52000,"total":236800,"perPerson":29600},"9":{"rooms":5,"nights":5,"ship":0,"accommodation":137500,"vehicle":55000,"guide":15000,"entry":5400,"food":58500,"total":271400,"perPerson":30200},"10":{"rooms":5,"nights":5,"ship":0,"accommodation":137500,"vehicle":55000,"guide":15000,"entry":6000,"food":65000,"total":278500,"perPerson":27900}},"foreign":{"1":{"rooms":1,"nights":5,"ship":0,"accommodation":32500,"vehicle":30000,"guide":15000,"entry":1500,"food":9000,"total":88000,"perPerson":88000},"2":{"rooms":1,"nights":5,"ship":0,"accommodation":32500,"vehicle":30000,"guide":15000,"entry":3000,"food":18000,"total":98500,"perPerson":49300},"3":{"rooms":2,"nights":5,"ship":0,"accommodation":65000,"vehicle":30000,"guide":15000,"entry":4500,"food":27000,"total":141500,"perPerson":47200},"4":{"rooms":2,"nights":5,"ship":0,"accommodation":65000,"vehicle":30000,"guide":15000,"entry":6000,"food":36000,"total":152000,"perPerson":38000},"5":{"rooms":3,"nights":5,"ship":0,"accommodation":97500,"vehicle":30000,"guide":15000,"entry":7500,"food":45000,"total":195000,"perPerson":39000},"6":{"rooms":3,"nights":5,"ship":0,"accommodation":97500,"vehicle":50000,"guide":25000,"entry":9000,"food":54000,"total":235500,"perPerson":39300},"7":{"rooms":4,"nights":5,"ship":0,"accommodation":130000,"vehicle":50000,"guide":25000,"entry":10500,"food":63000,"total":278500,"perPerson":39800},"8":{"rooms":4,"nights":5,"ship":0,"accommodation":130000,"vehicle":50000,"guide":25000,"entry":12000,"food":72000,"total":289000,"perPerson":36100},"9":{"rooms":5,"nights":5,"ship":0,"accommodation":162500,"vehicle":50000,"guide":25000,"entry":13500,"food":81000,"total":332000,"perPerson":36900},"10":{"rooms":5,"nights":5,"ship":0,"accommodation":162500,"vehicle":50000,"guide":25000,"entry":15000,"food":90000,"total":342500,"perPerson":34300}}},"T3":{"title":"South and Little Andaman Endemic Birding Tour (7 Nights_08th April_Update)","indian":{"1":{"rooms":1,"nights":7,"ship":8100,"accommodation":31000,"vehicle":37000,"guide":21000,"entry":600,"food":7000,"total":104700,"perPerson":104700},"2":{"rooms":1,"nights":7,"ship":16200,"accommodation":31000,"vehicle":37000,"guide":21000,"entry":1200,"food":14000,"total":120400,"perPerson":60200},"3":{"rooms":2,"nights":7,"ship":24300,"accommodation":62000,"vehicle":37000,"guide":21000,"entry":1800,"food":21000,"total":167100,"perPerson":55700},"4":{"rooms":2,"nights":7,"ship":32400,"accommodation":62000,"vehicle":37000,"guide":21000,"entry":2400,"food":28000,"total":182800,"perPerson":45700},"5":{"rooms":3,"nights":7,"ship":40500,"accommodation":93000,"vehicle":37000,"guide":21000,"entry":3000,"food":35000,"total":229500,"perPerson":45900},"6":{"rooms":3,"nights":7,"ship":48600,"accommodation":93000,"vehicle":64000,"guide":21000,"entry":3600,"food":42000,"total":272200,"perPerson":45400},"7":{"rooms":4,"nights":7,"ship":56700,"accommodation":124000,"vehicle":64000,"guide":21000,"entry":4200,"food":49000,"total":318900,"perPerson":45600},"8":{"rooms":4,"nights":7,"ship":64800,"accommodation":124000,"vehicle":64000,"guide":21000,"entry":4800,"food":56000,"total":334600,"perPerson":41800},"9":{"rooms":5,"nights":7,"ship":72900,"accommodation":155000,"vehicle":64000,"guide":21000,"entry":5400,"food":63000,"total":381300,"perPerson":42400},"10":{"rooms":5,"nights":7,"ship":81000,"accommodation":155000,"vehicle":64000,"guide":21000,"entry":6000,"food":70000,"total":397000,"perPerson":39700}},"foreign":{"1":{"rooms":1,"nights":7,"ship":10520,"accommodation":48500,"vehicle":45500,"guide":24500,"entry":1000,"food":10500,"total":140520,"perPerson":140500},"2":{"rooms":1,"nights":7,"ship":19250,"accommodation":48500,"vehicle":45500,"guide":24500,"entry":2000,"food":21000,"total":160750,"perPerson":80400},"3":{"rooms":2,"nights":7,"ship":27980,"accommodation":97000,"vehicle":45500,"guide":24500,"entry":3000,"food":31500,"total":229480,"perPerson":76500},"4":{"rooms":2,"nights":7,"ship":36710,"accommodation":97000,"vehicle":45500,"guide":24500,"entry":4000,"food":42000,"total":249710,"perPerson":62400},"5":{"rooms":3,"nights":7,"ship":45440,"accommodation":145500,"vehicle":45500,"guide":24500,"entry":5000,"food":52500,"total":318440,"perPerson":63700},"6":{"rooms":3,"nights":7,"ship":54170,"accommodation":145500,"vehicle":64000,"guide":24500,"entry":6000,"food":63000,"total":357170,"perPerson":59500},"7":{"rooms":4,"nights":7,"ship":62900,"accommodation":194000,"vehicle":64000,"guide":24500,"entry":7000,"food":73500,"total":425900,"perPerson":60800},"8":{"rooms":4,"nights":7,"ship":71630,"accommodation":194000,"vehicle":64000,"guide":24500,"entry":8000,"food":84000,"total":446130,"perPerson":55800},"9":{"rooms":5,"nights":7,"ship":80360,"accommodation":242500,"vehicle":64000,"guide":24500,"entry":9000,"food":94500,"total":514860,"perPerson":57200},"10":{"rooms":5,"nights":7,"ship":89090,"accommodation":242500,"vehicle":64000,"guide":24500,"entry":10000,"food":105000,"total":535090,"perPerson":53500}}},"T4":{"title":"South and Little Andaman Endemic Birding Tour (8 Nights_08th April_Update)","indian":{"1":{"rooms":1,"nights":8,"ship":8100,"accommodation":34000,"vehicle":40000,"guide":24000,"entry":1000,"food":8000,"total":115100,"perPerson":115100},"2":{"rooms":1,"nights":8,"ship":16200,"accommodation":34000,"vehicle":40000,"guide":24000,"entry":2000,"food":16000,"total":132200,"perPerson":66100},"3":{"rooms":2,"nights":8,"ship":24300,"accommodation":68000,"vehicle":40000,"guide":24000,"entry":3000,"food":24000,"total":183300,"perPerson":61100},"4":{"rooms":2,"nights":8,"ship":32400,"accommodation":68000,"vehicle":40000,"guide":24000,"entry":4000,"food":32000,"total":200400,"perPerson":50100},"5":{"rooms":3,"nights":8,"ship":40500,"accommodation":102000,"vehicle":40000,"guide":24000,"entry":5000,"food":40000,"total":251500,"perPerson":50300},"6":{"rooms":3,"nights":8,"ship":48600,"accommodation":102000,"vehicle":72000,"guide":24000,"entry":6000,"food":48000,"total":300600,"perPerson":50100},"7":{"rooms":4,"nights":8,"ship":56700,"accommodation":136000,"vehicle":72000,"guide":24000,"entry":7000,"food":56000,"total":351700,"perPerson":50200},"8":{"rooms":4,"nights":8,"ship":64800,"accommodation":136000,"vehicle":72000,"guide":24000,"entry":8000,"food":64000,"total":368800,"perPerson":46100},"9":{"rooms":5,"nights":8,"ship":72900,"accommodation":170000,"vehicle":72000,"guide":24000,"entry":9000,"food":72000,"total":419900,"perPerson":46700},"10":{"rooms":5,"nights":8,"ship":81000,"accommodation":170000,"vehicle":72000,"guide":24000,"entry":10000,"food":80000,"total":437000,"perPerson":43700}},"foreign":{"1":{"rooms":1,"nights":8,"ship":10520,"accommodation":40000,"vehicle":50000,"guide":28000,"entry":1000,"food":13000,"total":142520,"perPerson":142500},"2":{"rooms":1,"nights":8,"ship":19250,"accommodation":52000,"vehicle":50000,"guide":28000,"entry":2000,"food":25000,"total":176250,"perPerson":88100},"3":{"rooms":2,"nights":8,"ship":27980,"accommodation":104000,"vehicle":50000,"guide":28000,"entry":3000,"food":37000,"total":249980,"perPerson":83300},"4":{"rooms":2,"nights":8,"ship":36710,"accommodation":104000,"vehicle":50000,"guide":28000,"entry":4000,"food":49000,"total":271710,"perPerson":67900},"5":{"rooms":3,"nights":8,"ship":45440,"accommodation":156000,"vehicle":50000,"guide":40000,"entry":5000,"food":61000,"total":357440,"perPerson":71500},"6":{"rooms":3,"nights":8,"ship":54170,"accommodation":156000,"vehicle":72000,"guide":40000,"entry":6000,"food":73000,"total":401170,"perPerson":66900},"7":{"rooms":4,"nights":8,"ship":62900,"accommodation":208000,"vehicle":72000,"guide":40000,"entry":7000,"food":85000,"total":474900,"perPerson":67800},"8":{"rooms":4,"nights":8,"ship":71630,"accommodation":208000,"vehicle":72000,"guide":40000,"entry":8000,"food":97000,"total":496630,"perPerson":62100},"9":{"rooms":5,"nights":8,"ship":80360,"accommodation":260000,"vehicle":72000,"guide":40000,"entry":9000,"food":109000,"total":570360,"perPerson":63400},"10":{"rooms":5,"nights":8,"ship":89090,"accommodation":260000,"vehicle":72000,"guide":40000,"entry":10000,"food":121000,"total":592090,"perPerson":59200}}},"T2":{"title":"Great Nicobar Endemic Birding Tour (12 Nights_06th June_Update)","indian":{"1":{"rooms":1,"nights":10,"ship":20300,"accommodation":49000,"vehicle":58000,"guide":50000,"entry":1000,"food":16000,"total":194300,"perPerson":194300},"2":{"rooms":1,"nights":10,"ship":32800,"accommodation":59000,"vehicle":58000,"guide":66000,"entry":3000,"food":31000,"total":249800,"perPerson":124900},"3":{"rooms":2,"nights":10,"ship":45300,"accommodation":118000,"vehicle":58000,"guide":74000,"entry":3000,"food":46000,"total":344300,"perPerson":114800},"4":{"rooms":2,"nights":10,"ship":57800,"accommodation":118000,"vehicle":58000,"guide":82000,"entry":3000,"food":61000,"total":379800,"perPerson":95000},"5":{"rooms":3,"nights":10,"ship":70300,"accommodation":165000,"vehicle":58000,"guide":82000,"entry":3000,"food":76000,"total":454300,"perPerson":90900},"6":{"rooms":3,"nights":10,"ship":82800,"accommodation":165000,"vehicle":82000,"guide":90000,"entry":4000,"food":91000,"total":514800,"perPerson":85800},"7":{"rooms":4,"nights":10,"ship":95300,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":106000,"total":597300,"perPerson":85300},"8":{"rooms":4,"nights":10,"ship":107800,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":121000,"total":624800,"perPerson":78100},"9":{"rooms":5,"nights":10,"ship":120300,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":136000,"total":707300,"perPerson":78600},"10":{"rooms":5,"nights":10,"ship":132800,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":151000,"total":734800,"perPerson":73500}},"foreign":{"1":{"rooms":1,"nights":10,"ship":20300,"accommodation":49000,"vehicle":58000,"guide":50000,"entry":1000,"food":16000,"total":194300,"perPerson":194300},"2":{"rooms":1,"nights":10,"ship":32800,"accommodation":59000,"vehicle":58000,"guide":66000,"entry":3000,"food":31000,"total":249800,"perPerson":124900},"3":{"rooms":2,"nights":10,"ship":45300,"accommodation":118000,"vehicle":58000,"guide":74000,"entry":3000,"food":46000,"total":344300,"perPerson":114800},"4":{"rooms":2,"nights":10,"ship":57800,"accommodation":118000,"vehicle":58000,"guide":82000,"entry":3000,"food":61000,"total":379800,"perPerson":95000},"5":{"rooms":3,"nights":10,"ship":70300,"accommodation":165000,"vehicle":58000,"guide":82000,"entry":3000,"food":76000,"total":454300,"perPerson":90900},"6":{"rooms":3,"nights":10,"ship":82800,"accommodation":165000,"vehicle":82000,"guide":90000,"entry":4000,"food":91000,"total":514800,"perPerson":85800},"7":{"rooms":4,"nights":10,"ship":95300,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":106000,"total":597300,"perPerson":85300},"8":{"rooms":4,"nights":10,"ship":107800,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":121000,"total":624800,"perPerson":78100},"9":{"rooms":5,"nights":10,"ship":120300,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":136000,"total":707300,"perPerson":78600},"10":{"rooms":5,"nights":10,"ship":132800,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":151000,"total":734800,"perPerson":73500}}}};
+const CALC_ORDER=["T1","T3","T4","T2"];
+const CALC_LABELS={T1:"South Andaman Endemic · 5N",T3:"South & Little Andaman · 7N",T4:"South & Little Andaman · 8N",T2:"Great Nicobar Endemic · 12N"};
 var touristType="indian";
 var currentCalcTourId="";
 let bookings=[
@@ -438,10 +448,10 @@ function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
 function bookingPaymentStatus(b){var pend=bookingPending(b);if(pend<=0)return"Fully Paid";if(bookingDeposit(b)>0)return"Partial";return"Unpaid";}
 function bookingPaymentStatusClass(b){var s=bookingPaymentStatus(b);return s==="Fully Paid"?"completed":s==="Partial"?"open":"full";}
 let accommodations=[
-  {id:"acc-1",name:"Wild Grass Resort",location:"Chidiya Tapu",type:"Eco Resort",rooms:12,amenities:["AC","Restaurant","WiFi"],status:"Active",notes:"Birders' favourite"},
-  {id:"acc-2",name:"SeaShell Neil",location:"Neil Island",type:"Beach Resort",rooms:18,amenities:["AC","Pool","Restaurant","WiFi"],status:"Active",notes:"Premium property"},
-  {id:"acc-3",name:"Bamboo Flat Lodge",location:"Bamboo Flat",type:"Budget Lodge",rooms:8,amenities:["Fan","Restaurant"],status:"Active",notes:"Close to ferry"},
-  {id:"acc-4",name:"Dolphin Resort Havelock",location:"Havelock",type:"Govt Resort",rooms:20,amenities:["AC","Restaurant","Beach Access"],status:"Maintenance",notes:"Renovation till July"}
+  {id:"acc-1",name:"Wild Grass Resort",location:"Chidiya Tapu",type:"Eco Resort",rooms:12,available:5,amenities:["AC","Restaurant","WiFi"],status:"Active",notes:"Birders' favourite"},
+  {id:"acc-2",name:"SeaShell Neil",location:"Neil Island",type:"Beach Resort",rooms:18,available:10,amenities:["AC","Pool","Restaurant","WiFi"],status:"Active",notes:"Premium property"},
+  {id:"acc-3",name:"Bamboo Flat Lodge",location:"Bamboo Flat",type:"Budget Lodge",rooms:8,available:8,amenities:["Fan","Restaurant"],status:"Active",notes:"Close to ferry"},
+  {id:"acc-4",name:"Dolphin Resort Havelock",location:"Havelock",type:"Govt Resort",rooms:20,available:0,amenities:["AC","Restaurant","Beach Access"],status:"Maintenance",notes:"Renovation till July"}
 ];
 const waitlist={T4:[{guest:"M. Costa",party:2}]};
 let leads=[
@@ -751,8 +761,9 @@ function renderAccommodation(){
       "</div>"+
       "<div class='acc-meta'>"+
         "<div><span class='k'>Type</span><br><span class='v'>"+a.type+"</span></div>"+
-        "<div><span class='k'>Rooms</span><br><span class='v'>"+a.rooms+"</span></div>"+
+        "<div><span class='k'>Total rooms</span><br><span class='v'>"+a.rooms+"</span></div>"+
       "</div>"+
+      (function(){var avail=(a.available==null?a.rooms:a.available);var pct=a.rooms?Math.round(avail/a.rooms*100):0;return "<div class='acc-avail'><span class='num' style='color:"+(avail>0?'var(--forest)':'var(--coral)')+"'>"+avail+" / "+a.rooms+" available</span><span class='bar'><span style='width:"+pct+"%;background:"+(avail>0?'var(--sea)':'var(--coral)')+"'></span></span></div>";})()+
       "<div class='acc-amen'>"+a.amenities.map(function(am){return"<span class='amenity-pill'>"+am+"</span>";}).join("")+"</div>"+
       "<div class='acc-foot'>"+
         "<span class='note'>"+a.notes+"</span>"+
@@ -786,17 +797,19 @@ function renderAccCalendar(){
   persistData();
 }
 function openAddAccommodation(){
-  modalForm("New property","Add property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='na_name' placeholder='Resort name'></div><div class='field'><label>Location</label><input class='input' id='na_loc' placeholder='e.g. Chidiya Tapu'></div><div class='field'><label>Type</label><select class='input' id='na_type'><option>Eco Resort</option><option>Beach Resort</option><option>Budget Lodge</option><option>Govt Resort</option><option>Homestay</option></select></div><div class='field'><label>Rooms</label><input class='input mono' type='number' id='na_rooms' value='10' min='1'></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='na_amen' placeholder='AC, Restaurant, WiFi'></div><div class='field full'><label>Notes</label><input class='input' id='na_notes' placeholder='Special notes'></div></div>","saveNewAccommodation","Add property");
+  modalForm("New property","Add property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='na_name' placeholder='Resort name'></div><div class='field'><label>Location</label><input class='input' id='na_loc' placeholder='e.g. Chidiya Tapu'></div><div class='field'><label>Type</label><select class='input' id='na_type'><option>Eco Resort</option><option>Beach Resort</option><option>Budget Lodge</option><option>Govt Resort</option><option>Homestay</option></select></div><div class='field'><label>Total rooms</label><input class='input mono' type='number' id='na_rooms' value='10' min='1'></div><div class='field'><label>Rooms available</label><input class='input mono' type='number' id='na_avail' value='10' min='0'></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='na_amen' placeholder='AC, Restaurant, WiFi'></div><div class='field full'><label>Notes</label><input class='input' id='na_notes' placeholder='Special notes'></div></div>","saveNewAccommodation","Add property");
 }
 function saveNewAccommodation(){
   var name=document.getElementById("na_name").value||"New Property";
   var amenities=(document.getElementById("na_amen").value||"").split(",").map(function(s){return s.trim();}).filter(function(s){return s;});
-  accommodations.push({id:"acc-"+Date.now(),name:name,location:document.getElementById("na_loc").value||"—",type:document.getElementById("na_type").value,rooms:parseInt(document.getElementById("na_rooms").value)||1,amenities:amenities,status:"Active",notes:document.getElementById("na_notes").value||"—"});
+  var rooms=parseInt(document.getElementById("na_rooms").value)||1;
+  var avail=document.getElementById("na_avail")?Math.min(parseInt(document.getElementById("na_avail").value)||0,rooms):rooms;
+  accommodations.push({id:"acc-"+Date.now(),name:name,location:document.getElementById("na_loc").value||"—",type:document.getElementById("na_type").value,rooms:rooms,available:avail,amenities:amenities,status:"Active",notes:document.getElementById("na_notes").value||"—"});
   closeModal();renderAccommodation();
 }
 function editAccommodation(id){
   var a=accommodations.find(function(x){return x.id===id;});if(!a)return;
-  modalForm("Edit property","Update property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='ea_name' value='"+a.name+"'></div><div class='field'><label>Location</label><input class='input' id='ea_loc' value='"+a.location+"'></div><div class='field'><label>Type</label><select class='input' id='ea_type'>"+["Eco Resort","Beach Resort","Budget Lodge","Govt Resort","Homestay"].map(function(t){return"<option "+(t===a.type?"selected":"")+">"+t+"</option>";}).join("")+"</select></div><div class='field'><label>Rooms</label><input class='input mono' type='number' id='ea_rooms' value='"+a.rooms+"' min='1'></div><div class='field'><label>Status</label><select class='input' id='ea_status'><option "+(a.status==="Active"?"selected":"")+">Active</option><option "+(a.status==="Maintenance"?"selected":"")+">Maintenance</option></select></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='ea_amen' value='"+a.amenities.join(", ")+"'></div><div class='field full'><label>Notes</label><input class='input' id='ea_notes' value='"+a.notes+"'></div></div>","saveEditAccommodation","Update");
+  modalForm("Edit property","Update property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='ea_name' value='"+a.name+"'></div><div class='field'><label>Location</label><input class='input' id='ea_loc' value='"+a.location+"'></div><div class='field'><label>Type</label><select class='input' id='ea_type'>"+["Eco Resort","Beach Resort","Budget Lodge","Govt Resort","Homestay"].map(function(t){return"<option "+(t===a.type?"selected":"")+">"+t+"</option>";}).join("")+"</select></div><div class='field'><label>Total rooms</label><input class='input mono' type='number' id='ea_rooms' value='"+a.rooms+"' min='1'></div><div class='field'><label>Rooms available</label><input class='input mono' type='number' id='ea_avail' value='"+(a.available==null?a.rooms:a.available)+"' min='0'></div><div class='field'><label>Status</label><select class='input' id='ea_status'><option "+(a.status==="Active"?"selected":"")+">Active</option><option "+(a.status==="Maintenance"?"selected":"")+">Maintenance</option></select></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='ea_amen' value='"+a.amenities.join(", ")+"'></div><div class='field full'><label>Notes</label><input class='input' id='ea_notes' value='"+a.notes+"'></div></div>","saveEditAccommodation","Update");
   document.getElementById("modal").dataset.aid=id;
 }
 function saveEditAccommodation(){
@@ -806,6 +819,7 @@ function saveEditAccommodation(){
   a.location=document.getElementById("ea_loc").value;
   a.type=document.getElementById("ea_type").value;
   a.rooms=parseInt(document.getElementById("ea_rooms").value)||1;
+  if(document.getElementById("ea_avail"))a.available=Math.min(parseInt(document.getElementById("ea_avail").value)||0,a.rooms);
   a.status=document.getElementById("ea_status").value;
   a.amenities=(document.getElementById("ea_amen").value||"").split(",").map(function(s){return s.trim();}).filter(function(s){return s;});
   a.notes=document.getElementById("ea_notes").value;
@@ -876,6 +890,7 @@ function renderView(v){
   else if(v==="crm")renderCRM();
   else if(v==="logistics")renderLog();
   else if(v==="social")renderSocial();
+  else if(v==="calc")calc();
   else if(v==="dashboard")refreshDashboard();
 }
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
@@ -1057,96 +1072,42 @@ function deleteBooking(id){if(!confirm("Delete this booking?"))return;bookings=b
 
 /* ===== CALCULATOR ===== */
 function viewCalc(){
-  const defaultCosts=[
-    {name:'Accommodation',val:48000},{name:'Vehicle',val:22000},{name:'Driver',val:9000},
-    {name:'Ferry',val:7000},{name:'Boat',val:12000},{name:'Guide fees',val:25000},
-    {name:'Entry permits',val:6000},{name:'Food',val:18000},{name:'Fuel',val:8000},
-    {name:'Miscellaneous',val:5000}
-  ];
-  const groupOpts=[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>"<option value='"+n+"' "+(n===6?"selected":"")+">"+n+" pax</option>").join("");
+  if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
+  const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"' "+(k===currentCalcTourId?"selected":"")+">"+CALC_LABELS[k]+"</option>";}).join("");
+  const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
   return "<section class='view' id='v-calc'><div class='calc-grid'>"+
     "<div class='card card-pad'>"+
-      "<div class='sheet-link'><svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='#0c656f' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Link to <span class='ok'>Google Sheet 'Andaman Costing 2026'</span>"+
-        "<button onclick='linkSheet()'>Link Sheet</button></div>"+
+      "<div class='eyebrow'>From your costing sheet</div><div class='h-sec' style='margin-bottom:14px'>Tour cost lookup</div>"+
       "<div class='cost-grid'>"+
-        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Tour preset</legend><div class='cost-grid'>"+
-          "<div class='field'><label>Tour category</label><select class='input' id='calcCategory' onchange='applyCategoryRates()'><option value=''>Select a tour...</option>"+Object.keys(TOUR_RATES).map(c=>"<option value='"+c+"'>"+c+"</option>").join("")+"<option value='Custom'>Custom</option></select></div>"+
-          "<div class='field'><label>Group size</label><select class='input mono' id='calcGroupSize' onchange='calc()'>"+groupOpts+"</select></div>"+
-        "</div></fieldset>"+
-        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Per-tour costs</legend><div class='cost-grid' id='costItems'>"+
-          defaultCosts.map((it,i)=>costRow(it.name,it.val,i)).join('')+
-        "</div></fieldset>"+
-        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Custom items</legend><div id='customItems'></div>"+
-          "<button class='add-item' onclick='addCostItem()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add cost item</button></fieldset>"+
-        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Tourist Type</legend><div class='tourist-toggle'><button class='btn btn-sm "+(touristType==="indian"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"indian\")'>Indian</button><button class='btn btn-sm "+(touristType==="foreigner"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"foreigner\")'>Foreigner</button></div></fieldset>"+
-        "<fieldset class='fieldset'><legend>Pricing</legend>"+cf("Taxes %","c_tax",5,"%")+"</fieldset>"+
-        "<fieldset class='fieldset'><legend>Margin</legend>"+cf("Markup %","c_markup",25,"%")+cf("Profit margin %","c_margin",15,"%")+"</fieldset>"+
-        "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-sea btn-sm' onclick='openRateEditor()'>Edit per-pax rates</button><button class='btn btn-ghost btn-sm' onclick='fillDefaults()'>Fill Defaults</button><button class='btn btn-ghost btn-sm' onclick='resetToDefaults()'>Reset</button></div>"+
+        "<div class='field full'><label>Tour</label><select class='input' id='calcCategory' onchange='currentCalcTourId=this.value;calc()'>"+tourOpts+"</select></div>"+
+        "<div class='field'><label>Group size</label><select class='input mono' id='calcGroupSize' onchange='calc()'>"+groupOpts+"</select></div>"+
+        "<div class='field'><label>Client type</label><div class='tourist-toggle'><button class='btn btn-sm "+(touristType==="indian"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"indian\")'>Indian</button><button class='btn btn-sm "+(touristType==="foreigner"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"foreigner\")'>Foreigner</button></div></div>"+
       "</div>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Rates come straight from your Birding Tour Expense Calculator. Pick a tour, group size and client type to see the full breakdown and per-person cost.</p>"+
     "</div>"+
     "<div class='card result' id='calcResult'></div>"+
   "</div></section>";
 }
-function cf(label,id,val,unit){return "<div class='field'><label>"+label+(unit?" <span style='color:var(--ink-soft);font-weight:400'>("+unit+")</span>":"")+"</label><input class='input mono' id='"+id+"' type='number' value='"+val+"' oninput='calc()'></div>"}
-function costRow(name,val,idx){
-  const ids=['c_stay','c_veh','c_drv','c_ferry','c_boat','c_guide','c_permit','c_food','c_fuel','c_misc'];
-  return cf(name,ids[idx]||'c_extra_'+idx,val);
-}
-function applyCategoryRates(){
-  var sel=document.getElementById('calcCategory');
-  var cat=sel.value;
-  if(!cat||cat==='Custom'||!TOUR_RATES[cat])return;
-  var tid='';
-  for(var i=0;i<tours.length;i++){if(tours[i].name===cat){tid=tours[i].id;break;}}
-  currentCalcTourId=tid;
-  var rates=TOUR_RATES[cat];
-  var defaults=[
-    {name:'Accommodation',val:rates.accommodation},{name:'Vehicle',val:rates.vehicle},{name:'Driver',val:rates.driver},
-    {name:'Ferry',val:rates.ferry},{name:'Boat',val:rates.boat},{name:'Guide fees',val:rates.guideFees},
-    {name:'Entry permits',val:rates.entryPermits},{name:'Food',val:rates.food},{name:'Fuel',val:rates.fuel},{name:'Miscellaneous',val:rates.misc}
-  ];
-  document.getElementById('costItems').innerHTML=defaults.map(function(it,i){return costRow(it.name,it.val,i);}).join('');
-  calc();
-}
 function setTouristType(type){
-  touristType=type;
+  touristType=(type==="foreigner")?"foreigner":"indian";
   var btns=document.querySelectorAll('.tourist-toggle .btn');
-  btns.forEach(function(b){if(b.textContent.toLowerCase().trim()===type){b.classList.remove('btn-ghost');b.classList.add('btn-primary');}else{b.classList.remove('btn-primary');b.classList.add('btn-ghost');}});
-  if(currentCalcTourId&&DEFAULT_COSTS[currentCalcTourId]){fillDefaults();}
-  calc();
-}
-function fillDefaults(){
-  if(!currentCalcTourId||!DEFAULT_COSTS[currentCalcTourId])return;
-  var costs=DEFAULT_COSTS[currentCalcTourId][touristType];
-  if(!costs)return;
-  var map={c_stay:costs.accommodation,c_veh:costs.vehicle,c_ferry:costs.ferry,c_food:costs.food,c_guide:costs.guide,c_permit:costs.entry};
-  for(var k in map){var el=document.getElementById(k);if(el)el.value=map[k];}
-  calc();
-}
-function resetToDefaults(){
-  var items=['c_stay','c_veh','c_drv','c_ferry','c_boat','c_guide','c_permit','c_food','c_fuel','c_misc'];
-  items.forEach(function(id){var el=document.getElementById(id);if(el)el.value=0;});
-  document.querySelectorAll('.c_custom').forEach(function(i){i.value=0;});
+  btns.forEach(function(b){if(b.textContent.toLowerCase().trim()===(touristType==="foreigner"?"foreigner":"indian")){b.classList.remove('btn-ghost');b.classList.add('btn-primary');}else{b.classList.remove('btn-primary');b.classList.add('btn-ghost');}});
   calc();
 }
 function generateQuotation(){
-  // Gather data from calculator
-  const cat = document.getElementById('calcCategory')?.value || 'Custom';
-  const pax = parseInt(document.getElementById('calcGroupSize')?.value) ||
-              parseInt(document.getElementById('c_pax')?.value) || 6;
-  const totalCost = document.getElementById('c_total')?.textContent || '\u20b91,68,000';
-  const perPerson = document.getElementById('c_per')?.textContent || '\u20b928,000';
-  const sellingPrice = document.getElementById('c_sell')?.textContent || '\u20b92,10,000';
-  const netProfit = document.getElementById('c_net')?.textContent || '\u20b942,000';
-  const pricePerPerson = document.getElementById('c_price')?.textContent || '\u20b935,000';
-
-  // Get selected tour info
-  const tourName = cat !== 'Custom' ? cat : 'Custom Birding Expedition';
+  const sel = calcSelection();
+  const d = sel.d;
+  if(!d){ alert("Select a tour first to generate a quotation."); return; }
+  const pax = sel.pax;
+  const tourName = sel.label;
+  const clientType = sel.type==="foreign" ? "Foreigner" : "Indian";
   const qid = 'IEO-Q-' + Date.now().toString(36).toUpperCase();
   const today = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
   const validUntil = new Date(Date.now() + 14*864e5).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const logoUrl = (function(){try{return new URL('assets/logo.png', location.href).href;}catch(e){return 'assets/logo.png';}})();
+  const row = (label,val)=>`<tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">${label}</td><td style="padding:8px 4px;text-align:right;font-variant-numeric:tabular-nums">${fmt(val||0)}</td></tr>`;
+  const pricePerPerson = fmt(d.perPerson);
 
-  // Build the modal content
   const html = `
     <div class="modal-head">
       <div><div class="eyebrow">Quotation</div><div class="h-sec">${tourName}</div><div style="font-size:12px;color:var(--ink-soft);margin-top:2px">${qid} \u00b7 ${today}</div></div>
@@ -1154,19 +1115,15 @@ function generateQuotation(){
     </div>
     <div class="modal-body" style="padding:0">
       <div id="quotationBody" style="padding:24px;background:#fff">
-        <!-- Quotation Header -->
-        <div style="text-align:center;border-bottom:2px solid var(--forest);padding-bottom:16px;margin-bottom:20px">
-          <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:8px">
-            <span style="width:44px;height:44px;border-radius:12px;background:linear-gradient(150deg,#107a86,#143a2e);display:inline-grid;place-items:center">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg>
-            </span>
-            <span style="font-family:'Calistoga',serif;font-size:24px;color:var(--forest)">Island Explorer</span>
+        <div style="text-align:center;border-bottom:2px solid #143a2e;padding-bottom:16px;margin-bottom:20px">
+          <img src="${logoUrl}" alt="Island Explorer Birding Tours" style="max-width:280px;max-height:120px;object-fit:contain;margin:0 auto 6px" onerror="this.style.display='none';var f=document.getElementById('q_textlogo');if(f)f.style.display='block'">
+          <div id="q_textlogo" style="display:none">
+            <div style="font-family:'Calistoga',serif;font-size:30px;line-height:1.05"><span style="color:#16241d">Island</span> <span style="color:#1976d2">Explorer</span></div>
+            <div style="letter-spacing:.42em;font-size:12px;font-weight:700;color:#16241d;margin-top:5px;padding-left:.42em">BIRDING TOURS</div>
           </div>
-          <div style="font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase">Birding Tours \u00b7 Andaman & Nicobar Islands</div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Sumit Kumar \u00b7 +91 99332 02175 \u00b7 info@islandexplorer.in</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:6px">Sumit Kumar \u00b7 +91 99332 02175 \u00b7 info@islandexplorer.in</div>
         </div>
 
-        <!-- Quotation Info -->
         <div style="display:flex;justify-content:space-between;margin-bottom:20px;font-size:13px">
           <div>
             <div style="font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em">Quotation To</div>
@@ -1180,62 +1137,56 @@ function generateQuotation(){
           </div>
         </div>
 
-        <!-- Tour Details -->
         <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
           <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--forest)">${tourName}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><span style="color:var(--ink-soft)">Group Size:</span> <b>${pax} guests</b></div>
-            <div><span style="color:var(--ink-soft)">Duration:</span> <b>${cat !== 'Custom' ? (cat.includes('12') ? '12 nights' : cat.includes('8') ? '8 nights' : cat.includes('7') ? '7 nights' : cat.includes('5') ? '5 nights' : '1 day') : 'Custom'}</b></div>
+            <div><span style="color:var(--ink-soft)">Duration:</span> <b>${d.nights} nights</b></div>
+            <div><span style="color:var(--ink-soft)">Rooms:</span> <b>${d.rooms}</b></div>
+            <div><span style="color:var(--ink-soft)">Client type:</span> <b>${clientType}</b></div>
             <div><span style="color:var(--ink-soft)">Guide:</span> <b>Sumit Kumar</b></div>
-            <div><span style="color:var(--ink-soft)">Category:</span> <b>${cat}</b></div>
           </div>
         </div>
 
-        <!-- Cost Breakdown -->
         <table style="width:100%;font-size:13px;margin-bottom:16px;border-collapse:collapse">
           <thead><tr style="border-bottom:2px solid var(--line)">
             <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Description</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Amount</th>
           </tr></thead>
           <tbody>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Accommodation</td><td style="padding:8px 4px;text-align:right;font-weight:600" id="q_accom">${totalCost}</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Vehicle Transportation</td><td style="padding:8px 4px;text-align:right" id="q_veh">Included</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Ship / Ferry</td><td style="padding:8px 4px;text-align:right" id="q_ferry">Included</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Food</td><td style="padding:8px 4px;text-align:right" id="q_food">Included</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Guide</td><td style="padding:8px 4px;text-align:right" id="q_guide">Included</td></tr>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 4px">Entry / Permit</td><td style="padding:8px 4px;text-align:right;font-weight:600" id="q_entry">${perPerson}</td></tr>
+            ${row('Accommodation', d.accommodation)}
+            ${row('Vehicle transportation', d.vehicle)}
+            ${row('Guide charges', d.guide)}
+            ${row('Ship / ferry tickets', d.ship)}
+            ${row('Entry fees / permits', d.entry)}
+            ${row('Food (extra)', d.food)}
           </tbody>
           <tfoot>
-            <tr><td style="padding:10px 4px;font-size:14px"><b>Price Per Person</b></td><td style="padding:10px 4px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:var(--forest)"><b>${pricePerPerson}</b></td></tr>
-            <tr><td style="padding:4px;font-size:11px;color:var(--ink-soft)">Net profit after taxes</td><td style="padding:4px;text-align:right;font-size:11px;color:var(--sea)"><b>${netProfit}</b></td></tr>
+            <tr style="border-top:2px solid var(--line)"><td style="padding:10px 4px;font-size:14px"><b>Total tour cost (${pax} pax)</b></td><td style="padding:10px 4px;text-align:right;font-size:15px;font-weight:700">${fmt(d.total)}</td></tr>
+            <tr><td style="padding:6px 4px;font-size:14px"><b>Price per person</b></td><td style="padding:6px 4px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:var(--forest)"><b>${pricePerPerson}</b></td></tr>
           </tfoot>
         </table>
 
-        <!-- Inclusions -->
         <div style="font-size:12px;color:var(--ink-soft);margin-bottom:16px">
           <div style="font-weight:600;color:var(--ink);margin-bottom:4px">Includes:</div>
-          Private vehicle, forest permits, lodge stay, meals, expert guiding, ferry transfers
+          Accommodation, private vehicle, expert guiding, ferry / ship tickets, forest permits & entry fees, meals as listed.
         </div>
 
-        <!-- Terms -->
         <div style="font-size:11px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px">
           <div style="font-weight:600;color:var(--ink);margin-bottom:4px">Terms & Conditions</div>
           \u2022 50% deposit required to confirm booking \u00b7 Balance due 30 days before departure<br>
           \u2022 Prices are in Indian Rupees (INR) \u00b7 Subject to availability<br>
           \u2022 Cancellation: Full refund 60+ days \u00b7 50% refund 30-60 days \u00b7 No refund &lt;30 days<br>
           \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply<br>
-          \u2022 All permits subject to Forest Department approval \u00b7 Itinerary may change due to weather/sea conditions<br>
-          \u2022 Guests must carry valid ID proof \u00b7 Single supplement +25% on twin-share rates
+          \u2022 All permits subject to Forest Department approval \u00b7 Itinerary may change due to weather/sea conditions
         </div>
 
-        <!-- Signature -->
         <div style="margin-top:20px;padding:14px;background:var(--surface-2);border-radius:10px;display:flex;align-items:center;gap:12px">
-          <div style="width:40px;height:40px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px">SR</div>
-          <div><div style="font-weight:700;font-size:13px">Sumit Kumar</div><div style="font-size:11px;color:var(--ink-soft)">Ornithologist \u00b7 Lead Guide \u00b7 Island Explorer</div><div style="font-size:11px;color:var(--sea)">+91 99332 02175 \u00b7 info@islandexplorer.in</div></div>
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px">SK</div>
+          <div><div style="font-weight:700;font-size:13px">Sumit Kumar</div><div style="font-size:11px;color:var(--ink-soft)">Lead Guide \u00b7 Island Explorer Birding Tours</div><div style="font-size:11px;color:var(--sea)">+91 99332 02175 \u00b7 info@islandexplorer.in</div></div>
         </div>
 
-        <!-- Footer -->
-        <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid var(--forest)">
+        <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e">
           <div style="font-family:'Calistoga',serif;font-size:16px;color:var(--forest)">Island Explorer Birding Tours</div>
           <div style="font-size:11px;color:var(--ink-soft)">Port Blair \u00b7 Andaman & Nicobar Islands \u00b7 India</div>
         </div>
@@ -3715,55 +3666,34 @@ a:focus-visible,
   `);
   printWindow.document.close();
 }
+function calcSelection(){
+  var key=document.getElementById("calcCategory")?document.getElementById("calcCategory").value:currentCalcTourId;
+  if(key)currentCalcTourId=key;
+  var pax=document.getElementById("calcGroupSize")?String(document.getElementById("calcGroupSize").value):"2";
+  var type=(touristType==="foreigner")?"foreign":"indian";
+  var src=SHEET_DATA[currentCalcTourId];
+  var d=src&&src[type]?src[type][pax]:null;
+  return {key:currentCalcTourId,pax:pax,type:type,d:d,label:CALC_LABELS[currentCalcTourId]||(src?src.title:"")};
+}
 function calc(){
-  const g=id=>parseFloat(document.getElementById(id)?.value||0);
-  let base=["c_stay","c_veh","c_drv","c_ferry","c_boat","c_guide","c_permit","c_food","c_fuel","c_misc"].reduce((s,k)=>s+g(k),0);
-  document.querySelectorAll(".c_custom").forEach(i=>base+=parseFloat(i.value||0));
-  const pax=Math.max(parseInt(document.getElementById('calcGroupSize')?.value)||g("c_pax")||1,1);
-  const withTax=base*(1+g("c_tax")/100),sell=withTax*(1+g("c_markup")/100);
-  const gross=sell-base,net=sell-withTax,profitPct=sell?Math.round(net/sell*100):0;
-  var altType=touristType==="indian"?"foreigner":"indian";
-  var altLabel=touristType==="indian"?"Foreigner":"Indian";
-  var rateBox="";
-  if(currentCalcTourId&&TOUR_COSTS[currentCalcTourId]){
-    var rc=TOUR_COSTS[currentCalcTourId];
-    var myRate=rc[touristType];
-    rateBox="<div class='rate-card'><div class='rate-card-h'>Your rate per person · this category</div>"+
-      "<div class='res-row big'><span>"+(touristType==="indian"?"Indian":"Foreigner")+" rate / person</span><b class='mono'>"+fmt(myRate)+"</b></div>"+
-      "<div class='res-row'><span>"+altLabel+" rate / person</span><b class='mono'>"+fmt(rc[altType])+"</b></div>"+
-      "<div class='res-row'><span>Package total ("+pax+" pax × "+(touristType==="indian"?"Indian":"Foreigner")+" rate)</span><b class='mono'>"+fmt(myRate*pax)+"</b></div>"+
-    "</div>";
-  }
   const r=document.getElementById("calcResult");if(!r)return;
-  r.innerHTML="<h3>Costing summary</h3>"+
-    rateBox+
-    "<div class='res-row'><span>Total tour cost</span><b class='mono' id='c_total'>"+fmt(withTax)+"</b></div>"+
-    "<div class='res-row'><span>Cost per person ("+touristType+")</span><b class='mono' id='c_per'>"+fmt(withTax/pax)+"</b></div>"+
-    "<div class='res-row'><span>Selling price</span><b class='mono' id='c_sell'>"+fmt(sell)+"</b></div>"+
-    "<div class='res-row'><span>Gross profit</span><b class='mono'>"+fmt(gross)+"</b></div>"+
-    "<div class='res-row'><span>Net profit</span><b class='mono' id='c_net'>"+fmt(net)+"</b></div>"+
-    "<div class='res-row big'><span>Price / person · "+profitPct+"% margin</span><b class='mono' id='c_price'>"+fmt(sell/pax)+"</b></div>"+
-    "<button class='btn btn-primary' onclick='generateQuotation()' style='margin-top:12px;width:100%'>"+
+  var sel=calcSelection();var d=sel.d;
+  if(!d){r.innerHTML="<div style='padding:30px;text-align:center;color:var(--ink-soft)'>No costing data for this selection.</div>";return;}
+  var line=function(lab,v){return "<div class='res-row'><span>"+lab+"</span><b class='mono'>"+fmt(v||0)+"</b></div>";};
+  r.innerHTML="<h3>"+sel.label+"</h3>"+
+    "<div class='calc-sub'>"+d.nights+" nights · "+d.rooms+" room(s) · "+sel.pax+" pax · "+(sel.type==="foreign"?"Foreigner":"Indian")+"</div>"+
+    line("Accommodation",d.accommodation)+
+    line("Vehicle transport",d.vehicle)+
+    line("Guide charges",d.guide)+
+    line("Ship / ferry tickets",d.ship)+
+    line("Entry fees / permits",d.entry)+
+    line("Food (extra)",d.food)+
+    "<div class='res-row big'><span>Total tour cost</span><b class='mono' id='c_total'>"+fmt(d.total)+"</b></div>"+
+    "<div class='res-row big'><span>Per person</span><b class='mono' id='c_per'>"+fmt(d.perPerson)+"</b></div>"+
+    "<button class='btn btn-primary' onclick='generateQuotation()' style='margin-top:14px;width:100%'>"+
       "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>"+
       "Generate Quotation"+
     "</button>";
-}
-function openRateEditor(){
-  var rows=tours.filter(function(t){return TOUR_COSTS[t.id];}).map(function(t){
-    var c=TOUR_COSTS[t.id];
-    return "<div class='field'><label>"+shortName(t)+" · Indian ₹/pax</label><input class='input mono' type='number' id='rate_"+t.id+"_i' value='"+c.indian+"'></div>"+
-           "<div class='field'><label>"+shortName(t)+" · Foreigner ₹/pax</label><input class='input mono' type='number' id='rate_"+t.id+"_f' value='"+c.foreigner+"'></div>";
-  }).join("");
-  modalForm("Per-person rates","Edit category rates","<p style='font-size:13px;color:var(--ink-soft);margin-bottom:12px'>Your default per-person selling rate for each tour category. Saved on this device and synced to the cloud (Supabase).</p><div class='form-grid'>"+rows+"</div>","saveRates","Save rates");
-}
-function saveRates(){
-  tours.forEach(function(t){
-    if(!TOUR_COSTS[t.id])return;
-    var i=document.getElementById("rate_"+t.id+"_i"),f=document.getElementById("rate_"+t.id+"_f");
-    if(i)TOUR_COSTS[t.id].indian=parseFloat(i.value)||0;
-    if(f)TOUR_COSTS[t.id].foreigner=parseFloat(f.value)||0;
-  });
-  persistData();closeModal();calc();renderBookings();
 }
 function linkSheet(){
   var saved="";try{saved=localStorage.getItem("ieo_sheet_url")||"";}catch(e){}
