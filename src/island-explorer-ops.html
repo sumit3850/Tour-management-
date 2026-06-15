@@ -10,7 +10,7 @@
 <style>
 :root{
   --ink:#16241d;--ink-soft:#3f5249;--forest:#1b4d3e;--forest-deep:#143a2e;
-  --sea:#107a86;--sea-soft:#e3f1f1;--amber:#dd9a2b;--amber-soft:#fbeccb;
+  --sea:#1976d2;--sea-soft:#e3f2fd;--amber:#dd9a2b;--amber-soft:#fbeccb;
   --coral:#d65a3f;--coral-soft:#f8e2da;--paper:#f6f2e9;--surface:#ffffff;--surface-2:#fbf9f3;
   --line:#e6e0d2;--line-soft:#efe9dd;
   --shadow:0 1px 2px rgba(20,40,30,.04),0 8px 24px -12px rgba(20,40,30,.16);
@@ -26,7 +26,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
 h1,h2,h3,h4{line-height:1.2;font-weight:600}
 .display{font-family:'Calistoga',Georgia,serif;font-weight:400;letter-spacing:-.01em}
@@ -36,22 +36,22 @@ svg{display:block}
 ::selection{background:var(--amber-soft)}
 
 .app{display:flex;min-height:100dvh}
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--forest);color:#dfe9e3;display:flex;flex-direction:column;position:sticky;top:0;height:100dvh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:linear-gradient(180deg,rgba(227,242,253,0.97) 0%,rgba(200,230,255,0.95) 100%);color:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100dvh;border-right:1px solid rgba(25,118,210,0.1)}
 .brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px}
-.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--sea),var(--forest-deep));display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
-.brand .name{font-family:'Calistoga',serif;font-size:18px;color:#fff;line-height:1.05}
-.brand .sub{font-size:11px;color:#8fb3a4;letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--sea),#0d47a1);display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.brand .name{font-family:'Calistoga',serif;font-size:18px;color:var(--ink);line-height:1.05}
+.brand .sub{font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
 .nav{flex:1;overflow-y:auto;padding:6px 12px 18px}
-.nav-group{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#6f9384;margin:16px 10px 6px;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#c4d6cd;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s}
+.nav-group{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#5a7d9a;margin:16px 10px 6px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#4a6b7c;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s}
 .nav-item svg{width:18px;height:18px;stroke:currentColor;flex-shrink:0}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nav-item.active{background:rgba(255,255,255,.12);color:#fff}
-.nav-item.active svg{stroke:var(--amber)}
-.nav-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:11px}
-.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--forest-deep);display:grid;place-items:center;font-weight:700;font-size:13px}
-.nav-foot .who{font-size:13px;color:#fff;font-weight:600}
-.nav-foot .role{font-size:11px;color:#8fb3a4}
+.nav-item:hover{background:rgba(25,118,210,0.08);color:var(--ink)}
+.nav-item.active{background:rgba(25,118,210,0.15);color:var(--ink)}
+.nav-item.active svg{stroke:var(--sea)}
+.nav-foot{padding:14px 18px;border-top:1px solid rgba(25,118,210,0.12);display:flex;align-items:center;gap:11px}
+.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:13px}
+.nav-foot .who{font-size:13px;color:var(--ink);font-weight:600}
+.nav-foot .role{font-size:11px;color:#6a8fa8}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:0;z-index:30;background:rgba(246,242,233,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;gap:14px}
@@ -147,6 +147,9 @@ td.strong{font-weight:600;color:var(--ink)}
 .tour-card .capline{display:flex;justify-content:space-between;font-size:12px;margin:12px 0 6px;color:var(--ink-soft)}
 .tour-card .capline b{color:var(--ink)}
 .tour-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.tour-del{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--coral-soft);color:var(--coral);display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s}
+.tour-card:hover .tour-del{opacity:1}.tour-del:hover{background:var(--coral);color:#fff}
+.tour-card{position:relative}.tour-card .guests{font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;width:max-content;max-width:100%;overflow-x:auto}
 .tab{padding:7px 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
@@ -171,6 +174,8 @@ td.strong{font-weight:600;color:var(--ink)}
 .legend .sw{width:13px;height:13px;border-radius:4px;flex-shrink:0}
 
 .calc-grid{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+.tourist-toggle{display:flex;gap:6px}
+.per-pax-box{background:rgba(255,255,255,.08);border-radius:8px;padding:6px 10px;margin:4px 0}
 .field{margin-bottom:13px}
 .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--ink)}
 .input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink);transition:border-color .15s,box-shadow .15s}
@@ -179,7 +184,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
 .fieldset{border:1px solid var(--line-soft);border-radius:13px;padding:16px;margin-bottom:16px}
 .fieldset legend{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--sea);font-weight:600;padding:0 6px}
-.result{position:sticky;top:92px;padding:20px;background:linear-gradient(160deg,var(--forest),var(--forest-deep));color:#dfe9e3;border:none}
+.result{position:sticky;top:92px;padding:20px;background:linear-gradient(160deg,#1565c0,#0d47a1);color:#fff;border:none}
 .result h3{color:#fff;font-family:'Calistoga',serif;font-size:18px;margin-bottom:14px}
 .res-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.1);font-size:14px}
 .res-row span{color:#a9c4b9}.res-row b{font-weight:600;color:#fff}
@@ -251,7 +256,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .chat-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
 .msg{max-width:80%;padding:12px 15px;border-radius:15px;font-size:14px;line-height:1.5}
 .msg.bot{background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start;white-space:pre-wrap}
-.msg.me{background:var(--forest);color:#eaf2ee;border-bottom-right-radius:5px;align-self:flex-end}
+.msg.me{background:var(--sea);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
 .chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
 .chip{font-size:12.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-weight:500}
 .chip:hover{background:var(--sea-soft);border-color:#a9d2d6;color:#0c656f}
@@ -339,7 +344,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 
 const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
 const todayISO="2026-06-14";
-const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session",custom:"Custom"};
+const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session","guided-half":"Guided Session - Half Day",narcondam:"Narcondam Expedition",custom:"Custom"};
 const TOURCOLORS=["#1b4d3e","#107a86","#dd9a2b","#8a3d70","#3a527d","#c2603f","#5b8c3e","#a14b8a"];
 const XBTN="<button class='x' onclick='closeModal()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg></button>";
 
@@ -350,18 +355,46 @@ let tours=[
   {id:"T4",name:"8-Night South & Little Andaman",cat:"littleandaman",start:"2026-06-15",end:"2026-06-23",cap:6,status:"full",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Hawksbill Nest"},
   {id:"T5",name:"Guided Session — Full Day",cat:"session",start:"2026-06-20",end:"2026-06-20",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Day session"},
   {id:"T6",name:"Guided Session — Night",cat:"session",start:"2026-05-28",end:"2026-05-28",cap:8,status:"completed",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Mount Harriet",stay:"Night session"},
+  {id:"T7",name:"Guided Session — Half Day",cat:"guided-half",start:"2026-06-22",end:"2026-06-22",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Sippighat Wetlands",stay:"Half day session"},
+  {id:"T8",name:"Narcondam Expedition",cat:"narcondam",start:"2026-08-10",end:"2026-08-17",cap:4,status:"open",guide:"Sumit Rao",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
 ];
+const TOUR_COSTS={
+  T1:{indian:48500,foreigner:62500},
+  T2:{indian:118500,foreigner:148000},
+  T3:{indian:72000,foreigner:92000},
+  T4:{indian:78000,foreigner:98000},
+  T5:{indian:8500,foreigner:12000},
+  T6:{indian:9500,foreigner:13500},
+  T7:{indian:5500,foreigner:8500},
+  T8:{indian:95000,foreigner:125000},
+};
+const DEFAULT_COSTS={
+  T1:{indian:{accommodation:12000,vehicle:10000,ferry:3500,food:8000,guide:12000,entry:4000},foreigner:{accommodation:18000,vehicle:10000,ferry:3500,food:8000,guide:12000,entry:7000}},
+  T2:{indian:{accommodation:28000,vehicle:24000,ferry:10000,food:18000,guide:28000,entry:10000},foreigner:{accommodation:42000,vehicle:24000,ferry:10000,food:18000,guide:28000,entry:18000}},
+  T3:{indian:{accommodation:17000,vehicle:15000,ferry:5000,food:11000,guide:17000,entry:6000},foreigner:{accommodation:25000,vehicle:15000,ferry:5000,food:11000,guide:17000,entry:11000}},
+  T4:{indian:{accommodation:20000,vehicle:17000,ferry:6000,food:13000,guide:20000,entry:7000},foreigner:{accommodation:30000,vehicle:17000,ferry:6000,food:13000,guide:20000,entry:13000}},
+  T5:{indian:{accommodation:0,vehicle:2500,ferry:0,food:1200,guide:4500,entry:800},foreigner:{accommodation:0,vehicle:2500,ferry:0,food:1200,guide:4500,entry:1500}},
+  T6:{indian:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:800},foreigner:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:1500}},
+};
+var touristType="indian";
+var currentCalcTourId="";
 let bookings=[
-  {id:"B1",tour:"T1",guest:"Helen Marsh",party:2,country:"UK",status:"Confirmed",pay:"Paid",notes:"Vegetarian",start:"2026-06-18",end:"2026-06-23"},
-  {id:"B2",tour:"T1",guest:"Klaus Vogel",party:2,country:"Germany",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-18",end:"2026-06-23"},
-  {id:"B3",tour:"T1",guest:"Mei Tan",party:1,country:"Singapore",status:"Confirmed",pay:"Paid",notes:"Early riser",start:"2026-06-18",end:"2026-06-23"},
-  {id:"B4",tour:"T2",guest:"David Olsen",party:2,country:"USA",status:"Confirmed",pay:"Paid",notes:"Megapode focus",start:"2026-06-25",end:"2026-07-07"},
-  {id:"B5",tour:"T2",guest:"P. Sharma",party:2,country:"India",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-25",end:"2026-07-07"},
-  {id:"B6",tour:"T3",guest:"Anna Roy",party:2,country:"India",status:"Confirmed",pay:"Paid",notes:"",start:"2026-07-02",end:"2026-07-09"},
-  {id:"B7",tour:"T4",guest:"J. Fernández",party:3,country:"Spain",status:"Confirmed",pay:"Paid",notes:"Tripods",start:"2026-06-15",end:"2026-06-23"},
-  {id:"B8",tour:"T4",guest:"BNHS group",party:3,country:"India",status:"Confirmed",pay:"Paid",notes:"Society group",start:"2026-06-15",end:"2026-06-23"},
-  {id:"B9",tour:"T5",guest:"L. Bianchi",party:2,country:"Italy",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-20",end:"2026-06-20"},
+  {id:"B1",tour:"T1",guest:"Helen Marsh",party:2,country:"UK",status:"Confirmed",pay:"Paid",notes:"Vegetarian",start:"2026-06-18",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B2",tour:"T1",guest:"Klaus Vogel",party:2,country:"Germany",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-18",end:"2026-06-23",deposit:50000,lastPendingDate:"2026-05-19"},
+  {id:"B3",tour:"T1",guest:"Mei Tan",party:1,country:"Singapore",status:"Confirmed",pay:"Paid",notes:"Early riser",start:"2026-06-18",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B4",tour:"T2",guest:"David Olsen",party:2,country:"USA",status:"Confirmed",pay:"Paid",notes:"Megapode focus",start:"2026-06-25",end:"2026-07-07",deposit:0,lastPendingDate:""},
+  {id:"B5",tour:"T2",guest:"P. Sharma",party:2,country:"India",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-25",end:"2026-07-07",deposit:120000,lastPendingDate:"2026-05-26"},
+  {id:"B6",tour:"T3",guest:"Anna Roy",party:2,country:"India",status:"Confirmed",pay:"Paid",notes:"",start:"2026-07-02",end:"2026-07-09",deposit:0,lastPendingDate:""},
+  {id:"B7",tour:"T4",guest:"J. Fernández",party:3,country:"Spain",status:"Confirmed",pay:"Paid",notes:"Tripods",start:"2026-06-15",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B8",tour:"T4",guest:"BNHS group",party:3,country:"India",status:"Confirmed",pay:"Paid",notes:"Society group",start:"2026-06-15",end:"2026-06-23",deposit:0,lastPendingDate:""},
+  {id:"B9",tour:"T5",guest:"L. Bianchi",party:2,country:"Italy",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-20",end:"2026-06-20",deposit:15000,lastPendingDate:"2026-06-06"},
 ];
+function bookingTotalCost(b){var t=tours.find(function(x){return x.id===b.tour;});if(!t||!TOUR_COSTS[t.id])return 0;var costPP=TOUR_COSTS[t.id][b.country==="India"?"indian":"foreigner"];return costPP*b.party;}
+function bookingDeposit(b){return b.deposit||0;}
+function bookingPending(b){return Math.max(bookingTotalCost(b)-bookingDeposit(b),0);}
+function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
+function bookingPaymentStatus(b){var pend=bookingPending(b);if(pend<=0)return"Fully Paid";if(bookingDeposit(b)>0)return"Partial";return"Unpaid";}
+function bookingPaymentStatusClass(b){var s=bookingPaymentStatus(b);return s==="Fully Paid"?"completed":s==="Partial"?"open":"full";}
 let accommodations=[
   {id:"acc-1",name:"Wild Grass Resort",location:"Chidiya Tapu",type:"Eco Resort",rooms:12,amenities:["AC","Restaurant","WiFi"],status:"Active",notes:"Birders' favourite"},
   {id:"acc-2",name:"SeaShell Neil",location:"Neil Island",type:"Beach Resort",rooms:18,amenities:["AC","Pool","Restaurant","WiFi"],status:"Active",notes:"Premium property"},
@@ -621,6 +654,10 @@ function attachClickHandlers(){
     else if(a==='accTab')accTab(t.dataset.arg,e.target);
     else if(a==='editAccommodation')editAccommodation(t.dataset.arg);
     else if(a==='deleteAccommodation')deleteAccommodation(t.dataset.arg);
+    else if(a==='deleteTour')deleteTour(t.dataset.arg);
+    else if(a==='editTrip')editTrip(t.dataset.arg);
+    else if(a==='deleteTrip')deleteTrip(t.dataset.arg);
+    else if(a==='openCustomerSheet')openCustomerSheet(t.dataset.arg);
   };
 }
 function go(v,isBack){
@@ -695,15 +732,20 @@ function renderTours(filter=curTab){
     if(filter==="Ongoing")return s!=="completed"&&new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO);
     return true;});
   grid.innerHTML=list.map(t=>{const b=booked(t.id),pct=Math.round(b/t.cap*100),s=status(t);
+    var gNames=bookings.filter(function(x){return x.tour===t.id;}).map(function(x){return x.guest;}).join(", ");
+    var cost=t.guests&&t.guests.length>0?"<div class='cost-line'>Cost: "+fmt(t.guests.length*TOUR_COSTS[t.id]["indian"])+" ("+t.guests.length+" pax)</div>":"";
     return "<div class='card tour-card' data-action='openTour' data-arg='"+t.id+"'>"+
+      "<button class='tour-del' data-action='deleteTour' data-arg='"+t.id+"' title='Delete tour' onclick='event.stopPropagation()'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
       "<span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span>"+
       "<div class='nm'>"+t.name+"</div>"+
       "<div class='dt'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div>"+
       "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
       "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
+      (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
       "<div class='foot'>"+pill(s)+"<span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
     "</div>";}).join("")||"<div class='empty'>No tours in this view.</div>";
 }
+function deleteTour(id){if(!confirm("Delete this tour?"))return;tours=tours.filter(function(t){return t.id!==id;});renderTours();renderCalendar();}
 function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderTours(f);}
 
 /* ===== CALENDAR ===== */
@@ -746,12 +788,12 @@ function renderCalendar(){
 function viewBookings(){
   return "<section class='view' id='v-bookings'>"+
     "<div class='section-head'><div class='h-sec'>All bookings</div><button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th>Payment</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total Cost</th><th class='num'>Deposit</th><th class='num'>Pending</th><th>Last Pending</th><th>Payment Status</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
-  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);return "<tr><td class='strong'>"+x.guest+"</td><td>"+(t?t.name:"—")+"</td><td>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td>"+bookingLastPendingDate(x)+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
 }
 function editBooking(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
@@ -768,6 +810,8 @@ function editBooking(id){
       "<option value='Paid' "+(b.pay==="Paid"?"selected":"")+">Paid</option>"+
       "<option value='Balance due' "+(b.pay==="Balance due"?"selected":"")+">Balance due</option>"+
     "</select></div>"+
+    "<div class='field'><label>Deposit Amount</label><input class='input mono' type='number' id='eb_deposit' value='"+(b.deposit||0)+"'></div>"+
+    "<div class='field'><label>Last Pending Date</label><input class='input' type='date' id='eb_lastpend' value='"+(b.lastPendingDate||"")+"'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='eb_notes' value='"+(b.notes||"")+"'></div>"+
   "</div>","saveEditBooking","Update booking");
   document.getElementById("modal").dataset.bid=id;
@@ -784,6 +828,8 @@ function saveEditBooking(){
   b.party=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
   b.country=document.getElementById("eb_country").value;
   b.pay=document.getElementById("eb_pay").value;
+  b.deposit=parseFloat(document.getElementById("eb_deposit").value)||0;
+  b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
   b.notes=document.getElementById("eb_notes").value;
   closeModal();renderBookings();renderTours();renderCalendar();
 }
@@ -812,8 +858,10 @@ function viewCalc(){
         "</div></fieldset>"+
         "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Custom items</legend><div id='customItems'></div>"+
           "<button class='add-item' onclick='addCostItem()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add cost item</button></fieldset>"+
+        "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Tourist Type</legend><div class='tourist-toggle'><button class='btn btn-sm "+(touristType==="indian"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"indian\")'>Indian</button><button class='btn btn-sm "+(touristType==="foreigner"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"foreigner\")'>Foreigner</button></div></fieldset>"+
         "<fieldset class='fieldset'><legend>Pricing</legend>"+cf("Taxes %","c_tax",5,"%")+"</fieldset>"+
         "<fieldset class='fieldset'><legend>Margin</legend>"+cf("Markup %","c_markup",25,"%")+cf("Profit margin %","c_margin",15,"%")+"</fieldset>"+
+        "<div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='fillDefaults()'>Fill Defaults</button><button class='btn btn-ghost btn-sm' onclick='resetToDefaults()'>Reset</button></div>"+
       "</div>"+
     "</div>"+
     "<div class='card result' id='calcResult'></div>"+
@@ -825,15 +873,40 @@ function costRow(name,val,idx){
   return cf(name,ids[idx]||'c_extra_'+idx,val);
 }
 function applyCategoryRates(){
-  const cat=document.getElementById('calcCategory').value;
+  var sel=document.getElementById('calcCategory');
+  var cat=sel.value;
   if(!cat||cat==='Custom'||!TOUR_RATES[cat])return;
-  const rates=TOUR_RATES[cat];
-  const defaults=[
+  var tid='';
+  for(var i=0;i<tours.length;i++){if(tours[i].name===cat){tid=tours[i].id;break;}}
+  currentCalcTourId=tid;
+  var rates=TOUR_RATES[cat];
+  var defaults=[
     {name:'Accommodation',val:rates.accommodation},{name:'Vehicle',val:rates.vehicle},{name:'Driver',val:rates.driver},
     {name:'Ferry',val:rates.ferry},{name:'Boat',val:rates.boat},{name:'Guide fees',val:rates.guideFees},
     {name:'Entry permits',val:rates.entryPermits},{name:'Food',val:rates.food},{name:'Fuel',val:rates.fuel},{name:'Miscellaneous',val:rates.misc}
   ];
-  document.getElementById('costItems').innerHTML=defaults.map((it,i)=>costRow(it.name,it.val,i)).join('');
+  document.getElementById('costItems').innerHTML=defaults.map(function(it,i){return costRow(it.name,it.val,i);}).join('');
+  calc();
+}
+function setTouristType(type){
+  touristType=type;
+  var btns=document.querySelectorAll('.tourist-toggle .btn');
+  btns.forEach(function(b){if(b.textContent.toLowerCase().trim()===type){b.classList.remove('btn-ghost');b.classList.add('btn-primary');}else{b.classList.remove('btn-primary');b.classList.add('btn-ghost');}});
+  if(currentCalcTourId&&DEFAULT_COSTS[currentCalcTourId]){fillDefaults();}
+  calc();
+}
+function fillDefaults(){
+  if(!currentCalcTourId||!DEFAULT_COSTS[currentCalcTourId])return;
+  var costs=DEFAULT_COSTS[currentCalcTourId][touristType];
+  if(!costs)return;
+  var map={c_stay:costs.accommodation,c_veh:costs.vehicle,c_ferry:costs.ferry,c_food:costs.food,c_guide:costs.guide,c_permit:costs.entry};
+  for(var k in map){var el=document.getElementById(k);if(el)el.value=map[k];}
+  calc();
+}
+function resetToDefaults(){
+  var items=['c_stay','c_veh','c_drv','c_ferry','c_boat','c_guide','c_permit','c_food','c_fuel','c_misc'];
+  items.forEach(function(id){var el=document.getElementById(id);if(el)el.value=0;});
+  document.querySelectorAll('.c_custom').forEach(function(i){i.value=0;});
   calc();
 }
 function generateQuotation(){
@@ -863,6 +936,7 @@ function generateQuotation(){
       <div id="quotationBody" style="padding:24px;background:#fff">
         <!-- Quotation Header -->
         <div style="text-align:center;border-bottom:2px solid var(--forest);padding-bottom:16px;margin-bottom:20px">
+          <img src="logo.jpg" style="max-width:180px;margin-bottom:10px" onerror="this.style.display='none'">
           <div style="font-family:'Calistoga',serif;font-size:22px;color:var(--forest)">Island Explorer</div>
           <div style="font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase">Birding Tours \u00b7 Andaman & Nicobar Islands</div>
           <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Dr. Sumit Rao \u00b7 +91 98765 43210 \u00b7 sumit@islandexplorer.in</div>
@@ -900,9 +974,12 @@ function generateQuotation(){
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Amount</th>
           </tr></thead>
           <tbody>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Total Tour Cost</td><td style="padding:8px 4px;text-align:right;font-weight:600">${totalCost}</td></tr>
-            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Cost Per Person</td><td style="padding:8px 4px;text-align:right">${perPerson}</td></tr>
-            <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 4px">Selling Price (incl. margin)</td><td style="padding:8px 4px;text-align:right;color:var(--sea);font-weight:700">${sellingPrice}</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Accommodation</td><td style="padding:8px 4px;text-align:right;font-weight:600" id="q_accom">${totalCost}</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Vehicle Transportation</td><td style="padding:8px 4px;text-align:right" id="q_veh">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Ship / Ferry</td><td style="padding:8px 4px;text-align:right" id="q_ferry">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Food</td><td style="padding:8px 4px;text-align:right" id="q_food">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">Guide</td><td style="padding:8px 4px;text-align:right" id="q_guide">Included</td></tr>
+            <tr style="border-bottom:1px solid var(--line)"><td style="padding:8px 4px">Entry / Permit</td><td style="padding:8px 4px;text-align:right;font-weight:600" id="q_entry">${perPerson}</td></tr>
           </tbody>
           <tfoot>
             <tr><td style="padding:10px 4px;font-size:14px"><b>Price Per Person</b></td><td style="padding:10px 4px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:var(--forest)"><b>${pricePerPerson}</b></td></tr>
@@ -922,7 +999,15 @@ function generateQuotation(){
           \u2022 50% deposit required to confirm booking \u00b7 Balance due 30 days before departure<br>
           \u2022 Prices are in Indian Rupees (INR) \u00b7 Subject to availability<br>
           \u2022 Cancellation: Full refund 60+ days \u00b7 50% refund 30-60 days \u00b7 No refund &lt;30 days<br>
-          \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply
+          \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply<br>
+          \u2022 All permits subject to Forest Department approval \u00b7 Itinerary may change due to weather/sea conditions<br>
+          \u2022 Guests must carry valid ID proof \u00b7 Single supplement +25% on twin-share rates
+        </div>
+
+        <!-- Signature -->
+        <div style="margin-top:20px;padding:14px;background:var(--surface-2);border-radius:10px;display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px">SR</div>
+          <div><div style="font-weight:700;font-size:13px">Dr. Sumit Rao</div><div style="font-size:11px;color:var(--ink-soft)">Ornithologist \u00b7 Lead Guide \u00b7 Island Explorer</div><div style="font-size:11px;color:var(--sea)">+91 98765 43210 \u00b7 sumit@islandexplorer.in</div></div>
         </div>
 
         <!-- Footer -->
@@ -3398,8 +3483,8 @@ a:focus-visible,
     <body>
       ${body.innerHTML}
       <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
-    </body>
-    </html>
+    <\/body>
+    <\/html>
   `);
   printWindow.document.close();
 }
@@ -3410,14 +3495,22 @@ function calc(){
   const pax=Math.max(parseInt(document.getElementById('calcGroupSize')?.value)||g("c_pax")||1,1);
   const withTax=base*(1+g("c_tax")/100),sell=withTax*(1+g("c_markup")/100);
   const gross=sell-base,net=sell-withTax,profitPct=sell?Math.round(net/sell*100):0;
+  var altType=touristType==="indian"?"foreigner":"indian";
+  var altLabel=touristType==="indian"?"Foreigner":"Indian";
+  var altCost="";
+  if(currentCalcTourId&&TOUR_COSTS[currentCalcTourId]){
+    var altPp=TOUR_COSTS[currentCalcTourId][altType];
+    altCost="<div class='res-row per-pax-box'><span>Per person ("+altLabel+")</span><b class='mono'>"+fmt(altPp)+"</b></div>";
+  }
   const r=document.getElementById("calcResult");if(!r)return;
   r.innerHTML="<h3>Costing summary</h3>"+
-    "<div class='res-row'><span>Total tour cost</span><b class='mono'>"+fmt(withTax)+"</b></div>"+
-    "<div class='res-row'><span>Cost per person</span><b class='mono'>"+fmt(withTax/pax)+"</b></div>"+
-    "<div class='res-row'><span>Selling price</span><b class='mono'>"+fmt(sell)+"</b></div>"+
+    "<div class='res-row'><span>Total tour cost</span><b class='mono' id='c_total'>"+fmt(withTax)+"</b></div>"+
+    "<div class='res-row'><span>Cost per person ("+touristType+")</span><b class='mono' id='c_per'>"+fmt(withTax/pax)+"</b></div>"+
+    altCost+
+    "<div class='res-row'><span>Selling price</span><b class='mono' id='c_sell'>"+fmt(sell)+"</b></div>"+
     "<div class='res-row'><span>Gross profit</span><b class='mono'>"+fmt(gross)+"</b></div>"+
-    "<div class='res-row'><span>Net profit</span><b class='mono'>"+fmt(net)+"</b></div>"+
-    "<div class='res-row big'><span>Price / person · "+profitPct+"% margin</span><b class='mono'>"+fmt(sell/pax)+"</b></div>"+
+    "<div class='res-row'><span>Net profit</span><b class='mono' id='c_net'>"+fmt(net)+"</b></div>"+
+    "<div class='res-row big'><span>Price / person · "+profitPct+"% margin</span><b class='mono' id='c_price'>"+fmt(sell/pax)+"</b></div>"+
     "<button class='btn btn-primary' onclick='generateQuotation()' style='margin-top:12px;width:100%'>"+
       "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>"+
       "Generate Quotation"+
@@ -3474,8 +3567,8 @@ function renderLog(t="Operations Board"){
       kpi("Vehicles active",activeVeh,"on the road","","M5 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0M3 13h13V6H3z")+
       kpi("Trips on record",tripLogs.length,"this device","","M9 11l3 3 8-8")+
     "</div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th></tr></thead><tbody>"+
-    rows.map(r=>"<tr><td class='strong'>"+new Date(r.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td></tr>").join("")||"<tr><td colspan='8' class='empty'>No trips logged yet.</td></tr>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th><th></th></tr></thead><tbody>"+
+    rows.map(r=>"<tr><td class='strong'>"+new Date(r.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='9' class='empty'>No trips logged yet.</td></tr>"+
     "</tbody></table></div></div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
   }else{
@@ -3523,9 +3616,9 @@ function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filt
 /* ===== CUSTOMERS ===== */
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
-    "<div class='section-head'><div class='h-sec'>Customer database</div><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div>"+
+    "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'><button class='btn btn-sea btn-sm' onclick='openCustomerSheet(\"\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open in Google Sheets</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody>"+
-    customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
+    customers.map(c=>"<tr><td class='strong'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+c.country+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+(c.pay==="Paid"?"completed":"full")+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+c.pref+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='openCustomerSheet' data-arg='"+c.name+"' title='Open in Sheets'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
     "</tbody></table></div></div>"+
   "</section>";
 }
@@ -3534,6 +3627,7 @@ function saveEditCustomer(){const name=document.getElementById("modal").dataset.
 function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);go("customers");}
 function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
 function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();go("customers");}
+function openCustomerSheet(name){var c=customers.find(function(x){return x.name===name;});if(!c)return;var url="https://docs.google.com/spreadsheets/create?title=Customer:+"+encodeURIComponent(c.name)+"&usp=sheets_web";window.open(url,"_blank");}
 
 /* ===== SOCIAL ===== */
 function viewSocial(){
@@ -3814,6 +3908,26 @@ function saveDriverLog(){
   tripLogs.push({id:"TR"+Date.now(),date:document.getElementById("dl_date").value||todayISO,veh,driver:document.getElementById("dl_driver").value||"—",startKm:start,endKm:end,totalKm:end-start,loc:document.getElementById("dl_loc").value||"—",time:dur||"—",startT:document.getElementById("dl_start_t").value||"",endT:document.getElementById("dl_end_t").value||""});
   saveLogs();closeModal();go("logistics");logTab("Daily Activity");
 }
+function editTrip(id){
+  var tr=tripLogs.find(function(x){return x.id===id;});if(!tr)return;
+  var vehOpts=vehicles.map(function(v){return"<option value='"+v.name+"' "+(v.name===tr.veh?"selected":"")+">"+v.name+"</option>";}).join("");
+  modalForm("Edit trip","Update trip record","<div class='form-grid'><div class='field'><label>Date</label><input class='input' type='date' id='et_date' value='"+tr.date+"'></div><div class='field'><label>Vehicle</label><select class='input' id='et_veh'>"+vehOpts+"</select></div><div class='field'><label>Driver</label><input class='input' id='et_driver' value='"+tr.driver+"'></div><div class='field'><label>Start km</label><input class='input mono' type='number' id='et_startKm' value='"+tr.startKm+"'></div><div class='field'><label>End km</label><input class='input mono' type='number' id='et_endKm' value='"+tr.endKm+"'></div><div class='field'><label>Total km</label><input class='input mono' type='number' id='et_totalKm' value='"+tr.totalKm+"'></div><div class='field full'><label>Location</label><input class='input' id='et_loc' value='"+tr.loc+"'></div><div class='field'><label>Time</label><input class='input' id='et_time' value='"+tr.time+"'></div></div>","saveEditTrip","Update");
+  document.getElementById("modal").dataset.trid=id;
+}
+function saveEditTrip(){
+  var id=document.getElementById("modal").dataset.trid;
+  var tr=tripLogs.find(function(x){return x.id===id;});if(!tr)return;
+  tr.date=document.getElementById("et_date").value;
+  tr.veh=document.getElementById("et_veh").value;
+  tr.driver=document.getElementById("et_driver").value;
+  tr.startKm=parseFloat(document.getElementById("et_startKm").value)||0;
+  tr.endKm=parseFloat(document.getElementById("et_endKm").value)||0;
+  tr.totalKm=parseFloat(document.getElementById("et_totalKm").value)||0;
+  tr.loc=document.getElementById("et_loc").value;
+  tr.time=document.getElementById("et_time").value;
+  saveLogs();closeModal();renderLog("Daily Activity");
+}
+function deleteTrip(id){if(!confirm("Delete this trip record?"))return;tripLogs=tripLogs.filter(function(x){return x.id!==id;});saveLogs();renderLog("Daily Activity");}
 
 /* ===== BOOT ===== */
 function boot(){
