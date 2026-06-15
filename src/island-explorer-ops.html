@@ -325,6 +325,36 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   body{background:#fff!important}
   .card{box-shadow:none!important;border:1px solid #ddd!important}
 }
+/* ===== Accommodation (live app styles) ===== */
+.acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.acc-card{display:flex;flex-direction:column;padding:18px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);transition:transform .15s,box-shadow .2s,border-color .15s}
+.acc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--sea)}
+.acc-card .acc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.acc-card .acc-name{font-size:16px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.acc-card .acc-loc{font-size:12px;color:var(--ink-soft);margin-top:2px;display:flex;align-items:center;gap:4px}
+.acc-card .acc-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:12px;margin:4px 0 12px;padding:10px 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.acc-card .acc-meta .k{color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.acc-card .acc-meta .v{font-weight:700;font-size:14px}
+.acc-card .acc-amen{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.amenity-pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--sea-soft);color:#0c5760}
+.acc-card .acc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:12px;border-top:1px solid var(--line-soft)}
+.acc-card .acc-foot .note{font-size:12px;color:var(--ink-soft);flex:1;min-width:0}
+.pill.active{background:#e4ece6;color:#1b4d3e}
+.pill.maintenance{background:#fce8e6;color:#9e2a2b}
+.acc-prop-strip{display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.acc-prop-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-soft)}
+.acc-prop-item .sw{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.acc-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.acc-cal-grid .dow{font-size:11px;font-weight:700;color:var(--ink-soft);text-align:center;text-transform:uppercase;letter-spacing:.04em;padding:4px 0}
+.acc-cal-grid .cell{padding:8px;border:1px solid var(--line);border-radius:8px;font-size:12px;min-height:74px;background:var(--surface)}
+.acc-cal-grid .cell.dim{background:transparent;border-color:transparent}
+.acc-cal-grid .cell.today{border-color:var(--sea);box-shadow:0 0 0 1px var(--sea) inset}
+.acc-cal-grid .cell .dn{font-weight:700;margin-bottom:4px;color:var(--ink-soft)}
+.acc-cal-grid .cell .booked{padding:2px 6px;border-radius:5px;font-size:10.5px;font-weight:600;margin:2px 0;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend .lg .lg-acts{display:inline-flex;gap:4px;margin-left:4px}
+.legend .lg .lg-acts .edit-btn,.legend .lg .lg-acts .del-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
+.legend .lg .lg-acts .del-btn{color:var(--coral)}
+@media(max-width:600px){.acc-cal-grid .cell{min-height:58px;padding:5px}}
 </style>
 </head>
 <body>
@@ -370,7 +400,7 @@ let tours=[
   {id:"T7",name:"Guided Session — Half Day",cat:"guided-half",start:"2026-06-22",end:"2026-06-22",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Sippighat Wetlands",stay:"Half day session"},
   {id:"T8",name:"Narcondam Expedition",cat:"narcondam",start:"2026-08-10",end:"2026-08-17",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
 ];
-const TOUR_COSTS={
+let TOUR_COSTS={
   T1:{indian:48500,foreigner:62500},
   T2:{indian:118500,foreigner:148000},
   T3:{indian:72000,foreigner:92000},
@@ -461,7 +491,7 @@ const platIcon={
 /* ===== PERSISTENCE — offline saving on this device ===== */
 const DATA_KEY="ieo_data_v1";
 function persistData(){
-  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts}));}catch(e){}
+  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS}));}catch(e){}
   cloudAutoPush();
 }
 (function loadData(){
@@ -477,6 +507,7 @@ function persistData(){
     if(d.drivers)drivers=d.drivers;
     if(d.ops)ops=d.ops;
     if(d.posts)posts=d.posts;
+    if(d.tourCosts)TOUR_COSTS=d.tourCosts;
   }catch(e){}
 })();
 /* Backup / restore — a portable file you can move between devices (manual sync) */
@@ -504,6 +535,7 @@ function importData(input){
       if(d.drivers)drivers=d.drivers;
       if(d.ops)ops=d.ops;
       if(d.posts)posts=d.posts;
+      if(d.tourCosts)TOUR_COSTS=d.tourCosts;
       if(p.trips){tripLogs=p.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
       persistData();boot();
       alert("Backup restored successfully.");
@@ -536,12 +568,13 @@ function sbClient(){
   return _sb;
 }
 function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el.textContent=msg;el.className="sb-status "+(kind||"");}}
-function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
+function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
 function sbApply(d){
   if(!d)return;
   if(d.tours)tours=d.tours;if(d.bookings)bookings=d.bookings;if(d.accommodations)accommodations=d.accommodations;
   if(d.leads)leads=d.leads;if(d.customers)customers=d.customers;if(d.vehicles)vehicles=d.vehicles;
   if(d.drivers)drivers=d.drivers;if(d.ops)ops=d.ops;if(d.posts)posts=d.posts;
+  if(d.tourCosts)TOUR_COSTS=d.tourCosts;
   if(d.trips){tripLogs=d.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
 }
 function sbSaveConfig(){
@@ -713,7 +746,7 @@ function renderAccommodation(){
   "<div class='acc-grid'>"+accommodations.map(function(a){
     return "<div class='card acc-card'>"+
       "<div class='acc-head'>"+
-        "<div><div class='acc-name'>"+a.name+"</div><div class='acc-loc'>"+a.location+"</div></div>"+
+        "<div><div class='acc-name'>"+a.name+"</div><div class='acc-loc'><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z'/><circle cx='12' cy='10' r='3'/></svg>"+a.location+"</div></div>"+
         "<span class='pill "+(a.status==="Active"?"active":"maintenance")+"'>"+a.status+"</span>"+
       "</div>"+
       "<div class='acc-meta'>"+
@@ -722,7 +755,7 @@ function renderAccommodation(){
       "</div>"+
       "<div class='acc-amen'>"+a.amenities.map(function(am){return"<span class='amenity-pill'>"+am+"</span>";}).join("")+"</div>"+
       "<div class='acc-foot'>"+
-        "<span style='font-size:12px;color:var(--ink-soft)'>"+a.notes+"</span>"+
+        "<span class='note'>"+a.notes+"</span>"+
         "<div class='tbl-actions'>"+
           "<button class='edit-btn' data-action='editAccommodation' data-arg='"+a.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button>"+
           "<button class='del-btn' data-action='deleteAccommodation' data-arg='"+a.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
@@ -735,7 +768,7 @@ function renderAccommodation(){
 function renderAccCalendar(){
   var b=document.getElementById("accBody");if(!b)return;
   var monthTours=tours.filter(function(t){var iso=function(d){return calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};return t.start<=iso(new Date(calY,calM+1,0).getDate())&&t.end>=iso(1);});
-  var html="<div class='cal-bar' style='margin-bottom:14px'><div class='cal-nav'><button onclick='calStep(-1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button><button onclick='calStep(1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div><select class='cal-sel' id='accCalMonth' onchange='calM=+this.value;renderAccCalendar()'>"+MONTHS.map(function(m,i){return"<option value='"+i+"' "+(i===calM?"selected":"")+">"+m+"</option>";}).join("")+"</select><select class='cal-sel' id='accCalYear' onchange='calY=+this.value;renderAccCalendar()'><option value='2025'>2025</option><option value='2026' selected>2026</option><option value='2027'>2027</option></select></div>";
+  var html="<div class='cal-bar' style='margin-bottom:14px'><div class='cal-nav'><button onclick='calStep(-1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button><button onclick='calStep(1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div><select class='cal-sel' id='accCalMonth' onchange='calM=+this.value;renderAccCalendar()'>"+MONTHS.map(function(m,i){return"<option value='"+i+"' "+(i===calM?"selected":"")+">"+m+"</option>";}).join("")+"</select><select class='cal-sel' id='accCalYear' onchange='calY=+this.value;renderAccCalendar()'>"+yearOptions(calY)+"</select></div>";
   html+="<div class='acc-prop-strip'>"+accommodations.map(function(a,i){return"<div class='acc-prop-item'><span class='sw' style='background:"+accColor(i)+"'></span>"+a.name+"</div>";}).join("")+"</div>";
   var first=new Date(calY,calM,1),startDow=(first.getDay()+6)%7,days=new Date(calY,calM+1,0).getDate();
   var iso=function(d){return calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};
@@ -933,6 +966,8 @@ function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").
 
 /* ===== CALENDAR ===== */
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const YEAR_MIN=2000, YEAR_MAX=2100; /* ~100-year selectable range */
+function yearOptions(sel){var s="";for(var y=YEAR_MIN;y<=YEAR_MAX;y++){s+="<option value='"+y+"'"+(y===sel?" selected":"")+">"+y+"</option>";}return s;}
 let calY=2026,calM=5;
 function viewCalendar(){
   return "<section class='view' id='v-calendar'>"+
@@ -940,7 +975,7 @@ function viewCalendar(){
       "<div class='cal-nav'><button onclick='calStep(-1)' aria-label='Previous month'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button>"+
         "<button onclick='calStep(1)' aria-label='Next month'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div>"+
       "<select class='cal-sel' id='calMonth' onchange='calM=+this.value;renderCalendar()'>"+MONTHS.map((m,i)=>"<option value='"+i+"'>"+m+"</option>").join("")+"</select>"+
-      "<select class='cal-sel' id='calYear' onchange='calY=+this.value;renderCalendar()'>"+[2025,2026,2027].map(y=>"<option value='"+y+"'>"+y+"</option>").join("")+"</select>"+
+      "<select class='cal-sel' id='calYear' onchange='calY=+this.value;renderCalendar()'>"+yearOptions(calY)+"</select>"+
       "<button class='btn btn-ghost btn-sm' onclick='calY=2026;calM=5;renderCalendar()' style='margin-left:auto'>Jump to June 2026</button>"+
     "</div>"+
     "<div class='card card-pad'><div class='cal-scroll'><div class='cal' id='calGrid'></div></div><div class='legend' id='calLegend'></div></div>"+
@@ -1046,7 +1081,7 @@ function viewCalc(){
         "<fieldset class='fieldset' style='grid-column:1/-1'><legend>Tourist Type</legend><div class='tourist-toggle'><button class='btn btn-sm "+(touristType==="indian"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"indian\")'>Indian</button><button class='btn btn-sm "+(touristType==="foreigner"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"foreigner\")'>Foreigner</button></div></fieldset>"+
         "<fieldset class='fieldset'><legend>Pricing</legend>"+cf("Taxes %","c_tax",5,"%")+"</fieldset>"+
         "<fieldset class='fieldset'><legend>Margin</legend>"+cf("Markup %","c_markup",25,"%")+cf("Profit margin %","c_margin",15,"%")+"</fieldset>"+
-        "<div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='fillDefaults()'>Fill Defaults</button><button class='btn btn-ghost btn-sm' onclick='resetToDefaults()'>Reset</button></div>"+
+        "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-sea btn-sm' onclick='openRateEditor()'>Edit per-pax rates</button><button class='btn btn-ghost btn-sm' onclick='fillDefaults()'>Fill Defaults</button><button class='btn btn-ghost btn-sm' onclick='resetToDefaults()'>Reset</button></div>"+
       "</div>"+
     "</div>"+
     "<div class='card result' id='calcResult'></div>"+
@@ -3712,6 +3747,23 @@ function calc(){
       "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>"+
       "Generate Quotation"+
     "</button>";
+}
+function openRateEditor(){
+  var rows=tours.filter(function(t){return TOUR_COSTS[t.id];}).map(function(t){
+    var c=TOUR_COSTS[t.id];
+    return "<div class='field'><label>"+shortName(t)+" · Indian ₹/pax</label><input class='input mono' type='number' id='rate_"+t.id+"_i' value='"+c.indian+"'></div>"+
+           "<div class='field'><label>"+shortName(t)+" · Foreigner ₹/pax</label><input class='input mono' type='number' id='rate_"+t.id+"_f' value='"+c.foreigner+"'></div>";
+  }).join("");
+  modalForm("Per-person rates","Edit category rates","<p style='font-size:13px;color:var(--ink-soft);margin-bottom:12px'>Your default per-person selling rate for each tour category. Saved on this device and synced to the cloud (Supabase).</p><div class='form-grid'>"+rows+"</div>","saveRates","Save rates");
+}
+function saveRates(){
+  tours.forEach(function(t){
+    if(!TOUR_COSTS[t.id])return;
+    var i=document.getElementById("rate_"+t.id+"_i"),f=document.getElementById("rate_"+t.id+"_f");
+    if(i)TOUR_COSTS[t.id].indian=parseFloat(i.value)||0;
+    if(f)TOUR_COSTS[t.id].foreigner=parseFloat(f.value)||0;
+  });
+  persistData();closeModal();calc();renderBookings();
 }
 function linkSheet(){
   const url=prompt("Enter Google Sheet URL or ID:");
