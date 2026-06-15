@@ -3766,12 +3766,52 @@ function saveRates(){
   persistData();closeModal();calc();renderBookings();
 }
 function linkSheet(){
-  const url=prompt("Enter Google Sheet URL or ID:");
+  var saved="";try{saved=localStorage.getItem("ieo_sheet_url")||"";}catch(e){}
+  var url=prompt("Paste your Google Sheet CSV link.\n\nIn Google Sheets: File → Share → Publish to web → select the sheet → 'Comma-separated values (.csv)' → Publish, then copy the link.\n\nExpected columns (any order): a tour 'id' or 'category'/'name', plus 'indian' and 'foreigner' per-person rates.",saved);
   if(!url)return;
-  const sheetData={c_stay:52000,c_veh:24000,c_drv:10000,c_fuel:9000};
-  Object.entries(sheetData).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
-  calc();
-  alert("Linked! Costs updated from sheet. You can edit any field below.");
+  try{localStorage.setItem("ieo_sheet_url",url);}catch(e){}
+  importRatesFromSheet(url);
+}
+function parseCSV(text){
+  return text.replace(/\r/g,"").split("\n").filter(function(l){return l.trim().length;}).map(function(line){
+    var out=[],cur="",q=false;
+    for(var i=0;i<line.length;i++){var ch=line[i];
+      if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++;}else q=!q;}
+      else if(ch===","&&!q){out.push(cur);cur="";}
+      else cur+=ch;
+    }
+    out.push(cur);
+    return out.map(function(s){return s.trim();});
+  });
+}
+function applyRatesCSV(text){
+  var rows=parseCSV(text);if(rows.length<2)return 0;
+  var head=rows[0].map(function(h){return h.toLowerCase();});
+  var col=function(names){for(var i=0;i<head.length;i++)for(var j=0;j<names.length;j++)if(head[i].indexOf(names[j])>=0)return i;return -1;};
+  var idIdx=col(["id"]),catIdx=col(["category","name","tour"]),inIdx=col(["indian","domestic","ind"]),foIdx=col(["foreigner","foreign","international","intl"]);
+  var num=function(v){return parseFloat(String(v||"").replace(/[^0-9.]/g,""))||0;};
+  var count=0;
+  for(var r=1;r<rows.length;r++){
+    var row=rows[r];var tour=null;
+    if(idIdx>=0&&row[idIdx]){var idv=row[idIdx].toUpperCase();tour=tours.find(function(t){return t.id.toUpperCase()===idv;});}
+    if(!tour&&catIdx>=0&&row[catIdx]){var nm=row[catIdx].toLowerCase();tour=tours.find(function(t){return t.name.toLowerCase().indexOf(nm)>=0||nm.indexOf(t.name.toLowerCase())>=0||shortName(t).toLowerCase()===nm;});}
+    if(!tour)continue;
+    TOUR_COSTS[tour.id]=TOUR_COSTS[tour.id]||{indian:0,foreigner:0};
+    if(inIdx>=0&&row[inIdx]!==undefined&&row[inIdx]!=="")TOUR_COSTS[tour.id].indian=num(row[inIdx]);
+    if(foIdx>=0&&row[foIdx]!==undefined&&row[foIdx]!=="")TOUR_COSTS[tour.id].foreigner=num(row[foIdx]);
+    count++;
+  }
+  return count;
+}
+function importRatesFromSheet(url){
+  fetch(url).then(function(res){if(!res.ok)throw new Error("HTTP "+res.status);return res.text();}).then(function(text){
+    var n=applyRatesCSV(text);
+    if(!n){alert("Fetched the sheet but found no matching rows. Check that it has columns like 'category', 'indian', 'foreigner' and that names/ids match your tours.");return;}
+    persistData();calc();renderBookings();
+    alert("Imported per-person rates for "+n+" tour categories from your Google Sheet. Saved and synced to the cloud.");
+  }).catch(function(e){
+    alert("Could not read the sheet ("+(e.message||e)+").\n\nMake sure you used File → Share → Publish to web → CSV (not just a normal share link), which is publicly readable by the browser.");
+  });
 }
 function addCostItem(){
   const wrap=document.getElementById("customItems");if(!wrap)return;
