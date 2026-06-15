@@ -100,7 +100,15 @@ Because storage is per-device, data does **not** sync between devices on its own
 - **Import backup** — restores that file on another device.
 - **Reset to sample data** — clears this device's saved data and restores the original demo content.
 
-> Want true real-time multi-device sync? That requires a hosted backend (e.g. Supabase or Firebase). The current build is intentionally serverless; wiring in Supabase is a planned upgrade.
+### Cloud sync (optional, Supabase)
+
+For automatic multi-device sync, the app has a built-in **Supabase** integration (off by default — no server is required to use the app). To enable it:
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the Supabase **SQL editor**, run the setup SQL shown under **Settings → Cloud Sync** (creates a `workspaces` table + access policy).
+3. Paste your **Project URL** and **anon public key** (Project Settings → API) into **Settings → Cloud Sync**, choose a workspace name, and tick **Auto-sync**.
+
+With auto-sync on, every change is pushed to Supabase and pulled on load, so all devices using the same URL, key and workspace name stay in sync. You can also Push / Pull manually. The anon key is public, so use a hard-to-guess workspace name (or add Supabase Auth) to control access.
 
 ---
 

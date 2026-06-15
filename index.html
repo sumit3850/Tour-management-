@@ -110,6 +110,7 @@ tbody tr{transition:background .12s}tbody tr:hover{background:var(--surface-2)}
 th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
 td.nowrap,th.nowrap{white-space:nowrap}
 td{vertical-align:middle}
+.sb-status{font-size:13px;color:var(--ink-soft)}.sb-status.ok{color:var(--forest)}.sb-status.err{color:var(--coral)}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -342,6 +343,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 </div>
 <div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
 const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
@@ -452,6 +454,7 @@ const platIcon={
 const DATA_KEY="ieo_data_v1";
 function persistData(){
   try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts}));}catch(e){}
+  cloudAutoPush();
 }
 (function loadData(){
   try{
@@ -504,6 +507,75 @@ function resetData(){
   if(!confirm("This will erase every change saved on this device and restore the original sample data. Continue?"))return;
   try{localStorage.removeItem(DATA_KEY);}catch(e){}
   location.reload();
+}
+
+/* ===== CLOUD SYNC — optional Supabase backend, configured in Settings ===== */
+const SB_CFG_KEY="ieo_supabase";
+let _sb=null, _sbReady=false, _sbApplying=false, _sbPushTimer=null;
+function sbConfig(){try{return JSON.parse(localStorage.getItem(SB_CFG_KEY)||"null");}catch(e){return null;}}
+function sbClient(){
+  if(_sb)return _sb;
+  var c=sbConfig();
+  if(!c||!c.url||!c.key||!window.supabase)return null;
+  try{_sb=window.supabase.createClient(c.url,c.key);}catch(e){_sb=null;}
+  return _sb;
+}
+function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el.textContent=msg;el.className="sb-status "+(kind||"");}}
+function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
+function sbApply(d){
+  if(!d)return;
+  if(d.tours)tours=d.tours;if(d.bookings)bookings=d.bookings;if(d.accommodations)accommodations=d.accommodations;
+  if(d.leads)leads=d.leads;if(d.customers)customers=d.customers;if(d.vehicles)vehicles=d.vehicles;
+  if(d.drivers)drivers=d.drivers;if(d.ops)ops=d.ops;if(d.posts)posts=d.posts;
+  if(d.trips){tripLogs=d.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
+}
+function sbSaveConfig(){
+  var url=document.getElementById("sb_url").value.trim();
+  var key=document.getElementById("sb_key").value.trim();
+  var ws=document.getElementById("sb_ws").value.trim()||"default";
+  var auto=document.getElementById("sb_auto").checked;
+  try{localStorage.setItem(SB_CFG_KEY,JSON.stringify({url:url,key:key,ws:ws,auto:auto}));}catch(e){}
+  _sb=null;_sbReady=true;
+  if(!window.supabase){sbStatus("Saved, but the Supabase library didn't load (check your connection / ad-blocker).","err");return;}
+  sbStatus(url&&key?("Saved. Connected to workspace \""+ws+"\". Use Push / Pull below."):"Cleared.","ok");
+}
+async function cloudPush(silent){
+  var c=sbConfig(),cl=sbClient();
+  if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return;}
+  if(!silent)sbStatus("Pushing to cloud…","");
+  try{
+    var res=await cl.from("workspaces").upsert({id:c.ws||"default",data:sbCollect(),updated_at:new Date().toISOString()});
+    if(res.error)throw res.error;
+    if(!silent)sbStatus("Pushed to cloud ✓ "+new Date().toLocaleTimeString(),"ok");
+  }catch(e){if(!silent)sbStatus("Push failed: "+(e.message||e),"err");}
+}
+async function cloudPull(silent){
+  var c=sbConfig(),cl=sbClient();
+  if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return;}
+  if(!silent)sbStatus("Pulling from cloud…","");
+  try{
+    var res=await cl.from("workspaces").select("data,updated_at").eq("id",c.ws||"default").maybeSingle();
+    if(res.error)throw res.error;
+    if(!res.data){if(!silent)sbStatus("Nothing saved in the cloud yet — Push from one device first.","");return;}
+    _sbApplying=true;
+    sbApply(res.data.data);
+    persistData();
+    boot();
+    _sbApplying=false;
+    if(!silent)sbStatus("Pulled from cloud ✓ "+new Date().toLocaleTimeString(),"ok");
+  }catch(e){_sbApplying=false;if(!silent)sbStatus("Pull failed: "+(e.message||e),"err");}
+}
+function cloudAutoPush(){
+  if(_sbApplying||!_sbReady)return;
+  var c=sbConfig();
+  if(!c||!c.auto)return;
+  clearTimeout(_sbPushTimer);
+  _sbPushTimer=setTimeout(function(){cloudPush(true);},1500);
+}
+async function cloudInit(){
+  var c=sbConfig();
+  if(c&&c.auto&&sbClient()){await cloudPull(true);}
+  _sbReady=true;
 }
 
 const TOUR_RATES={
@@ -3809,6 +3881,7 @@ Hashtags: #AndamanBirding #NicobarMegapode #IslandExplorer #BirdsOfIndia #Endemi
 
 /* ===== SETTINGS ===== */
 function viewSettings(){
+  var sbc=sbConfig()||{};
   const integ=[["Google Sheets","Cost data sync","M3 3h18v18H3zM3 9h18M9 3v18",true],["Google Maps","Pickup & birding locations","M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z",true],["WhatsApp","Booking & lead replies","M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5z",true],["Email","Quotations & confirmations","M4 4h16v16H4zM4 7l8 6 8-6",false]];
   return "<section class='view' id='v-settings'><div class='grid-2'>"+
     "<div class='card card-pad'><div class='eyebrow'>Connections</div><div class='h-sec' style='margin-bottom:6px'>Integrations</div>"+
@@ -3831,6 +3904,26 @@ function viewSettings(){
       "<label class='btn btn-sea btn-sm' style='cursor:pointer'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 8l5-5 5 5M12 3v12'/></svg>Import backup<input type='file' accept='application/json,.json' style='display:none' onchange='importData(this)'></label>"+
       "<button class='btn btn-ghost btn-sm' onclick='resetData()' style='color:var(--coral)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Reset to sample data</button>"+
     "</div>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Cloud Sync · Supabase</div>"+
+    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:680px'>Connect a free Supabase project to sync data across devices automatically. Create a project at supabase.com, run the setup SQL below in the Supabase SQL editor, then paste your <b>Project URL</b> and <b>anon public key</b> here (Project Settings → API).</p>"+
+    "<div class='form-grid'>"+
+      "<div class='field full'><label>Project URL</label><input class='input' id='sb_url' placeholder='https://xxxxxxxx.supabase.co' value='"+(sbc.url||"")+"'></div>"+
+      "<div class='field full'><label>Anon public key</label><input class='input' id='sb_key' placeholder='eyJhbGciOi...' value='"+(sbc.key||"")+"'></div>"+
+      "<div class='field'><label>Workspace name</label><input class='input' id='sb_ws' placeholder='default' value='"+(sbc.ws||"default")+"'></div>"+
+      "<div class='field'><label>Auto-sync</label><label style='display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;color:var(--ink)'><input type='checkbox' id='sb_auto' "+(sbc.auto?"checked":"")+" style='width:auto;margin:0'> Push on every change &amp; pull on load</label></div>"+
+    "</div>"+
+    "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px'>"+
+      "<button class='btn btn-primary btn-sm' onclick='sbSaveConfig()'>Save &amp; connect</button>"+
+      "<button class='btn btn-sea btn-sm' onclick='cloudPush()'>Push to cloud ↑</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick='cloudPull()'>Pull from cloud ↓</button>"+
+      "<span class='sb-status' id='sbStatus'></span>"+
+    "</div>"+
+    "<details style='margin-top:14px'><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
+      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;margin-top:8px;white-space:pre-wrap'>create table if not exists workspaces (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table workspaces enable row level security;\ncreate policy \"anon access\" on workspaces\n  for all to anon using (true) with check (true);</pre>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Heads-up: the anon key is public. Anyone with your URL, key and workspace name can read/write this data — pick a hard-to-guess workspace name, or add Supabase Auth later for stricter access.</p>"+
+    "</details>"+
   "</div>"+
   "</section>";
 }
@@ -4017,6 +4110,7 @@ function boot(){
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();
+cloudInit();
 </script>
 </body>
 </html>
