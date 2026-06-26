@@ -117,9 +117,15 @@ td{vertical-align:middle}
 .tour-col-head .ct{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1px 9px;font-size:11px;color:var(--ink-soft);font-weight:600}
 .tour-col .tour-card{margin-bottom:10px}
 .tour-col .tour-card:last-child{margin-bottom:0}
+.tour-card .dt-range{font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.15}
+.tour-card .code-tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:600;color:#0c5760;background:var(--sea-soft);border-radius:999px;padding:2px 10px}
 .rate-card{background:var(--sea-soft);border:1px solid var(--sea);border-radius:12px;padding:12px 14px;margin-bottom:14px}
 .rate-card-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--sea);font-weight:700;margin-bottom:6px}
 .calc-sub{font-size:12.5px;color:var(--ink-soft);margin:-4px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+.calc-in{width:130px;text-align:right;border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:13px;background:var(--surface)}
+.calc-in:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 2px var(--sea-soft)}
+.res-row.edit{align-items:center}
+.calc-mini{width:46px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:2px 4px;font-size:12px}
 .tourist-toggle{display:flex;gap:6px}
 .acc-avail{display:flex;align-items:center;gap:8px;font-size:12px;margin:2px 0 4px}
 .acc-avail .bar{flex:1;height:7px;border-radius:5px;background:var(--line);overflow:hidden}
@@ -368,7 +374,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 8</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 9</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -404,7 +410,9 @@ let tours=[
   {id:"T5",name:"Guided Session — Full Day",cat:"session",start:"2026-06-20",end:"2026-06-20",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Day session"},
   {id:"T6",name:"Guided Session — Night",cat:"session",start:"2026-05-28",end:"2026-05-28",cap:8,status:"completed",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Mount Harriet",stay:"Night session"},
   {id:"T7",name:"Guided Session — Half Day",cat:"guided-half",start:"2026-06-22",end:"2026-06-22",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Sippighat Wetlands",stay:"Half day session"},
-  {id:"T8",name:"Narcondam Expedition",cat:"narcondam",start:"2026-08-10",end:"2026-08-17",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
+  {id:"T8",name:"Narcondam Expedition (A)",cat:"narcondam",start:"2026-08-10",end:"2026-08-13",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
+  {id:"T9",name:"Narcondam Expedition (B)",cat:"narcondam",start:"2026-09-14",end:"2026-09-17",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
+  {id:"T10",name:"Narcondam Expedition (C)",cat:"narcondam",start:"2026-10-12",end:"2026-10-15",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
 ];
 let TOUR_COSTS={
   T1:{indian:48500,foreigner:62500},
@@ -425,9 +433,18 @@ const DEFAULT_COSTS={
   T6:{indian:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:800},foreigner:{accommodation:0,vehicle:3000,ferry:0,food:800,guide:5500,entry:1500}},
 };
 /* ===== Real costing data imported from the Birding Tour Expense Calculator sheet ===== */
-const SHEET_DATA={"T1":{"title":"South Andaman Endemic Birding Tour (5 Nights_15.05.2026_Update)","indian":{"1":{"rooms":1,"nights":5,"ship":0,"accommodation":27500,"vehicle":27500,"guide":15000,"entry":600,"food":6500,"total":77100,"perPerson":77100},"2":{"rooms":1,"nights":5,"ship":0,"accommodation":27500,"vehicle":27500,"guide":15000,"entry":1200,"food":13000,"total":84200,"perPerson":42100},"3":{"rooms":2,"nights":5,"ship":0,"accommodation":55000,"vehicle":27500,"guide":15000,"entry":1800,"food":19500,"total":118800,"perPerson":39600},"4":{"rooms":2,"nights":5,"ship":0,"accommodation":55000,"vehicle":27500,"guide":15000,"entry":2400,"food":26000,"total":125900,"perPerson":31500},"5":{"rooms":3,"nights":5,"ship":0,"accommodation":82500,"vehicle":27500,"guide":15000,"entry":3000,"food":32500,"total":160500,"perPerson":32100},"6":{"rooms":3,"nights":5,"ship":0,"accommodation":82500,"vehicle":55000,"guide":15000,"entry":3600,"food":39000,"total":195100,"perPerson":32500},"7":{"rooms":4,"nights":5,"ship":0,"accommodation":110000,"vehicle":55000,"guide":15000,"entry":4200,"food":45500,"total":229700,"perPerson":32800},"8":{"rooms":4,"nights":5,"ship":0,"accommodation":110000,"vehicle":55000,"guide":15000,"entry":4800,"food":52000,"total":236800,"perPerson":29600},"9":{"rooms":5,"nights":5,"ship":0,"accommodation":137500,"vehicle":55000,"guide":15000,"entry":5400,"food":58500,"total":271400,"perPerson":30200},"10":{"rooms":5,"nights":5,"ship":0,"accommodation":137500,"vehicle":55000,"guide":15000,"entry":6000,"food":65000,"total":278500,"perPerson":27900}},"foreign":{"1":{"rooms":1,"nights":5,"ship":0,"accommodation":32500,"vehicle":30000,"guide":15000,"entry":1500,"food":9000,"total":88000,"perPerson":88000},"2":{"rooms":1,"nights":5,"ship":0,"accommodation":32500,"vehicle":30000,"guide":15000,"entry":3000,"food":18000,"total":98500,"perPerson":49300},"3":{"rooms":2,"nights":5,"ship":0,"accommodation":65000,"vehicle":30000,"guide":15000,"entry":4500,"food":27000,"total":141500,"perPerson":47200},"4":{"rooms":2,"nights":5,"ship":0,"accommodation":65000,"vehicle":30000,"guide":15000,"entry":6000,"food":36000,"total":152000,"perPerson":38000},"5":{"rooms":3,"nights":5,"ship":0,"accommodation":97500,"vehicle":30000,"guide":15000,"entry":7500,"food":45000,"total":195000,"perPerson":39000},"6":{"rooms":3,"nights":5,"ship":0,"accommodation":97500,"vehicle":50000,"guide":25000,"entry":9000,"food":54000,"total":235500,"perPerson":39300},"7":{"rooms":4,"nights":5,"ship":0,"accommodation":130000,"vehicle":50000,"guide":25000,"entry":10500,"food":63000,"total":278500,"perPerson":39800},"8":{"rooms":4,"nights":5,"ship":0,"accommodation":130000,"vehicle":50000,"guide":25000,"entry":12000,"food":72000,"total":289000,"perPerson":36100},"9":{"rooms":5,"nights":5,"ship":0,"accommodation":162500,"vehicle":50000,"guide":25000,"entry":13500,"food":81000,"total":332000,"perPerson":36900},"10":{"rooms":5,"nights":5,"ship":0,"accommodation":162500,"vehicle":50000,"guide":25000,"entry":15000,"food":90000,"total":342500,"perPerson":34300}}},"T3":{"title":"South and Little Andaman Endemic Birding Tour (7 Nights_08th April_Update)","indian":{"1":{"rooms":1,"nights":7,"ship":8100,"accommodation":31000,"vehicle":37000,"guide":21000,"entry":600,"food":7000,"total":104700,"perPerson":104700},"2":{"rooms":1,"nights":7,"ship":16200,"accommodation":31000,"vehicle":37000,"guide":21000,"entry":1200,"food":14000,"total":120400,"perPerson":60200},"3":{"rooms":2,"nights":7,"ship":24300,"accommodation":62000,"vehicle":37000,"guide":21000,"entry":1800,"food":21000,"total":167100,"perPerson":55700},"4":{"rooms":2,"nights":7,"ship":32400,"accommodation":62000,"vehicle":37000,"guide":21000,"entry":2400,"food":28000,"total":182800,"perPerson":45700},"5":{"rooms":3,"nights":7,"ship":40500,"accommodation":93000,"vehicle":37000,"guide":21000,"entry":3000,"food":35000,"total":229500,"perPerson":45900},"6":{"rooms":3,"nights":7,"ship":48600,"accommodation":93000,"vehicle":64000,"guide":21000,"entry":3600,"food":42000,"total":272200,"perPerson":45400},"7":{"rooms":4,"nights":7,"ship":56700,"accommodation":124000,"vehicle":64000,"guide":21000,"entry":4200,"food":49000,"total":318900,"perPerson":45600},"8":{"rooms":4,"nights":7,"ship":64800,"accommodation":124000,"vehicle":64000,"guide":21000,"entry":4800,"food":56000,"total":334600,"perPerson":41800},"9":{"rooms":5,"nights":7,"ship":72900,"accommodation":155000,"vehicle":64000,"guide":21000,"entry":5400,"food":63000,"total":381300,"perPerson":42400},"10":{"rooms":5,"nights":7,"ship":81000,"accommodation":155000,"vehicle":64000,"guide":21000,"entry":6000,"food":70000,"total":397000,"perPerson":39700}},"foreign":{"1":{"rooms":1,"nights":7,"ship":10520,"accommodation":48500,"vehicle":45500,"guide":24500,"entry":1000,"food":10500,"total":140520,"perPerson":140500},"2":{"rooms":1,"nights":7,"ship":19250,"accommodation":48500,"vehicle":45500,"guide":24500,"entry":2000,"food":21000,"total":160750,"perPerson":80400},"3":{"rooms":2,"nights":7,"ship":27980,"accommodation":97000,"vehicle":45500,"guide":24500,"entry":3000,"food":31500,"total":229480,"perPerson":76500},"4":{"rooms":2,"nights":7,"ship":36710,"accommodation":97000,"vehicle":45500,"guide":24500,"entry":4000,"food":42000,"total":249710,"perPerson":62400},"5":{"rooms":3,"nights":7,"ship":45440,"accommodation":145500,"vehicle":45500,"guide":24500,"entry":5000,"food":52500,"total":318440,"perPerson":63700},"6":{"rooms":3,"nights":7,"ship":54170,"accommodation":145500,"vehicle":64000,"guide":24500,"entry":6000,"food":63000,"total":357170,"perPerson":59500},"7":{"rooms":4,"nights":7,"ship":62900,"accommodation":194000,"vehicle":64000,"guide":24500,"entry":7000,"food":73500,"total":425900,"perPerson":60800},"8":{"rooms":4,"nights":7,"ship":71630,"accommodation":194000,"vehicle":64000,"guide":24500,"entry":8000,"food":84000,"total":446130,"perPerson":55800},"9":{"rooms":5,"nights":7,"ship":80360,"accommodation":242500,"vehicle":64000,"guide":24500,"entry":9000,"food":94500,"total":514860,"perPerson":57200},"10":{"rooms":5,"nights":7,"ship":89090,"accommodation":242500,"vehicle":64000,"guide":24500,"entry":10000,"food":105000,"total":535090,"perPerson":53500}}},"T4":{"title":"South and Little Andaman Endemic Birding Tour (8 Nights_08th April_Update)","indian":{"1":{"rooms":1,"nights":8,"ship":8100,"accommodation":34000,"vehicle":40000,"guide":24000,"entry":1000,"food":8000,"total":115100,"perPerson":115100},"2":{"rooms":1,"nights":8,"ship":16200,"accommodation":34000,"vehicle":40000,"guide":24000,"entry":2000,"food":16000,"total":132200,"perPerson":66100},"3":{"rooms":2,"nights":8,"ship":24300,"accommodation":68000,"vehicle":40000,"guide":24000,"entry":3000,"food":24000,"total":183300,"perPerson":61100},"4":{"rooms":2,"nights":8,"ship":32400,"accommodation":68000,"vehicle":40000,"guide":24000,"entry":4000,"food":32000,"total":200400,"perPerson":50100},"5":{"rooms":3,"nights":8,"ship":40500,"accommodation":102000,"vehicle":40000,"guide":24000,"entry":5000,"food":40000,"total":251500,"perPerson":50300},"6":{"rooms":3,"nights":8,"ship":48600,"accommodation":102000,"vehicle":72000,"guide":24000,"entry":6000,"food":48000,"total":300600,"perPerson":50100},"7":{"rooms":4,"nights":8,"ship":56700,"accommodation":136000,"vehicle":72000,"guide":24000,"entry":7000,"food":56000,"total":351700,"perPerson":50200},"8":{"rooms":4,"nights":8,"ship":64800,"accommodation":136000,"vehicle":72000,"guide":24000,"entry":8000,"food":64000,"total":368800,"perPerson":46100},"9":{"rooms":5,"nights":8,"ship":72900,"accommodation":170000,"vehicle":72000,"guide":24000,"entry":9000,"food":72000,"total":419900,"perPerson":46700},"10":{"rooms":5,"nights":8,"ship":81000,"accommodation":170000,"vehicle":72000,"guide":24000,"entry":10000,"food":80000,"total":437000,"perPerson":43700}},"foreign":{"1":{"rooms":1,"nights":8,"ship":10520,"accommodation":40000,"vehicle":50000,"guide":28000,"entry":1000,"food":13000,"total":142520,"perPerson":142500},"2":{"rooms":1,"nights":8,"ship":19250,"accommodation":52000,"vehicle":50000,"guide":28000,"entry":2000,"food":25000,"total":176250,"perPerson":88100},"3":{"rooms":2,"nights":8,"ship":27980,"accommodation":104000,"vehicle":50000,"guide":28000,"entry":3000,"food":37000,"total":249980,"perPerson":83300},"4":{"rooms":2,"nights":8,"ship":36710,"accommodation":104000,"vehicle":50000,"guide":28000,"entry":4000,"food":49000,"total":271710,"perPerson":67900},"5":{"rooms":3,"nights":8,"ship":45440,"accommodation":156000,"vehicle":50000,"guide":40000,"entry":5000,"food":61000,"total":357440,"perPerson":71500},"6":{"rooms":3,"nights":8,"ship":54170,"accommodation":156000,"vehicle":72000,"guide":40000,"entry":6000,"food":73000,"total":401170,"perPerson":66900},"7":{"rooms":4,"nights":8,"ship":62900,"accommodation":208000,"vehicle":72000,"guide":40000,"entry":7000,"food":85000,"total":474900,"perPerson":67800},"8":{"rooms":4,"nights":8,"ship":71630,"accommodation":208000,"vehicle":72000,"guide":40000,"entry":8000,"food":97000,"total":496630,"perPerson":62100},"9":{"rooms":5,"nights":8,"ship":80360,"accommodation":260000,"vehicle":72000,"guide":40000,"entry":9000,"food":109000,"total":570360,"perPerson":63400},"10":{"rooms":5,"nights":8,"ship":89090,"accommodation":260000,"vehicle":72000,"guide":40000,"entry":10000,"food":121000,"total":592090,"perPerson":59200}}},"T2":{"title":"Great Nicobar Endemic Birding Tour (12 Nights_06th June_Update)","indian":{"1":{"rooms":1,"nights":10,"ship":20300,"accommodation":49000,"vehicle":58000,"guide":50000,"entry":1000,"food":16000,"total":194300,"perPerson":194300},"2":{"rooms":1,"nights":10,"ship":32800,"accommodation":59000,"vehicle":58000,"guide":66000,"entry":3000,"food":31000,"total":249800,"perPerson":124900},"3":{"rooms":2,"nights":10,"ship":45300,"accommodation":118000,"vehicle":58000,"guide":74000,"entry":3000,"food":46000,"total":344300,"perPerson":114800},"4":{"rooms":2,"nights":10,"ship":57800,"accommodation":118000,"vehicle":58000,"guide":82000,"entry":3000,"food":61000,"total":379800,"perPerson":95000},"5":{"rooms":3,"nights":10,"ship":70300,"accommodation":165000,"vehicle":58000,"guide":82000,"entry":3000,"food":76000,"total":454300,"perPerson":90900},"6":{"rooms":3,"nights":10,"ship":82800,"accommodation":165000,"vehicle":82000,"guide":90000,"entry":4000,"food":91000,"total":514800,"perPerson":85800},"7":{"rooms":4,"nights":10,"ship":95300,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":106000,"total":597300,"perPerson":85300},"8":{"rooms":4,"nights":10,"ship":107800,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":121000,"total":624800,"perPerson":78100},"9":{"rooms":5,"nights":10,"ship":120300,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":136000,"total":707300,"perPerson":78600},"10":{"rooms":5,"nights":10,"ship":132800,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":151000,"total":734800,"perPerson":73500}},"foreign":{"1":{"rooms":1,"nights":10,"ship":20300,"accommodation":49000,"vehicle":58000,"guide":50000,"entry":1000,"food":16000,"total":194300,"perPerson":194300},"2":{"rooms":1,"nights":10,"ship":32800,"accommodation":59000,"vehicle":58000,"guide":66000,"entry":3000,"food":31000,"total":249800,"perPerson":124900},"3":{"rooms":2,"nights":10,"ship":45300,"accommodation":118000,"vehicle":58000,"guide":74000,"entry":3000,"food":46000,"total":344300,"perPerson":114800},"4":{"rooms":2,"nights":10,"ship":57800,"accommodation":118000,"vehicle":58000,"guide":82000,"entry":3000,"food":61000,"total":379800,"perPerson":95000},"5":{"rooms":3,"nights":10,"ship":70300,"accommodation":165000,"vehicle":58000,"guide":82000,"entry":3000,"food":76000,"total":454300,"perPerson":90900},"6":{"rooms":3,"nights":10,"ship":82800,"accommodation":165000,"vehicle":82000,"guide":90000,"entry":4000,"food":91000,"total":514800,"perPerson":85800},"7":{"rooms":4,"nights":10,"ship":95300,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":106000,"total":597300,"perPerson":85300},"8":{"rooms":4,"nights":10,"ship":107800,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":121000,"total":624800,"perPerson":78100},"9":{"rooms":5,"nights":10,"ship":120300,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":136000,"total":707300,"perPerson":78600},"10":{"rooms":5,"nights":10,"ship":132800,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":151000,"total":734800,"perPerson":73500}}}};
-const CALC_ORDER=["T1","T3","T4","T2"];
-const CALC_LABELS={T1:"South Andaman Endemic · 5N",T3:"South & Little Andaman · 7N",T4:"South & Little Andaman · 8N",T2:"Great Nicobar Endemic · 12N"};
+const SHEET_DATA_DEFAULT={"T1":{"title":"South Andaman Endemic Birding Tour (5 Nights_15.05.2026_Update)","indian":{"1":{"rooms":1,"nights":5,"ship":0,"accommodation":27500,"vehicle":27500,"guide":15000,"entry":600,"food":6500,"total":77100,"perPerson":77100},"2":{"rooms":1,"nights":5,"ship":0,"accommodation":27500,"vehicle":27500,"guide":15000,"entry":1200,"food":13000,"total":84200,"perPerson":42100},"3":{"rooms":2,"nights":5,"ship":0,"accommodation":55000,"vehicle":27500,"guide":15000,"entry":1800,"food":19500,"total":118800,"perPerson":39600},"4":{"rooms":2,"nights":5,"ship":0,"accommodation":55000,"vehicle":27500,"guide":15000,"entry":2400,"food":26000,"total":125900,"perPerson":31500},"5":{"rooms":3,"nights":5,"ship":0,"accommodation":82500,"vehicle":27500,"guide":15000,"entry":3000,"food":32500,"total":160500,"perPerson":32100},"6":{"rooms":3,"nights":5,"ship":0,"accommodation":82500,"vehicle":55000,"guide":15000,"entry":3600,"food":39000,"total":195100,"perPerson":32500},"7":{"rooms":4,"nights":5,"ship":0,"accommodation":110000,"vehicle":55000,"guide":15000,"entry":4200,"food":45500,"total":229700,"perPerson":32800},"8":{"rooms":4,"nights":5,"ship":0,"accommodation":110000,"vehicle":55000,"guide":15000,"entry":4800,"food":52000,"total":236800,"perPerson":29600},"9":{"rooms":5,"nights":5,"ship":0,"accommodation":137500,"vehicle":55000,"guide":15000,"entry":5400,"food":58500,"total":271400,"perPerson":30200},"10":{"rooms":5,"nights":5,"ship":0,"accommodation":137500,"vehicle":55000,"guide":15000,"entry":6000,"food":65000,"total":278500,"perPerson":27900}},"foreign":{"1":{"rooms":1,"nights":5,"ship":0,"accommodation":32500,"vehicle":30000,"guide":15000,"entry":1500,"food":9000,"total":88000,"perPerson":88000},"2":{"rooms":1,"nights":5,"ship":0,"accommodation":32500,"vehicle":30000,"guide":15000,"entry":3000,"food":18000,"total":98500,"perPerson":49300},"3":{"rooms":2,"nights":5,"ship":0,"accommodation":65000,"vehicle":30000,"guide":15000,"entry":4500,"food":27000,"total":141500,"perPerson":47200},"4":{"rooms":2,"nights":5,"ship":0,"accommodation":65000,"vehicle":30000,"guide":15000,"entry":6000,"food":36000,"total":152000,"perPerson":38000},"5":{"rooms":3,"nights":5,"ship":0,"accommodation":97500,"vehicle":30000,"guide":15000,"entry":7500,"food":45000,"total":195000,"perPerson":39000},"6":{"rooms":3,"nights":5,"ship":0,"accommodation":97500,"vehicle":50000,"guide":25000,"entry":9000,"food":54000,"total":235500,"perPerson":39300},"7":{"rooms":4,"nights":5,"ship":0,"accommodation":130000,"vehicle":50000,"guide":25000,"entry":10500,"food":63000,"total":278500,"perPerson":39800},"8":{"rooms":4,"nights":5,"ship":0,"accommodation":130000,"vehicle":50000,"guide":25000,"entry":12000,"food":72000,"total":289000,"perPerson":36100},"9":{"rooms":5,"nights":5,"ship":0,"accommodation":162500,"vehicle":50000,"guide":25000,"entry":13500,"food":81000,"total":332000,"perPerson":36900},"10":{"rooms":5,"nights":5,"ship":0,"accommodation":162500,"vehicle":50000,"guide":25000,"entry":15000,"food":90000,"total":342500,"perPerson":34300}}},"T3":{"title":"South and Little Andaman Endemic Birding Tour (7 Nights_08th April_Update)","indian":{"1":{"rooms":1,"nights":7,"ship":8100,"accommodation":31000,"vehicle":37000,"guide":21000,"entry":600,"food":7000,"total":104700,"perPerson":104700},"2":{"rooms":1,"nights":7,"ship":16200,"accommodation":31000,"vehicle":37000,"guide":21000,"entry":1200,"food":14000,"total":120400,"perPerson":60200},"3":{"rooms":2,"nights":7,"ship":24300,"accommodation":62000,"vehicle":37000,"guide":21000,"entry":1800,"food":21000,"total":167100,"perPerson":55700},"4":{"rooms":2,"nights":7,"ship":32400,"accommodation":62000,"vehicle":37000,"guide":21000,"entry":2400,"food":28000,"total":182800,"perPerson":45700},"5":{"rooms":3,"nights":7,"ship":40500,"accommodation":93000,"vehicle":37000,"guide":21000,"entry":3000,"food":35000,"total":229500,"perPerson":45900},"6":{"rooms":3,"nights":7,"ship":48600,"accommodation":93000,"vehicle":64000,"guide":21000,"entry":3600,"food":42000,"total":272200,"perPerson":45400},"7":{"rooms":4,"nights":7,"ship":56700,"accommodation":124000,"vehicle":64000,"guide":21000,"entry":4200,"food":49000,"total":318900,"perPerson":45600},"8":{"rooms":4,"nights":7,"ship":64800,"accommodation":124000,"vehicle":64000,"guide":21000,"entry":4800,"food":56000,"total":334600,"perPerson":41800},"9":{"rooms":5,"nights":7,"ship":72900,"accommodation":155000,"vehicle":64000,"guide":21000,"entry":5400,"food":63000,"total":381300,"perPerson":42400},"10":{"rooms":5,"nights":7,"ship":81000,"accommodation":155000,"vehicle":64000,"guide":21000,"entry":6000,"food":70000,"total":397000,"perPerson":39700}},"foreign":{"1":{"rooms":1,"nights":7,"ship":10520,"accommodation":48500,"vehicle":45500,"guide":24500,"entry":1000,"food":10500,"total":140520,"perPerson":140500},"2":{"rooms":1,"nights":7,"ship":19250,"accommodation":48500,"vehicle":45500,"guide":24500,"entry":2000,"food":21000,"total":160750,"perPerson":80400},"3":{"rooms":2,"nights":7,"ship":27980,"accommodation":97000,"vehicle":45500,"guide":24500,"entry":3000,"food":31500,"total":229480,"perPerson":76500},"4":{"rooms":2,"nights":7,"ship":36710,"accommodation":97000,"vehicle":45500,"guide":24500,"entry":4000,"food":42000,"total":249710,"perPerson":62400},"5":{"rooms":3,"nights":7,"ship":45440,"accommodation":145500,"vehicle":45500,"guide":24500,"entry":5000,"food":52500,"total":318440,"perPerson":63700},"6":{"rooms":3,"nights":7,"ship":54170,"accommodation":145500,"vehicle":64000,"guide":24500,"entry":6000,"food":63000,"total":357170,"perPerson":59500},"7":{"rooms":4,"nights":7,"ship":62900,"accommodation":194000,"vehicle":64000,"guide":24500,"entry":7000,"food":73500,"total":425900,"perPerson":60800},"8":{"rooms":4,"nights":7,"ship":71630,"accommodation":194000,"vehicle":64000,"guide":24500,"entry":8000,"food":84000,"total":446130,"perPerson":55800},"9":{"rooms":5,"nights":7,"ship":80360,"accommodation":242500,"vehicle":64000,"guide":24500,"entry":9000,"food":94500,"total":514860,"perPerson":57200},"10":{"rooms":5,"nights":7,"ship":89090,"accommodation":242500,"vehicle":64000,"guide":24500,"entry":10000,"food":105000,"total":535090,"perPerson":53500}}},"T4":{"title":"South and Little Andaman Endemic Birding Tour (8 Nights_08th April_Update)","indian":{"1":{"rooms":1,"nights":8,"ship":8100,"accommodation":34000,"vehicle":40000,"guide":24000,"entry":1000,"food":8000,"total":115100,"perPerson":115100},"2":{"rooms":1,"nights":8,"ship":16200,"accommodation":34000,"vehicle":40000,"guide":24000,"entry":2000,"food":16000,"total":132200,"perPerson":66100},"3":{"rooms":2,"nights":8,"ship":24300,"accommodation":68000,"vehicle":40000,"guide":24000,"entry":3000,"food":24000,"total":183300,"perPerson":61100},"4":{"rooms":2,"nights":8,"ship":32400,"accommodation":68000,"vehicle":40000,"guide":24000,"entry":4000,"food":32000,"total":200400,"perPerson":50100},"5":{"rooms":3,"nights":8,"ship":40500,"accommodation":102000,"vehicle":40000,"guide":24000,"entry":5000,"food":40000,"total":251500,"perPerson":50300},"6":{"rooms":3,"nights":8,"ship":48600,"accommodation":102000,"vehicle":72000,"guide":24000,"entry":6000,"food":48000,"total":300600,"perPerson":50100},"7":{"rooms":4,"nights":8,"ship":56700,"accommodation":136000,"vehicle":72000,"guide":24000,"entry":7000,"food":56000,"total":351700,"perPerson":50200},"8":{"rooms":4,"nights":8,"ship":64800,"accommodation":136000,"vehicle":72000,"guide":24000,"entry":8000,"food":64000,"total":368800,"perPerson":46100},"9":{"rooms":5,"nights":8,"ship":72900,"accommodation":170000,"vehicle":72000,"guide":24000,"entry":9000,"food":72000,"total":419900,"perPerson":46700},"10":{"rooms":5,"nights":8,"ship":81000,"accommodation":170000,"vehicle":72000,"guide":24000,"entry":10000,"food":80000,"total":437000,"perPerson":43700}},"foreign":{"1":{"rooms":1,"nights":8,"ship":10520,"accommodation":40000,"vehicle":50000,"guide":28000,"entry":1000,"food":13000,"total":142520,"perPerson":142500},"2":{"rooms":1,"nights":8,"ship":19250,"accommodation":52000,"vehicle":50000,"guide":28000,"entry":2000,"food":25000,"total":176250,"perPerson":88100},"3":{"rooms":2,"nights":8,"ship":27980,"accommodation":104000,"vehicle":50000,"guide":28000,"entry":3000,"food":37000,"total":249980,"perPerson":83300},"4":{"rooms":2,"nights":8,"ship":36710,"accommodation":104000,"vehicle":50000,"guide":28000,"entry":4000,"food":49000,"total":271710,"perPerson":67900},"5":{"rooms":3,"nights":8,"ship":45440,"accommodation":156000,"vehicle":50000,"guide":40000,"entry":5000,"food":61000,"total":357440,"perPerson":71500},"6":{"rooms":3,"nights":8,"ship":54170,"accommodation":156000,"vehicle":72000,"guide":40000,"entry":6000,"food":73000,"total":401170,"perPerson":66900},"7":{"rooms":4,"nights":8,"ship":62900,"accommodation":208000,"vehicle":72000,"guide":40000,"entry":7000,"food":85000,"total":474900,"perPerson":67800},"8":{"rooms":4,"nights":8,"ship":71630,"accommodation":208000,"vehicle":72000,"guide":40000,"entry":8000,"food":97000,"total":496630,"perPerson":62100},"9":{"rooms":5,"nights":8,"ship":80360,"accommodation":260000,"vehicle":72000,"guide":40000,"entry":9000,"food":109000,"total":570360,"perPerson":63400},"10":{"rooms":5,"nights":8,"ship":89090,"accommodation":260000,"vehicle":72000,"guide":40000,"entry":10000,"food":121000,"total":592090,"perPerson":59200}}},"T2":{"title":"Great Nicobar Endemic Birding Tour (12 Nights_06th June_Update)","indian":{"1":{"rooms":1,"nights":10,"ship":20300,"accommodation":49000,"vehicle":58000,"guide":50000,"entry":1000,"food":16000,"total":194300,"perPerson":194300},"2":{"rooms":1,"nights":10,"ship":32800,"accommodation":59000,"vehicle":58000,"guide":66000,"entry":3000,"food":31000,"total":249800,"perPerson":124900},"3":{"rooms":2,"nights":10,"ship":45300,"accommodation":118000,"vehicle":58000,"guide":74000,"entry":3000,"food":46000,"total":344300,"perPerson":114800},"4":{"rooms":2,"nights":10,"ship":57800,"accommodation":118000,"vehicle":58000,"guide":82000,"entry":3000,"food":61000,"total":379800,"perPerson":95000},"5":{"rooms":3,"nights":10,"ship":70300,"accommodation":165000,"vehicle":58000,"guide":82000,"entry":3000,"food":76000,"total":454300,"perPerson":90900},"6":{"rooms":3,"nights":10,"ship":82800,"accommodation":165000,"vehicle":82000,"guide":90000,"entry":4000,"food":91000,"total":514800,"perPerson":85800},"7":{"rooms":4,"nights":10,"ship":95300,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":106000,"total":597300,"perPerson":85300},"8":{"rooms":4,"nights":10,"ship":107800,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":121000,"total":624800,"perPerson":78100},"9":{"rooms":5,"nights":10,"ship":120300,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":136000,"total":707300,"perPerson":78600},"10":{"rooms":5,"nights":10,"ship":132800,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":151000,"total":734800,"perPerson":73500}},"foreign":{"1":{"rooms":1,"nights":10,"ship":20300,"accommodation":49000,"vehicle":58000,"guide":50000,"entry":1000,"food":16000,"total":194300,"perPerson":194300},"2":{"rooms":1,"nights":10,"ship":32800,"accommodation":59000,"vehicle":58000,"guide":66000,"entry":3000,"food":31000,"total":249800,"perPerson":124900},"3":{"rooms":2,"nights":10,"ship":45300,"accommodation":118000,"vehicle":58000,"guide":74000,"entry":3000,"food":46000,"total":344300,"perPerson":114800},"4":{"rooms":2,"nights":10,"ship":57800,"accommodation":118000,"vehicle":58000,"guide":82000,"entry":3000,"food":61000,"total":379800,"perPerson":95000},"5":{"rooms":3,"nights":10,"ship":70300,"accommodation":165000,"vehicle":58000,"guide":82000,"entry":3000,"food":76000,"total":454300,"perPerson":90900},"6":{"rooms":3,"nights":10,"ship":82800,"accommodation":165000,"vehicle":82000,"guide":90000,"entry":4000,"food":91000,"total":514800,"perPerson":85800},"7":{"rooms":4,"nights":10,"ship":95300,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":106000,"total":597300,"perPerson":85300},"8":{"rooms":4,"nights":10,"ship":107800,"accommodation":220000,"vehicle":82000,"guide":90000,"entry":4000,"food":121000,"total":624800,"perPerson":78100},"9":{"rooms":5,"nights":10,"ship":120300,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":136000,"total":707300,"perPerson":78600},"10":{"rooms":5,"nights":10,"ship":132800,"accommodation":275000,"vehicle":82000,"guide":90000,"entry":4000,"food":151000,"total":734800,"perPerson":73500}}}};
+let SHEET_DATA=JSON.parse(JSON.stringify(SHEET_DATA_DEFAULT));
+function ensureSheetDefaults(){
+  ["T8","T9","T10"].forEach(function(k){
+    if(SHEET_DATA[k])return;
+    var blank=function(){var o={};for(var p=1;p<=10;p++){o[String(p)]={rooms:Math.ceil(p/2),nights:3,ship:0,accommodation:0,vehicle:0,guide:0,entry:0,food:0,total:0,perPerson:0};}return o;};
+    SHEET_DATA[k]={title:k,indian:blank(),foreign:blank()};
+  });
+}
+ensureSheetDefaults();
+const CALC_ORDER=["T1","T3","T4","T2","T8","T9","T10"];
+const CALC_LABELS={T1:"5N · South Andaman",T3:"7N · South & Little Andaman",T4:"8N · South & Little Andaman",T2:"12N · Great Nicobar",T8:"03N · Narcondam Exp (A)",T9:"03N · Narcondam Exp (B)",T10:"03N · Narcondam Exp (C)"};
 var touristType="indian";
 var currentCalcTourId="";
 let bookings=[
@@ -501,7 +518,7 @@ const platIcon={
 /* ===== PERSISTENCE — offline saving on this device ===== */
 const DATA_KEY="ieo_data_v1";
 function persistData(){
-  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS}));}catch(e){}
+  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA}));}catch(e){}
   cloudAutoPush();
 }
 (function loadData(){
@@ -518,6 +535,8 @@ function persistData(){
     if(d.ops)ops=d.ops;
     if(d.posts)posts=d.posts;
     if(d.tourCosts)TOUR_COSTS=d.tourCosts;
+    if(d.sheetData)SHEET_DATA=d.sheetData;
+    ensureSheetDefaults();
   }catch(e){}
 })();
 /* Backup / restore — a portable file you can move between devices (manual sync) */
@@ -578,13 +597,15 @@ function sbClient(){
   return _sb;
 }
 function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el.textContent=msg;el.className="sb-status "+(kind||"");}}
-function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
+function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
 function sbApply(d){
   if(!d)return;
   if(d.tours)tours=d.tours;if(d.bookings)bookings=d.bookings;if(d.accommodations)accommodations=d.accommodations;
   if(d.leads)leads=d.leads;if(d.customers)customers=d.customers;if(d.vehicles)vehicles=d.vehicles;
   if(d.drivers)drivers=d.drivers;if(d.ops)ops=d.ops;if(d.posts)posts=d.posts;
   if(d.tourCosts)TOUR_COSTS=d.tourCosts;
+  if(d.sheetData)SHEET_DATA=d.sheetData;
+  ensureSheetDefaults();
   if(d.trips){tripLogs=d.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
 }
 function sbSaveConfig(){
@@ -692,13 +713,26 @@ const durNights=t=>Math.round((new Date(t.end)-new Date(t.start))/864e5);
 const dShort=s=>new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
 const tourColor=id=>TOURCOLORS[Math.abs(tours.findIndex(t=>t.id===id))%TOURCOLORS.length];
 const accColor=i=>TOURCOLORS[Math.abs(i)%TOURCOLORS.length];
-/* Short tour labels, e.g. "5-N SNBT", "12-N GNBT", "7-N SLABT", "4-N NarCo" */
+/* Exact short codes for each tour (used on cards, calendar, etc.) */
+const TOUR_CODE={
+  T1:"5N- South Andaman",
+  T3:"7N- South & Little And.",
+  T4:"8N- South & Little And.",
+  T2:"12N- Great Nicobar",
+  T8:"03N- Narcondam Exp_(A)",
+  T9:"03N- Narcondam Exp _(B)",
+  T10:"03N- Narcondam Exp_(C)",
+  T7:"GS- Half Day",
+  T5:"GS-Full day",
+  T6:"GS-Night"
+};
 const CAT_CODE={southandaman:"SNBT",littleandaman:"SLABT",nicobar:"GNBT",narcondam:"NarCo"};
 function shortName(t){
+  if(TOUR_CODE[t.id])return TOUR_CODE[t.id];
   var c=CAT_CODE[t.cat];
   if(c)return durNights(t)+"-N "+c;
-  if(t.cat==="session")return (t.name.indexOf("Night")>=0?"GS Night":"GS Full Day");
-  if(t.cat==="guided-half")return "GS Half Day";
+  if(t.cat==="session")return (t.name.indexOf("Night")>=0?"GS-Night":"GS-Full day");
+  if(t.cat==="guided-half")return "GS- Half Day";
   return t.name;
 }
 function pill(s){const m={open:"Open",full:"Full",closed:"Closed",completed:"Completed"};return "<span class='pill "+s+"'>"+m[s]+"</span>"}
@@ -951,8 +985,8 @@ function tourCard(t){
   var gNames=bookings.filter(function(x){return x.tour===t.id;}).map(function(x){return x.guest;}).join(", ");
   return "<div class='card tour-card' data-action='openTour' data-arg='"+t.id+"'>"+
     "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
-    "<div class='nm' title='"+t.name+"'>"+shortName(t)+"</div>"+
-    "<div class='dt'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div>"+
+    "<div class='dt-range'>"+dShort(t.start)+" – "+dShort(t.end)+"</div>"+
+    "<div class='code-tag' title='"+t.name+"'>"+shortName(t)+"</div>"+
     "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
     "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
@@ -1096,8 +1130,8 @@ function setTouristType(type){
 }
 function generateQuotation(){
   const sel = calcSelection();
-  const d = sel.d;
-  if(!d){ alert("Select a tour first to generate a quotation."); return; }
+  if(!sel.d){ alert("Select a tour first to generate a quotation."); return; }
+  const d = document.getElementById('cb_accommodation') ? readCalcInputs() : sel.d;
   const pax = sel.pax;
   const tourName = sel.label;
   const clientType = sel.type==="foreign" ? "Foreigner" : "Indian";
@@ -3675,25 +3709,47 @@ function calcSelection(){
   var d=src&&src[type]?src[type][pax]:null;
   return {key:currentCalcTourId,pax:pax,type:type,d:d,label:CALC_LABELS[currentCalcTourId]||(src?src.title:"")};
 }
+const CALC_ITEMS=[["accommodation","Accommodation"],["vehicle","Vehicle transport"],["guide","Guide charges"],["ship","Ship / ferry tickets"],["entry","Entry fees / permits"],["food","Food (extra)"]];
 function calc(){
   const r=document.getElementById("calcResult");if(!r)return;
   var sel=calcSelection();var d=sel.d;
   if(!d){r.innerHTML="<div style='padding:30px;text-align:center;color:var(--ink-soft)'>No costing data for this selection.</div>";return;}
-  var line=function(lab,v){return "<div class='res-row'><span>"+lab+"</span><b class='mono'>"+fmt(v||0)+"</b></div>";};
+  var rowEdit=function(key,lab){return "<div class='res-row edit'><span>"+lab+"</span><input class='calc-in mono' type='number' id='cb_"+key+"' value='"+(d[key]||0)+"' oninput='recalcCalc()'></div>";};
   r.innerHTML="<h3>"+sel.label+"</h3>"+
-    "<div class='calc-sub'>"+d.nights+" nights · "+d.rooms+" room(s) · "+sel.pax+" pax · "+(sel.type==="foreign"?"Foreigner":"Indian")+"</div>"+
-    line("Accommodation",d.accommodation)+
-    line("Vehicle transport",d.vehicle)+
-    line("Guide charges",d.guide)+
-    line("Ship / ferry tickets",d.ship)+
-    line("Entry fees / permits",d.entry)+
-    line("Food (extra)",d.food)+
+    "<div class='calc-sub'>"+
+      "<input class='calc-mini mono' type='number' id='cb_nights' value='"+(d.nights||0)+"' oninput='recalcCalc()'> nights · "+
+      "<input class='calc-mini mono' type='number' id='cb_rooms' value='"+(d.rooms||0)+"' oninput='recalcCalc()'> room(s) · "+sel.pax+" pax · "+(sel.type==="foreign"?"Foreigner":"Indian")+
+    "</div>"+
+    CALC_ITEMS.map(function(it){return rowEdit(it[0],it[1]);}).join("")+
     "<div class='res-row big'><span>Total tour cost</span><b class='mono' id='c_total'>"+fmt(d.total)+"</b></div>"+
     "<div class='res-row big'><span>Per person</span><b class='mono' id='c_per'>"+fmt(d.perPerson)+"</b></div>"+
-    "<button class='btn btn-primary' onclick='generateQuotation()' style='margin-top:14px;width:100%'>"+
-      "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>"+
-      "Generate Quotation"+
-    "</button>";
+    "<div style='display:flex;gap:8px;margin-top:14px'>"+
+      "<button class='btn btn-sea' onclick='saveCalcRates()' style='flex:1'>Save rates</button>"+
+      "<button class='btn btn-primary' onclick='generateQuotation()' style='flex:1'>"+
+        "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>Quotation</button>"+
+    "</div>"+
+    "<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Edit any line to update the total live. <b>Save rates</b> stores it for this tour · "+sel.pax+" pax · "+(sel.type==="foreign"?"Foreigner":"Indian")+" (synced).</p>";
+}
+function readCalcInputs(){
+  var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
+  var o={nights:g("cb_nights"),rooms:g("cb_rooms")};
+  var total=0;
+  CALC_ITEMS.forEach(function(it){o[it[0]]=g("cb_"+it[0]);total+=o[it[0]];});
+  var sel=calcSelection();var pax=Math.max(parseInt(sel.pax)||1,1);
+  o.total=total;o.perPerson=Math.round(total/pax);
+  return o;
+}
+function recalcCalc(){
+  var o=readCalcInputs();
+  var t=document.getElementById("c_total"),p=document.getElementById("c_per");
+  if(t)t.textContent=fmt(o.total);if(p)p.textContent=fmt(o.perPerson);
+}
+function saveCalcRates(){
+  var sel=calcSelection();if(!sel.d)return;
+  var o=readCalcInputs();
+  SHEET_DATA[sel.key][sel.type][sel.pax]=o;
+  persistData();calc();
+  var btn=event&&event.target;if(btn){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1200);}
 }
 function linkSheet(){
   var saved="";try{saved=localStorage.getItem("ieo_sheet_url")||"";}catch(e){}
