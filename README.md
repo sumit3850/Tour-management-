@@ -90,6 +90,28 @@ All data is stored in-memory as JavaScript arrays, persisted to `localStorage` o
 
 ---
 
+## Data, Offline Saving & Sync
+
+The app runs entirely in the browser — **there is no backend server, database, or Supabase connection.** Every edit (add / edit / delete across all modules) is saved automatically to the browser's `localStorage` under the key `ieo_data_v1`, so your data survives refreshes and works fully **offline** on that device.
+
+Because storage is per-device, data does **not** sync between devices on its own. To move data between a phone and a laptop, use **Settings → Data & Backup**:
+
+- **Export backup** — downloads a `.json` file with all your data and trip logs.
+- **Import backup** — restores that file on another device.
+- **Reset to sample data** — clears this device's saved data and restores the original demo content.
+
+### Cloud sync (optional, Supabase)
+
+For automatic multi-device sync, the app has a built-in **Supabase** integration (off by default — no server is required to use the app). To enable it:
+
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the Supabase **SQL editor**, run the setup SQL shown under **Settings → Cloud Sync** (creates a `workspaces` table + access policy).
+3. Paste your **Project URL** and **anon public key** (Project Settings → API) into **Settings → Cloud Sync**, choose a workspace name, and tick **Auto-sync**.
+
+With auto-sync on, every change is pushed to Supabase and pulled on load, so all devices using the same URL, key and workspace name stay in sync. You can also Push / Pull manually. The anon key is public, so use a hard-to-guess workspace name (or add Supabase Auth) to control access.
+
+---
+
 ## Cost Calculator
 
 The calculator supports 6 tour categories with pre-loaded rate sheets:
