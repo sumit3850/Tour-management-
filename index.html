@@ -452,7 +452,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 12</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 13</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -1042,18 +1042,14 @@ function closeModal(){document.getElementById("scrim").classList.remove("show")}
 /* ===== automation helpers ===== */
 function overlaps(s1,e1,s2,e2){if(!s1||!e1||!s2||!e2)return false;return s1<=e2&&s2<=e1;}
 function pendingBookings(){return bookings.filter(function(b){return bookingPending(b)>0;});}
-function waShare(text){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");}
-function paymentReminder(id){
-  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
-  var t=tours.find(function(x){return x.id===b.tour;});
-  var msg="Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(bookingPending(b))+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+").\n\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175";
-  waShare(msg);
-}
-function sendGuestForm(id){
-  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
-  var url=formLink("client");
-  waShare("Hello "+b.guest+", thank you for your advance payment! Please complete your guest details here so we can finalise your trip:\n"+url);
-}
+function waShare(text,phone){var n=String(phone||"").replace(/\D/g,"");window.open("https://wa.me/"+n+"?text="+encodeURIComponent(text),"_blank");}
+function mailSend(to,subject,body){window.open("mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body),"_blank");}
+function paymentMsg(b){var t=tours.find(function(x){return x.id===b.tour;});return "Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(bookingPending(b))+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+").\n\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175 · info@islandexplorer.in";}
+function guestMsg(b){return "Hello "+b.guest+", thank you for your advance payment! Please complete your guest details here so we can finalise your trip:\n"+formLink("client");}
+function paymentReminder(id){var b=bookings.find(function(x){return x.id===id;});if(b)waShare(paymentMsg(b),b.phone);}
+function paymentReminderEmail(id){var b=bookings.find(function(x){return x.id===id;});if(!b)return;if(!b.email){alert("No email on this booking. Add one in the booking editor.");return;}mailSend(b.email,"Pending payment · Island Explorer Birding Tours",paymentMsg(b));}
+function sendGuestForm(id){var b=bookings.find(function(x){return x.id===id;});if(b)waShare(guestMsg(b),b.phone);}
+function sendGuestFormEmail(id){var b=bookings.find(function(x){return x.id===id;});if(!b)return;if(!b.email){alert("No email on this booking. Add one in the booking editor.");return;}mailSend(b.email,"Your guest details · Island Explorer Birding Tours",guestMsg(b));}
 function detectClashes(){
   var out=[];
   for(var i=0;i<ops.length;i++)for(var j=i+1;j<ops.length;j++){
@@ -1087,7 +1083,7 @@ function viewDashboard(){
   var alerts="";
   alerts+="<div class='card card-pad'>"+
     "<div class='section-head'><div class='h-sec' style='font-size:15px'>Pending payments</div><span class='pill "+(totalPending>0?"full":"completed")+"'>"+fmt(totalPending)+"</span></div>"+
-    (pend.length?pend.slice(0,6).map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+" · "+(t?shortName(t):"—")+"</div><div class='s'>Pending "+fmt(bookingPending(b))+(b.lastPendingDate?" · due "+dShort(b.lastPendingDate):"")+"</div></div><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\">Remind</button></div>";}).join(""):"<div class='empty'>All payments are settled. 🎉</div>")+
+    (pend.length?pend.slice(0,6).map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+" · "+(t?shortName(t):"—")+"</div><div class='s'>Pending "+fmt(bookingPending(b))+(b.lastPendingDate?" · due "+dShort(b.lastPendingDate):"")+"</div></div><div style='display:flex;gap:6px'><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\" title='WhatsApp'>WA</button>"+(b.email?"<button class='btn btn-ghost btn-sm' onclick=\"paymentReminderEmail('"+b.id+"')\" title='Email'>Email</button>":"")+"</div></div>";}).join(""):"<div class='empty'>All payments are settled. 🎉</div>")+
   "</div>";
   alerts+="<div class='card card-pad'>"+
     "<div class='h-sec' style='font-size:15px;margin-bottom:8px'>Upcoming departures</div>"+
@@ -1241,6 +1237,8 @@ function editBooking(id){
     "<div class='field'><label>Guest name</label><input class='input' id='eb_guest' value='"+b.guest+"'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='eb_party' value='"+b.party+"'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='eb_country' value='"+b.country+"'></div>"+
+    "<div class='field'><label>Email</label><input class='input' type='email' id='eb_email' value='"+(b.email||"")+"'></div>"+
+    "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='eb_phone' value='"+(b.phone||"")+"'></div>"+
     "<div class='field'><label>Payment</label><select class='input' id='eb_pay'>"+
       "<option value='Deposit' "+(b.pay==="Deposit"?"selected":"")+">Deposit</option>"+
       "<option value='Paid' "+(b.pay==="Paid"?"selected":"")+">Paid</option>"+
@@ -1249,7 +1247,11 @@ function editBooking(id){
     "<div class='field'><label>Deposit Amount</label><input class='input mono' type='number' id='eb_deposit' value='"+(b.deposit||0)+"'></div>"+
     "<div class='field'><label>Last Pending Date</label><input class='input' type='date' id='eb_lastpend' value='"+(b.lastPendingDate||"")+"'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='eb_notes' value='"+(b.notes||"")+"'></div>"+
-    "<div class='field full' style='display:flex;gap:8px;flex-wrap:wrap'><button type='button' class='btn btn-sea btn-sm' onclick=\"sendGuestForm('"+b.id+"')\">Send guest-details form</button>"+(bookingPending(b)>0?"<button type='button' class='btn btn-ghost btn-sm' onclick=\"paymentReminder('"+b.id+"')\">Send payment reminder</button>":"")+"</div>"+
+    "<div class='field full'><label>Quick actions</label><div style='display:flex;gap:8px;flex-wrap:wrap'>"+
+      "<button type='button' class='btn btn-sea btn-sm' onclick=\"sendGuestForm('"+b.id+"')\">Guest form · WhatsApp</button>"+
+      "<button type='button' class='btn btn-ghost btn-sm' onclick=\"sendGuestFormEmail('"+b.id+"')\">Guest form · Email</button>"+
+      (bookingPending(b)>0?"<button type='button' class='btn btn-sea btn-sm' onclick=\"paymentReminder('"+b.id+"')\">Reminder · WhatsApp</button><button type='button' class='btn btn-ghost btn-sm' onclick=\"paymentReminderEmail('"+b.id+"')\">Reminder · Email</button>":"")+
+    "</div></div>"+
   "</div>","saveEditBooking","Update booking");
   document.getElementById("modal").dataset.bid=id;
 }
@@ -1264,6 +1266,8 @@ function saveEditBooking(){
   b.guest=document.getElementById("eb_guest").value;
   b.party=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
   b.country=document.getElementById("eb_country").value;
+  b.email=document.getElementById("eb_email").value;
+  b.phone=document.getElementById("eb_phone").value;
   b.pay=document.getElementById("eb_pay").value;
   b.deposit=parseFloat(document.getElementById("eb_deposit").value)||0;
   b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
@@ -4107,12 +4111,19 @@ function renderRequests(){
     var acts="";
     if(s.type==="interest")acts="<button class='btn btn-primary btn-sm' onclick=\"convertToLead('"+s.id+"')\">Add as lead</button>";
     else if(s.type==="guide")acts="<button class='btn btn-sea btn-sm' onclick=\"setSubStatus('"+s.id+"','accepted')\">Accept</button><button class='btn btn-ghost btn-sm' onclick=\"setSubStatus('"+s.id+"','declined')\">Decline</button>";
+    if(s.phone)acts+="<button class='btn btn-ghost btn-sm' onclick=\"replySub('"+s.id+"','wa')\">WhatsApp</button>";
+    if(s.email)acts+="<button class='btn btn-ghost btn-sm' onclick=\"replySub('"+s.id+"','email')\">Email</button>";
     return "<div class='card req-card'><div class='req-top'><div><span class='req-type'>"+(TYPEN[s.type]||s.type)+"</span> "+statusPill+"<div class='req-name'>"+(s.name||"—")+"</div>"+
       "<div class='req-sub'>"+[s.phone,s.email,s.country].filter(Boolean).join(" · ")+"</div></div>"+
       "<div class='req-meta'>"+(s.tour?"<div><b>"+s.tour+"</b></div>":"")+(dates?"<div>"+dates+"</div>":"")+(s.party?"<div>"+s.party+" pax</div>":"")+"</div></div>"+
       (rows?"<div class='req-kv'>"+rows+"</div>":"")+
       "<div class='req-acts'>"+acts+"<button class='btn btn-ghost btn-sm' onclick=\"deleteSub('"+s.id+"')\" style='color:var(--coral)'>Delete</button></div></div>";
   }).join("");
+}
+function replySub(id,via){
+  var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
+  var msg="Hello "+(s.name||"")+",\n\nThank you for reaching out to Island Explorer Birding Tours regarding "+(s.tour||"our tours")+". ";
+  if(via==="email"){mailSend(s.email,"Island Explorer Birding Tours",msg);}else{waShare(msg,s.phone);}
 }
 function convertToLead(id){
   var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
@@ -4465,6 +4476,8 @@ function openAddBooking(tourId){
     "<div class='field'><label>Guest name</label><input class='input' id='nb_guest' placeholder='Full name'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='nb_party' value='2'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
+    "<div class='field'><label>Email</label><input class='input' type='email' id='nb_email' placeholder='guest@email.com'></div>"+
+    "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='nb_phone' placeholder='+91 …'></div>"+
     "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(p=>opt(p)).join("")+"</select></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='nb_notes' placeholder='Dietary, interests, etc.'></div>"+
   "</div>","saveBooking","Add booking");
@@ -4477,7 +4490,7 @@ function saveBooking(){
   const end=document.getElementById("nb_end").value;
   if(!start||!end||end<start){alert("Enter valid start and end dates.");return;}
   bookings.push({id:"B"+Date.now(),tour,guest,party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
-    country:document.getElementById("nb_country").value||"—",status:"Confirmed",pay:document.getElementById("nb_pay").value,
+    country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:"Confirmed",pay:document.getElementById("nb_pay").value,
     notes:document.getElementById("nb_notes").value||"",start:start,end:end});
   closeModal();renderBookings();renderTours();renderCalendar();
 }
