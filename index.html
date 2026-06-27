@@ -9,12 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#16241d;--ink-soft:#3f5249;--forest:#1b4d3e;--forest-deep:#143a2e;
-  --sea:#1976d2;--sea-soft:#e3f2fd;--amber:#dd9a2b;--amber-soft:#fbeccb;
-  --coral:#d65a3f;--coral-soft:#f8e2da;--paper:#f6f2e9;--surface:#ffffff;--surface-2:#fbf9f3;
-  --line:#e6e0d2;--line-soft:#efe9dd;
-  --shadow:0 1px 2px rgba(20,40,30,.04),0 8px 24px -12px rgba(20,40,30,.16);
-  --shadow-lg:0 12px 40px -12px rgba(20,40,30,.28);
+  /* HDFC-style banking palette: navy blue + red accent on a light-grey canvas */
+  --ink:#1b2a4a;--ink-soft:#5a6a86;--forest:#004c8f;--forest-deep:#003a6e;
+  --sea:#0a6ed1;--sea-soft:#e7f1fb;--amber:#f0a400;--amber-soft:#fdf0d2;
+  --coral:#ed232a;--coral-soft:#fde4e5;--paper:#eef1f6;--surface:#ffffff;--surface-2:#f5f8fc;
+  --line:#e2e8f1;--line-soft:#eef2f8;
+  --shadow:0 1px 2px rgba(20,40,80,.04),0 8px 24px -12px rgba(20,40,80,.14);
+  --shadow-lg:0 12px 40px -12px rgba(20,40,80,.26);
   --r:14px;--r-sm:10px;--r-lg:20px;--sidebar-w:248px;
 
   --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -144,6 +145,9 @@ td{vertical-align:middle}
 .req-kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 16px;margin:12px 0;padding:12px 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
 .req-kv .kv{font-size:12.5px}.req-kv .kv span{color:var(--ink-soft);text-transform:capitalize}.req-kv .kv b{margin-left:5px}
 .req-acts{display:flex;gap:8px;flex-wrap:wrap}
+.res-card .res-fig{display:flex;justify-content:space-between;font-size:12.5px;margin-top:4px}
+.res-card .res-fig span{color:var(--ink-soft)}
+.res-card .edit-btn,.res-card .del-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 0;font-size:12px;font-weight:600}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -395,6 +399,12 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .lg-btn{width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 .lg-err{display:none;background:#fbe7e4;color:#c0392b;border:1px solid #f0c2bb;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:6px}
 .lg-err.show{display:block}
+.lg-ok{display:none;background:#e4f3ea;color:#1b7a4d;border:1px solid #b6e0c6;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:6px}
+.lg-ok.show{display:block}
+.lg-check{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;margin-top:12px;cursor:pointer}
+.lg-check input{width:auto}
+.lg-links{display:flex;justify-content:space-between;margin-top:14px;font-size:13px}
+.lg-links a{color:var(--sea);font-weight:600}
 .lg-foot{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:16px}
 </style>
 </head>
@@ -402,14 +412,22 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
     <div class="login-brand"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn">Island Explorer</div><div class="bs">Ops Console</div></div></div>
-    <h2>Operator sign in</h2>
-    <p class="lg-sub">Enter your phone number and personal code.</p>
+    <h2 id="lgTitle">Sign in</h2>
+    <p class="lg-sub" id="lgSub">Welcome back. Sign in to your console.</p>
     <div class="lg-err" id="lgErr"></div>
-    <label>Phone number</label>
-    <input id="lg_phone" type="tel" inputmode="numeric" placeholder="e.g. 9933202175" autocomplete="username">
-    <label>Operator code</label>
-    <input id="lg_code" type="password" inputmode="numeric" placeholder="Your code" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="lg-btn" onclick="doLogin()">Sign in</button>
+    <div class="lg-ok" id="lgOk"></div>
+    <label>Email</label>
+    <input id="lg_email" type="email" placeholder="you@email.com" autocomplete="username">
+    <div id="lg_pwwrap">
+      <label>Password</label>
+      <input id="lg_pw" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')authPrimary()">
+    </div>
+    <label class="lg-check" id="lg_rememberwrap"><input type="checkbox" id="lg_remember" checked> Remember me on this device</label>
+    <button class="lg-btn" id="lgBtn" onclick="authPrimary()">Sign in</button>
+    <div class="lg-links">
+      <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
+      <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
+    </div>
     <div class="lg-foot">Island Explorer Birding Tours · Port Blair</div>
   </div>
 </div>
@@ -417,7 +435,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 10</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 11</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -427,9 +445,8 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
     <header class="topbar">
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
-      <div class="page-title"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg><input placeholder="Search tours, leads, customers…"></div>
-      <button class="iconbtn" aria-label="Notifications"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+      <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
+      <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
   </div>
@@ -517,6 +534,11 @@ const waitlist={T4:[{guest:"M. Costa",party:2}]};
 let operators=[
   {name:"Sumit Kumar",phone:"9933202175",code:"1947",role:"Admin"}
 ];
+let reservations=[
+  {id:"R1",tour:"5N- South Andaman",location:"South Andaman",date:"2026-11-12",endDate:"2026-11-17",guideFee:45000,referral:5000,by:"R. Menon",notes:"Wants Narcondam add-on",stage:"proposed"},
+  {id:"R2",tour:"12N- Great Nicobar",location:"Great Nicobar",date:"2027-01-08",endDate:"2027-01-20",guideFee:120000,referral:15000,by:"BNHS",notes:"Group of 4",stage:"review"}
+];
+const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"]];
 let leads=[
   {id:"L1",name:"Sophie Bernard",country:"France",tour:"Great Nicobar 12-Night",date:"2026-11",stage:"New",src:"Website"},
   {id:"L2",name:"Tom Hughes",country:"Australia",tour:"5-Night Endemic",date:"2026-10",stage:"New",src:"Instagram"},
@@ -564,7 +586,7 @@ const platIcon={
 /* ===== PERSISTENCE — offline saving on this device ===== */
 const DATA_KEY="ieo_data_v1";
 function persistData(){
-  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,operators:operators}));}catch(e){}
+  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,operators:operators,reservations:reservations}));}catch(e){}
   cloudAutoPush();
 }
 (function loadData(){
@@ -583,6 +605,7 @@ function persistData(){
     if(d.tourCosts)TOUR_COSTS=d.tourCosts;
     if(d.sheetData)SHEET_DATA=d.sheetData;
     if(d.operators)operators=d.operators;
+    if(d.reservations)reservations=d.reservations;
     ensureSheetDefaults();
   }catch(e){}
 })();
@@ -644,7 +667,7 @@ function sbClient(){
   return _sb;
 }
 function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el.textContent=msg;el.className="sb-status "+(kind||"");}}
-function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,operators:operators,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
+function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,operators:operators,reservations:reservations,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
 function sbApply(d){
   if(!d)return;
   if(d.tours)tours=d.tours;if(d.bookings)bookings=d.bookings;if(d.accommodations)accommodations=d.accommodations;
@@ -653,6 +676,7 @@ function sbApply(d){
   if(d.tourCosts)TOUR_COSTS=d.tourCosts;
   if(d.sheetData)SHEET_DATA=d.sheetData;
   if(d.operators)operators=d.operators;
+  if(d.reservations)reservations=d.reservations;
   ensureSheetDefaults();
   if(d.trips){tripLogs=d.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
 }
@@ -758,7 +782,9 @@ function copyKey(k,btn){navigator.clipboard&&navigator.clipboard.writeText(k);if
 const booked=id=>bookings.filter(b=>b.tour===id).reduce((s,b)=>s+b.party,0);
 const status=t=>booked(t.id)>=t.cap?(t.status==="completed"?"completed":"full"):t.status;
 const durNights=t=>Math.round((new Date(t.end)-new Date(t.start))/864e5);
-const dShort=s=>new Date(s).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+function pad2(n){return (n<10?"0":"")+n;}
+const dShort=s=>{if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;return pad2(d.getDate())+"/"+pad2(d.getMonth()+1)+"/"+d.getFullYear();};
+const dmy=dShort;
 const tourColor=id=>TOURCOLORS[Math.abs(tours.findIndex(t=>t.id===id))%TOURCOLORS.length];
 const accColor=i=>TOURCOLORS[Math.abs(i)%TOURCOLORS.length];
 /* Exact short codes for each tour (used on cards, calendar, etc.) */
@@ -799,6 +825,7 @@ const NAV=[
   ["logistics","Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["requests","Requests / Forms","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
+  ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
   ["group","Growth"],
   ["social","Social Media","M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4"],
@@ -806,7 +833,7 @@ const NAV=[
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Requests & Form Links"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Requests & Form Links"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -974,6 +1001,7 @@ function renderView(v){
   else if(v==="customers")renderCustomers();
   else if(v==="crm")renderCRM();
   else if(v==="requests")loadSubmissions(true);
+  else if(v==="reservations")renderReservations();
   else if(v==="settings")renderOperators();
   else if(v==="logistics")renderLog();
   else if(v==="social")renderSocial();
@@ -1189,8 +1217,8 @@ function generateQuotation(){
   const tourName = sel.label;
   const clientType = sel.type==="foreign" ? "Foreigner" : "Indian";
   const qid = 'IEO-Q-' + Date.now().toString(36).toUpperCase();
-  const today = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-  const validUntil = new Date(Date.now() + 14*864e5).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const today = dmy(new Date());
+  const validUntil = dmy(new Date(Date.now() + 14*864e5));
   const logoUrl = (function(){try{return new URL('assets/logo.png', location.href).href;}catch(e){return 'assets/logo.png';}})();
   const row = (label,val)=>`<tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">${label}</td><td style="padding:8px 4px;text-align:right;font-variant-numeric:tabular-nums">${fmt(val||0)}</td></tr>`;
   const pricePerPerson = fmt(d.perPerson);
@@ -3896,7 +3924,7 @@ function renderLog(t="Operations Board"){
       kpi("Trips on record",tripLogs.length,"this device","","M9 11l3 3 8-8")+
     "</div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th><th></th></tr></thead><tbody>"+
-    rows.map(r=>"<tr><td class='strong'>"+new Date(r.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='9' class='empty'>No trips logged yet.</td></tr>"+
+    rows.map(r=>"<tr><td class='strong'>"+dShort(r.date)+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='9' class='empty'>No trips logged yet.</td></tr>"+
     "</tbody></table></div></div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
   }else{
@@ -3958,7 +3986,6 @@ function viewRequests(){
       "<div class='req-links'>"+
         reqLinkRow("Tour interest / registration","Send to anyone who wants to join a tour.","interest")+
         reqLinkRow("Guest details (after advance)","Send to clients who've paid the advance.","client")+
-        reqLinkRow("Guide reservation request","For other guides proposing dates.","guide")+
       "</div>"+
     "</div>"+
     "<div class='section-head'><div class='h-sec'>Incoming submissions</div><button class='btn btn-ghost btn-sm' onclick='loadSubmissions(true)'>Refresh</button></div>"+
@@ -4018,6 +4045,56 @@ function deleteSub(id){
   _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();
   if(cl)cl.from("submissions").delete().eq("id",id).then(function(){});
 }
+
+/* ===== RESERVATION PIPELINE ===== */
+function viewReservations(){
+  return "<section class='view' id='v-reservations'>"+
+    "<div class='section-head'><div><div class='eyebrow'>Guide service reservations</div><div class='h-sec'>Reservation pipeline</div></div><button class='btn btn-primary' onclick='openAddReservation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>New reservation</button></div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:14px'>Create a query with the tour dates, location, guide fee and referral commission, then move it across the stages.</p>"+
+    "<div class='kanban' id='resKanban'></div>"+
+  "</section>";
+}
+function renderReservations(){
+  var k=document.getElementById("resKanban");if(!k)return;
+  k.innerHTML=RES_STAGES.map(function(st){
+    var key=st[0],label=st[1];
+    var items=reservations.filter(function(r){return r.stage===key;});
+    return "<div class='kcol'><h4>"+label+"<span class='ct'>"+items.length+"</span></h4>"+(items.map(function(r){
+      var idx=RES_STAGES.findIndex(function(s){return s[0]===r.stage;});
+      var prev=idx>0?RES_STAGES[idx-1]:null,next=idx<RES_STAGES.length-1?RES_STAGES[idx+1]:null;
+      var dates=dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"");
+      return "<div class='lead res-card'><div class='ln'>"+(r.tour||"Tour")+"</div>"+
+        "<div class='lc'>"+dates+(r.location?" · "+r.location:"")+"</div>"+
+        "<div class='res-fig'><span>Guide fee</span><b class='mono'>"+fmt(r.guideFee||0)+"</b></div>"+
+        "<div class='res-fig'><span>Referral</span><b class='mono'>"+fmt(r.referral||0)+"</b></div>"+
+        (r.by?"<div class='lt'>By: "+r.by+"</div>":"")+(r.notes?"<div class='lt'>"+r.notes+"</div>":"")+
+        "<div class='mv'>"+(prev?"<button onclick=\"moveReservation('"+r.id+"','"+prev[0]+"')\">← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button onclick=\"moveReservation('"+r.id+"','"+next[0]+"')\">"+next[1].split(" ")[0]+" →</button>":"")+"</div>"+
+        "<div style='display:flex;gap:6px;margin-top:6px'><button class='edit-btn' onclick=\"editReservation('"+r.id+"')\" style='flex:1'>Edit</button><button class='del-btn' onclick=\"deleteReservation('"+r.id+"')\" style='flex:1;color:var(--coral)'>Delete</button></div>"+
+      "</div>";
+    }).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";
+  }).join("");
+  persistData();
+}
+function resForm(r){r=r||{};var tourOpts="<option value=''>—</option>"+CALC_ORDER.map(function(k){return "<option "+((r.tour===CALC_LABELS[k])?"selected":"")+">"+CALC_LABELS[k]+"</option>";}).join("");
+  return "<div class='form-grid'>"+
+    "<div class='field full'><label>Tour</label><select class='input' id='rs_tour'>"+tourOpts+"</select></div>"+
+    "<div class='field'><label>Tour start date</label><input class='input' type='date' id='rs_date' value='"+(r.date||"")+"'></div>"+
+    "<div class='field'><label>Tour end date</label><input class='input' type='date' id='rs_end' value='"+(r.endDate||"")+"'></div>"+
+    "<div class='field full'><label>Location</label><input class='input' id='rs_loc' value='"+(r.location||"")+"' placeholder='e.g. South Andaman'></div>"+
+    "<div class='field'><label>Guide fee (₹)</label><input class='input mono' type='number' id='rs_fee' value='"+(r.guideFee||0)+"'></div>"+
+    "<div class='field'><label>Referral commission (₹)</label><input class='input mono' type='number' id='rs_ref' value='"+(r.referral||0)+"'></div>"+
+    "<div class='field full'><label>Requested by</label><input class='input' id='rs_by' value='"+(r.by||"")+"' placeholder='Guide / agency name'></div>"+
+    "<div class='field full'><label>Notes</label><input class='input' id='rs_notes' value='"+(r.notes||"")+"'></div>"+
+  "</div>";}
+function openAddReservation(){modalForm("New reservation","Add to pipeline",resForm(),"saveNewReservation","Add reservation");}
+function saveNewReservation(){
+  reservations.unshift({id:"R"+Date.now(),tour:document.getElementById("rs_tour").value,date:document.getElementById("rs_date").value,endDate:document.getElementById("rs_end").value,location:document.getElementById("rs_loc").value,guideFee:parseFloat(document.getElementById("rs_fee").value)||0,referral:parseFloat(document.getElementById("rs_ref").value)||0,by:document.getElementById("rs_by").value,notes:document.getElementById("rs_notes").value,stage:"proposed"});
+  closeModal();renderReservations();
+}
+function editReservation(id){var r=reservations.find(function(x){return x.id===id;});if(!r)return;modalForm("Edit reservation","Update reservation",resForm(r),"saveEditReservation","Update");document.getElementById("modal").dataset.rid=id;}
+function saveEditReservation(){var id=document.getElementById("modal").dataset.rid;var r=reservations.find(function(x){return x.id===id;});if(!r)return;r.tour=document.getElementById("rs_tour").value;r.date=document.getElementById("rs_date").value;r.endDate=document.getElementById("rs_end").value;r.location=document.getElementById("rs_loc").value;r.guideFee=parseFloat(document.getElementById("rs_fee").value)||0;r.referral=parseFloat(document.getElementById("rs_ref").value)||0;r.by=document.getElementById("rs_by").value;r.notes=document.getElementById("rs_notes").value;closeModal();renderReservations();}
+function moveReservation(id,stage){var r=reservations.find(function(x){return x.id===id;});if(r){r.stage=stage;renderReservations();}}
+function deleteReservation(id){if(!confirm("Delete this reservation?"))return;reservations=reservations.filter(function(x){return x.id!==id;});renderReservations();}
 
 /* ===== CUSTOMERS ===== */
 function viewCustomers(){
@@ -4425,42 +4502,90 @@ function deleteTrip(id){if(!confirm("Delete this trip record?"))return;tripLogs=
 /* ===== BOOT ===== */
 function boot(){
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewRequests(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   go("dashboard");
-  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();
+  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();renderReservations();
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();
 cloudInit();
-requireLogin();
+initAuth();
 
-/* ===== OPERATOR LOGIN ===== */
-function normPhone(p){return String(p||"").replace(/\D/g,"").slice(-10);}
-function currentOperator(){try{return JSON.parse(sessionStorage.getItem("ieo_op")||"null");}catch(e){return null;}}
-function requireLogin(){
-  var ov=document.getElementById("loginOverlay");if(!ov)return;
-  if(!operators||!operators.length){ov.classList.remove("show");return;} /* fail open if no operators set */
-  var op=currentOperator();
-  if(op){applyOperator(op);ov.classList.remove("show");}
-  else{ov.classList.add("show");setTimeout(function(){var f=document.getElementById("lg_phone");if(f)f.focus();},80);}
+/* ===== AUTHENTICATION (Supabase email/password) ===== */
+var _authMode="signin"; /* signin | signup */
+function authClient(){return (typeof sbClient==="function")?sbClient():null;}
+function lgEl(id){return document.getElementById(id);}
+function lgMsg(box,msg){var e=lgEl(box==="ok"?"lgOk":"lgErr"),o=lgEl(box==="ok"?"lgErr":"lgOk");if(e){e.textContent=msg;e.classList.add("show");}if(o)o.classList.remove("show");}
+function lgClearMsg(){["lgErr","lgOk"].forEach(function(i){var e=lgEl(i);if(e)e.classList.remove("show");});}
+function showLogin(){var ov=lgEl("loginOverlay");if(ov){ov.classList.add("show");setTimeout(function(){var f=lgEl("lg_email");if(f)f.focus();},80);}}
+function hideLogin(){var ov=lgEl("loginOverlay");if(ov)ov.classList.remove("show");}
+function applyUser(user){
+  var name=(user&&(user.user_metadata&&user.user_metadata.name))||(user&&user.email)||"Operator";
+  var who=document.querySelector(".nav-foot .who");if(who)who.textContent=name;
+  var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(user&&user.email)||"Signed in";
+  var av=document.querySelector(".nav-foot .av");if(av)av.textContent=String(name).split(/[ @.]/).filter(Boolean).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
 }
-function applyOperator(op){
-  var who=document.querySelector(".nav-foot .who");if(who)who.textContent=op.name;
-  var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(op.role||"Operator")+" · "+op.code;
-  var av=document.querySelector(".nav-foot .av");if(av)av.textContent=(op.name||"OP").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
+function initAuth(){
+  var cl=authClient();
+  if(!cl){hideLogin();return;} /* fail open if Supabase unavailable, so you're never locked out */
+  cl.auth.getSession().then(function(res){
+    var s=res&&res.data&&res.data.session;
+    if(s&&s.user){applyUser(s.user);hideLogin();}else{showLogin();}
+  }).catch(function(){showLogin();});
+  cl.auth.onAuthStateChange(function(_e,session){if(session&&session.user){applyUser(session.user);hideLogin();}});
 }
-function doLogin(){
-  var phone=normPhone(document.getElementById("lg_phone").value);
-  var code=String(document.getElementById("lg_code").value||"").trim();
-  var err=document.getElementById("lgErr");
-  var op=operators.find(function(o){return normPhone(o.phone)===phone&&String(o.code)===code;});
-  if(!op){if(err){err.textContent="Phone number or code not recognised.";err.classList.add("show");}return;}
-  try{sessionStorage.setItem("ieo_op",JSON.stringify(op));}catch(e){}
-  if(err)err.classList.remove("show");
-  applyOperator(op);
-  document.getElementById("loginOverlay").classList.remove("show");
+function authToggleMode(){
+  _authMode=(_authMode==="signin")?"signup":"signin";
+  lgClearMsg();
+  lgEl("lgTitle").textContent=_authMode==="signup"?"Create account":"Sign in";
+  lgEl("lgSub").textContent=_authMode==="signup"?"Register a new operator login.":"Welcome back. Sign in to your console.";
+  lgEl("lgBtn").textContent=_authMode==="signup"?"Create account":"Sign in";
+  lgEl("lgToggle").textContent=_authMode==="signup"?"Back to sign in":"Create new account";
 }
-function logout(){try{sessionStorage.removeItem("ieo_op");}catch(e){}requireLogin();}
+function authPrimary(){if(_authMode==="signup")authSignUp();else authSignIn();}
+function authSignIn(){
+  var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
+  var email=lgEl("lg_email").value.trim(),pw=lgEl("lg_pw").value;
+  if(!email||!pw){lgMsg("err","Enter your email and password.");return;}
+  var remember=lgEl("lg_remember")?lgEl("lg_remember").checked:true;
+  try{localStorage.setItem("ieo_remember",remember?"1":"0");}catch(e){}
+  lgEl("lgBtn").disabled=true;
+  cl.auth.signInWithPassword({email:email,password:pw}).then(function(res){
+    lgEl("lgBtn").disabled=false;
+    if(res.error){lgMsg("err",res.error.message);return;}
+    lgClearMsg();applyUser(res.data.user);hideLogin();
+  });
+}
+function authSignUp(){
+  var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
+  var email=lgEl("lg_email").value.trim(),pw=lgEl("lg_pw").value;
+  if(!email||pw.length<6){lgMsg("err","Enter an email and a password of at least 6 characters.");return;}
+  lgEl("lgBtn").disabled=true;
+  cl.auth.signUp({email:email,password:pw}).then(function(res){
+    lgEl("lgBtn").disabled=false;
+    if(res.error){lgMsg("err",res.error.message);return;}
+    if(res.data&&res.data.session){applyUser(res.data.user);hideLogin();}
+    else{lgMsg("ok","Account created. Check your email to confirm, then sign in.");authToggleMode();}
+  });
+}
+function authForgot(){
+  var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
+  var email=lgEl("lg_email").value.trim();
+  if(!email){lgMsg("err","Enter your email above first, then tap Forgot password.");return;}
+  cl.auth.resetPasswordForEmail(email,{redirectTo:location.href.split("#")[0]}).then(function(res){
+    if(res.error){lgMsg("err",res.error.message);return;}
+    lgMsg("ok","Password reset link sent to "+email+".");
+  });
+}
+function logout(){
+  var cl=authClient();
+  if(cl)cl.auth.signOut().then(function(){showLogin();});
+  else showLogin();
+}
+/* If "remember me" was unchecked, end the session when the tab closes */
+window.addEventListener("beforeunload",function(){
+  try{if(localStorage.getItem("ieo_remember")==="0"){var cl=authClient();if(cl)cl.auth.signOut();}}catch(e){}
+});
 </script>
 </body>
 </html>
