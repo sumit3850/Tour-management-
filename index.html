@@ -148,6 +148,23 @@ td{vertical-align:middle}
 .res-card .res-fig{display:flex;justify-content:space-between;font-size:12.5px;margin-top:4px}
 .res-card .res-fig span{color:var(--ink-soft)}
 .res-card .edit-btn,.res-card .del-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 0;font-size:12px;font-weight:600}
+.qa-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.qa-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;cursor:pointer;transition:transform .12s,box-shadow .15s;font:inherit}
+.qa-tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.qa-ic{width:44px;height:44px;border-radius:13px;background:var(--sea-soft);display:grid;place-items:center}
+.qa-ic svg{width:22px;height:22px;stroke:var(--forest)}
+.qa-lbl{font-size:12px;font-weight:600;text-align:center;color:var(--ink);line-height:1.2}
+.alert-warn{border-color:var(--coral)!important;background:var(--coral-soft)}
+@media(max-width:900px){.qa-grid{grid-template-columns:repeat(3,1fr)}}
+.bottom-nav{display:none}
+@media(max-width:768px){
+  .qa-grid{grid-template-columns:repeat(3,1fr)}
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:45;background:var(--surface);border-top:1px solid var(--line);padding:6px 2px;justify-content:space-around;box-shadow:0 -4px 16px -8px rgba(20,40,80,.25)}
+  .bottom-nav button{display:flex;flex-direction:column;align-items:center;gap:3px;font:inherit;background:none;border:none;color:var(--ink-soft);font-size:10px;flex:1;padding:4px 0;font-weight:600}
+  .bottom-nav button svg{width:22px;height:22px;stroke:currentColor;fill:none}
+  .bottom-nav button.active{color:var(--forest)}
+  .content{padding-bottom:76px!important}
+}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -435,7 +452,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 11</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 12</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -449,6 +466,13 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
+    <nav class="bottom-nav" id="bottomNav">
+      <button data-bn="dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+      <button data-bn="tours" onclick="go('tours')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Tours</button>
+      <button data-bn="bookings" onclick="go('bookings')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Bookings</button>
+      <button data-bn="reservations" onclick="go('reservations')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"/></svg>Reserve</button>
+      <button data-bn="requests" onclick="go('requests')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg>Inbox</button>
+    </nav>
   </div>
 </div>
 <div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal"></div></div>
@@ -986,6 +1010,7 @@ function go(v,isBack){
   setTimeout(attachClickHandlers,50);
   curView=v;
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.v===v));
+  document.querySelectorAll("#bottomNav button").forEach(b=>b.classList.toggle("active",b.dataset.bn===v));
   document.querySelectorAll(".view").forEach(el=>el.classList.toggle("active",el.id==="v-"+v));
   document.getElementById("crumb").textContent=TITLES[v][0]||"";
   document.getElementById("ptitle").textContent=TITLES[v][1];
@@ -1014,17 +1039,78 @@ function openScrim(){document.getElementById("scrim").classList.add("show")}
 function closeModal(){document.getElementById("scrim").classList.remove("show")}
 
 /* ===== DASHBOARD ===== */
+/* ===== automation helpers ===== */
+function overlaps(s1,e1,s2,e2){if(!s1||!e1||!s2||!e2)return false;return s1<=e2&&s2<=e1;}
+function pendingBookings(){return bookings.filter(function(b){return bookingPending(b)>0;});}
+function waShare(text){window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");}
+function paymentReminder(id){
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  var t=tours.find(function(x){return x.id===b.tour;});
+  var msg="Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(bookingPending(b))+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+").\n\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175";
+  waShare(msg);
+}
+function sendGuestForm(id){
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  var url=formLink("client");
+  waShare("Hello "+b.guest+", thank you for your advance payment! Please complete your guest details here so we can finalise your trip:\n"+url);
+}
+function detectClashes(){
+  var out=[];
+  for(var i=0;i<ops.length;i++)for(var j=i+1;j<ops.length;j++){
+    var a=ops[i],c=ops[j];
+    if(!overlaps(a.start,a.end,c.start,c.end))continue;
+    ["veh","driver","guide"].forEach(function(k){
+      if(a[k]&&c[k]&&a[k]!=="—"&&a[k].toLowerCase()===String(c[k]).toLowerCase()){
+        out.push({what:k,who:a[k],a:a,b:c});
+      }
+    });
+  }
+  return out;
+}
+function referralRollup(){
+  var m={};reservations.forEach(function(r){if(r.referral>0){var key=r.by||"Unassigned";m[key]=(m[key]||0)+r.referral;}});
+  return Object.keys(m).map(function(k){return {by:k,total:m[k]};}).sort(function(a,b){return b.total-a.total;});
+}
+function upcomingDepartures(){
+  return tours.filter(function(t){return t.start>=todayISO;}).sort(function(a,b){return a.start.localeCompare(b.start);}).slice(0,6);
+}
+function qaTile(label,icon,onclick){return "<button class='qa-tile' onclick='"+onclick+"'><span class='qa-ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg></span><span class='qa-lbl'>"+label+"</span></button>";}
 function viewDashboard(){
   const upcoming=tours.filter(t=>status(t)!=="completed").length;
   const seats=tours.reduce((s,t)=>status(t)==="completed"?s:s+(t.cap-booked(t.id)),0);
-  const occ=tours.filter(t=>status(t)!=="completed").slice(0,5).map(t=>({n:t.name.split(" ")[0],pct:Math.round(booked(t.id)/t.cap*100)}));
+  const occ=tours.filter(t=>status(t)!=="completed").slice(0,5).map(t=>({n:shortName(t).split(" ")[0],pct:Math.round(booked(t.id)/t.cap*100)}));
+  const pend=pendingBookings();
+  const totalPending=pend.reduce(function(s,b){return s+bookingPending(b);},0);
+  const clashes=detectClashes();
+  const deps=upcomingDepartures();
+  const rollup=referralRollup();
+  var alerts="";
+  alerts+="<div class='card card-pad'>"+
+    "<div class='section-head'><div class='h-sec' style='font-size:15px'>Pending payments</div><span class='pill "+(totalPending>0?"full":"completed")+"'>"+fmt(totalPending)+"</span></div>"+
+    (pend.length?pend.slice(0,6).map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+" · "+(t?shortName(t):"—")+"</div><div class='s'>Pending "+fmt(bookingPending(b))+(b.lastPendingDate?" · due "+dShort(b.lastPendingDate):"")+"</div></div><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\">Remind</button></div>";}).join(""):"<div class='empty'>All payments are settled. 🎉</div>")+
+  "</div>";
+  alerts+="<div class='card card-pad'>"+
+    "<div class='h-sec' style='font-size:15px;margin-bottom:8px'>Upcoming departures</div>"+
+    (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+shortName(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
+  "</div>";
   return "<section class='view' id='v-dashboard'>"+
-    "<div class='kpis'>"+
-      kpi("Upcoming Tours",upcoming,"+2 this month","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
-      kpi("Seats Available",seats,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
-      kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"4 to follow up","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
-      kpi("Revenue · June",fmt(642000),"+18% vs May","up","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6")+
+    "<div class='qa-grid'>"+
+      qaTile("Create tour","M12 5v14M5 12h14","openCreateTour()")+
+      qaTile("Add booking","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11","openAddBooking()")+
+      qaTile("New reservation","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4","go('reservations')")+
+      qaTile("Cost calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z","go('calc')")+
+      qaTile("Share form","M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13","go('requests')")+
+      qaTile("Requests","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z","go('requests')")+
     "</div>"+
+    (clashes.length?"<div class='card card-pad alert-warn' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px;color:var(--coral)'>⚠ Scheduling clashes ("+clashes.length+")</div>"+clashes.slice(0,5).map(function(c){return "<div class='s' style='margin:3px 0'>"+c.who+" ("+c.what+") double-booked: <b>"+c.a.tour+"</b> &amp; <b>"+c.b.tour+"</b></div>";}).join("")+"</div>":"")+
+    "<div class='kpis' style='margin-top:16px'>"+
+      kpi("Upcoming Tours",upcoming,"departures ahead","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
+      kpi("Seats Available",seats,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
+      kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
+      kpi("Pending payments",fmt(totalPending),pend.length+" booking(s)",totalPending>0?"down":"up","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6")+
+    "</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
+    (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
     "<div class='grid-2' style='margin-top:16px'>"+
       "<div class='card card-pad'>"+
         "<div class='section-head'><div><div class='eyebrow'>Field movements</div><div class='h-sec'>Upcoming operations</div></div><button class='btn btn-ghost btn-sm' data-action='go' data-arg='logistics'>Open board</button></div>"+
@@ -1163,6 +1249,7 @@ function editBooking(id){
     "<div class='field'><label>Deposit Amount</label><input class='input mono' type='number' id='eb_deposit' value='"+(b.deposit||0)+"'></div>"+
     "<div class='field'><label>Last Pending Date</label><input class='input' type='date' id='eb_lastpend' value='"+(b.lastPendingDate||"")+"'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='eb_notes' value='"+(b.notes||"")+"'></div>"+
+    "<div class='field full' style='display:flex;gap:8px;flex-wrap:wrap'><button type='button' class='btn btn-sea btn-sm' onclick=\"sendGuestForm('"+b.id+"')\">Send guest-details form</button>"+(bookingPending(b)>0?"<button type='button' class='btn btn-ghost btn-sm' onclick=\"paymentReminder('"+b.id+"')\">Send payment reminder</button>":"")+"</div>"+
   "</div>","saveEditBooking","Update booking");
   document.getElementById("modal").dataset.bid=id;
 }
@@ -4069,6 +4156,7 @@ function renderReservations(){
         "<div class='res-fig'><span>Referral</span><b class='mono'>"+fmt(r.referral||0)+"</b></div>"+
         (r.by?"<div class='lt'>By: "+r.by+"</div>":"")+(r.notes?"<div class='lt'>"+r.notes+"</div>":"")+
         "<div class='mv'>"+(prev?"<button onclick=\"moveReservation('"+r.id+"','"+prev[0]+"')\">← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button onclick=\"moveReservation('"+r.id+"','"+next[0]+"')\">"+next[1].split(" ")[0]+" →</button>":"")+"</div>"+
+        (r.stage==="confirmed"&&!r.tourCreated?"<button class='btn btn-primary btn-sm' onclick=\"createTourFromReservation('"+r.id+"')\" style='width:100%;margin-top:6px'>+ Create tour from this</button>":"")+
         "<div style='display:flex;gap:6px;margin-top:6px'><button class='edit-btn' onclick=\"editReservation('"+r.id+"')\" style='flex:1'>Edit</button><button class='del-btn' onclick=\"deleteReservation('"+r.id+"')\" style='flex:1;color:var(--coral)'>Delete</button></div>"+
       "</div>";
     }).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";
@@ -4094,6 +4182,16 @@ function saveNewReservation(){
 function editReservation(id){var r=reservations.find(function(x){return x.id===id;});if(!r)return;modalForm("Edit reservation","Update reservation",resForm(r),"saveEditReservation","Update");document.getElementById("modal").dataset.rid=id;}
 function saveEditReservation(){var id=document.getElementById("modal").dataset.rid;var r=reservations.find(function(x){return x.id===id;});if(!r)return;r.tour=document.getElementById("rs_tour").value;r.date=document.getElementById("rs_date").value;r.endDate=document.getElementById("rs_end").value;r.location=document.getElementById("rs_loc").value;r.guideFee=parseFloat(document.getElementById("rs_fee").value)||0;r.referral=parseFloat(document.getElementById("rs_ref").value)||0;r.by=document.getElementById("rs_by").value;r.notes=document.getElementById("rs_notes").value;closeModal();renderReservations();}
 function moveReservation(id,stage){var r=reservations.find(function(x){return x.id===id;});if(r){r.stage=stage;renderReservations();}}
+function createTourFromReservation(id){
+  var r=reservations.find(function(x){return x.id===id;});if(!r)return;
+  var catMap={"South Andaman":"southandaman","Little":"littleandaman","Nicobar":"nicobar","Narcondam":"narcondam"};
+  var cat="custom";Object.keys(catMap).forEach(function(k){if((r.tour||r.location||"").indexOf(k)>=0)cat=catMap[k];});
+  var end=r.endDate||r.date;
+  tours.push({id:"T"+Date.now(),name:r.tour||"Reserved tour",cat:cat,start:r.date,end:end,cap:8,status:"open",guide:"Sumit Kumar",pickup:r.location||"Port Blair",startLoc:r.location||"—",stay:"—"});
+  r.tourCreated=true;
+  renderReservations();renderTours();renderCalendar();
+  alert("Tour created from this reservation. You'll find it in Tours and the Calendar.");
+}
 function deleteReservation(id){if(!confirm("Delete this reservation?"))return;reservations=reservations.filter(function(x){return x.id!==id;});renderReservations();}
 
 /* ===== CUSTOMERS ===== */
