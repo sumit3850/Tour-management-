@@ -445,6 +445,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
+    <div style="text-align:center;margin-top:14px"><a href="#" onclick="authSkip();return false" style="color:var(--ink-soft);font-size:12.5px">Continue without signing in →</a></div>
     <div class="lg-foot">Island Explorer Birding Tours · Port Blair</div>
   </div>
 </div>
@@ -452,7 +453,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 13</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 14</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -4665,7 +4666,10 @@ function authSignIn(){
     lgEl("lgBtn").disabled=false;
     if(res.error){lgMsg("err",res.error.message);return;}
     lgClearMsg();applyUser(res.data.user);hideLogin();
-  });
+  }).catch(function(e){lgEl("lgBtn").disabled=false;authNetErr(e);});
+}
+function authNetErr(e){
+  lgMsg("err","Couldn't reach the sign-in server. Your Supabase project may be paused, or email auth may be disabled. Check the dashboard — or tap \"Continue without signing in\" below.");
 }
 function authSignUp(){
   var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
@@ -4677,7 +4681,7 @@ function authSignUp(){
     if(res.error){lgMsg("err",res.error.message);return;}
     if(res.data&&res.data.session){applyUser(res.data.user);hideLogin();}
     else{lgMsg("ok","Account created. Check your email to confirm, then sign in.");authToggleMode();}
-  });
+  }).catch(function(e){lgEl("lgBtn").disabled=false;authNetErr(e);});
 }
 function authForgot(){
   var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
@@ -4686,8 +4690,9 @@ function authForgot(){
   cl.auth.resetPasswordForEmail(email,{redirectTo:location.href.split("#")[0]}).then(function(res){
     if(res.error){lgMsg("err",res.error.message);return;}
     lgMsg("ok","Password reset link sent to "+email+".");
-  });
+  }).catch(function(e){authNetErr(e);});
 }
+function authSkip(){hideLogin();}
 function logout(){
   var cl=authClient();
   if(cl)cl.auth.signOut().then(function(){showLogin();});
