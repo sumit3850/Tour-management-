@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Island Explorer Birding Tours — Registration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16241d;--soft:#5a6f64;--forest:#143a2e;--sea:#1976d2;--paper:#eef3f0;--surface:#fff;--line:#dfe7e2;--ok:#1b7a4d;--err:#c0392b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;padding:18px}
+.wrap{max-width:600px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px -16px rgba(20,40,30,.25);overflow:hidden}
+.head{background:linear-gradient(150deg,#1f5f4c,#143a2e);color:#fff;padding:26px 24px 22px;text-align:center}
+.head .logo{display:inline-flex;align-items:center;gap:9px;justify-content:center}
+.head .logo .mk{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.14);display:grid;place-items:center}
+.head .brand{font-family:'Calistoga',serif;font-size:23px}
+.head .brand .ex{color:#7fc4ff}
+.head .sub{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#bfe0d2;margin-top:6px}
+.head h1{font-size:17px;font-weight:600;margin-top:14px}
+.head p{font-size:12.5px;color:#cfe6db;margin-top:3px}
+.body{padding:22px 22px 26px}
+.field{margin-bottom:15px}
+label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+label .req{color:var(--err)}
+input,select,textarea{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
+textarea{min-height:84px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:11.5px;color:var(--soft);margin-top:4px}
+.btn{width:100%;margin-top:8px;padding:14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:default}
+.note{font-size:11.5px;color:var(--soft);text-align:center;margin-top:14px}
+.ok-box,.err-box{display:none;padding:16px;border-radius:12px;font-size:14px;margin-bottom:14px}
+.ok-box{background:#e4f3ea;color:var(--ok);border:1px solid #b6e0c6}
+.err-box{background:#fbe7e4;color:var(--err);border:1px solid #f0c2bb}
+.success{display:none;text-align:center;padding:40px 24px}
+.success svg{width:56px;height:56px;color:var(--ok)}
+.success h2{font-size:20px;margin:14px 0 6px}
+.success p{color:var(--soft);font-size:14px}
+.foot{text-align:center;font-size:11px;color:var(--soft);padding:14px}
+@media(max-width:480px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div class="logo"><span class="mk"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><span class="brand">Island <span class="ex">Explorer</span></span></div>
+      <div class="sub">Birding Tours · Andaman &amp; Nicobar</div>
+      <h1 id="formTitle">Tour Registration</h1>
+      <p id="formIntro">Tell us about your trip and we'll get back to you.</p>
+    </div>
+    <div class="body" id="formBody">
+      <div class="ok-box" id="okBox"></div>
+      <div class="err-box" id="errBox"></div>
+      <form id="theForm"><div id="fields"></div>
+        <button class="btn" type="submit" id="submitBtn">Submit</button>
+        <div class="note">Your details go straight to Island Explorer. We never share them.</div>
+      </form>
+    </div>
+    <div class="success" id="success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+      <h2>Thank you!</h2>
+      <p id="successMsg">Your details have been received. We'll be in touch shortly.</p>
+    </div>
+  </div>
+  <div class="foot">Sumit Kumar · +91 99332 02175 · info@islandexplorer.in</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const TOURS=["5N- South Andaman","7N- South & Little And.","8N- South & Little And.","12N- Great Nicobar","03N- Narcondam Exp_(A)","03N- Narcondam Exp _(B)","03N- Narcondam Exp_(C)","GS- Half Day","GS-Full day","GS-Night"];
+
+const params=new URLSearchParams(location.search);
+const type=(params.get("type")||"interest").toLowerCase();
+const presetTour=params.get("tour")||"";
+
+const TITLES={
+  interest:["Join a Tour","Register your interest and preferred dates — we'll confirm availability."],
+  client:["Guest Details","Thanks for your advance payment! Please share the details below so we can finalise your trip."],
+  guide:["Guide Reservation Request","Propose dates to reserve Island Explorer's guiding services."]
+};
+document.getElementById("formTitle").textContent=TITLES[type]?TITLES[type][0]:TITLES.interest[0];
+document.getElementById("formIntro").textContent=TITLES[type]?TITLES[type][1]:TITLES.interest[1];
+
+function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*</span>":"";var t=opts.type||"text";
+  var ctrl;
+  if(opts.tour){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+"><option value=''>Select a tour…</option>"+TOURS.map(function(t){return "<option "+(t===presetTour?"selected":"")+">"+t+"</option>";}).join("")+"</select>";}
+  else if(opts.select){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+">"+opts.select.map(function(o){return "<option>"+o+"</option>";}).join("")+"</select>";}
+  else if(t==="textarea"){ctrl="<textarea id='"+id+"' placeholder='"+(opts.ph||"")+"'></textarea>";}
+  else{ctrl="<input id='"+id+"' type='"+t+"' placeholder='"+(opts.ph||"")+"' "+(opts.req?"required":"")+">";}
+  return "<div class='field'><label>"+label+req+"</label>"+ctrl+(opts.hint?"<div class='hint'>"+opts.hint+"</div>":"")+"</div>";
+}
+function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
+
+var html="";
+if(type==="guide"){
+  html+=inp("g_name","Your name",{req:1});
+  html+=rowOf(inp("g_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("g_email","Email",{type:"email"}));
+  html+=inp("g_org","Organisation / company",{});
+  html+=inp("g_tour","Tour / region of interest",{tour:1});
+  html+=rowOf(inp("g_start","Proposed start date",{type:"date",req:1}),inp("g_end","Proposed end date",{type:"date",req:1}));
+  html+=rowOf(inp("g_party","Group size",{type:"number"}),inp("g_clienttype","Client type",{select:["Indian","Foreigner","Mixed"]}));
+  html+=inp("g_notes","Notes / requirements",{type:"textarea",ph:"Target species, flexibility on dates, etc."});
+}else if(type==="client"){
+  html+=inp("c_name","Full name (as on passport/ID)",{req:1});
+  html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
+  html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
+  html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID"]}),inp("c_idno","ID / passport number",{req:1}));
+  html+=rowOf(inp("c_idexp","ID / passport expiry",{type:"date"}),inp("c_tour","Tour",{tour:1}));
+  html+=rowOf(inp("c_arrival","Arrival date & flight",{ph:"e.g. 18 Jun, 6E-237"}),inp("c_departure","Departure date & flight",{}));
+  html+=rowOf(inp("c_diet","Dietary needs",{ph:"Veg / non-veg / allergies"}),inp("c_room","Room preference",{select:["Twin share","Double","Single (supplement)","No preference"]}));
+  html+=rowOf(inp("c_emname","Emergency contact name",{}),inp("c_emphone","Emergency contact phone",{type:"tel"}));
+  html+=inp("c_med","Medical notes / mobility",{type:"textarea",ph:"Anything we should know to keep you safe & comfortable"});
+}else{
+  html+=inp("i_name","Your name",{req:1});
+  html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
+  html+=rowOf(inp("i_country","Country",{req:1}),inp("i_party","Number of guests",{type:"number"}));
+  html+=inp("i_tour","Which tour?",{tour:1,req:1});
+  html+=rowOf(inp("i_start","Preferred start date",{type:"date"}),inp("i_end","Preferred end date",{type:"date"}));
+  html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner"]});
+  html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
+}
+document.getElementById("fields").innerHTML=html;
+
+var sb=null;
+try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
+
+function val(id){var el=document.getElementById(id);return el?el.value.trim():"";}
+function showErr(m){var b=document.getElementById("errBox");b.textContent=m;b.style.display="block";}
+
+document.getElementById("theForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  document.getElementById("errBox").style.display="none";
+  var rec={type:type,status:"new"};
+  if(type==="guide"){
+    rec.name=val("g_name");rec.phone=val("g_phone");rec.email=val("g_email");
+    rec.tour=val("g_tour");rec.start_date=val("g_start")||null;rec.end_date=val("g_end")||null;
+    rec.party=parseInt(val("g_party"))||null;
+    rec.data={organisation:val("g_org"),clientType:val("g_clienttype"),notes:val("g_notes")};
+  }else if(type==="client"){
+    rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
+    rec.tour=val("c_tour");
+    rec.data={dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
+  }else{
+    rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
+    rec.tour=val("i_tour");rec.start_date=val("i_start")||null;rec.end_date=val("i_end")||null;
+    rec.party=parseInt(val("i_party"))||null;
+    rec.data={clientType:val("i_clienttype"),message:val("i_msg")};
+  }
+  if(!rec.name||!rec.phone){showErr("Please fill in at least your name and phone number.");return;}
+  if(!sb){showErr("Sorry, the form service is unavailable right now. Please WhatsApp us at +91 99332 02175.");return;}
+  var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
+  sb.from("submissions").insert(rec).then(function(res){
+    if(res.error){btn.disabled=false;btn.textContent="Submit";showErr("Could not submit: "+res.error.message);return;}
+    document.getElementById("formBody").style.display="none";
+    document.getElementById("success").style.display="block";
+    if(type==="client")document.getElementById("successMsg").textContent="Your guest details have been received. We'll finalise your trip and confirm by email/WhatsApp.";
+    if(type==="guide")document.getElementById("successMsg").textContent="Your reservation request has been sent to Island Explorer. We'll respond with availability soon.";
+  }).catch(function(err){btn.disabled=false;btn.textContent="Submit";showErr("Network error. Please try again or WhatsApp +91 99332 02175.");});
+});
+</script>
+</body>
+</html>

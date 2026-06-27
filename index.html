@@ -131,6 +131,19 @@ td{vertical-align:middle}
 .acc-avail .bar{flex:1;height:7px;border-radius:5px;background:var(--line);overflow:hidden}
 .acc-avail .bar span{display:block;height:100%;background:var(--sea)}
 .acc-avail .num{font-weight:700;color:var(--ink);white-space:nowrap}
+.req-links{display:flex;flex-direction:column;gap:10px}
+.req-link{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.req-link .t{font-weight:700;font-size:14px}.req-link .s{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.req-link .acts{display:flex;gap:8px}
+.req-card{padding:16px;margin-bottom:12px}
+.req-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.req-type{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--sea);font-weight:700}
+.req-name{font-size:16px;font-weight:700;margin-top:4px}
+.req-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.req-meta{text-align:right;font-size:13px;color:var(--ink-soft)}
+.req-kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 16px;margin:12px 0;padding:12px 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.req-kv .kv{font-size:12.5px}.req-kv .kv span{color:var(--ink-soft);text-transform:capitalize}.req-kv .kv b{margin-left:5px}
+.req-acts{display:flex;gap:8px;flex-wrap:wrap}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -367,14 +380,44 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .legend .lg .lg-acts .edit-btn,.legend .lg .lg-acts .del-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
 .legend .lg .lg-acts .del-btn{color:var(--coral)}
 @media(max-width:600px){.acc-cal-grid .cell{min-height:58px;padding:5px}}
+.login-overlay{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#1f5f4c,#102b22);display:none;align-items:center;justify-content:center;padding:20px}
+.login-overlay.show{display:flex}
+.login-card{width:100%;max-width:380px;background:var(--surface);border-radius:20px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);padding:28px 26px}
+.login-brand{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.login-brand .mk{width:44px;height:44px;border-radius:12px;background:linear-gradient(150deg,#1976d2,#143a2e);display:grid;place-items:center}
+.login-brand .bn{font-family:'Calistoga',serif;font-size:18px;color:var(--ink)}
+.login-brand .bs{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+.login-card h2{font-size:19px;margin-bottom:4px}
+.login-card .lg-sub{font-size:13px;color:var(--ink-soft);margin-bottom:16px}
+.login-card label{display:block;font-size:12px;font-weight:600;margin:12px 0 5px}
+.login-card input{width:100%;font-size:16px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.login-card input:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
+.lg-btn{width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.lg-err{display:none;background:#fbe7e4;color:#c0392b;border:1px solid #f0c2bb;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:6px}
+.lg-err.show{display:block}
+.lg-foot{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:16px}
 </style>
 </head>
 <body>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-brand"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn">Island Explorer</div><div class="bs">Ops Console</div></div></div>
+    <h2>Operator sign in</h2>
+    <p class="lg-sub">Enter your phone number and personal code.</p>
+    <div class="lg-err" id="lgErr"></div>
+    <label>Phone number</label>
+    <input id="lg_phone" type="tel" inputmode="numeric" placeholder="e.g. 9933202175" autocomplete="username">
+    <label>Operator code</label>
+    <input id="lg_code" type="password" inputmode="numeric" placeholder="Your code" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="lg-btn" onclick="doLogin()">Sign in</button>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair</div>
+  </div>
+</div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 9</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 10</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -471,6 +514,9 @@ let accommodations=[
   {id:"acc-4",name:"Dolphin Resort Havelock",location:"Havelock",type:"Govt Resort",rooms:20,available:0,amenities:["AC","Restaurant","Beach Access"],status:"Maintenance",notes:"Renovation till July"}
 ];
 const waitlist={T4:[{guest:"M. Costa",party:2}]};
+let operators=[
+  {name:"Sumit Kumar",phone:"9933202175",code:"1947",role:"Admin"}
+];
 let leads=[
   {id:"L1",name:"Sophie Bernard",country:"France",tour:"Great Nicobar 12-Night",date:"2026-11",stage:"New",src:"Website"},
   {id:"L2",name:"Tom Hughes",country:"Australia",tour:"5-Night Endemic",date:"2026-10",stage:"New",src:"Instagram"},
@@ -518,7 +564,7 @@ const platIcon={
 /* ===== PERSISTENCE — offline saving on this device ===== */
 const DATA_KEY="ieo_data_v1";
 function persistData(){
-  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA}));}catch(e){}
+  try{localStorage.setItem(DATA_KEY,JSON.stringify({tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,operators:operators}));}catch(e){}
   cloudAutoPush();
 }
 (function loadData(){
@@ -536,6 +582,7 @@ function persistData(){
     if(d.posts)posts=d.posts;
     if(d.tourCosts)TOUR_COSTS=d.tourCosts;
     if(d.sheetData)SHEET_DATA=d.sheetData;
+    if(d.operators)operators=d.operators;
     ensureSheetDefaults();
   }catch(e){}
 })();
@@ -597,7 +644,7 @@ function sbClient(){
   return _sb;
 }
 function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el.textContent=msg;el.className="sb-status "+(kind||"");}}
-function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
+function sbCollect(){return {tours:tours,bookings:bookings,accommodations:accommodations,leads:leads,customers:customers,vehicles:vehicles,drivers:drivers,ops:ops,posts:posts,tourCosts:TOUR_COSTS,sheetData:SHEET_DATA,operators:operators,trips:(typeof tripLogs!=="undefined"?tripLogs:[])};}
 function sbApply(d){
   if(!d)return;
   if(d.tours)tours=d.tours;if(d.bookings)bookings=d.bookings;if(d.accommodations)accommodations=d.accommodations;
@@ -605,6 +652,7 @@ function sbApply(d){
   if(d.drivers)drivers=d.drivers;if(d.ops)ops=d.ops;if(d.posts)posts=d.posts;
   if(d.tourCosts)TOUR_COSTS=d.tourCosts;
   if(d.sheetData)SHEET_DATA=d.sheetData;
+  if(d.operators)operators=d.operators;
   ensureSheetDefaults();
   if(d.trips){tripLogs=d.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
 }
@@ -750,6 +798,7 @@ const NAV=[
   ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
   ["logistics","Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
+  ["requests","Requests / Forms","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
   ["group","Growth"],
   ["social","Social Media","M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4"],
@@ -757,7 +806,7 @@ const NAV=[
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Requests & Form Links"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -902,6 +951,8 @@ function dispatchAction(e){
     else if(a==='editTrip')editTrip(t.dataset.arg);
     else if(a==='deleteTrip')deleteTrip(t.dataset.arg);
     else if(a==='openCustomerSheet')openCustomerSheet(t.dataset.arg);
+    else if(a==='editOperator')editOperator(parseInt(t.dataset.arg));
+    else if(a==='deleteOperator')deleteOperator(parseInt(t.dataset.arg));
 }
 function go(v,isBack){
   if(!isBack&&v!==curView)navStack.push(curView);
@@ -922,6 +973,8 @@ function renderView(v){
   else if(v==="accommodation")renderAccommodation();
   else if(v==="customers")renderCustomers();
   else if(v==="crm")renderCRM();
+  else if(v==="requests")loadSubmissions(true);
+  else if(v==="settings")renderOperators();
   else if(v==="logistics")renderLog();
   else if(v==="social")renderSocial();
   else if(v==="calc")calc();
@@ -3891,6 +3944,81 @@ function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage
 function refreshDashboard(){var dash=document.getElementById("v-dashboard");if(!dash)return;var wasActive=dash.classList.contains("active");dash.outerHTML=viewDashboard();var nd=document.getElementById("v-dashboard");if(nd&&wasActive)nd.classList.add("active");attachClickHandlers();persistData();}
 function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();refreshDashboard();}
 
+/* ===== REQUESTS / PUBLIC FORMS ===== */
+var _submissions=[];
+function formLink(type){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"register.html?type="+type;}
+function copyLink(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURIComponent(tour)):"");
+  if(navigator.clipboard)navigator.clipboard.writeText(url);
+  alert("Link copied:\n\n"+url+"\n\nShare it on WhatsApp / email. Submissions show up here automatically.");}
+function shareWhatsApp(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURIComponent(tour)):"");var msg=encodeURIComponent("Please register here for Island Explorer Birding Tours:\n"+url);window.open("https://wa.me/?text="+msg,"_blank");}
+function viewRequests(){
+  return "<section class='view' id='v-requests'>"+
+    "<div class='card card-pad' style='margin-bottom:16px'>"+
+      "<div class='eyebrow'>Share these links</div><div class='h-sec' style='margin-bottom:10px'>Public form links</div>"+
+      "<div class='req-links'>"+
+        reqLinkRow("Tour interest / registration","Send to anyone who wants to join a tour.","interest")+
+        reqLinkRow("Guest details (after advance)","Send to clients who've paid the advance.","client")+
+        reqLinkRow("Guide reservation request","For other guides proposing dates.","guide")+
+      "</div>"+
+    "</div>"+
+    "<div class='section-head'><div class='h-sec'>Incoming submissions</div><button class='btn btn-ghost btn-sm' onclick='loadSubmissions(true)'>Refresh</button></div>"+
+    "<div id='reqBody'><div class='empty'>Loading…</div></div>"+
+  "</section>";
+}
+function reqLinkRow(title,desc,type){
+  return "<div class='req-link'><div class='meta'><div class='t'>"+title+"</div><div class='s'>"+desc+"</div></div>"+
+    "<div class='acts'><button class='btn btn-sea btn-sm' onclick=\"copyLink('"+type+"')\">Copy link</button>"+
+    "<button class='btn btn-primary btn-sm' onclick=\"shareWhatsApp('"+type+"')\">WhatsApp</button></div></div>";
+}
+function loadSubmissions(force){
+  var cl=(typeof sbClient==="function")?sbClient():null;
+  var body=document.getElementById("reqBody");
+  if(!cl){if(body)body.innerHTML="<div class='empty'>Cloud not connected — set up Supabase in Settings to receive form submissions.</div>";return;}
+  if(body&&force)body.innerHTML="<div class='empty'>Loading…</div>";
+  cl.from("submissions").select("*").order("created_at",{ascending:false}).then(function(res){
+    if(res.error){if(body)body.innerHTML="<div class='empty'>Could not load submissions: "+res.error.message+(/relation|does not exist/i.test(res.error.message)?" — run the submissions table SQL in Settings → Cloud Sync.":"")+"</div>";return;}
+    _submissions=res.data||[];renderRequests();
+  }).catch(function(e){if(body)body.innerHTML="<div class='empty'>Network error loading submissions.</div>";});
+}
+function renderRequests(){
+  var body=document.getElementById("reqBody");if(!body)return;
+  if(!_submissions.length){body.innerHTML="<div class='empty'>No submissions yet. Share a form link above — entries appear here automatically.</div>";return;}
+  var TYPEN={interest:"Tour interest",client:"Guest details",guide:"Guide request"};
+  body.innerHTML=_submissions.map(function(s){
+    var d=s.data||{};
+    var rows="";
+    Object.keys(d).forEach(function(k){if(d[k])rows+="<div class='kv'><span>"+k+"</span><b>"+String(d[k])+"</b></div>";});
+    var dates=(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"");
+    var statusPill="<span class='pill "+(s.status==="accepted"?"completed":s.status==="declined"?"full":"open")+"'>"+(s.status||"new")+"</span>";
+    var acts="";
+    if(s.type==="interest")acts="<button class='btn btn-primary btn-sm' onclick=\"convertToLead('"+s.id+"')\">Add as lead</button>";
+    else if(s.type==="guide")acts="<button class='btn btn-sea btn-sm' onclick=\"setSubStatus('"+s.id+"','accepted')\">Accept</button><button class='btn btn-ghost btn-sm' onclick=\"setSubStatus('"+s.id+"','declined')\">Decline</button>";
+    return "<div class='card req-card'><div class='req-top'><div><span class='req-type'>"+(TYPEN[s.type]||s.type)+"</span> "+statusPill+"<div class='req-name'>"+(s.name||"—")+"</div>"+
+      "<div class='req-sub'>"+[s.phone,s.email,s.country].filter(Boolean).join(" · ")+"</div></div>"+
+      "<div class='req-meta'>"+(s.tour?"<div><b>"+s.tour+"</b></div>":"")+(dates?"<div>"+dates+"</div>":"")+(s.party?"<div>"+s.party+" pax</div>":"")+"</div></div>"+
+      (rows?"<div class='req-kv'>"+rows+"</div>":"")+
+      "<div class='req-acts'>"+acts+"<button class='btn btn-ghost btn-sm' onclick=\"deleteSub('"+s.id+"')\" style='color:var(--coral)'>Delete</button></div></div>";
+  }).join("");
+}
+function convertToLead(id){
+  var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
+  leads.unshift({id:"L"+Date.now(),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
+  renderCRM();setSubStatus(id,"added",true);persistData();
+  alert((s.name||"Lead")+" added to the CRM pipeline (New).");
+}
+function setSubStatus(id,status,silent){
+  var cl=sbClient();var s=_submissions.find(function(x){return x.id===id;});if(s)s.status=status;
+  renderRequests();
+  if(cl)cl.from("submissions").update({status:status}).eq("id",id).then(function(){});
+  if(!silent&&status!=="added")renderRequests();
+}
+function deleteSub(id){
+  if(!confirm("Delete this submission?"))return;
+  var cl=sbClient();
+  _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();
+  if(cl)cl.from("submissions").delete().eq("id",id).then(function(){});
+}
+
 /* ===== CUSTOMERS ===== */
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
@@ -4062,12 +4190,32 @@ function viewSettings(){
       "<span class='sb-status' id='sbStatus'></span>"+
     "</div>"+
     "<details style='margin-top:14px'><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
-      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;margin-top:8px;white-space:pre-wrap'>create table if not exists workspaces (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table workspaces enable row level security;\ncreate policy \"anon access\" on workspaces\n  for all to anon using (true) with check (true);</pre>"+
+      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;margin-top:8px;white-space:pre-wrap'>create table if not exists workspaces (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table workspaces enable row level security;\ncreate policy \"anon access\" on workspaces\n  for all to anon using (true) with check (true);\n\n-- Public form submissions (registration / guest details / guide requests)\ncreate table if not exists submissions (\n  id uuid primary key default gen_random_uuid(),\n  created_at timestamptz default now(),\n  type text, status text default 'new',\n  name text, email text, phone text, country text,\n  tour text, start_date date, end_date date, party int,\n  data jsonb\n);\nalter table submissions enable row level security;\ncreate policy \"anon submissions\" on submissions\n  for all to anon using (true) with check (true);</pre>"+
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Heads-up: the anon key is public. Anyone with your URL, key and workspace name can read/write this data — pick a hard-to-guess workspace name, or add Supabase Auth later for stricter access.</p>"+
     "</details>"+
   "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='section-head'><div><div class='eyebrow'>Access</div><div class='h-sec'>Operators &amp; login</div></div><div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='logout()'>Lock / sign out</button><button class='btn btn-primary btn-sm' onclick='openAddOperator()'>Add operator</button></div></div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin:6px 0 12px'>Each operator signs in with their phone number and personal code. Codes are stored with your synced data.</p>"+
+    "<div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Phone</th><th>Code</th><th>Role</th><th></th></tr></thead><tbody id='opBody'></tbody></table></div>"+
+  "</div>"+
   "</section>";
 }
+function renderOperators(){
+  var b=document.getElementById("opBody");if(!b)return;
+  b.innerHTML=operators.map(function(o,i){return "<tr><td class='strong'>"+o.name+"</td><td class='mono'>"+o.phone+"</td><td class='mono'>"+o.code+"</td><td>"+(o.role||"Operator")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editOperator' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteOperator' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='5' class='empty'>No operators — login is open until you add one.</td></tr>";
+}
+function opForm(o){o=o||{};return "<div class='form-grid'>"+
+  "<div class='field'><label>Name</label><input class='input' id='op_name' value='"+(o.name||"")+"'></div>"+
+  "<div class='field'><label>Phone number</label><input class='input mono' id='op_phone' value='"+(o.phone||"")+"' placeholder='10-digit number'></div>"+
+  "<div class='field'><label>Operator code</label><input class='input mono' id='op_code' value='"+(o.code||"")+"' placeholder='e.g. 1947'></div>"+
+  "<div class='field'><label>Role</label><select class='input' id='op_role'>"+["Admin","Operator","Guide","Sales"].map(function(r){return "<option "+(r===(o.role||"Operator")?"selected":"")+">"+r+"</option>";}).join("")+"</select></div>"+
+"</div>";}
+function openAddOperator(){modalForm("New operator","Add operator",opForm(),"saveNewOperator","Add operator");}
+function saveNewOperator(){var n=document.getElementById("op_name").value.trim();var ph=document.getElementById("op_phone").value.trim();var c=document.getElementById("op_code").value.trim();if(!n||!ph||!c){alert("Name, phone and code are required.");return;}operators.push({name:n,phone:ph,code:c,role:document.getElementById("op_role").value});persistData();closeModal();renderOperators();}
+function editOperator(i){var o=operators[i];if(!o)return;modalForm("Edit operator","Update operator",opForm(o),"saveEditOperator","Update");document.getElementById("modal").dataset.opi=i;}
+function saveEditOperator(){var i=parseInt(document.getElementById("modal").dataset.opi);var o=operators[i];if(!o)return;o.name=document.getElementById("op_name").value.trim();o.phone=document.getElementById("op_phone").value.trim();o.code=document.getElementById("op_code").value.trim();o.role=document.getElementById("op_role").value;persistData();closeModal();renderOperators();}
+function deleteOperator(i){if(!confirm("Remove this operator?"))return;operators.splice(i,1);persistData();renderOperators();}
 
 /* ===== MODALS / FORMS ===== */
 function modalForm(eyebrow,title,body,saveFn,saveLabel){
@@ -4277,13 +4425,42 @@ function deleteTrip(id){if(!confirm("Delete this trip record?"))return;tripLogs=
 /* ===== BOOT ===== */
 function boot(){
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewRequests(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   go("dashboard");
-  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();
+  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();
 cloudInit();
+requireLogin();
+
+/* ===== OPERATOR LOGIN ===== */
+function normPhone(p){return String(p||"").replace(/\D/g,"").slice(-10);}
+function currentOperator(){try{return JSON.parse(sessionStorage.getItem("ieo_op")||"null");}catch(e){return null;}}
+function requireLogin(){
+  var ov=document.getElementById("loginOverlay");if(!ov)return;
+  if(!operators||!operators.length){ov.classList.remove("show");return;} /* fail open if no operators set */
+  var op=currentOperator();
+  if(op){applyOperator(op);ov.classList.remove("show");}
+  else{ov.classList.add("show");setTimeout(function(){var f=document.getElementById("lg_phone");if(f)f.focus();},80);}
+}
+function applyOperator(op){
+  var who=document.querySelector(".nav-foot .who");if(who)who.textContent=op.name;
+  var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(op.role||"Operator")+" · "+op.code;
+  var av=document.querySelector(".nav-foot .av");if(av)av.textContent=(op.name||"OP").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
+}
+function doLogin(){
+  var phone=normPhone(document.getElementById("lg_phone").value);
+  var code=String(document.getElementById("lg_code").value||"").trim();
+  var err=document.getElementById("lgErr");
+  var op=operators.find(function(o){return normPhone(o.phone)===phone&&String(o.code)===code;});
+  if(!op){if(err){err.textContent="Phone number or code not recognised.";err.classList.add("show");}return;}
+  try{sessionStorage.setItem("ieo_op",JSON.stringify(op));}catch(e){}
+  if(err)err.classList.remove("show");
+  applyOperator(op);
+  document.getElementById("loginOverlay").classList.remove("show");
+}
+function logout(){try{sessionStorage.removeItem("ieo_op");}catch(e){}requireLogin();}
 </script>
 </body>
 </html>
