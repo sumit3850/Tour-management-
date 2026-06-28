@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Island Explorer — Guide Service Request</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b2a4a;--soft:#5a6a86;--forest:#143a2e;--blue:#0a6ed1;--paper:#eef1f6;--surface:#fff;--line:#e2e8f1;--ok:#1b7a4d;--err:#c0392b;--amber:#f0a400}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;padding:18px}
+.wrap{max-width:560px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px -16px rgba(20,40,80,.25);overflow:hidden}
+.head{background:linear-gradient(150deg,#1f5f4c,#143a2e);color:#fff;padding:24px;text-align:center}
+.head .brand{font-family:'Calistoga',serif;font-size:22px}.head .brand .ex{color:#7fc4ff}
+.head .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#bfe0d2;margin-top:6px}
+.head h1{font-size:16px;font-weight:600;margin-top:12px}
+.body{padding:22px}
+.det{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:18px}
+.det .row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid var(--line)}
+.det .row:last-child{border-bottom:none}.det .row span{color:var(--soft)}.det .row b{text-align:right}
+label{display:block;font-size:12.5px;font-weight:600;margin:10px 0 5px}
+input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:11px}
+.opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px}
+.opt{padding:12px 8px;border:1px solid var(--line);border-radius:11px;text-align:center;font-weight:600;font-size:13px;cursor:pointer;background:var(--surface)}
+.opt.sel{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
+.btn{width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.msg{padding:14px;border-radius:12px;font-size:14px;margin-bottom:14px;display:none}
+.err{background:#fbe7e4;color:var(--err);border:1px solid #f0c2bb}.ok{background:#e4f3ea;color:var(--ok);border:1px solid #b6e0c6}
+.success{display:none;text-align:center;padding:40px 24px}
+.success svg{width:54px;height:54px;color:var(--ok)}.success h2{font-size:20px;margin:12px 0 6px}
+.foot{text-align:center;font-size:11px;color:var(--soft);padding:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <div class="brand">Island <span class="ex">Explorer</span></div>
+      <div class="sub">Birding Tours · Andaman &amp; Nicobar</div>
+      <h1>Guide Service Request</h1>
+    </div>
+    <div class="body" id="body">
+      <div class="msg err" id="err"></div>
+      <div id="detail"><p style="color:var(--soft);text-align:center;padding:20px">Loading request…</p></div>
+    </div>
+    <div class="success" id="success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+      <h2>Response sent</h2>
+      <p style="color:var(--soft)">Thank you — Island Explorer has been notified.</p>
+    </div>
+  </div>
+  <div class="foot">Sumit Kumar · +91 99332 02175 · info@islandexplorer.in</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const rid=new URLSearchParams(location.search).get("rid")||"";
+var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display="block";}
+function dmy(s){if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
+function fmt(n){return "₹"+Math.round(n||0).toLocaleString("en-IN");}
+var chosen="";
+function pick(v){chosen=v;document.querySelectorAll(".opt").forEach(function(o){o.classList.toggle("sel",o.dataset.v===v);});}
+
+async function load(){
+  if(!sb||!rid){showErr("This link is invalid or the service is unavailable.");return;}
+  try{
+    var res=await sb.from("workspaces").select("data").eq("id","island-explorer").maybeSingle();
+    var list=(res.data&&res.data.data&&res.data.data.reservations)||[];
+    var r=list.find(function(x){return x.id===rid;});
+    if(!r){showErr("This request could not be found. It may have been withdrawn.");return;}
+    document.getElementById("detail").innerHTML=
+      "<div class='det'>"+
+        "<div class='row'><span>Tour</span><b>"+(r.tour||"—")+"</b></div>"+
+        "<div class='row'><span>Dates</span><b>"+dmy(r.date)+(r.endDate?" – "+dmy(r.endDate):"")+"</b></div>"+
+        "<div class='row'><span>Location</span><b>"+(r.location||"—")+"</b></div>"+
+        "<div class='row'><span>Guide fee</span><b>"+fmt(r.guideFee)+"</b></div>"+
+        "<div class='row'><span>Referral commission</span><b>"+fmt(r.referral)+"</b></div>"+
+        (r.notes?"<div class='row'><span>Notes</span><b>"+r.notes+"</b></div>":"")+
+      "</div>"+
+      "<label>Your name</label><input id='gname' placeholder='Your name / organisation'>"+
+      "<label>Your response</label>"+
+      "<div class='opts'><div class='opt' data-v='review' onclick=\"pick('review')\">In review</div><div class='opt' data-v='accepted' onclick=\"pick('accepted')\">Accept</div><div class='opt' data-v='declined' onclick=\"pick('declined')\">Decline</div></div>"+
+      "<button class='btn' onclick='submitResp()'>Send response</button>";
+  }catch(e){showErr("Couldn't load the request. Please try again.");}
+}
+async function submitResp(){
+  document.getElementById("err").style.display="none";
+  if(!chosen){showErr("Please choose a response (In review / Accept / Decline).");return;}
+  var by=(document.getElementById("gname")||{}).value||"";
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*1000),type:"reservation_response",status:"new",name:by,created_at:new Date().toISOString(),data:{rid:rid,response:chosen,by:by}};
+  try{
+    var ex=await sb.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle();
+    var list=(ex&&ex.data&&ex.data.data&&Array.isArray(ex.data.data.list))?ex.data.data.list:[];
+    list.unshift(rec);
+    var up=await sb.from("workspaces").upsert({id:"ieo_submissions",data:{list:list},updated_at:new Date().toISOString()});
+    if(up.error){showErr("Could not send: "+up.error.message);return;}
+    document.getElementById("body").style.display="none";
+    document.getElementById("success").style.display="block";
+  }catch(e){showErr("Network error. Please try again.");}
+}
+load();
+</script>
+</body>
+</html>

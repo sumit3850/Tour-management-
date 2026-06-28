@@ -78,6 +78,8 @@ const TOURS=["5N- South Andaman","7N- South & Little And.","8N- South & Little A
 const params=new URLSearchParams(location.search);
 const type=(params.get("type")||"interest").toLowerCase();
 const presetTour=params.get("tour")||"";
+const presetStart=params.get("start")||"";
+const presetEnd=params.get("end")||"";
 
 const TITLES={
   interest:["Join a Tour","Register your interest and preferred dates — we'll confirm availability."],
@@ -92,7 +94,7 @@ function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*
   if(opts.tour){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+"><option value=''>Select a tour…</option>"+TOURS.map(function(t){return "<option "+(t===presetTour?"selected":"")+">"+t+"</option>";}).join("")+"</select>";}
   else if(opts.select){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+">"+opts.select.map(function(o){return "<option>"+o+"</option>";}).join("")+"</select>";}
   else if(t==="textarea"){ctrl="<textarea id='"+id+"' placeholder='"+(opts.ph||"")+"'></textarea>";}
-  else{ctrl="<input id='"+id+"' type='"+t+"' placeholder='"+(opts.ph||"")+"' "+(opts.req?"required":"")+">";}
+  else{ctrl="<input id='"+id+"' type='"+t+"' value='"+(opts.val||"")+"' placeholder='"+(opts.ph||"")+"' "+(opts.req?"required":"")+">";}
   return "<div class='field'><label>"+label+req+"</label>"+ctrl+(opts.hint?"<div class='hint'>"+opts.hint+"</div>":"")+"</div>";
 }
 function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
@@ -123,22 +125,24 @@ if(type==="guide"){
   html+=rowOf(inp("g_party","Group size",{type:"number"}),inp("g_clienttype","Client type",{select:["Indian","Foreigner","Mixed"]}));
   html+=inp("g_notes","Notes / requirements",{type:"textarea",ph:"Target species, flexibility on dates, etc."});
 }else if(type==="client"){
+  html+=inp("c_tour","Tour category",{tour:1});
+  html+=rowOf(inp("c_start","Tour start date",{type:"date",val:presetStart}),inp("c_end","Tour end date",{type:"date",val:presetEnd}));
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
   html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID","Other"]}),inp("c_idno","ID / passport number",{req:1}));
-  html+=rowOf(inp("c_idexp","ID / passport expiry",{type:"date"}),inp("c_tour","Tour",{tour:1}));
+  html+=inp("c_idexp","ID / passport expiry",{type:"date"});
   html+=docField("c_docs","Upload documents (passport / ID / photo)");
   html+=rowOf(inp("c_arrival","Arrival date & flight",{ph:"e.g. 18 Jun, 6E-237"}),inp("c_departure","Departure date & flight",{}));
   html+=rowOf(inp("c_diet","Dietary needs",{ph:"Veg / non-veg / allergies"}),inp("c_room","Room preference",{select:["Twin share","Double","Single (supplement)","No preference","Other"]}));
   html+=rowOf(inp("c_emname","Emergency contact name",{}),inp("c_emphone","Emergency contact phone",{type:"tel"}));
   html+=inp("c_med","Medical notes / mobility",{type:"textarea",ph:"Anything we should know to keep you safe & comfortable"});
 }else{
+  html+=inp("i_tour","Tour category",{tour:1,req:1});
+  html+=rowOf(inp("i_start","Preferred start date",{type:"date",val:presetStart}),inp("i_end","Preferred end date",{type:"date",val:presetEnd}));
   html+=inp("i_name","Your name",{req:1});
   html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_party","Number of guests",{type:"number"}));
-  html+=inp("i_tour","Which tour?",{tour:1,req:1});
-  html+=rowOf(inp("i_start","Preferred start date",{type:"date"}),inp("i_end","Preferred end date",{type:"date"}));
   html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner","Other"]});
   html+=docField("i_docs","Upload documents (optional)");
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
@@ -163,7 +167,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     rec.data={organisation:val("g_org"),clientType:val("g_clienttype"),notes:val("g_notes")};
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
-    rec.tour=val("c_tour");
+    rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;
     rec.data={dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
@@ -177,7 +181,12 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
   try{
     if(docInput){var docs=await uploadDocs(docInput);if(docs.length)rec.data.documents=docs;}
-    var res=await sb.from("submissions").insert(rec);
+    rec.id="S"+Date.now()+Math.floor(Math.random()*1000);
+    rec.created_at=new Date().toISOString();
+    var ex=await sb.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle();
+    var list=(ex&&ex.data&&ex.data.data&&Array.isArray(ex.data.data.list))?ex.data.data.list:[];
+    list.unshift(rec);
+    var res=await sb.from("workspaces").upsert({id:"ieo_submissions",data:{list:list},updated_at:new Date().toISOString()});
     if(res.error){btn.disabled=false;btn.textContent="Submit";showErr("Could not submit: "+res.error.message);return;}
     document.getElementById("formBody").style.display="none";
     document.getElementById("success").style.display="block";
