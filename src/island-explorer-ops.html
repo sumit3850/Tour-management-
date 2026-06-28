@@ -455,7 +455,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 19</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 20</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -4344,7 +4344,7 @@ function viewSettings(){
       "<span class='sb-status' id='sbStatus'></span>"+
     "</div>"+
     "<details style='margin-top:14px'><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
-      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;margin-top:8px;white-space:pre-wrap'>create table if not exists workspaces (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table workspaces enable row level security;\ncreate policy \"anon access\" on workspaces\n  for all to anon using (true) with check (true);\n\n-- Public form submissions (registration / guest details / guide requests)\ncreate table if not exists submissions (\n  id uuid primary key default gen_random_uuid(),\n  created_at timestamptz default now(),\n  type text, status text default 'new',\n  name text, email text, phone text, country text,\n  tour text, start_date date, end_date date, party int,\n  data jsonb\n);\nalter table submissions enable row level security;\ncreate policy \"anon submissions\" on submissions\n  for all to anon using (true) with check (true);</pre>"+
+      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;margin-top:8px;white-space:pre-wrap'>-- Run this once in the Supabase SQL editor.\n-- Fixes 'new row violates row-level security policy'.\ncreate table if not exists workspaces (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table workspaces enable row level security;\ndrop policy if exists \"anon access\" on workspaces;\ndrop policy if exists \"anon submissions\" on workspaces;\ncreate policy \"public access\" on workspaces\n  for all\n  to anon, authenticated\n  using (true) with check (true);</pre>"+
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Heads-up: the anon key is public. Anyone with your URL, key and workspace name can read/write this data — pick a hard-to-guess workspace name, or add Supabase Auth later for stricter access.</p>"+
     "</details>"+
   "</div>"+
