@@ -96,6 +96,22 @@ function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*
   return "<div class='field'><label>"+label+req+"</label>"+ctrl+(opts.hint?"<div class='hint'>"+opts.hint+"</div>":"")+"</div>";
 }
 function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
+function docField(id,label){return "<div class='field'><label>"+label+"</label><input id='"+id+"' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach one or more files (photo, PDF). Optional.</div></div>";}
+async function uploadDocs(inputId){
+  var el=document.getElementById(inputId);
+  if(!el||!el.files||!el.files.length||!sb)return [];
+  var out=[];
+  for(var i=0;i<el.files.length;i++){
+    var f=el.files[i];var path="forms/"+Date.now()+"_"+i+"_"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    try{
+      var up=await sb.storage.from("uploads").upload(path,f,{upsert:false});
+      if(up.error){out.push(f.name+" (not uploaded)");continue;}
+      var pub=sb.storage.from("uploads").getPublicUrl(path);
+      out.push((pub&&pub.data&&pub.data.publicUrl)||f.name);
+    }catch(e){out.push(f.name+" (not uploaded)");}
+  }
+  return out;
+}
 
 var html="";
 if(type==="guide"){
@@ -110,10 +126,11 @@ if(type==="guide"){
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
-  html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID"]}),inp("c_idno","ID / passport number",{req:1}));
+  html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID","Other"]}),inp("c_idno","ID / passport number",{req:1}));
   html+=rowOf(inp("c_idexp","ID / passport expiry",{type:"date"}),inp("c_tour","Tour",{tour:1}));
+  html+=docField("c_docs","Upload documents (passport / ID / photo)");
   html+=rowOf(inp("c_arrival","Arrival date & flight",{ph:"e.g. 18 Jun, 6E-237"}),inp("c_departure","Departure date & flight",{}));
-  html+=rowOf(inp("c_diet","Dietary needs",{ph:"Veg / non-veg / allergies"}),inp("c_room","Room preference",{select:["Twin share","Double","Single (supplement)","No preference"]}));
+  html+=rowOf(inp("c_diet","Dietary needs",{ph:"Veg / non-veg / allergies"}),inp("c_room","Room preference",{select:["Twin share","Double","Single (supplement)","No preference","Other"]}));
   html+=rowOf(inp("c_emname","Emergency contact name",{}),inp("c_emphone","Emergency contact phone",{type:"tel"}));
   html+=inp("c_med","Medical notes / mobility",{type:"textarea",ph:"Anything we should know to keep you safe & comfortable"});
 }else{
@@ -122,7 +139,8 @@ if(type==="guide"){
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_party","Number of guests",{type:"number"}));
   html+=inp("i_tour","Which tour?",{tour:1,req:1});
   html+=rowOf(inp("i_start","Preferred start date",{type:"date"}),inp("i_end","Preferred end date",{type:"date"}));
-  html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner"]});
+  html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner","Other"]});
+  html+=docField("i_docs","Upload documents (optional)");
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
 }
 document.getElementById("fields").innerHTML=html;
@@ -133,10 +151,11 @@ try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
 function val(id){var el=document.getElementById(id);return el?el.value.trim():"";}
 function showErr(m){var b=document.getElementById("errBox");b.textContent=m;b.style.display="block";}
 
-document.getElementById("theForm").addEventListener("submit",function(e){
+document.getElementById("theForm").addEventListener("submit",async function(e){
   e.preventDefault();
   document.getElementById("errBox").style.display="none";
   var rec={type:type,status:"new"};
+  var docInput=(type==="client")?"c_docs":(type==="interest"?"i_docs":null);
   if(type==="guide"){
     rec.name=val("g_name");rec.phone=val("g_phone");rec.email=val("g_email");
     rec.tour=val("g_tour");rec.start_date=val("g_start")||null;rec.end_date=val("g_end")||null;
@@ -152,16 +171,19 @@ document.getElementById("theForm").addEventListener("submit",function(e){
     rec.party=parseInt(val("i_party"))||null;
     rec.data={clientType:val("i_clienttype"),message:val("i_msg")};
   }
+  if(params.get("tid"))rec.data.tourId=params.get("tid");
   if(!rec.name||!rec.phone){showErr("Please fill in at least your name and phone number.");return;}
   if(!sb){showErr("Sorry, the form service is unavailable right now. Please WhatsApp us at +91 99332 02175.");return;}
   var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
-  sb.from("submissions").insert(rec).then(function(res){
+  try{
+    if(docInput){var docs=await uploadDocs(docInput);if(docs.length)rec.data.documents=docs;}
+    var res=await sb.from("submissions").insert(rec);
     if(res.error){btn.disabled=false;btn.textContent="Submit";showErr("Could not submit: "+res.error.message);return;}
     document.getElementById("formBody").style.display="none";
     document.getElementById("success").style.display="block";
     if(type==="client")document.getElementById("successMsg").textContent="Your guest details have been received. We'll finalise your trip and confirm by email/WhatsApp.";
     if(type==="guide")document.getElementById("successMsg").textContent="Your reservation request has been sent to Island Explorer. We'll respond with availability soon.";
-  }).catch(function(err){btn.disabled=false;btn.textContent="Submit";showErr("Network error. Please try again or WhatsApp +91 99332 02175.");});
+  }catch(err){btn.disabled=false;btn.textContent="Submit";showErr("Network error. Please try again or WhatsApp +91 99332 02175.");}
 });
 </script>
 </body>
