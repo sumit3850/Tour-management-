@@ -455,7 +455,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 17</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 18</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -990,7 +990,7 @@ function renderView(v){
   else if(v==="customers")renderCustomers();
   else if(v==="crm")renderCRM();
   else if(v==="requests")loadSubmissions(true);
-  else if(v==="reservations")renderReservations();
+  else if(v==="reservations"){renderReservations();loadSubmissions(false);}
   else if(v==="settings")renderOperators();
   else if(v==="logistics")renderLog();
   else if(v==="social")renderSocial();
@@ -1060,7 +1060,6 @@ function viewDashboard(){
       qaTile("New reservation","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4","go('reservations')")+
       qaTile("Cost calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z","go('calc')")+
       qaTile("Share form","M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13","go('requests')")+
-      qaTile("Requests","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z","go('requests')")+
     "</div>"+
     (clashes.length?"<div class='card card-pad alert-warn' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px;color:var(--coral)'>⚠ Scheduling clashes ("+clashes.length+")</div>"+clashes.slice(0,5).map(function(c){return "<div class='s' style='margin:3px 0'>"+c.who+" ("+c.what+") double-booked: <b>"+c.a.tour+"</b> &amp; <b>"+c.b.tour+"</b></div>";}).join("")+"</div>":"")+
     "<div class='kpis' style='margin-top:16px'>"+
@@ -3982,7 +3981,7 @@ function copyLink(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURICom
 function shareWhatsApp(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURIComponent(tour)):"");var msg=encodeURIComponent("Please register here for Island Explorer Birding Tours:\n"+url);window.open("https://wa.me/?text="+msg,"_blank");}
 function shareTourForm(id,type){
   var t=tours.find(function(x){return x.id===id;});if(!t)return;
-  var url=formLink(type)+"&tour="+encodeURIComponent(shortName(t))+"&tid="+id;
+  var url=formLink(type)+"&tour="+encodeURIComponent(shortName(t))+"&tid="+id+"&start="+(t.start||"")+"&end="+(t.end||"");
   if(navigator.clipboard)navigator.clipboard.writeText(url);
   var intro=type==="client"?"Please complete your guest details for "+shortName(t)+":\n":"Register your interest for "+shortName(t)+":\n";
   if(confirm("Link copied:\n\n"+url+"\n\nOpen WhatsApp to share it now?"))waShare(intro+url,t.phone);
@@ -4005,14 +4004,17 @@ function reqLinkRow(title,desc,type){
     "<div class='acts'><button class='btn btn-sea btn-sm' onclick=\"copyLink('"+type+"')\">Copy link</button>"+
     "<button class='btn btn-primary btn-sm' onclick=\"shareWhatsApp('"+type+"')\">WhatsApp</button></div></div>";
 }
+function saveSubmissionsStore(){var cl=sbClient();if(cl)cl.from("workspaces").upsert({id:"ieo_submissions",data:{list:_submissions},updated_at:new Date().toISOString()}).then(function(){});}
 function loadSubmissions(force){
   var cl=(typeof sbClient==="function")?sbClient():null;
   var body=document.getElementById("reqBody");
   if(!cl){if(body)body.innerHTML="<div class='empty'>Cloud not connected — set up Supabase in Settings to receive form submissions.</div>";return;}
   if(body&&force)body.innerHTML="<div class='empty'>Loading…</div>";
-  cl.from("submissions").select("*").order("created_at",{ascending:false}).then(function(res){
-    if(res.error){if(body)body.innerHTML="<div class='empty'>Could not load submissions: "+res.error.message+(/relation|does not exist/i.test(res.error.message)?" — run the submissions table SQL in Settings → Cloud Sync.":"")+"</div>";return;}
-    _submissions=res.data||[];renderRequests();
+  cl.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle().then(function(res){
+    if(res.error){if(body)body.innerHTML="<div class='empty'>Could not load submissions: "+res.error.message+"</div>";return;}
+    _submissions=(res.data&&res.data.data&&res.data.data.list)||[];
+    applyReservationResponses();
+    renderRequests();
   }).catch(function(e){if(body)body.innerHTML="<div class='empty'>Network error loading submissions.</div>";});
 }
 function renderRequests(){
@@ -4060,28 +4062,58 @@ function convertToBooking(id){
   alert("Booking created for "+(s.name||"guest")+(t?" on "+shortName(t):"")+". It now shows in Bookings, Tours and the Calendar.");
 }
 function setSubStatus(id,status,silent){
-  var cl=sbClient();var s=_submissions.find(function(x){return x.id===id;});if(s)s.status=status;
-  renderRequests();
-  if(cl)cl.from("submissions").update({status:status}).eq("id",id).then(function(){});
-  if(!silent&&status!=="added")renderRequests();
+  var s=_submissions.find(function(x){return x.id===id;});if(s)s.status=status;
+  renderRequests();saveSubmissionsStore();
 }
 function deleteSub(id){
   if(!confirm("Delete this submission?"))return;
-  var cl=sbClient();
-  _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();
-  if(cl)cl.from("submissions").delete().eq("id",id).then(function(){});
+  _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();saveSubmissionsStore();
 }
 
 /* ===== RESERVATION PIPELINE ===== */
 function viewReservations(){
   return "<section class='view' id='v-reservations'>"+
     "<div class='section-head'><div><div class='eyebrow'>Guide service reservations</div><div class='h-sec'>Reservation pipeline</div></div><button class='btn btn-primary' onclick='openAddReservation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>New reservation</button></div>"+
-    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:14px'>Create a query with the tour dates, location, guide fee and referral commission, then move it across the stages.</p>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:14px'>Create a query with the tour dates, location, guide fee and referral commission, then share it. When the other guide responds, it moves across the stages automatically.</p>"+
+    "<div id='resSummary'></div>"+
     "<div class='kanban' id='resKanban'></div>"+
   "</section>";
 }
+function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"respond.html?rid="+rid;}
+function shareReservation(id,via){
+  var r=reservations.find(function(x){return x.id===id;});if(!r)return;
+  var msg="Island Explorer — guide service request\n\nTour: "+(r.tour||"")+"\nDates: "+dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"")+"\nLocation: "+(r.location||"")+"\nGuide fee: "+fmt(r.guideFee||0)+"\nReferral: "+fmt(r.referral||0)+"\n\nPlease review & respond here:\n"+respondLink(id);
+  if(via==="email")mailSend("","Guide service request · Island Explorer",msg);else waShare(msg,r.phone);
+}
+function avgDays(field){
+  var diffs=reservations.map(function(r){if(r.createdAt&&r[field])return (new Date(r[field])-new Date(r.createdAt))/864e5;return null;}).filter(function(v){return v!=null&&v>=0;});
+  if(!diffs.length)return null;
+  return Math.round(diffs.reduce(function(a,b){return a+b;},0)/diffs.length*10)/10;
+}
+function resSummary(){
+  var aR=avgDays("reviewedAt"),aA=avgDays("acceptedAt");
+  return "<div class='card card-pad' style='margin-bottom:14px'><div class='eyebrow'>Guide acceptance behaviour</div>"+
+    "<div class='kpis' style='margin-top:8px'>"+
+      kpi("Open requests",reservations.filter(function(r){return r.stage!=="confirmed";}).length,"in pipeline","","M9 11l3 3 8-8")+
+      kpi("Confirmed",reservations.filter(function(r){return r.stage==="confirmed";}).length,"accepted","up","M20 6 9 17l-5-5")+
+      kpi("Avg time to review",aR==null?"—":aR+"d","proposed to review","","M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z")+
+      kpi("Avg time to accept",aA==null?"—":aA+"d","proposed to accepted","","M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z")+
+    "</div></div>";
+}
+function applyReservationResponses(){
+  var changed=false;
+  (_submissions||[]).filter(function(s){return s.type==="reservation_response";}).forEach(function(s){
+    var d=s.data||{};var r=reservations.find(function(x){return x.id===d.rid;});if(!r)return;
+    if(d.by)r.respondedBy=d.by;
+    if(d.response==="review"&&r.stage==="proposed"){r.stage="review";r.reviewedAt=r.reviewedAt||s.created_at;changed=true;}
+    else if(d.response==="accepted"&&r.stage!=="confirmed"){r.stage="confirmed";r.acceptedAt=r.acceptedAt||s.created_at;if(!r.reviewedAt)r.reviewedAt=s.created_at;changed=true;}
+    else if(d.response==="declined"&&!r.declined){r.declined=true;r.declinedAt=s.created_at;changed=true;}
+  });
+  if(changed){persistData();if(document.getElementById("resKanban"))renderReservations();}
+}
 function renderReservations(){
   var k=document.getElementById("resKanban");if(!k)return;
+  var sumEl=document.getElementById("resSummary");if(sumEl)sumEl.innerHTML=resSummary();
   k.innerHTML=RES_STAGES.map(function(st){
     var key=st[0],label=st[1];
     var items=reservations.filter(function(r){return r.stage===key;});
@@ -4089,12 +4121,13 @@ function renderReservations(){
       var idx=RES_STAGES.findIndex(function(s){return s[0]===r.stage;});
       var prev=idx>0?RES_STAGES[idx-1]:null,next=idx<RES_STAGES.length-1?RES_STAGES[idx+1]:null;
       var dates=dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"");
-      return "<div class='lead res-card'><div class='ln'>"+(r.tour||"Tour")+"</div>"+
+      return "<div class='lead res-card'><div class='ln'>"+(r.tour||"Tour")+(r.declined?" <span class='pill full'>declined</span>":"")+"</div>"+
         "<div class='lc'>"+dates+(r.location?" · "+r.location:"")+"</div>"+
         "<div class='res-fig'><span>Guide fee</span><b class='mono'>"+fmt(r.guideFee||0)+"</b></div>"+
         "<div class='res-fig'><span>Referral</span><b class='mono'>"+fmt(r.referral||0)+"</b></div>"+
-        (r.by?"<div class='lt'>By: "+r.by+"</div>":"")+(r.notes?"<div class='lt'>"+r.notes+"</div>":"")+
+        (r.by?"<div class='lt'>By: "+r.by+"</div>":"")+(r.respondedBy?"<div class='lt'>Response: "+r.respondedBy+"</div>":"")+(r.notes?"<div class='lt'>"+r.notes+"</div>":"")+
         "<div class='mv'>"+(prev?"<button onclick=\"moveReservation('"+r.id+"','"+prev[0]+"')\">← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button onclick=\"moveReservation('"+r.id+"','"+next[0]+"')\">"+next[1].split(" ")[0]+" →</button>":"")+"</div>"+
+        "<div style='display:flex;gap:6px;margin-top:6px'><button class='edit-btn' onclick=\"shareReservation('"+r.id+"','wa')\" style='flex:1'>Share · WA</button><button class='edit-btn' onclick=\"shareReservation('"+r.id+"','email')\" style='flex:1'>Email</button></div>"+
         (r.stage==="confirmed"&&!r.tourCreated?"<button class='btn btn-primary btn-sm' onclick=\"createTourFromReservation('"+r.id+"')\" style='width:100%;margin-top:6px'>+ Create tour from this</button>":"")+
         "<div style='display:flex;gap:6px;margin-top:6px'><button class='edit-btn' onclick=\"editReservation('"+r.id+"')\" style='flex:1'>Edit</button><button class='del-btn' onclick=\"deleteReservation('"+r.id+"')\" style='flex:1;color:var(--coral)'>Delete</button></div>"+
       "</div>";
@@ -4115,7 +4148,7 @@ function resForm(r){r=r||{};var tourOpts="<option value=''>—</option>"+CALC_OR
   "</div>";}
 function openAddReservation(){modalForm("New reservation","Add to pipeline",resForm(),"saveNewReservation","Add reservation");}
 function saveNewReservation(){
-  reservations.unshift({id:"R"+Date.now(),tour:document.getElementById("rs_tour").value,date:document.getElementById("rs_date").value,endDate:document.getElementById("rs_end").value,location:document.getElementById("rs_loc").value,guideFee:parseFloat(document.getElementById("rs_fee").value)||0,referral:parseFloat(document.getElementById("rs_ref").value)||0,by:document.getElementById("rs_by").value,notes:document.getElementById("rs_notes").value,stage:"proposed"});
+  reservations.unshift({id:"R"+Date.now(),tour:document.getElementById("rs_tour").value,date:document.getElementById("rs_date").value,endDate:document.getElementById("rs_end").value,location:document.getElementById("rs_loc").value,guideFee:parseFloat(document.getElementById("rs_fee").value)||0,referral:parseFloat(document.getElementById("rs_ref").value)||0,by:document.getElementById("rs_by").value,notes:document.getElementById("rs_notes").value,stage:"proposed",createdAt:new Date().toISOString()});
   closeModal();renderReservations();
 }
 function editReservation(id){var r=reservations.find(function(x){return x.id===id;});if(!r)return;modalForm("Edit reservation","Update reservation",resForm(r),"saveEditReservation","Update");document.getElementById("modal").dataset.rid=id;}
