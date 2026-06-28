@@ -455,7 +455,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 21</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 22</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -659,6 +659,15 @@ function resetData(){
   try{localStorage.removeItem(DATA_KEY);}catch(e){}
   location.reload();
 }
+/* ===== CSV / spreadsheet export ===== */
+function toCSV(rows){return rows.map(function(r){return r.map(function(c){c=(c==null?"":String(c));return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(",");}).join("\n");}
+function downloadCSV(name,rows){var blob=new Blob([toCSV(rows)],{type:"text/csv;charset=utf-8"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name+"-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
+function exportBookingsCSV(){var rows=[["Guest","Tour","Start","End","Party","Country","Email","Phone","Status","Payment","Total","Deposit","Pending","Notes"]];bookings.forEach(function(b){var t=tours.find(function(x){return x.id===b.tour;});rows.push([b.guest,t?shortName(t):"",b.start,b.end,b.party,b.country,b.email||"",b.phone||"",b.status,b.pay,bookingTotalCost(b),bookingDeposit(b),bookingPending(b),b.notes||""]);});downloadCSV("bookings",rows);}
+function exportCustomersCSV(){var rows=[["Name","Country","Past tours","Payment","Preferences"]];customers.forEach(function(c){rows.push([c.name,c.country,c.tours,c.pay,c.pref]);});downloadCSV("customers",rows);}
+function exportToursCSV(){var rows=[["Code","Name","Category","Start","End","Nights","Capacity","Booked","Guide","Status"]];tours.forEach(function(t){rows.push([shortName(t),t.name,CATS[t.cat]||t.cat,t.start,t.end,durNights(t),t.cap,booked(t.id),t.guide,status(t)]);});downloadCSV("tours",rows);}
+function exportReservationsCSV(){var rows=[["Tour","Start","End","Location","Guide fee","Referral","Requested by","Stage","Responded by"]];reservations.forEach(function(r){rows.push([r.tour,r.date,r.endDate,r.location,r.guideFee,r.referral,r.by,r.stage,r.respondedBy||""]);});downloadCSV("reservations",rows);}
+function exportSubmissionsCSV(){var rows=[["Type","Name","Phone","Email","Country","Tour","Start","End","Status","Created"]];(_submissions||[]).forEach(function(s){rows.push([s.type,s.name,s.phone,s.email,s.country,s.tour,s.start_date,s.end_date,s.status,s.created_at]);});downloadCSV("submissions",rows);}
+function dlBtn(fn){return "<button class='btn btn-ghost btn-sm' onclick='"+fn+"()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>CSV</button>";}
 
 /* ===== CLOUD SYNC — optional Supabase backend, configured in Settings ===== */
 const SB_CFG_KEY="ieo_supabase";
@@ -1101,7 +1110,7 @@ function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
       "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
-      "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button>"+
+      "<div style='display:flex;gap:8px'>"+dlBtn('exportToursCSV')+"<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
     "</div>"+
     "<div class='tour-cols' id='tourGrid'></div>"+
   "</section>";
@@ -1181,7 +1190,7 @@ function renderCalendar(){
 /* ===== BOOKINGS ===== */
 function viewBookings(){
   return "<section class='view' id='v-bookings'>"+
-    "<div class='section-head'><div class='h-sec'>All bookings</div><button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div>"+
+    "<div class='section-head'><div class='h-sec'>All bookings</div><div style='display:flex;gap:8px'>"+dlBtn('exportBookingsCSV')+"<button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total Cost</th><th class='num'>Deposit</th><th class='num'>Pending</th><th>Last Pending</th><th>Payment Status</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
 }
@@ -3995,7 +4004,7 @@ function viewRequests(){
         reqLinkRow("Guest details (after advance)","Send to clients who've paid the advance.","client")+
       "</div>"+
     "</div>"+
-    "<div class='section-head'><div class='h-sec'>Incoming submissions</div><button class='btn btn-ghost btn-sm' onclick='loadSubmissions(true)'>Refresh</button></div>"+
+    "<div class='section-head'><div class='h-sec'>Incoming submissions</div><div style='display:flex;gap:8px'>"+dlBtn('exportSubmissionsCSV')+"<button class='btn btn-ghost btn-sm' onclick='loadSubmissions(true)'>Refresh</button></div></div>"+
     "<div id='reqBody'><div class='empty'>Loading…</div></div>"+
   "</section>";
 }
@@ -4014,6 +4023,7 @@ function loadSubmissions(force){
     if(res.error){if(body)body.innerHTML="<div class='empty'>Could not load submissions: "+res.error.message+"</div>";return;}
     _submissions=(res.data&&res.data.data&&res.data.data.list)||[];
     applyReservationResponses();
+    autoProcessSubmissions();
     renderRequests();
   }).catch(function(e){if(body)body.innerHTML="<div class='empty'>Network error loading submissions.</div>";});
 }
@@ -4058,15 +4068,43 @@ function convertToLead(id){
   renderCRM();setSubStatus(id,"added",true);persistData();
   alert((s.name||"Lead")+" added to the CRM pipeline (New).");
 }
-function convertToBooking(id){
-  var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
+function addOrUpdateCustomer(s){
+  if(!s.name)return;
+  var c=customers.find(function(x){return (x.name||"").toLowerCase()===s.name.toLowerCase();});
+  if(c){c.tours=(c.tours||0)+1;c.repeat=(c.tours>1);if(s.country)c.country=s.country;}
+  else customers.unshift({name:s.name,country:s.country||"—",tours:1,pay:"Deposit",repeat:false,pref:(s.data&&(s.data.diet||s.data.message))||"—"});
+}
+function makeBookingFromSub(s){
   var t=null;
   if(s.data&&s.data.tourId)t=tours.find(function(x){return x.id===s.data.tourId;});
   if(!t&&s.tour)t=tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour;});
-  var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
-  bookings.unshift({id:"B"+Date.now(),tour:t?t.id:"",guest:s.name||"—",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""});
-  renderBookings();renderTours();renderCalendar();setSubStatus(id,"booked",true);persistData();
-  alert("Booking created for "+(s.name||"guest")+(t?" on "+shortName(t):"")+". It now shows in Bookings, Tours and the Calendar.");
+  /* avoid duplicate booking for the same guest+tour */
+  var dup=bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
+  if(!dup){
+    var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
+    bookings.unshift({id:"B"+Date.now()+Math.floor(Math.random()*100),tour:t?t.id:"",guest:s.name||"—",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""});
+    addOrUpdateCustomer(s);
+  }
+  return t;
+}
+function convertToBooking(id){
+  var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
+  var t=makeBookingFromSub(s);
+  renderBookings();renderTours();renderCalendar();renderCustomers();setSubStatus(id,"booked",true);persistData();
+  alert("Booking + customer created for "+(s.name||"guest")+(t?" on "+shortName(t):"")+". It now shows in Bookings, the tour, Calendar occupancy and Customers.");
+}
+function autoProcessSubmissions(){
+  var changed=false;
+  (_submissions||[]).forEach(function(s){
+    if(s.status==="booked"||s.status==="lead-added"||s.type==="reservation_response")return;
+    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";changed=true;}
+    else if(s.type==="interest"){
+      if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
+        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
+      s.status="lead-added";changed=true;
+    }
+  });
+  if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();saveSubmissionsStore();persistData();}
 }
 function setSubStatus(id,status,silent){
   var s=_submissions.find(function(x){return x.id===id;});if(s)s.status=status;
@@ -4080,7 +4118,7 @@ function deleteSub(id){
 /* ===== RESERVATION PIPELINE ===== */
 function viewReservations(){
   return "<section class='view' id='v-reservations'>"+
-    "<div class='section-head'><div><div class='eyebrow'>Guide service reservations</div><div class='h-sec'>Reservation pipeline</div></div><button class='btn btn-primary' onclick='openAddReservation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>New reservation</button></div>"+
+    "<div class='section-head'><div><div class='eyebrow'>Guide service reservations</div><div class='h-sec'>Reservation pipeline</div></div><div style='display:flex;gap:8px'>"+dlBtn('exportReservationsCSV')+"<button class='btn btn-primary' onclick='openAddReservation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>New reservation</button></div></div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:14px'>Create a query with the tour dates, location, guide fee and referral commission, then share it. When the other guide responds, it moves across the stages automatically.</p>"+
     "<div id='resSummary'></div>"+
     "<div class='kanban' id='resKanban'></div>"+
@@ -4176,7 +4214,7 @@ function deleteReservation(id){if(!confirm("Delete this reservation?"))return;re
 /* ===== CUSTOMERS ===== */
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
-    "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'><button class='btn btn-sea btn-sm' onclick='openCustomerSheet(\"\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open in Google Sheets</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
+    "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'>"+dlBtn('exportCustomersCSV')+"<button class='btn btn-sea btn-sm' onclick='openCustomerSheet(\"\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open in Google Sheets</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
 }
