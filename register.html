@@ -99,18 +99,24 @@ function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*
 }
 function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
 function docField(id,label){return "<div class='field'><label>"+label+"</label><input id='"+id+"' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach one or more files (photo, PDF). Optional.</div></div>";}
+function readDataURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=function(){res(null);};r.readAsDataURL(f);});}
 async function uploadDocs(inputId){
   var el=document.getElementById(inputId);
   if(!el||!el.files||!el.files.length||!sb)return [];
   var out=[];
   for(var i=0;i<el.files.length;i++){
     var f=el.files[i];var path="forms/"+Date.now()+"_"+i+"_"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    var done=false;
+    /* Prefer a Storage bucket if it exists */
     try{
       var up=await sb.storage.from("uploads").upload(path,f,{upsert:false});
-      if(up.error){out.push(f.name+" (not uploaded)");continue;}
-      var pub=sb.storage.from("uploads").getPublicUrl(path);
-      out.push((pub&&pub.data&&pub.data.publicUrl)||f.name);
-    }catch(e){out.push(f.name+" (not uploaded)");}
+      if(up&&!up.error){var pub=sb.storage.from("uploads").getPublicUrl(path);out.push({name:f.name,url:(pub&&pub.data&&pub.data.publicUrl)||""});done=true;}
+    }catch(e){}
+    /* Fallback: embed small files inline so uploads work with zero setup */
+    if(!done){
+      if(f.size<=900000){var dataUrl=await readDataURL(f);if(dataUrl){out.push({name:f.name,url:dataUrl});done=true;}}
+      if(!done)out.push({name:f.name,note:"too large to attach (set up an 'uploads' storage bucket for full-size files)"});
+    }
   }
   return out;
 }
