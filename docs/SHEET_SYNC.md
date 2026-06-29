@@ -90,3 +90,31 @@ and writes it back. The app picks up the new rates on its next auto-pull.
 
 > The service-role key is powerful and stays server-side inside the Edge
 > Function — never put it in the browser app or commit it to the repo.
+
+---
+
+## Option C — Auto-push to Google Sheets (Apps Script web app)
+
+The console can POST every new **booking** and **customer** to a Google Sheet via a tiny Apps Script web app. No service account, free.
+
+### 1. Create the script
+In your Google Sheet → **Extensions → Apps Script** → paste:
+
+```javascript
+function doPost(e){
+  var body = JSON.parse(e.postData.contents);   // {kind, row, at}
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
+  var row = body.row || {};
+  var keys = Object.keys(row);
+  if (sheet.getLastRow() === 0) sheet.appendRow(["at"].concat(keys));   // header
+  sheet.appendRow([body.at].concat(keys.map(function(k){return row[k];})));
+  return ContentService.createTextOutput("ok");
+}
+```
+
+### 2. Deploy
+**Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).
+
+### 3. Connect
+Paste that URL in **Settings → Google Sheet auto-push → Save webhook**. Click **Push all now** to back-fill existing data. From then on, each new booking/customer is appended to a `booking` / `customer` tab automatically.
