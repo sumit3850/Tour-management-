@@ -463,7 +463,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 24</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 25</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -557,6 +557,7 @@ let accommodations=[
   {id:"acc-3",name:"Bamboo Flat Lodge",location:"Bamboo Flat",type:"Budget Lodge",rooms:8,available:8,amenities:["Fan","Restaurant"],status:"Active",notes:"Close to ferry"},
   {id:"acc-4",name:"Dolphin Resort Havelock",location:"Havelock",type:"Govt Resort",rooms:20,available:0,amenities:["AC","Restaurant","Beach Access"],status:"Maintenance",notes:"Renovation till July"}
 ];
+let accBookings=[]; /* {id, accId, tour, poc, guests, checkIn, checkOut, status} */
 const waitlist={T4:[{guest:"M. Costa",party:2}]};
 let operators=[
   {name:"Sumit Kumar",phone:"9933202175",code:"1947",role:"Admin"}
@@ -617,6 +618,7 @@ const STORE=[
   {k:"tours",arr:1,get:function(){return tours;},set:function(v){tours=v;}},
   {k:"bookings",arr:1,get:function(){return bookings;},set:function(v){bookings=v;}},
   {k:"accommodations",arr:1,get:function(){return accommodations;},set:function(v){accommodations=v;}},
+  {k:"accBookings",arr:1,get:function(){return accBookings;},set:function(v){accBookings=v;}},
   {k:"leads",arr:1,get:function(){return leads;},set:function(v){leads=v;}},
   {k:"customers",arr:1,get:function(){return customers;},set:function(v){customers=v;}},
   {k:"vehicles",arr:1,get:function(){return vehicles;},set:function(v){vehicles=v;}},
@@ -908,24 +910,55 @@ function renderAccommodation(){
 }
 function renderAccCalendar(){
   var b=document.getElementById("accBody");if(!b)return;
-  var monthTours=tours.filter(function(t){var iso=function(d){return calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};return t.start<=iso(new Date(calY,calM+1,0).getDate())&&t.end>=iso(1);});
-  var html="<div class='cal-bar' style='margin-bottom:14px'><div class='cal-nav'><button onclick='calStep(-1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button><button onclick='calStep(1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div><select class='cal-sel' id='accCalMonth' onchange='calM=+this.value;renderAccCalendar()'>"+MONTHS.map(function(m,i){return"<option value='"+i+"' "+(i===calM?"selected":"")+">"+m+"</option>";}).join("")+"</select><select class='cal-sel' id='accCalYear' onchange='calY=+this.value;renderAccCalendar()'>"+yearOptions(calY)+"</select></div>";
+  var html="<div class='section-head' style='margin-bottom:10px'><div class='h-sec' style='font-size:15px'>Availability</div><button class='btn btn-primary btn-sm' onclick='openAssignStay()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Assign accommodation</button></div>";
+  html+="<div class='cal-bar' style='margin-bottom:14px'><div class='cal-nav'><button onclick='calStep(-1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M15 18l-6-6 6-6'/></svg></button><button onclick='calStep(1)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M9 18l6-6-6-6'/></svg></button></div><select class='cal-sel' id='accCalMonth' onchange='calM=+this.value;renderAccCalendar()'>"+MONTHS.map(function(m,i){return"<option value='"+i+"' "+(i===calM?"selected":"")+">"+m+"</option>";}).join("")+"</select><select class='cal-sel' id='accCalYear' onchange='calY=+this.value;renderAccCalendar()'>"+yearOptions(calY)+"</select></div>";
   html+="<div class='acc-prop-strip'>"+accommodations.map(function(a,i){return"<div class='acc-prop-item'><span class='sw' style='background:"+accColor(i)+"'></span>"+a.name+"</div>";}).join("")+"</div>";
   var first=new Date(calY,calM,1),startDow=(first.getDay()+6)%7,days=new Date(calY,calM+1,0).getDate();
   var iso=function(d){return calY+"-"+String(calM+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};
-  var stayMatch=function(stay,name){if(!stay)return false;stay=stay.toLowerCase();var key=(name||"").toLowerCase().split(/[ ,]/)[0];return key&&stay.indexOf(key)>=0;};
   html+="<div class='acc-cal-grid'>"+["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(function(d){return"<div class='dow'>"+d+"</div>";}).join("")+"</div>";
   html+="<div class='acc-cal-grid'>";
   for(var i=0;i<startDow;i++) html+="<div class='cell dim'></div>";
   for(var d=1;d<=days;d++){
     var date=iso(d);
-    var booked=accommodations.filter(function(a){return monthTours.some(function(t){return date>=t.start&&date<=t.end&&stayMatch(t.stay,a.name);});});
-    html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+booked.map(function(a){var idx=accommodations.indexOf(a);return"<div class='booked' style='background:"+accColor(idx)+"1a;color:"+accColor(idx)+"'>"+a.name.split(" ").slice(0,2).join(" ")+"</div>";}).join("")+"</div>";
+    var onDate=accBookings.filter(function(ab){return ab.checkIn&&ab.checkOut&&date>=ab.checkIn&&date<ab.checkOut;});
+    html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+onDate.map(function(ab){var idx=accommodations.findIndex(function(a){return a.id===ab.accId;});var nm=(accommodations[idx]||{}).name||"";return"<div class='booked' style='background:"+accColor(idx<0?0:idx)+"1a;color:"+accColor(idx<0?0:idx)+"' title='"+nm+" · "+(ab.tour||"")+" · "+(ab.poc||"")+"'>"+nm.split(" ").slice(0,2).join(" ")+"</div>";}).join("")+"</div>";
   }
   html+="</div>";
+  /* assignment list */
+  html+="<div class='h-sec' style='font-size:14px;margin:18px 0 8px'>Accommodation bookings</div>";
+  if(accBookings.length){
+    html+="<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Property</th><th>Tour</th><th>Guest (POC)</th><th class='num'>Guests</th><th>Check-in</th><th>Check-out</th><th>Status</th><th></th></tr></thead><tbody>"+
+      accBookings.slice().sort(function(a,b){return (a.checkIn||"").localeCompare(b.checkIn||"");}).map(function(ab){var a=accommodations.find(function(x){return x.id===ab.accId;});return "<tr><td class='strong nowrap'>"+(a?a.name:"—")+"</td><td class='nowrap'>"+(ab.tour||"—")+"</td><td class='nowrap'>"+(ab.poc||"—")+"</td><td class='num mono'>"+(ab.guests||"")+"</td><td class='nowrap'>"+(ab.checkIn?dShort(ab.checkIn):"—")+"</td><td class='nowrap'>"+(ab.checkOut?dShort(ab.checkOut):"—")+"</td><td><span class='pill "+(ab.status==="Confirmed"?"completed":"open")+"'>"+(ab.status||"Held")+"</span></td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"openAssignStay('"+ab.id+"')\"><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' onclick=\"deleteAccBooking('"+ab.id+"')\"><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")+
+    "</tbody></table></div></div>";
+  } else html+="<div class='empty'>No accommodation bookings yet. Tap “Assign accommodation”.</div>";
   b.innerHTML=html;
   persistData();
 }
+function openAssignStay(id){
+  var ab=accBookings.find(function(x){return x.id===id;})||{};
+  var accOpts=accommodations.map(function(a){return "<option value='"+a.id+"' "+(a.id===ab.accId?"selected":"")+">"+a.name+"</option>";}).join("");
+  var tourOpts="<option value=''>—</option>"+tours.map(function(t){return "<option "+(ab.tour===shortName(t)?"selected":"")+">"+shortName(t)+"</option>";}).join("");
+  modalForm(id?"Edit accommodation booking":"Assign accommodation",id?"Update":"Add to calendar","<div class='form-grid'>"+
+    "<div class='field full'><label>Accommodation</label><select class='input' id='ab_acc'>"+accOpts+"</select></div>"+
+    "<div class='field full'><label>Tour</label><select class='input' id='ab_tour'>"+tourOpts+"</select></div>"+
+    "<div class='field'><label>Guest name (POC)</label><input class='input' id='ab_poc' value='"+(ab.poc||"")+"'></div>"+
+    "<div class='field'><label>No. of guests</label><input class='input mono' type='number' id='ab_guests' value='"+(ab.guests||2)+"'></div>"+
+    "<div class='field'><label>Check-in</label><input class='input' type='date' id='ab_in' value='"+(ab.checkIn||"")+"'></div>"+
+    "<div class='field'><label>Check-out</label><input class='input' type='date' id='ab_out' value='"+(ab.checkOut||"")+"'></div>"+
+    "<div class='field full'><label>Status</label><select class='input' id='ab_status'>"+["Held","Confirmed","Cancelled"].map(function(s){return "<option "+(s===(ab.status||"Held")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
+  "</div>","saveAssignStay","Save");
+  document.getElementById("modal").dataset.abid=id||"";
+}
+function saveAssignStay(){
+  var id=document.getElementById("modal").dataset.abid;
+  var ci=document.getElementById("ab_in").value,co=document.getElementById("ab_out").value;
+  if(!ci||!co||co<ci){alert("Enter valid check-in / check-out dates.");return;}
+  var rec={accId:document.getElementById("ab_acc").value,tour:document.getElementById("ab_tour").value,poc:document.getElementById("ab_poc").value,guests:parseInt(document.getElementById("ab_guests").value)||1,checkIn:ci,checkOut:co,status:document.getElementById("ab_status").value};
+  if(id){var ab=accBookings.find(function(x){return x.id===id;});if(ab)Object.assign(ab,rec);}
+  else{rec.id="AB"+Date.now();accBookings.unshift(rec);}
+  closeModal();renderAccCalendar();
+}
+function deleteAccBooking(id){if(!confirm("Remove this accommodation booking?"))return;accBookings=accBookings.filter(function(x){return x.id!==id;});renderAccCalendar();}
 function openAddAccommodation(){
   modalForm("New property","Add property","<div class='form-grid'><div class='field'><label>Property name</label><input class='input' id='na_name' placeholder='Resort name'></div><div class='field'><label>Location</label><input class='input' id='na_loc' placeholder='e.g. Chidiya Tapu'></div><div class='field'><label>Type</label><select class='input' id='na_type'><option>Eco Resort</option><option>Beach Resort</option><option>Budget Lodge</option><option>Govt Resort</option><option>Homestay</option></select></div><div class='field'><label>Total rooms</label><input class='input mono' type='number' id='na_rooms' value='10' min='1'></div><div class='field'><label>Rooms available</label><input class='input mono' type='number' id='na_avail' value='10' min='0'></div><div class='field full'><label>Amenities (comma separated)</label><input class='input' id='na_amen' placeholder='AC, Restaurant, WiFi'></div><div class='field full'><label>Notes</label><input class='input' id='na_notes' placeholder='Special notes'></div></div>","saveNewAccommodation","Add property");
 }
@@ -1250,7 +1283,7 @@ function viewBookings(){
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
-  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";return "<tr><td class='strong'>"+x.guest+"</td><td class='nowrap'>"+(t?shortName(t):"—")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";return "<tr><td class='strong'>"+x.guest+"</td><td class='nowrap'>"+(t?shortName(t):(x.customTour||"—"))+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
   persistData();
 }
 function editBooking(id){
@@ -1436,8 +1469,9 @@ function generateQuotation(){
         </div>
       </div>
     </div>
-    <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end">
+    <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+      <button class="btn btn-ghost" id="qEditBtn" onclick="toggleQuoteEdit()">Edit quotation</button>
       <button class="btn btn-sea" onclick="shareQuotationEmail('${qid}','${tourName}','${pricePerPerson}','${pax}')">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M4 4h16v16H4zM4 9l8 5 8-5"/></svg>
         Email
@@ -1502,6 +1536,15 @@ function shareQuotationEmail(qid, tourName, pricePerPerson, pax) {
   window.open('mailto:?subject=' + subject + '&body=' + body, '_blank');
 }
 
+function toggleQuoteEdit(){
+  var body=document.getElementById('quotationBody');var btn=document.getElementById('qEditBtn');if(!body)return;
+  var on=body.getAttribute('contenteditable')==='true';
+  body.setAttribute('contenteditable',on?'false':'true');
+  body.style.outline=on?'':'2px dashed var(--sea)';
+  body.style.outlineOffset=on?'':'4px';
+  if(btn)btn.textContent=on?'Edit quotation':'Done editing';
+  if(!on){body.focus();}
+}
 function printQuotation() {
   const body = document.getElementById('quotationBody');
   if (!body) return;
@@ -4151,7 +4194,9 @@ function addOrUpdateCustomer(s){
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
     documents:d.documents,lastTour:s.tour||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
   });
-  postToSheet("customer",{name:c.name,country:c.country||"",phone:c.phone||"",email:c.email||"",tours:c.tours,payment:c.pay,preferences:c.pref});
+  var dd=c.details||{};
+  var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
+  postToSheet("customer",{name:c.name,country:c.country||"",nationality:dd.nationality||"",phone:c.phone||"",email:c.email||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",pastTours:c.tours,payment:c.pay,preferences:c.pref,documents:docs});
 }
 function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
@@ -4175,7 +4220,9 @@ function makeBookingFromSub(s){
     var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
     bookings.unshift({id:"B"+Date.now()+Math.floor(Math.random()*100),tour:t?t.id:"",guest:s.name||"—",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""});
     addOrUpdateCustomer(s);
-    postToSheet("booking",{guest:s.name||"",tour:t?shortName(t):(s.tour||""),start:start,end:end,party:s.party||1,country:s.country||"",email:s.email||"",phone:s.phone||""});
+    var dd=s.data||{};
+    var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
+    postToSheet("booking",{bookingDate:dShort(new Date()),guestPOC:s.name||"",tour:t?shortName(t):(s.tour||""),customTour:"",start:start,end:end,party:s.party||1,country:s.country||"",nationality:dd.nationality||s.country||"",email:s.email||"",phone:s.phone||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",documents:docs,status:"Confirmed",payment:"Deposit"});
   }
   return t;
 }
@@ -4185,9 +4232,22 @@ function convertToBooking(id){
   renderBookings();renderTours();renderCalendar();renderCustomers();setSubStatus(id,"booked",true);persistData();
   alert("Booking + customer created for "+(s.name||"guest")+(t?" on "+shortName(t):"")+". It now shows in Bookings, the tour, Calendar occupancy and Customers.");
 }
-/* Form submissions are NOT auto-converted — you decide via the
-   "Add as lead" / "Create booking" buttons, so nothing appears that you didn't add. */
-function autoProcessSubmissions(){ /* intentionally no-op; reservation responses handled by applyReservationResponses */ }
+/* Guest-detail submissions auto-create a booking + customer; interest submissions auto-create a lead.
+   Idempotent via status, and the snapshot-clear stops phantom sample data. */
+function autoProcessSubmissions(){
+  var changed=false;
+  (_submissions||[]).forEach(function(s){
+    if(s.status==="booked"||s.status==="lead-added"||s.type==="reservation_response")return;
+    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";changed=true;}
+    else if(s.type==="interest"){
+      addOrUpdateCustomer(s);
+      if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
+        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
+      s.status="lead-added";changed=true;
+    }
+  });
+  if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();saveSubmissionsStore();persistData();}
+}
 function setSubStatus(id,status,silent){
   var s=_submissions.find(function(x){return x.id===id;});if(s)s.status=status;
   renderRequests();saveSubmissionsStore();
@@ -4209,26 +4269,17 @@ function viewReservations(){
 function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"respond.html?rid="+rid;}
 function shareReservation(id,via){
   var r=reservations.find(function(x){return x.id===id;});if(!r)return;
-  var msg="Island Explorer — Guide Service Request
-
-"+
-    "Tour              : "+(r.tour||"")+"
-"+
-    "Dates             : "+dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"")+"
-"+
-    "Location          : "+(r.location||"")+"
-"+
-    "Guide             : "+(r.guideName||"TBD")+"
-"+
-    "Guide Fee         : "+fmt(r.guideFee||0)+"
-"+
-    "Referral          : "+fmt(r.referral||0)+"
-"+
-    "Additional Notes  : Food, accommodation and tickets will be covered.
-
-"+
-    "Please review & respond here:
-"+respondLink(id);
+  var dates=dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"");
+  function row(label,val){return label+(new Array(Math.max(1,18-label.length)).join(" "))+": "+val;}
+  var msg="Island Explorer — Guide Service Request\n\n"+
+    row("Tour",r.tour||"—")+"\n"+
+    row("Dates",dates||"—")+"\n"+
+    row("Location",r.location||"—")+"\n"+
+    row("Guide Name",r.guideName||"—")+"\n"+
+    row("Guide Fee",fmt(r.guideFee||0))+"\n"+
+    row("Referral",fmt(r.referral||0))+"\n"+
+    row("Additional Notes",r.notes||"—")+"\n\n"+
+    "Please review & respond here:\n"+respondLink(id);
   if(via==="email")mailSend("","Guide Service Request · Island Explorer",msg);else waShare(msg,r.phone);
 }
 function avgDays(field){
@@ -4259,7 +4310,7 @@ function applyReservationResponses(){
 }
 /* When a guide accepts, set that guide as the lead on the matching tour + dates */
 function updateTourGuideFromReservation(r){
-  if(!r)return;var who=r.respondedBy||r.by;if(!who)return;
+  if(!r)return;var who=r.guideName||r.respondedBy||r.by;if(!who)return;
   var t=tours.find(function(x){return (shortName(x)===r.tour||x.name===r.tour)&&(!r.date||x.start===r.date);});
   if(!t)t=tours.find(function(x){return shortName(x)===r.tour||x.name===r.tour;});
   if(t){t.guide=who;}
@@ -4294,19 +4345,19 @@ function resForm(r){r=r||{};var tourOpts="<option value=''>—</option>"+CALC_OR
     "<div class='field'><label>Tour start date</label><input class='input' type='date' id='rs_date' value='"+(r.date||"")+"'></div>"+
     "<div class='field'><label>Tour end date</label><input class='input' type='date' id='rs_end' value='"+(r.endDate||"")+"'></div>"+
     "<div class='field full'><label>Location</label><input class='input' id='rs_loc' value='"+(r.location||"")+"' placeholder='e.g. South Andaman'></div>"+
-    "<div class='field'><label>Guide Name</label><input class='input' id='rs_guide_name' value='"+(r.guideName||"")+"' placeholder='Guide name'></div>"+
     "<div class='field'><label>Guide fee (₹)</label><input class='input mono' type='number' id='rs_fee' value='"+(r.guideFee||0)+"'></div>"+
     "<div class='field'><label>Referral commission (₹)</label><input class='input mono' type='number' id='rs_ref' value='"+(r.referral||0)+"'></div>"+
-    "<div class='field full'><label>Requested by</label><input class='input' id='rs_by' value='"+(r.by||"")+"' placeholder='Guide / agency name'></div>"+
-    "<div class='field full'><label>Notes</label><input class='input' id='rs_notes' value='"+(r.notes||"")+"'></div>"+
+    "<div class='field'><label>Guide Name</label><input class='input' id='rs_guide' value='"+(r.guideName||"")+"' placeholder='Guide to assign'></div>"+
+    "<div class='field'><label>Requested by</label><input class='input' id='rs_by' value='"+(r.by||"")+"' placeholder='Guide / agency name'></div>"+
+    "<div class='field full'><label>Additional notes</label><input class='input' id='rs_notes' value='"+(r.notes||"")+"' placeholder='e.g. Food, accommodation & tickets covered'></div>"+
   "</div>";}
 function openAddReservation(){modalForm("New reservation","Add to pipeline",resForm(),"saveNewReservation","Add reservation");}
 function saveNewReservation(){
-  reservations.unshift({id:"R"+Date.now(),tour:document.getElementById("rs_tour").value,date:document.getElementById("rs_date").value,endDate:document.getElementById("rs_end").value,location:document.getElementById("rs_loc").value,guideName:document.getElementById("rs_guide_name").value||"",guideFee:parseFloat(document.getElementById("rs_fee").value)||0,referral:parseFloat(document.getElementById("rs_ref").value)||0,by:document.getElementById("rs_by").value,notes:document.getElementById("rs_notes").value,stage:"proposed",createdAt:new Date().toISOString()});
+  reservations.unshift({id:"R"+Date.now(),tour:document.getElementById("rs_tour").value,date:document.getElementById("rs_date").value,endDate:document.getElementById("rs_end").value,location:document.getElementById("rs_loc").value,guideFee:parseFloat(document.getElementById("rs_fee").value)||0,referral:parseFloat(document.getElementById("rs_ref").value)||0,guideName:document.getElementById("rs_guide").value,by:document.getElementById("rs_by").value,notes:document.getElementById("rs_notes").value,stage:"proposed",createdAt:new Date().toISOString()});
   closeModal();renderReservations();
 }
 function editReservation(id){var r=reservations.find(function(x){return x.id===id;});if(!r)return;modalForm("Edit reservation","Update reservation",resForm(r),"saveEditReservation","Update");document.getElementById("modal").dataset.rid=id;}
-function saveEditReservation(){var id=document.getElementById("modal").dataset.rid;var r=reservations.find(function(x){return x.id===id;});if(!r)return;r.tour=document.getElementById("rs_tour").value;r.date=document.getElementById("rs_date").value;r.endDate=document.getElementById("rs_end").value;r.location=document.getElementById("rs_loc").value;r.guideName=document.getElementById("rs_guide_name").value||"";r.guideFee=parseFloat(document.getElementById("rs_fee").value)||0;r.referral=parseFloat(document.getElementById("rs_ref").value)||0;r.by=document.getElementById("rs_by").value;r.notes=document.getElementById("rs_notes").value;closeModal();renderReservations();}
+function saveEditReservation(){var id=document.getElementById("modal").dataset.rid;var r=reservations.find(function(x){return x.id===id;});if(!r)return;r.tour=document.getElementById("rs_tour").value;r.date=document.getElementById("rs_date").value;r.endDate=document.getElementById("rs_end").value;r.location=document.getElementById("rs_loc").value;r.guideFee=parseFloat(document.getElementById("rs_fee").value)||0;r.referral=parseFloat(document.getElementById("rs_ref").value)||0;r.guideName=document.getElementById("rs_guide").value;r.by=document.getElementById("rs_by").value;r.notes=document.getElementById("rs_notes").value;closeModal();renderReservations();}
 function moveReservation(id,stage){var r=reservations.find(function(x){return x.id===id;});if(r){r.stage=stage;if(stage==="confirmed"){r.acceptedAt=r.acceptedAt||new Date().toISOString();updateTourGuideFromReservation(r);renderTours();renderCalendar();}renderReservations();}}
 function createTourFromReservation(id){
   var r=reservations.find(function(x){return x.id===id;});if(!r)return;
@@ -4614,74 +4665,42 @@ function saveEditTour(){
   closeModal();renderTours();renderCalendar();renderBookings();
 }
 
+function tourOptionLabel(t){var y=t.start?new Date(t.start).getFullYear():"";return shortName(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+(y?", "+y:"")+")";}
 function openAddBooking(tourId){
-  var tOpts=tours.map(function(t){return "<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+t.name+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("");
-  var defTour=tours.find(function(t){return t.id===tourId;});
-  var defStart=defTour?defTour.start:"";
-  var defEnd=defTour?defTour.end:"";
-  var displayStyle=tourId?"none":"block";
+  const tOpts="<option value=''>— Custom tour (none) —</option>"+tours.map(t=>"<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+tourOptionLabel(t)+"</option>").join("");
+  const defTour=tours.find(t=>t.id===tourId);
+  const defStart=defTour?defTour.start:"";
+  const defEnd=defTour?defTour.end:"";
   modalForm("New booking","Add a booking","<div class='form-grid'>"+
-    "<div class='field full'><label>Existing Tour</label><select class='input' id='nb_tour' onchange="nbTourChange(this.value)"><option value=''>— Custom Tour —</option>"+tOpts+"</select></div>"+
-    "<div class='field full' id='nb_custom_wrap' style="display:"+displayStyle+""><label>Custom Tour Name</label><input class='input' id='nb_custom_tour' placeholder='Enter custom tour name'></div>"+
+    "<div class='field full'><label>Existing Tour</label><select class='input' id='nb_tour' onchange='nbTourPick()'>"+tOpts+"</select></div>"+
+    "<div class='field full'><label>Custom Tour Name <span style='color:var(--ink-soft);font-weight:400'>(overrides existing tour)</span></label><input class='input' id='nb_custom' placeholder='e.g. Private North Andaman 4N'></div>"+
     "<div class='field'><label>Start date</label><input class='input' type='date' id='nb_start' value='"+defStart+"'></div>"+
     "<div class='field'><label>End date</label><input class='input' type='date' id='nb_end' value='"+defEnd+"'></div>"+
-    "<div class='field'><label>Guest Name (POC)</label><input class='input' id='nb_guest' placeholder='Full name'></div>"+
+    "<div class='field'><label>Guest Name (POC)</label><input class='input' id='nb_guest' placeholder='Primary contact name'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='nb_party' value='2'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='nb_email' placeholder='guest@email.com'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='nb_phone' placeholder='+91 …'></div>"+
-    "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(function(p){return opt(p);}).join("")+"</select></div>"+
-    "<div class='field'><label>Amount Paid (₹)</label><input class='input mono' type='number' id='nb_amount' placeholder='0'></div>"+
+    "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(p=>opt(p)).join("")+"</select></div>"+
+    "<div class='field'><label>Amount Paid (₹)</label><input class='input mono' type='number' id='nb_amount' value='0'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='nb_notes' placeholder='Dietary, interests, etc.'></div>"+
   "</div>","saveBooking","Add booking");
 }
-function nbTourChange(tid){
-  var t=tours.find(function(x){return x.id===tid;});
-  if(t){
-    document.getElementById('nb_start').value=t.start;
-    document.getElementById('nb_end').value=t.end;
-    document.getElementById('nb_custom_wrap').style.display='none';
-  } else {
-    document.getElementById('nb_custom_wrap').style.display='block';
-    document.getElementById('nb_start').value='';
-    document.getElementById('nb_end').value='';
-  }
+function nbTourPick(){
+  var t=tours.find(function(x){return x.id===document.getElementById("nb_tour").value;});
+  if(t){document.getElementById("nb_start").value=t.start||"";document.getElementById("nb_end").value=t.end||"";}
 }
 function saveBooking(){
-  var guest=document.getElementById("nb_guest").value.trim();
-  if(!guest){alert("Enter a guest name.");return;}
-  var tourId=document.getElementById("nb_tour").value;
-  var customTour=document.getElementById("nb_custom_tour").value.trim();
-  var start=document.getElementById("nb_start").value;
-  var end=document.getElementById("nb_end").value;
+  const guest=document.getElementById("nb_guest").value.trim();
+  if(!guest){alert("Enter the guest (POC) name.");return;}
+  const tour=document.getElementById("nb_tour").value;
+  const custom=document.getElementById("nb_custom").value.trim();
+  const start=document.getElementById("nb_start").value;
+  const end=document.getElementById("nb_end").value;
   if(!start||!end||end<start){alert("Enter valid start and end dates.");return;}
-  var tourName=tourId?(tours.find(function(t){return t.id===tourId;})||{}).name||customTour:customTour;
-  if(!tourName){alert("Enter a tour name or select an existing tour.");return;}
-  var newBooking={
-    id:"B"+Date.now(),
-    tour:tourId||tourName,
-    tourName:tourName,
-    guest:guest,
-    party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
-    country:document.getElementById("nb_country").value||"—",
-    email:document.getElementById("nb_email").value||"",
-    phone:document.getElementById("nb_phone").value||"",
-    status:"Confirmed",
-    pay:document.getElementById("nb_pay").value,
-    amount:parseFloat(document.getElementById("nb_amount").value)||0,
-    notes:document.getElementById("nb_notes").value||"",
-    start:start,
-    end:end
-  };
-  bookings.push(newBooking);
-  addOrUpdateCustomer({
-    name:guest,
-    country:newBooking.country,
-    email:newBooking.email,
-    phone:newBooking.phone,
-    tours:tourName,
-    last:newBooking.start
-  });
+  bookings.push({id:"B"+Date.now(),tour:custom?"":tour,customTour:custom,guest:guest,party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
+    country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:"Confirmed",pay:document.getElementById("nb_pay").value,
+    deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:""});
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();
 }
 
