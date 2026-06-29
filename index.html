@@ -4214,17 +4214,17 @@ function shareReservation(id,via){
 "+
     "Tour              : "+(r.tour||"")+"
 "+
-    "Dates          : "+dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"")+"
+    "Dates             : "+dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"")+"
 "+
-    "Location    : "+(r.location||"")+"
+    "Location          : "+(r.location||"")+"
 "+
-    "Guide        : "+(r.guideName||"TBD")+"
+    "Guide             : "+(r.guideName||"TBD")+"
 "+
-    "Guide Fee  : "+fmt(r.guideFee||0)+"
+    "Guide Fee         : "+fmt(r.guideFee||0)+"
 "+
-    "Referral       : "+fmt(r.referral||0)+"
+    "Referral          : "+fmt(r.referral||0)+"
 "+
-    "Additional notes : Food, accommodation, tickets will be covered.
+    "Additional Notes  : Food, accommodation and tickets will be covered.
 
 "+
     "Please review & respond here:
@@ -4618,11 +4618,11 @@ function saveEditTour(){
 }
 
 function openAddBooking(tourId){
-  const tOpts=tours.map(t=>"<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+t.name+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>").join("");
-  const defTour=tours.find(t=>t.id===tourId);
-  const defStart=defTour?defTour.start:"";
-  const defEnd=defTour?defTour.end:"";
-  const displayStyle=tourId?"none":"block";
+  var tOpts=tours.map(function(t){return "<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+t.name+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("");
+  var defTour=tours.find(function(t){return t.id===tourId;});
+  var defStart=defTour?defTour.start:"";
+  var defEnd=defTour?defTour.end:"";
+  var displayStyle=tourId?"none":"block";
   modalForm("New booking","Add a booking","<div class='form-grid'>"+
     "<div class='field full'><label>Existing Tour</label><select class='input' id='nb_tour' onchange="nbTourChange(this.value)"><option value=''>— Custom Tour —</option>"+tOpts+"</select></div>"+
     "<div class='field full' id='nb_custom_wrap' style="display:"+displayStyle+""><label>Custom Tour Name</label><input class='input' id='nb_custom_tour' placeholder='Enter custom tour name'></div>"+
@@ -4633,13 +4633,13 @@ function openAddBooking(tourId){
     "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='nb_email' placeholder='guest@email.com'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='nb_phone' placeholder='+91 …'></div>"+
-    "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(p=>opt(p)).join("")+"</select></div>"+
-    "<div class='field'><label>Amount (₹)</label><input class='input mono' type='number' id='nb_amount' placeholder='0'></div>"+
+    "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(function(p){return opt(p);}).join("")+"</select></div>"+
+    "<div class='field'><label>Amount Paid (₹)</label><input class='input mono' type='number' id='nb_amount' placeholder='0'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='nb_notes' placeholder='Dietary, interests, etc.'></div>"+
   "</div>","saveBooking","Add booking");
 }
 function nbTourChange(tid){
-  const t=tours.find(function(x){return x.id===tid;});
+  var t=tours.find(function(x){return x.id===tid;});
   if(t){
     document.getElementById('nb_start').value=t.start;
     document.getElementById('nb_end').value=t.end;
@@ -4651,12 +4651,12 @@ function nbTourChange(tid){
   }
 }
 function saveBooking(){
-  const guest=document.getElementById("nb_guest").value.trim();
+  var guest=document.getElementById("nb_guest").value.trim();
   if(!guest){alert("Enter a guest name.");return;}
-  const tourId=document.getElementById("nb_tour").value;
-  const customTour=document.getElementById("nb_custom_tour").value.trim();
-  const start=document.getElementById("nb_start").value;
-  const end=document.getElementById("nb_end").value;
+  var tourId=document.getElementById("nb_tour").value;
+  var customTour=document.getElementById("nb_custom_tour").value.trim();
+  var start=document.getElementById("nb_start").value;
+  var end=document.getElementById("nb_end").value;
   if(!start||!end||end<start){alert("Enter valid start and end dates.");return;}
   var tourName=tourId?(tours.find(function(t){return t.id===tourId;})||{}).name||customTour:customTour;
   if(!tourName){alert("Enter a tour name or select an existing tour.");return;}
@@ -4686,19 +4686,6 @@ function saveBooking(){
     last:newBooking.start
   });
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();
-  postToSheet("booking",{
-    guest:guest,
-    tour:tourName,
-    start:start,
-    end:end,
-    party:newBooking.party,
-    country:newBooking.country,
-    email:newBooking.email,
-    phone:newBooking.phone,
-    total:newBooking.amount,
-    payStatus:newBooking.pay,
-    notes:newBooking.notes
-  });
 }
 
 function openAddLead(){
