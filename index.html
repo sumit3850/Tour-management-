@@ -455,14 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 32</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 33</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 32</span></div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 33</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -1358,6 +1358,7 @@ function saveEditBooking(){
   b.totalOverride=(tv===""||tv==null)?"":(parseFloat(tv)||0);
   b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
   b.notes=document.getElementById("eb_notes").value;
+  syncBookingCustomers(b);
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(b);
 }
 function ebRecalc(){
@@ -4245,6 +4246,35 @@ function addOrUpdateCustomer(s){
   });
   pushCustomer(c);
 }
+/* Make sure a person exists in the Customer Database (by name), filling in any
+   details we have. Used for booking POCs and every listed party member. */
+function ensureCustomer(name,opts){
+  name=(name||"").trim();if(!name||name==="—")return null;
+  opts=opts||{};
+  var c=customers.find(function(x){return (x.name||"").toLowerCase()===name.toLowerCase();});
+  if(!c){c={name:name,tours:1,repeat:false,pay:"Deposit",type:"Client"};ensureClientId(c);customers.unshift(c);}
+  ensureClientId(c);if(!c.type)c.type="Client";
+  if(opts.country)c.country=opts.country;
+  if(opts.email)c.email=opts.email;
+  if(opts.phone)c.phone=opts.phone;
+  c.details=Object.assign({},c.details||{},{
+    email:opts.email||(c.details&&c.details.email),phone:opts.phone||(c.details&&c.details.phone),
+    nationality:opts.country||(c.details&&c.details.nationality),
+    lastTour:opts.tour||(c.details&&c.details.lastTour),
+    startDate:opts.start||(c.details&&c.details.startDate)||"",endDate:opts.end||(c.details&&c.details.endDate)||"",
+    lastDates:opts.start?dShort(opts.start)+(opts.end?" – "+dShort(opts.end):""):(c.details&&c.details.lastDates)
+  });
+  pushCustomer(c);
+  return c;
+}
+/* Add the booking's POC and all listed members to the Customer Database. */
+function syncBookingCustomers(b){
+  if(!b)return;
+  var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
+  var tourName=t?tourLabel(t):(b.customTour||"");
+  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tour:tourName,start:b.start,end:b.end});
+  if(b.members)String(b.members).split(/[,\n]/).forEach(function(nm){ensureCustomer(nm,{tour:tourName,start:b.start,end:b.end});});
+}
 function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
   var d=c.details||{};
@@ -4747,6 +4777,7 @@ function saveBooking(){
     country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:"Confirmed",pay:document.getElementById("nb_pay").value,
     deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:""};
   bookings.push(nb);
+  syncBookingCustomers(nb);
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(nb);
 }
 
