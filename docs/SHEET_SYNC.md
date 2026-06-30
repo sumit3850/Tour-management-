@@ -102,29 +102,42 @@ In your Google Sheet → **Extensions → Apps Script** → paste:
 
 ```javascript
 function doPost(e){
-  var body = JSON.parse(e.postData.contents);          // {kind, row, at}
+  var body = JSON.parse(e.postData.contents);          // {kind, row, keyField}
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
   var row = body.row || {};
   var keys = Object.keys(row);
-  // Build / extend the header so EVERY field becomes a column (future-proof)
-  var header = sheet.getLastRow() ? sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0] : ["at"];
+  // Header = exactly the columns the app sends, in order (auto-extends for new fields).
+  // The "customer" tab columns match Customer_Database.xlsx; "booking" carries the
+  // POC details + Deposit / Pending / Total cost / Payment status.
+  var header = sheet.getLastRow() ? sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0] : [];
   keys.forEach(function(k){ if (header.indexOf(k) === -1) header.push(k); });
   sheet.getRange(1,1,1,header.length).setValues([header]);
-  var line = header.map(function(h){ return h === "at" ? body.at : (row[h] != null ? row[h] : ""); });
-  // Upsert by row.key (no duplicates): update the existing row if the key matches
+  var line = header.map(function(h){ return row[h] != null ? row[h] : ""; });
+  // Upsert (no duplicates) on the key column — defaults to the first column sent.
+  var keyField = body.keyField || keys[0];
+  var keyVal = row[keyField];
   var updated = false;
-  if (row.key && sheet.getLastRow() > 1){
-    var kc = header.indexOf("key");
+  if (keyVal && sheet.getLastRow() > 1){
+    var kc = header.indexOf(keyField);
     if (kc > -1){
       var col = sheet.getRange(2,kc+1,sheet.getLastRow()-1,1).getValues();
-      for (var i=0;i<col.length;i++){ if (String(col[i][0]) === String(row.key)){ sheet.getRange(i+2,1,1,line.length).setValues([line]); updated = true; break; } }
+      for (var i=0;i<col.length;i++){ if (String(col[i][0]) === String(keyVal)){ sheet.getRange(i+2,1,1,line.length).setValues([line]); updated = true; break; } }
     }
   }
   if (!updated) sheet.appendRow(line);
   return ContentService.createTextOutput("ok");
 }
 ```
+
+> **Already deployed the older script?** Replace it with the code above, then
+> **Deploy → Manage deployments → ✎ Edit → Version: New version → Deploy** (re-using
+> the same URL). Start with a fresh `customer` tab so old columns don't linger. The
+> `customer` tab then has exactly: Client ID · Type · Client Name (Full name) · Start
+> Date · End Date · Tour Category · Phone / WhatsApp · Email · Nationality · Date of
+> birth · Gender · ID type · ID / passport number · Arrival date & flight · Departure
+> date & flight · Dietary needs · Room preference · Emergency contact name · Emergency
+> contact phone · Medical notes / mobility · Upload documents link.
 
 ### 2. Deploy
 **Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).
