@@ -455,14 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 28</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 29</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 28</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 29</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -4076,6 +4076,13 @@ function reqLinkRow(title,desc,type){
     "<button class='btn btn-primary btn-sm' onclick=\"shareWhatsApp('"+type+"')\">WhatsApp</button></div></div>";
 }
 function saveSubmissionRow(s){var cl=sbClient();if(cl&&s&&s._rowid)cl.from("workspaces").update({data:s,updated_at:new Date().toISOString()}).eq("id",s._rowid).then(function(){});}
+/* Locally-persisted guard so a submission is auto-processed exactly once on this
+   device, even for legacy rows that can't write their status back to the cloud.
+   Without this, legacy submissions (no _rowid) were re-converted on every load,
+   inflating customer.tours and spawning duplicate bookings/leads. */
+function _procSet(){try{return JSON.parse(localStorage.getItem("ieo_processed")||"[]");}catch(e){return [];}}
+function subProcessed(id){if(!id)return false;return _procSet().indexOf(id)>-1;}
+function markSubProcessed(id){if(!id)return;var a=_procSet();if(a.indexOf(id)===-1){a.push(id);try{localStorage.setItem("ieo_processed",JSON.stringify(a));}catch(e){}}}
 function loadSubmissions(force){
   var cl=(typeof sbClient==="function")?sbClient():null;
   var body=document.getElementById("reqBody");
@@ -4173,11 +4180,12 @@ function makeBookingFromSub(s){
   var t=null;
   if(s.data&&s.data.tourId)t=tours.find(function(x){return x.id===s.data.tourId;});
   if(!t&&s.tour)t=tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour;});
-  /* avoid duplicate booking for the same guest+tour */
-  var dup=bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
+  /* avoid duplicate booking: match the source submission first, then guest+tour+start */
+  var dup=bookings.find(function(b){return b.fromSub&&b.fromSub===s.id;})||
+          bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
   if(!dup){
     var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
-    bookings.unshift({id:"B"+Date.now()+Math.floor(Math.random()*100),tour:t?t.id:"",guest:s.name||"—",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""});
+    bookings.unshift({id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,tour:t?t.id:"",guest:s.name||"—",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""});
     addOrUpdateCustomer(s);
     var dd=s.data||{};
     var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
@@ -4197,12 +4205,13 @@ function autoProcessSubmissions(){
   var changed=false;
   (_submissions||[]).forEach(function(s){
     if(s.status==="booked"||s.status==="lead-added"||s.type==="reservation_response")return;
-    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";changed=true;saveSubmissionRow(s);}
+    if(subProcessed(s.id))return; /* never re-process the same submission on this device */
+    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);}
     else if(s.type==="interest"){
       addOrUpdateCustomer(s);
       if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
         leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
-      s.status="lead-added";changed=true;saveSubmissionRow(s);
+      s.status="lead-added";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
     }
   });
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();persistData();}
