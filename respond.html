@@ -91,12 +91,9 @@ async function submitResp(){
   document.getElementById("err").style.display="none";
   if(!chosen){showErr("Please choose a response (In review / Accept / Decline).");return;}
   var by=(document.getElementById("gname")||{}).value||"";
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*1000),type:"reservation_response",status:"new",name:by,created_at:new Date().toISOString(),data:{rid:rid,response:chosen,by:by}};
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"reservation_response",status:"new",name:by,created_at:new Date().toISOString(),data:{rid:rid,response:chosen,by:by}};
   try{
-    var ex=await sb.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle();
-    var list=(ex&&ex.data&&ex.data.data&&Array.isArray(ex.data.data.list))?ex.data.data.list:[];
-    list.unshift(rec);
-    var up=await sb.from("workspaces").upsert({id:"ieo_submissions",data:{list:list},updated_at:new Date().toISOString()});
+    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     if(up.error){showErr("Could not send: "+up.error.message);return;}
     document.getElementById("body").style.display="none";
     document.getElementById("success").style.display="block";

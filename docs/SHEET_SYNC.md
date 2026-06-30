@@ -102,13 +102,26 @@ In your Google Sheet → **Extensions → Apps Script** → paste:
 
 ```javascript
 function doPost(e){
-  var body = JSON.parse(e.postData.contents);   // {kind, row, at}
+  var body = JSON.parse(e.postData.contents);          // {kind, row, at}
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
   var row = body.row || {};
   var keys = Object.keys(row);
-  if (sheet.getLastRow() === 0) sheet.appendRow(["at"].concat(keys));   // header
-  sheet.appendRow([body.at].concat(keys.map(function(k){return row[k];})));
+  // Build / extend the header so EVERY field becomes a column (future-proof)
+  var header = sheet.getLastRow() ? sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0] : ["at"];
+  keys.forEach(function(k){ if (header.indexOf(k) === -1) header.push(k); });
+  sheet.getRange(1,1,1,header.length).setValues([header]);
+  var line = header.map(function(h){ return h === "at" ? body.at : (row[h] != null ? row[h] : ""); });
+  // Upsert by row.key (no duplicates): update the existing row if the key matches
+  var updated = false;
+  if (row.key && sheet.getLastRow() > 1){
+    var kc = header.indexOf("key");
+    if (kc > -1){
+      var col = sheet.getRange(2,kc+1,sheet.getLastRow()-1,1).getValues();
+      for (var i=0;i<col.length;i++){ if (String(col[i][0]) === String(row.key)){ sheet.getRange(i+2,1,1,line.length).setValues([line]); updated = true; break; } }
+    }
+  }
+  if (!updated) sheet.appendRow(line);
   return ContentService.createTextOutput("ok");
 }
 ```
