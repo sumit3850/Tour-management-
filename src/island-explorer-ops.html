@@ -455,14 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 27</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 28</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 27</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 28</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -1064,12 +1064,17 @@ function paymentStats(){
   return {dep:dep,pend:pend,tot:tot,from:from};
 }
 function setPayFilter(){var f=document.getElementById("payFrom"),t=document.getElementById("payTo");payFrom=f?f.value:"";payTo=t?t.value:"";renderPayments();}
+function payThisMonth(){var d=new Date();var p=function(n){return (n<10?"0":"")+n;};payFrom=d.getFullYear()+"-"+p(d.getMonth()+1)+"-01";payTo=d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(new Date(d.getFullYear(),d.getMonth()+1,0).getDate());renderPayments();}
+function payClear(){payFrom="";payTo="";renderPayments();}
 function renderPayments(){
   var el=document.getElementById("payPanel");if(!el)return;
   var s=paymentStats();
+  var monthName=new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"});
   el.innerHTML="<div class='card card-pad'>"+
     "<div class='section-head'><div class='h-sec' style='font-size:15px'>Payments</div>"+
-      "<div style='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-soft);flex-wrap:wrap'>From <input type='date' class='input mono' style='width:auto;padding:5px 8px' id='payFrom' value='"+(s.from||"")+"' onchange='setPayFilter()'> to <input type='date' class='input mono' style='width:auto;padding:5px 8px' id='payTo' value='"+(payTo||"")+"' onchange='setPayFilter()'></div>"+
+      "<div style='display:flex;gap:6px;align-items:center;font-size:12px;color:var(--ink-soft);flex-wrap:wrap'>From <input type='date' class='input mono' style='width:auto;padding:5px 8px' id='payFrom' value='"+(payFrom||s.from||"")+"' onchange='setPayFilter()'> to <input type='date' class='input mono' style='width:auto;padding:5px 8px' id='payTo' value='"+(payTo||"")+"' onchange='setPayFilter()'>"+
+        "<button class='btn btn-ghost btn-sm' onclick='payThisMonth()'>This month: "+monthName+"</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick='payClear()'>Clear</button></div>"+
     "</div>"+
     "<div class='kpis' style='margin-top:10px'>"+
       kpi("Deposit / advance received",fmt(s.dep),"from part-paid bookings","","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6")+
@@ -1099,8 +1104,9 @@ function viewDashboard(){
     "<div class='qa-grid'>"+
       qaTile("Create tour","M12 5v14M5 12h14","openCreateTour()")+
       qaTile("Add booking","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11","openAddBooking()")+
-      qaTile("New reservation","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4","go('reservations')")+
+      qaTile("Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4","go('calendar')")+
       qaTile("Cost calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z","go('calc')")+
+      qaTile("Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z","go('logistics')")+
       qaTile("Share form","M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13","go('requests')")+
     "</div>"+
     "<div id='payPanel' style='margin-top:16px'></div>"+
@@ -1109,7 +1115,7 @@ function viewDashboard(){
       kpi("Upcoming Tours",upcoming,"departures ahead","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
       kpi("Seats Available",seats,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
       kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
-      kpi("Pending payments",fmt(totalPending),pend.length+" booking(s)",totalPending>0?"down":"up","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6")+
+      kpi("Confirmed Bookings",bookings.filter(function(x){return x.status==="Confirmed";}).length,"total guests "+bookings.reduce(function(s,x){return s+(x.party||0);},0),"up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
     "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
     (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
