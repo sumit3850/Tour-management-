@@ -161,14 +161,19 @@ function doPost(e){
 > **Deploy → Manage deployments → ✎ Edit → Version: New version → Deploy** (re-using
 > the same URL). This version **re-orders the columns automatically** on the next push
 > (matching by column name, so no data is lost) — you do **not** need to delete the
-> tab. After re-deploying, click **Push all now** once and the `customer` tab will
-> have exactly, in this order: Client ID · Type · Client Name (Full name) · Start Date ·
-> End Date · Tour Category · Phone / WhatsApp · Email · Nationality · Date of birth ·
-> Gender · ID type · ID / passport number · Arrival date & flight · Departure date &
-> flight · Dietary needs · Room preference · Emergency contact name · Emergency contact
-> phone · Medical notes / mobility · Upload documents link.
+> tab. After re-deploying, click **Push all now** once and the tabs match the app:
 >
-> (If you'd rather start clean, deleting the `customer` tab before pushing also works.)
+> - **`booking`**: Booking ID · BookingDate · Point of Contact (POC) · Tour ID · Tour ·
+>   Tour Start_Date · Tour End_Date · Member (s) · Party Size · Country · Email · Phone ·
+>   status · Total Tour Cost · Deposit · Pending Amount · Due Date · Payment Status ·
+>   Additional Notes
+> - **`customer`**: Client ID · Type · Client Name (Full name) · Tour ID · Tour Category ·
+>   Tour Start_Date · Tour End_Date · Phone / WhatsApp · Email · Nationality · Date of
+>   birth · Gender · ID type · ID / passport number · Arrival date & flight · Departure
+>   date & flight · Dietary needs · Room preference · Emergency contact name · Emergency
+>   contact phone · Medical notes / mobility · Upload documents link
+>
+> (If you'd rather start clean, deleting the tab before pushing also works.)
 
 ### 2. Deploy
 **Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).

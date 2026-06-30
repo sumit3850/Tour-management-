@@ -455,14 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 33</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 34</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 33</span></div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 34</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -630,15 +630,34 @@ function dlBtn(fn){return "<button class='btn btn-ghost btn-sm' onclick='"+fn+"(
    the spreadsheet and the downloaded file always carry the same full detail. ===== */
 function tourNights(t){return t?durNights(t):"";}
 function memberList(b){return (b.members?String(b.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", "):"");}
+/* Booking-sheet row — columns + order match the Google Sheet "booking" tab. */
 function bookingSheetRow(b){
   var t=tours.find(function(x){return x.id===b.tour;});
-  return {key:b.id,bookingDate:b.bookingDate||"",tour:(t?tourLabel(t):(b.customTour||"")),nights:tourNights(t),start:b.start||"",end:b.end||"",
-    poc:b.guest||"",members:memberList(b),party:b.party||1,country:b.country||"",email:b.email||"",phone:b.phone||"",status:b.status||"",
-    totalCost:bookingTotalCost(b),depositAmount:bookingDeposit(b),pending:bookingPending(b),paymentStatus:bookingPaymentStatus(b),dueDate:b.lastPendingDate||"",notes:b.notes||""};
+  var row={};
+  row["Booking ID"]=b.id||"";
+  row["BookingDate"]=b.bookingDate||"";
+  row["Point of Contact (POC)"]=b.guest||"";
+  row["Tour ID"]=b.tour||"";
+  row["Tour"]=t?tourLabel(t):(b.customTour||"");
+  row["Tour Start_Date"]=dOpt(b.start);
+  row["Tour End_Date"]=dOpt(b.end);
+  row["Member (s)"]=memberList(b);
+  row["Party Size"]=b.party||1;
+  row["Country"]=b.country||"";
+  row["Email"]=b.email||"";
+  row["Phone"]=b.phone||"";
+  row["status"]=b.status||"";
+  row["Total Tour Cost"]=bookingTotalCost(b);
+  row["Deposit"]=bookingDeposit(b);
+  row["Pending Amount"]=bookingPending(b);
+  row["Due Date"]=dOpt(b.lastPendingDate);
+  row["Payment Status"]=bookingPaymentStatus(b);
+  row["Additional Notes"]=b.notes||"";
+  return row;
 }
 function ensureClientId(c){if(c&&!c.id)c.id="C"+(c.createdTs||Date.now())+Math.floor(Math.random()*100);return c?c.id:"";}
 function dOpt(s){return s?dShort(s):"";}
-/* Customer/client database row — columns match Customer_Database.xlsx exactly. */
+/* Customer/client database row — columns + order match the Google Sheet "customer" tab. */
 function customerSheetRow(c){
   var d=c.details||{};
   var docs=(d.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
@@ -646,9 +665,10 @@ function customerSheetRow(c){
   row["Client ID"]=ensureClientId(c);
   row["Type"]=c.type||"Client";
   row["Client Name (Full name)"]=c.name||"";
-  row["Start Date"]=dOpt(d.startDate);
-  row["End Date"]=dOpt(d.endDate);
+  row["Tour ID"]=d.tourId||"";
   row["Tour Category"]=d.lastTour||"";
+  row["Tour Start_Date"]=dOpt(d.startDate);
+  row["Tour End_Date"]=dOpt(d.endDate);
   row["Phone / WhatsApp"]=c.phone||d.phone||"";
   row["Email"]=c.email||d.email||"";
   row["Nationality"]=d.nationality||c.country||"";
@@ -666,7 +686,7 @@ function customerSheetRow(c){
   row["Upload documents (passport / ID / photo) link"]=docs;
   return row;
 }
-function pushBooking(b){if(b)postToSheet("booking",bookingSheetRow(b),"key");}
+function pushBooking(b){if(b)postToSheet("booking",bookingSheetRow(b),"Booking ID");}
 function pushCustomer(c){if(c)postToSheet("customer",customerSheetRow(c),"Client ID");}
 /* Turn an array of flat objects into a CSV with a header that is the union of all keys */
 function objsToCSV(objs){
@@ -1320,6 +1340,7 @@ function editBooking(id){
     "<div class='field'><label>Country</label><input class='input' id='eb_country' value='"+b.country+"'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='eb_email' value='"+(b.email||"")+"'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='eb_phone' value='"+(b.phone||"")+"'></div>"+
+    "<div class='field'><label>Status</label><select class='input' id='eb_status'>"+["Confirmed","Pending","Cancelled","Completed"].map(function(s){return "<option "+(s===(b.status||"Confirmed")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
     "<div class='field'><label>Payment</label><select class='input' id='eb_pay'>"+
       "<option value='Deposit' "+(b.pay==="Deposit"?"selected":"")+">Deposit</option>"+
       "<option value='Paid' "+(b.pay==="Paid"?"selected":"")+">Paid</option>"+
@@ -1352,6 +1373,7 @@ function saveEditBooking(){
   b.country=document.getElementById("eb_country").value;
   b.email=document.getElementById("eb_email").value;
   b.phone=document.getElementById("eb_phone").value;
+  b.status=document.getElementById("eb_status").value;
   b.pay=document.getElementById("eb_pay").value;
   b.deposit=parseFloat(document.getElementById("eb_deposit").value)||0;
   var tv=document.getElementById("eb_total").value;
@@ -4242,7 +4264,7 @@ function addOrUpdateCustomer(s){
     email:s.email||(c.details&&c.details.email),phone:s.phone||(c.details&&c.details.phone),nationality:s.country||(c.details&&c.details.nationality),
     gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
-    documents:d.documents,lastTour:s.tour||"",startDate:s.start_date||(c.details&&c.details.startDate)||"",endDate:s.end_date||(c.details&&c.details.endDate)||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
+    documents:d.documents,tourId:d.tourId||(c.details&&c.details.tourId)||"",lastTour:s.tour||"",startDate:s.start_date||(c.details&&c.details.startDate)||"",endDate:s.end_date||(c.details&&c.details.endDate)||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
   });
   pushCustomer(c);
 }
@@ -4260,6 +4282,7 @@ function ensureCustomer(name,opts){
   c.details=Object.assign({},c.details||{},{
     email:opts.email||(c.details&&c.details.email),phone:opts.phone||(c.details&&c.details.phone),
     nationality:opts.country||(c.details&&c.details.nationality),
+    tourId:opts.tourId||(c.details&&c.details.tourId)||"",
     lastTour:opts.tour||(c.details&&c.details.lastTour),
     startDate:opts.start||(c.details&&c.details.startDate)||"",endDate:opts.end||(c.details&&c.details.endDate)||"",
     lastDates:opts.start?dShort(opts.start)+(opts.end?" – "+dShort(opts.end):""):(c.details&&c.details.lastDates)
@@ -4272,8 +4295,8 @@ function syncBookingCustomers(b){
   if(!b)return;
   var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
   var tourName=t?tourLabel(t):(b.customTour||"");
-  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tour:tourName,start:b.start,end:b.end});
-  if(b.members)String(b.members).split(/[,\n]/).forEach(function(nm){ensureCustomer(nm,{tour:tourName,start:b.start,end:b.end});});
+  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end});
+  if(b.members)String(b.members).split(/[,\n]/).forEach(function(nm){ensureCustomer(nm,{tourId:b.tour||"",tour:tourName,start:b.start,end:b.end});});
 }
 function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
@@ -4468,8 +4491,12 @@ function editCustomer(name){
   const c=customers.find(x=>x.name===name);if(!c)return;var d=c.details||{};
   var f=function(lab,id,val,type){return "<div class='field'><label>"+lab+"</label><input class='input' "+(type?"type='"+type+"' ":"")+"id='"+id+"' value='"+(val||"")+"'></div>";};
   modalForm("Edit customer","Update customer","<div class='form-grid'>"+
-    f("Name","ec_name",c.name)+f("Country / nationality","ec_country",c.country)+
-    f("Phone","ec_phone",c.phone||d.phone,"tel")+f("Email","ec_email",c.email||d.email,"email")+
+    f("Client name (full name)","ec_name",c.name)+
+    "<div class='field'><label>Type</label><select class='input' id='ec_type'>"+["Client","Lead"].map(function(o){return "<option "+(o===(c.type||"Client")?"selected":"")+">"+o+"</option>";}).join("")+"</select></div>"+
+    f("Tour category","ec_tour",d.lastTour)+
+    f("Tour start date","ec_start",d.startDate,"date")+f("Tour end date","ec_end",d.endDate,"date")+
+    f("Country / nationality","ec_country",c.country)+
+    f("Phone / WhatsApp","ec_phone",c.phone||d.phone,"tel")+f("Email","ec_email",c.email||d.email,"email")+
     f("Gender","ec_gender",d.gender)+f("Date of birth","ec_dob",d.dob,"date")+
     "<div class='field'><label>ID type</label><select class='input' id='ec_idtype'>"+["","Passport","Aadhaar","Other Govt ID","Other"].map(function(o){return "<option "+(o===(d.idType||"")?"selected":"")+">"+o+"</option>";}).join("")+"</select></div>"+
     f("ID / passport no.","ec_idno",d.idNo)+f("ID / passport expiry","ec_idexp",d.idExpiry,"date")+
@@ -4487,8 +4514,10 @@ function saveEditCustomer(){
   const name=document.getElementById("modal").dataset.cname;const c=customers.find(x=>x.name===name);if(!c)return;
   var g=function(id){var el=document.getElementById(id);return el?el.value:"";};
   c.name=g("ec_name");c.country=g("ec_country");c.phone=g("ec_phone");c.email=g("ec_email");
+  c.type=g("ec_type")||c.type||"Client";
   c.tours=parseInt(g("ec_tours"))||0;c.pay=g("ec_pay");c.pref=g("ec_pref");
-  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med")});
+  var es=g("ec_start"),ee=g("ec_end");
+  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,lastTour:g("ec_tour"),startDate:es,endDate:ee,lastDates:(es?dShort(es)+(ee?" – "+dShort(ee):""):(c.details&&c.details.lastDates)),gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med")});
   closeModal();renderCustomers();pushCustomer(c);
 }
 function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();persistData();}
@@ -4756,9 +4785,11 @@ function openAddBooking(tourId){
     "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='nb_email' placeholder='guest@email.com'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='nb_phone' placeholder='+91 …'></div>"+
+    "<div class='field'><label>Status</label><select class='input' id='nb_status'>"+["Confirmed","Pending","Cancelled","Completed"].map(p=>opt(p)).join("")+"</select></div>"+
     "<div class='field'><label>Payment</label><select class='input' id='nb_pay'>"+["Deposit","Paid","Balance due"].map(p=>opt(p)).join("")+"</select></div>"+
-    "<div class='field'><label>Amount Paid (₹)</label><input class='input mono' type='number' id='nb_amount' value='0'></div>"+
-    "<div class='field full'><label>Notes</label><input class='input' id='nb_notes' placeholder='Dietary, interests, etc.'></div>"+
+    "<div class='field'><label>Amount Paid / Deposit (₹)</label><input class='input mono' type='number' id='nb_amount' value='0'></div>"+
+    "<div class='field'><label>Due date</label><input class='input' type='date' id='nb_due' value=''></div>"+
+    "<div class='field full'><label>Additional Notes</label><input class='input' id='nb_notes' placeholder='Dietary, interests, etc.'></div>"+
   "</div>","saveBooking","Add booking");
 }
 function nbTourPick(){
@@ -4774,8 +4805,8 @@ function saveBooking(){
   const end=document.getElementById("nb_end").value;
   if(!start||!end||end<start){alert("Enter valid start and end dates.");return;}
   var nb={id:"B"+Date.now(),bookingDate:dShort(new Date()),tour:custom?"":tour,customTour:custom,guest:guest,members:document.getElementById("nb_members").value||"",party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
-    country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:"Confirmed",pay:document.getElementById("nb_pay").value,
-    deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:""};
+    country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:document.getElementById("nb_status").value,pay:document.getElementById("nb_pay").value,
+    deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:document.getElementById("nb_due").value||""};
   bookings.push(nb);
   syncBookingCustomers(nb);
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(nb);
