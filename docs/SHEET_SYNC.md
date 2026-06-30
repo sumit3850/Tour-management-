@@ -163,11 +163,11 @@ function doPost(e){
 > (matching by column name, so no data is lost) — you do **not** need to delete the
 > tab. After re-deploying, click **Push all now** once and the tabs match the app:
 >
-> - **`booking`**: Booking ID · BookingDate · Point of Contact (POC) · Tour ID · Tour ·
+> - **`Booking`**: Booking ID · BookingDate · Point of Contact (POC) · Tour ID · Tour ·
 >   Tour Start_Date · Tour End_Date · Member (s) · Party Size · Country · Email · Phone ·
 >   status · Total Tour Cost · Deposit · Pending Amount · Due Date · Payment Status ·
 >   Additional Notes
-> - **`customer`**: Client ID · Type · Client Name (Full name) · Tour ID · Tour Category ·
+> - **`Customer Database`**: Client ID · Type · Client Name (Full name) · Tour ID · Tour Category ·
 >   Tour Start_Date · Tour End_Date · Phone / WhatsApp · Email · Nationality · Date of
 >   birth · Gender · ID type · ID / passport number · Arrival date & flight · Departure
 >   date & flight · Dietary needs · Room preference · Emergency contact name · Emergency
@@ -179,4 +179,4 @@ function doPost(e){
 **Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).
 
 ### 3. Connect
-Paste that URL in **Settings → Google Sheet auto-push → Save webhook**. Click **Push all now** to back-fill existing data. From then on, each new booking/customer is appended to a `booking` / `customer` tab automatically.
+Paste that URL in **Settings → Google Sheet auto-push → Save webhook**. Click **Push all now** to back-fill existing data. From then on, each new booking/customer is written to the **`Booking`** and **`Customer Database`** tabs automatically (these exact names — no duplicate lowercase tabs are created).

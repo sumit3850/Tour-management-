@@ -455,14 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 34</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 35</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 34</span></div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 35</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -686,8 +686,10 @@ function customerSheetRow(c){
   row["Upload documents (passport / ID / photo) link"]=docs;
   return row;
 }
-function pushBooking(b){if(b)postToSheet("booking",bookingSheetRow(b),"Booking ID");}
-function pushCustomer(c){if(c)postToSheet("customer",customerSheetRow(c),"Client ID");}
+/* Tab names match the user's sheet: "Booking" and "Customer Database" (no duplicate
+   lowercase tabs). */
+function pushBooking(b){if(b)postToSheet("Booking",bookingSheetRow(b),"Booking ID");}
+function pushCustomer(c){if(c)postToSheet("Customer Database",customerSheetRow(c),"Client ID");}
 /* Turn an array of flat objects into a CSV with a header that is the union of all keys */
 function objsToCSV(objs){
   var header=[];objs.forEach(function(o){Object.keys(o).forEach(function(k){if(header.indexOf(k)===-1)header.push(k);});});
@@ -844,14 +846,12 @@ const TOUR_CODE={
   T5:"GS-Full day",
   T6:"GS-Night"
 };
-const CAT_CODE={southandaman:"SNBT",littleandaman:"SLABT",nicobar:"GNBT",narcondam:"NarCo"};
+/* No auto abbreviations (no SNBT / GNBT / SLABT …) — the clean name for the 10
+   standard tours, otherwise exactly the name the user typed. */
 function shortName(t){
+  if(!t)return "—";
   if(TOUR_CODE[t.id])return TOUR_CODE[t.id];
-  var c=CAT_CODE[t.cat];
-  if(c)return durNights(t)+"-N "+c;
-  if(t.cat==="session")return (t.name.indexOf("Night")>=0?"GS-Night":"GS-Full day");
-  if(t.cat==="guided-half")return "GS- Half Day";
-  return t.name;
+  return t.name||"";
 }
 /* User-facing tour label: the clean name for the 10 standard tours, otherwise the
    exact name the user typed — never the auto-generated code like "4-N SNBT". */
