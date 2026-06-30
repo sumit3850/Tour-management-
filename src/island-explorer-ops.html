@@ -463,7 +463,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 25</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 26</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -497,18 +497,7 @@ const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",
 const TOURCOLORS=["#1b4d3e","#107a86","#dd9a2b","#8a3d70","#3a527d","#c2603f","#5b8c3e","#a14b8a"];
 const XBTN="<button class='x' onclick='closeModal()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg></button>";
 
-let tours=[
-  {id:"T1",name:"5-Night South Andaman",cat:"southandaman",start:"2026-06-18",end:"2026-06-23",cap:8,status:"open",guide:"Sumit Kumar",pickup:"Veer Savarkar Airport",startLoc:"Sippighat Wetlands",stay:"SeaShell, Port Blair"},
-  {id:"T2",name:"12-Night Great Nicobar",cat:"nicobar",start:"2026-06-25",end:"2026-07-07",cap:6,status:"open",guide:"Sumit Kumar",pickup:"Campbell Bay Jetty",startLoc:"Galathea NP",stay:"Forest Guest House"},
-  {id:"T3",name:"7-Night South & Little Andaman",cat:"littleandaman",start:"2026-07-02",end:"2026-07-09",cap:8,status:"open",guide:"A. Kumar",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Hawksbill Nest"},
-  {id:"T4",name:"8-Night South & Little Andaman",cat:"littleandaman",start:"2026-06-15",end:"2026-06-23",cap:6,status:"full",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Hawksbill Nest"},
-  {id:"T5",name:"Guided Session — Full Day",cat:"session",start:"2026-06-20",end:"2026-06-20",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Chidiya Tapu",stay:"Day session"},
-  {id:"T6",name:"Guided Session — Night",cat:"session",start:"2026-05-28",end:"2026-05-28",cap:8,status:"completed",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Mount Harriet",stay:"Night session"},
-  {id:"T7",name:"Guided Session — Half Day",cat:"guided-half",start:"2026-06-22",end:"2026-06-22",cap:6,status:"open",guide:"R. Das",pickup:"Port Blair",startLoc:"Sippighat Wetlands",stay:"Half day session"},
-  {id:"T8",name:"Narcondam Expedition (A)",cat:"narcondam",start:"2026-08-10",end:"2026-08-13",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
-  {id:"T9",name:"Narcondam Expedition (B)",cat:"narcondam",start:"2026-09-14",end:"2026-09-17",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
-  {id:"T10",name:"Narcondam Expedition (C)",cat:"narcondam",start:"2026-10-12",end:"2026-10-15",cap:4,status:"open",guide:"Sumit Kumar",pickup:"Port Blair",startLoc:"Narcondam Island",stay:"Campsite"},
-];
+let tours=[];
 let TOUR_COSTS={
   T1:{indian:48500,foreigner:62500},
   T2:{indian:118500,foreigner:148000},
@@ -534,77 +523,28 @@ const CALC_ORDER=["T1","T3","T4","T2","T8","T9","T10"];
 const CALC_LABELS={T1:"5N · South Andaman",T3:"7N · South & Little Andaman",T4:"8N · South & Little Andaman",T2:"12N · Great Nicobar",T8:"03N · Narcondam Exp (A)",T9:"03N · Narcondam Exp (B)",T10:"03N · Narcondam Exp (C)"};
 var touristType="indian";
 var currentCalcTourId="";
-let bookings=[
-  {id:"B1",tour:"T1",guest:"Helen Marsh",party:2,country:"UK",status:"Confirmed",pay:"Paid",notes:"Vegetarian",start:"2026-06-18",end:"2026-06-23",deposit:0,lastPendingDate:""},
-  {id:"B2",tour:"T1",guest:"Klaus Vogel",party:2,country:"Germany",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-18",end:"2026-06-23",deposit:50000,lastPendingDate:"2026-05-19"},
-  {id:"B3",tour:"T1",guest:"Mei Tan",party:1,country:"Singapore",status:"Confirmed",pay:"Paid",notes:"Early riser",start:"2026-06-18",end:"2026-06-23",deposit:0,lastPendingDate:""},
-  {id:"B4",tour:"T2",guest:"David Olsen",party:2,country:"USA",status:"Confirmed",pay:"Paid",notes:"Megapode focus",start:"2026-06-25",end:"2026-07-07",deposit:0,lastPendingDate:""},
-  {id:"B5",tour:"T2",guest:"P. Sharma",party:2,country:"India",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-25",end:"2026-07-07",deposit:120000,lastPendingDate:"2026-05-26"},
-  {id:"B6",tour:"T3",guest:"Anna Roy",party:2,country:"India",status:"Confirmed",pay:"Paid",notes:"",start:"2026-07-02",end:"2026-07-09",deposit:0,lastPendingDate:""},
-  {id:"B7",tour:"T4",guest:"J. Fernández",party:3,country:"Spain",status:"Confirmed",pay:"Paid",notes:"Tripods",start:"2026-06-15",end:"2026-06-23",deposit:0,lastPendingDate:""},
-  {id:"B8",tour:"T4",guest:"BNHS group",party:3,country:"India",status:"Confirmed",pay:"Paid",notes:"Society group",start:"2026-06-15",end:"2026-06-23",deposit:0,lastPendingDate:""},
-  {id:"B9",tour:"T5",guest:"L. Bianchi",party:2,country:"Italy",status:"Confirmed",pay:"Deposit",notes:"",start:"2026-06-20",end:"2026-06-20",deposit:15000,lastPendingDate:"2026-06-06"},
-];
+let bookings=[];
 function bookingTotalCost(b){if(b.totalOverride!=null&&b.totalOverride!=="")return parseFloat(b.totalOverride)||0;var t=tours.find(function(x){return x.id===b.tour;});if(!t||!TOUR_COSTS[t.id])return 0;var costPP=TOUR_COSTS[t.id][b.country==="India"?"indian":"foreigner"];return costPP*b.party;}
 function bookingDeposit(b){return b.deposit||0;}
 function bookingPending(b){return Math.max(bookingTotalCost(b)-bookingDeposit(b),0);}
 function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
 function bookingPaymentStatus(b){var pend=bookingPending(b);if(pend<=0)return"Fully Paid";if(bookingDeposit(b)>0)return"Partial";return"Unpaid";}
 function bookingPaymentStatusClass(b){var s=bookingPaymentStatus(b);return s==="Fully Paid"?"completed":s==="Partial"?"open":"full";}
-let accommodations=[
-  {id:"acc-1",name:"Wild Grass Resort",location:"Chidiya Tapu",type:"Eco Resort",rooms:12,available:5,amenities:["AC","Restaurant","WiFi"],status:"Active",notes:"Birders' favourite"},
-  {id:"acc-2",name:"SeaShell Neil",location:"Neil Island",type:"Beach Resort",rooms:18,available:10,amenities:["AC","Pool","Restaurant","WiFi"],status:"Active",notes:"Premium property"},
-  {id:"acc-3",name:"Bamboo Flat Lodge",location:"Bamboo Flat",type:"Budget Lodge",rooms:8,available:8,amenities:["Fan","Restaurant"],status:"Active",notes:"Close to ferry"},
-  {id:"acc-4",name:"Dolphin Resort Havelock",location:"Havelock",type:"Govt Resort",rooms:20,available:0,amenities:["AC","Restaurant","Beach Access"],status:"Maintenance",notes:"Renovation till July"}
-];
+let accommodations=[];
 let accBookings=[]; /* {id, accId, tour, poc, guests, checkIn, checkOut, status} */
-const waitlist={T4:[{guest:"M. Costa",party:2}]};
+const waitlist={};
 let operators=[
   {name:"Sumit Kumar",phone:"9933202175",code:"1947",role:"Admin"}
 ];
-let reservations=[
-  {id:"R1",tour:"5N- South Andaman",location:"South Andaman",date:"2026-11-12",endDate:"2026-11-17",guideFee:45000,referral:5000,by:"R. Menon",notes:"Wants Narcondam add-on",stage:"proposed"},
-  {id:"R2",tour:"12N- Great Nicobar",location:"Great Nicobar",date:"2027-01-08",endDate:"2027-01-20",guideFee:120000,referral:15000,by:"BNHS",notes:"Group of 4",stage:"review"}
-];
+let reservations=[];
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
-let leads=[
-  {id:"L1",name:"Sophie Bernard",country:"France",tour:"Great Nicobar 12-Night",date:"2026-11",stage:"New",src:"Website"},
-  {id:"L2",name:"Tom Hughes",country:"Australia",tour:"5-Night Endemic",date:"2026-10",stage:"New",src:"Instagram"},
-  {id:"L3",name:"Yuki Sato",country:"Japan",tour:"Photography",date:"2026-12",stage:"Contacted",src:"Referral"},
-  {id:"L4",name:"R. Menon",country:"India",tour:"South & Little Andaman",date:"2026-09",stage:"Proposal",src:"Email"},
-  {id:"L5",name:"Greta Nilsson",country:"Sweden",tour:"Great Nicobar 12-Night",date:"2027-01",stage:"FollowUp",src:"Website"},
-  {id:"L6",name:"Carlos Ruiz",country:"Mexico",tour:"Endemic",date:"2026-11",stage:"Confirmed",src:"eBird"},
-];
+let leads=[];
 const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
-let customers=[
-  {name:"Helen Marsh",country:"UK",tours:3,pay:"Paid",repeat:true,pref:"Vegetarian, slow pace"},
-  {name:"David Olsen",country:"USA",tours:2,pay:"Paid",repeat:true,pref:"Photography priority"},
-  {name:"Mei Tan",country:"Singapore",tours:1,pay:"Paid",repeat:false,pref:"Early starts"},
-  {name:"J. Fernández",country:"Spain",tours:2,pay:"Paid",repeat:true,pref:"Tripod hide"},
-  {name:"Anna Roy",country:"India",tours:1,pay:"Balance due",repeat:false,pref:"—"},
-];
-let vehicles=[
-  {name:"Tempo Traveller",reg:"AN-01-C-4421",type:"12-seater van",cap:12,driver:"Suresh",avail:"On Tour"},
-  {name:"Bolero",reg:"AN-01-B-9087",type:"SUV",cap:7,driver:"Anil",avail:"Available"},
-  {name:"Innova Crysta",reg:"AN-01-A-3310",type:"SUV",cap:7,driver:"Vikram",avail:"Available"},
-  {name:"Boat — Galathea",reg:"AN-BT-118",type:"Fibre boat",cap:8,driver:"Boatman R.",avail:"Maintenance"},
-];
-let drivers=[
-  {name:"Suresh",phone:"+91 94760 11223",veh:"Tempo Traveller",tour:"5-Night Endemic"},
-  {name:"Anil",phone:"+91 94760 44556",veh:"Bolero",tour:"—"},
-  {name:"Vikram",phone:"+91 94760 77889",veh:"Innova Crysta",tour:"Photography"},
-];
-let ops=[
-  {id:"O1",tour:"Chidiya Tapu Photography",start:"2026-06-15",end:"2026-06-15",dateDisplay:"15 Jun",clients:"Fernández +2",pax:3,veh:"Innova",driver:"Vikram",guide:"Sumit",pickup:"Port Blair 04:30",birding:"Chidiya Tapu",stay:"Wild Grass",status:"Scheduled"},
-  {id:"O2",tour:"5-Night Endemic",start:"2026-06-18",end:"2026-06-23",dateDisplay:"18-23 Jun",clients:"Marsh, Vogel, Tan",pax:5,veh:"Tempo",driver:"Suresh",guide:"Sumit",pickup:"Airport 09:00",birding:"Sippighat",stay:"SeaShell",status:"Scheduled"},
-  {id:"O3",tour:"Mt Harriet Herping",start:"2026-06-20",end:"2026-06-20",dateDisplay:"20 Jun",clients:"Bianchi +1",pax:2,veh:"Bolero",driver:"Anil",guide:"R. Das",pickup:"Bamboo Flat 17:00",birding:"Mt Harriet",stay:"Day trip",status:"Scheduled"},
-];
-let posts=[
-  {plat:"instagram",type:"Reel",day:16,cap:"Andaman Woodpecker drumming at dawn",color:"#c13584"},
-  {plat:"youtube",type:"Video",day:19,cap:"Galathea NP — Nicobar Megapode",color:"#ff0000"},
-  {plat:"facebook",type:"Post",day:22,cap:"Monsoon birding: what to pack",color:"#1877f2"},
-  {plat:"instagram",type:"Reel",day:24,cap:"Endemic species checklist 2026",color:"#c13584"},
-];
+let customers=[];
+let vehicles=[];
+let drivers=[];
+let ops=[];
+let posts=[];
 const platIcon={
   instagram:"<rect x='3' y='3' width='18' height='18' rx='5'/><circle cx='12' cy='12' r='4'/><circle cx='17.5' cy='6.5' r='1' fill='#fff' stroke='none'/>",
   youtube:"<rect x='3' y='6' width='18' height='12' rx='3'/><path d='m10 9 5 3-5 3z' fill='#fff' stroke='none'/>",
@@ -783,11 +723,7 @@ function loadLogs(){
     const sync=localStorage.getItem("ieo_sync_trips");
     if(sync)return JSON.parse(sync);
   }catch(e){}
-  return [
-    {id:"TR1",date:"2026-06-13",veh:"Innova Crysta",driver:"Vikram",startKm:48210,endKm:48355,totalKm:145,loc:"Port Blair → Chidiya Tapu → Port Blair",time:"6h 30m",startT:"04:30",endT:"11:00"},
-    {id:"TR2",date:"2026-06-13",veh:"Tempo Traveller",driver:"Suresh",startKm:91140,endKm:91262,totalKm:122,loc:"Airport → Sippighat → SeaShell",time:"4h 15m",startT:"09:00",endT:"13:15"},
-    {id:"TR3",date:"2026-06-12",veh:"Bolero",driver:"Anil",startKm:67500,endKm:67611,totalKm:111,loc:"Bamboo Flat → Mt Harriet (night)",time:"5h 00m",startT:"17:00",endT:"22:00"},
-  ];
+  return [];
 }
 let tripLogs=loadLogs();
 function saveLogs(){try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs))}catch(e){}cloudAutoPush();}
@@ -4122,15 +4058,21 @@ function reqLinkRow(title,desc,type){
     "<div class='acts'><button class='btn btn-sea btn-sm' onclick=\"copyLink('"+type+"')\">Copy link</button>"+
     "<button class='btn btn-primary btn-sm' onclick=\"shareWhatsApp('"+type+"')\">WhatsApp</button></div></div>";
 }
-function saveSubmissionsStore(){var cl=sbClient();if(cl)cl.from("workspaces").upsert({id:"ieo_submissions",data:{list:_submissions},updated_at:new Date().toISOString()}).then(function(){});}
+function saveSubmissionRow(s){var cl=sbClient();if(cl&&s&&s._rowid)cl.from("workspaces").update({data:s,updated_at:new Date().toISOString()}).eq("id",s._rowid).then(function(){});}
 function loadSubmissions(force){
   var cl=(typeof sbClient==="function")?sbClient():null;
   var body=document.getElementById("reqBody");
   if(!cl){if(body)body.innerHTML="<div class='empty'>Cloud not connected — set up Supabase in Settings to receive form submissions.</div>";return;}
   if(body&&force)body.innerHTML="<div class='empty'>Loading…</div>";
-  cl.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle().then(function(res){
-    if(res.error){if(body)body.innerHTML="<div class='empty'>Could not load submissions: "+res.error.message+"</div>";return;}
-    _submissions=(res.data&&res.data.data&&res.data.data.list)||[];
+  /* one row per submission (id like sub_%) + legacy single-row list, merged */
+  Promise.all([
+    cl.from("workspaces").select("id,data").like("id","sub_%"),
+    cl.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle()
+  ]).then(function(r){
+    var rows=(r[0]&&r[0].data)||[];
+    var list=rows.map(function(row){var o=Object.assign({},row.data);o._rowid=row.id;return o;});
+    var legacy=(r[1]&&r[1].data&&r[1].data.data&&r[1].data.data.list)||[];
+    _submissions=list.concat(legacy).sort(function(a,b){return (b.created_at||"").localeCompare(a.created_at||"");});
     applyReservationResponses();
     autoProcessSubmissions();
     renderRequests();
@@ -4190,19 +4132,19 @@ function addOrUpdateCustomer(s){
   c.pref=d.diet||d.message||c.pref||"—";
   c.details=Object.assign({},c.details||{},{
     email:s.email||(c.details&&c.details.email),phone:s.phone||(c.details&&c.details.phone),nationality:s.country||(c.details&&c.details.nationality),
-    dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
+    gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
     documents:d.documents,lastTour:s.tour||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
   });
   var dd=c.details||{};
   var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
-  postToSheet("customer",{name:c.name,country:c.country||"",nationality:dd.nationality||"",phone:c.phone||"",email:c.email||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",pastTours:c.tours,payment:c.pay,preferences:c.pref,documents:docs});
+  postToSheet("customer",{key:(c.email||c.phone||c.name||""),name:c.name,country:c.country||"",nationality:dd.nationality||"",gender:dd.gender||"",phone:c.phone||"",email:c.email||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",pastTours:c.tours,payment:c.pay,preferences:c.pref,documents:docs});
 }
 function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
   var d=c.details||{};
   var rel=bookings.filter(function(b){return (b.guest||"").toLowerCase()===name.toLowerCase();});
-  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours],["Payment status",c.pay],["Preferences",c.pref]];
+  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours],["Payment status",c.pay],["Preferences",c.pref]];
   var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div style='font-weight:600;font-size:14px'>"+r[1]+"</div></div>";}).join("");
   if(d.documents&&d.documents.length)html+="<div class='field full'><label>Documents</label><div>"+d.documents.map(function(doc){var u=(typeof doc==="string")?doc:doc.url;var nm=(typeof doc==="string")?"file":(doc.name||"file");return u?"<a href='"+u+"' target='_blank' style='color:var(--sea);margin-right:10px'>"+nm+"</a>":nm;}).join("")+"</div></div>";
   html+="<div class='field full'><label>Bookings</label><div style='font-size:13px'>"+(rel.length?rel.map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return (t?shortName(t):"—")+" · "+dShort(b.start)+" · "+fmt(bookingTotalCost(b));}).join("<br>"):"—")+"</div></div>";
@@ -4222,7 +4164,7 @@ function makeBookingFromSub(s){
     addOrUpdateCustomer(s);
     var dd=s.data||{};
     var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
-    postToSheet("booking",{bookingDate:dShort(new Date()),guestPOC:s.name||"",tour:t?shortName(t):(s.tour||""),customTour:"",start:start,end:end,party:s.party||1,country:s.country||"",nationality:dd.nationality||s.country||"",email:s.email||"",phone:s.phone||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",documents:docs,status:"Confirmed",payment:"Deposit"});
+    postToSheet("booking",{key:(s.email||s.phone||s.name||""),bookingDate:dShort(new Date()),guestPOC:s.name||"",tour:t?shortName(t):(s.tour||""),customTour:"",start:start,end:end,party:s.party||1,country:s.country||"",nationality:dd.nationality||s.country||"",email:s.email||"",phone:s.phone||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",documents:docs,status:"Confirmed",payment:"Deposit"});
   }
   return t;
 }
@@ -4238,23 +4180,25 @@ function autoProcessSubmissions(){
   var changed=false;
   (_submissions||[]).forEach(function(s){
     if(s.status==="booked"||s.status==="lead-added"||s.type==="reservation_response")return;
-    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";changed=true;}
+    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";changed=true;saveSubmissionRow(s);}
     else if(s.type==="interest"){
       addOrUpdateCustomer(s);
       if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
         leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
-      s.status="lead-added";changed=true;
+      s.status="lead-added";changed=true;saveSubmissionRow(s);
     }
   });
-  if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();saveSubmissionsStore();persistData();}
+  if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();persistData();}
 }
 function setSubStatus(id,status,silent){
-  var s=_submissions.find(function(x){return x.id===id;});if(s)s.status=status;
-  renderRequests();saveSubmissionsStore();
+  var s=_submissions.find(function(x){return x.id===id;});if(s){s.status=status;saveSubmissionRow(s);}
+  renderRequests();
 }
 function deleteSub(id){
   if(!confirm("Delete this submission?"))return;
-  _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();saveSubmissionsStore();
+  var s=_submissions.find(function(x){return x.id===id;});var cl=sbClient();
+  _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();
+  if(cl&&s&&s._rowid)cl.from("workspaces").delete().eq("id",s._rowid).then(function(){});
 }
 
 /* ===== RESERVATION PIPELINE ===== */
@@ -4389,7 +4333,7 @@ function editCustomer(name){
   modalForm("Edit customer","Update customer","<div class='form-grid'>"+
     f("Name","ec_name",c.name)+f("Country / nationality","ec_country",c.country)+
     f("Phone","ec_phone",c.phone||d.phone,"tel")+f("Email","ec_email",c.email||d.email,"email")+
-    f("Date of birth","ec_dob",d.dob,"date")+
+    f("Gender","ec_gender",d.gender)+f("Date of birth","ec_dob",d.dob,"date")+
     "<div class='field'><label>ID type</label><select class='input' id='ec_idtype'>"+["","Passport","Aadhaar","Other Govt ID","Other"].map(function(o){return "<option "+(o===(d.idType||"")?"selected":"")+">"+o+"</option>";}).join("")+"</select></div>"+
     f("ID / passport no.","ec_idno",d.idNo)+f("ID / passport expiry","ec_idexp",d.idExpiry,"date")+
     f("Arrival","ec_arrival",d.arrival)+f("Departure","ec_departure",d.departure)+
@@ -4407,7 +4351,7 @@ function saveEditCustomer(){
   var g=function(id){var el=document.getElementById(id);return el?el.value:"";};
   c.name=g("ec_name");c.country=g("ec_country");c.phone=g("ec_phone");c.email=g("ec_email");
   c.tours=parseInt(g("ec_tours"))||0;c.pay=g("ec_pay");c.pref=g("ec_pref");
-  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med")});
+  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med")});
   closeModal();renderCustomers();
 }
 function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();}

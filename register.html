@@ -56,6 +56,7 @@ textarea{min-height:84px;resize:vertical}
       <div class="ok-box" id="okBox"></div>
       <div class="err-box" id="errBox"></div>
       <form id="theForm"><div id="fields"></div>
+        <div id="progWrap" style="display:none;margin:6px 0 2px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:4px"><span id="progLabel">Uploading…</span><span id="progPct">0%</span></div><div style="height:8px;background:var(--line);border-radius:6px;overflow:hidden"><div id="progBar" style="height:100%;width:0;background:var(--ok);transition:width .25s"></div></div></div>
         <button class="btn" type="submit" id="submitBtn">Submit</button>
         <div class="note">Your details go straight to Island Explorer. We never share them.</div>
       </form>
@@ -115,8 +116,10 @@ function compressImage(f){return new Promise(function(res){
 async function uploadDocs(inputId){
   var el=document.getElementById(inputId);
   if(!el||!el.files||!el.files.length||!sb)return [];
-  var out=[];
+  var out=[];var total=el.files.length;
+  setProgress(3,"Preparing documents…");
   for(var i=0;i<el.files.length;i++){
+    setProgress(5+Math.round(i/total*88),"Uploading "+(i+1)+" of "+total+"…");
     var f=el.files[i];var path="forms/"+Date.now()+"_"+i+"_"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");
     var done=false;
     /* Prefer a Storage bucket if it exists (keeps full quality + real URLs) */
@@ -150,6 +153,7 @@ if(type==="guide"){
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
+  html+=inp("c_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID","Other"]}),inp("c_idno","ID / passport number",{req:1}));
   html+=inp("c_idexp","ID / passport expiry",{type:"date"});
   html+=docField("c_docs","Upload documents (passport / ID / photo)");
@@ -163,6 +167,7 @@ if(type==="guide"){
   html+=inp("i_name","Your name",{req:1});
   html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_party","Number of guests",{type:"number"}));
+  html+=inp("i_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner","Other"]});
   html+=docField("i_docs","Upload documents (optional)");
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
@@ -174,6 +179,7 @@ try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
 
 function val(id){var el=document.getElementById(id);return el?el.value.trim():"";}
 function showErr(m){var b=document.getElementById("errBox");b.textContent=m;b.style.display="block";}
+function setProgress(pct,label){var w=document.getElementById("progWrap");if(!w)return;w.style.display=pct>0?"block":"none";var bar=document.getElementById("progBar"),p=document.getElementById("progPct"),l=document.getElementById("progLabel");if(bar)bar.style.width=Math.round(pct)+"%";if(p)p.textContent=Math.round(pct)+"%";if(l&&label)l.textContent=label;}
 
 document.getElementById("theForm").addEventListener("submit",async function(e){
   e.preventDefault();
@@ -188,12 +194,12 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
     rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;
-    rec.data={dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
+    rec.data={gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
     rec.tour=val("i_tour");rec.start_date=val("i_start")||null;rec.end_date=val("i_end")||null;
     rec.party=parseInt(val("i_party"))||null;
-    rec.data={clientType:val("i_clienttype"),message:val("i_msg")};
+    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg")};
   }
   if(params.get("tid"))rec.data.tourId=params.get("tid");
   if(!rec.name||!rec.phone){showErr("Please fill in at least your name and phone number.");return;}
@@ -201,13 +207,13 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
   try{
     if(docInput){var docs=await uploadDocs(docInput);if(docs.length)rec.data.documents=docs;}
-    rec.id="S"+Date.now()+Math.floor(Math.random()*1000);
+    setProgress(96,"Saving…");
+    rec.id="S"+Date.now()+Math.floor(Math.random()*100000);
     rec.created_at=new Date().toISOString();
-    var ex=await sb.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle();
-    var list=(ex&&ex.data&&ex.data.data&&Array.isArray(ex.data.data.list))?ex.data.data.list:[];
-    list.unshift(rec);
-    var res=await sb.from("workspaces").upsert({id:"ieo_submissions",data:{list:list},updated_at:new Date().toISOString()});
-    if(res.error){btn.disabled=false;btn.textContent="Submit";showErr("Could not submit: "+res.error.message);return;}
+    /* One row per submission — no read-modify-write, so concurrent multi-user submissions never clash */
+    var res=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
+    if(res.error){btn.disabled=false;btn.textContent="Submit";showErr("Could not submit: "+res.error.message);setProgress(0,"");return;}
+    setProgress(100,"Done ✓");
     document.getElementById("formBody").style.display="none";
     document.getElementById("success").style.display="block";
     if(type==="client")document.getElementById("successMsg").textContent="Your guest details have been received. We'll finalise your trip and confirm by email/WhatsApp.";
