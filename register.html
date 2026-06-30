@@ -79,6 +79,7 @@ const TOURS=["5N- South Andaman","7N- South & Little And.","8N- South & Little A
 const params=new URLSearchParams(location.search);
 const type=(params.get("type")||"interest").toLowerCase();
 const presetTour=params.get("tour")||"";
+const presetTourCode=params.get("tcode")||"";
 const presetStart=params.get("start")||"";
 const presetEnd=params.get("end")||"";
 
@@ -139,6 +140,7 @@ async function uploadDocs(inputId){
 }
 
 var html="";
+if(presetTourCode){html+="<div class='field'><label>Tour ID</label><input value='"+presetTourCode+"' readonly style='background:#eef3f0;font-family:monospace'><div class='hint'>Auto-filled from your tour — please don't change.</div></div>";}
 if(type==="guide"){
   html+=inp("g_name","Your name",{req:1});
   html+=rowOf(inp("g_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("g_email","Email",{type:"email"}));
@@ -202,6 +204,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg")};
   }
   if(params.get("tid"))rec.data.tourId=params.get("tid");
+  if(presetTourCode)rec.data.tourCode=presetTourCode;
   if(!rec.name||!rec.phone){showErr("Please fill in at least your name and phone number.");return;}
   if(!sb){showErr("Sorry, the form service is unavailable right now. Please WhatsApp us at +91 99332 02175.");return;}
   var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
