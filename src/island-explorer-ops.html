@@ -455,15 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 30</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 31</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div></div>
-      <span style="margin-left:auto;align-self:flex-start;font-size:10px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;white-space:nowrap">build 30</span>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 31</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -637,15 +636,38 @@ function bookingSheetRow(b){
     poc:b.guest||"",members:memberList(b),party:b.party||1,country:b.country||"",email:b.email||"",phone:b.phone||"",status:b.status||"",
     totalCost:bookingTotalCost(b),depositAmount:bookingDeposit(b),pending:bookingPending(b),paymentStatus:bookingPaymentStatus(b),dueDate:b.lastPendingDate||"",notes:b.notes||""};
 }
+function ensureClientId(c){if(c&&!c.id)c.id="C"+(c.createdTs||Date.now())+Math.floor(Math.random()*100);return c?c.id:"";}
+function dOpt(s){return s?dShort(s):"";}
+/* Customer/client database row — columns match Customer_Database.xlsx exactly. */
 function customerSheetRow(c){
   var d=c.details||{};
   var docs=(d.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
-  return {key:(c.email||c.phone||c.name||""),name:c.name||"",country:c.country||"",nationality:d.nationality||"",gender:d.gender||"",phone:c.phone||d.phone||"",email:c.email||d.email||"",
-    dob:d.dob||"",idType:d.idType||"",idNo:d.idNo||"",idExpiry:d.idExpiry||"",arrival:d.arrival||"",departure:d.departure||"",dietary:d.diet||"",room:d.room||"",
-    emergencyName:d.emergencyName||"",emergencyPhone:d.emergencyPhone||"",medical:d.medical||"",lastTour:d.lastTour||"",lastDates:d.lastDates||"",pastTours:c.tours||0,payment:c.pay||"",preferences:c.pref||"",documents:docs};
+  var row={};
+  row["Client ID"]=ensureClientId(c);
+  row["Type"]=c.type||"Client";
+  row["Client Name (Full name)"]=c.name||"";
+  row["Start Date"]=dOpt(d.startDate);
+  row["End Date"]=dOpt(d.endDate);
+  row["Tour Category"]=d.lastTour||"";
+  row["Phone / WhatsApp"]=c.phone||d.phone||"";
+  row["Email"]=c.email||d.email||"";
+  row["Nationality"]=d.nationality||c.country||"";
+  row["Date of birth"]=dOpt(d.dob);
+  row["Gender"]=d.gender||"";
+  row["ID type"]=d.idType||"";
+  row["ID / passport number"]=d.idNo||"";
+  row["Arrival date & flight"]=d.arrival||"";
+  row["Departure date & flight"]=d.departure||"";
+  row["Dietary needs"]=d.diet||"";
+  row["Room preference"]=d.room||"";
+  row["Emergency contact name"]=d.emergencyName||"";
+  row["Emergency contact phone"]=d.emergencyPhone||"";
+  row["Medical notes / mobility"]=d.medical||"";
+  row["Upload documents (passport / ID / photo) link"]=docs;
+  return row;
 }
-function pushBooking(b){if(b)postToSheet("booking",bookingSheetRow(b));}
-function pushCustomer(c){if(c)postToSheet("customer",customerSheetRow(c));}
+function pushBooking(b){if(b)postToSheet("booking",bookingSheetRow(b),"key");}
+function pushCustomer(c){if(c)postToSheet("customer",customerSheetRow(c),"Client ID");}
 /* Turn an array of flat objects into a CSV with a header that is the union of all keys */
 function objsToCSV(objs){
   var header=[];objs.forEach(function(o){Object.keys(o).forEach(function(k){if(header.indexOf(k)===-1)header.push(k);});});
@@ -656,9 +678,9 @@ function objsToCSV(objs){
 function sheetHook(){try{return localStorage.getItem("ieo_sheethook")||"";}catch(e){return "";}}
 function sheetViewUrl(){try{return localStorage.getItem("ieo_sheetview")||"";}catch(e){return "";}}
 function openSheet(){var u=sheetViewUrl();if(!u){alert("Paste your Google Sheet link in the field, then Save.");return;}window.open(u,"_blank");}
-function postToSheet(kind,row){
+function postToSheet(kind,row,keyField){
   var url=sheetHook();if(!url)return;
-  try{fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kind:kind,row:row,at:new Date().toISOString()})});}catch(e){}
+  try{fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kind:kind,row:row,keyField:keyField||"",at:new Date().toISOString()})});}catch(e){}
 }
 function saveSheetHook(){var v=document.getElementById("sheethook_url").value.trim();try{localStorage.setItem("ieo_sheethook",v);}catch(e){}var sv=document.getElementById("sheetview_url");if(sv){try{localStorage.setItem("ieo_sheetview",sv.value.trim());}catch(e){}}alert(v?"Saved. New bookings & customers will be pushed to your Sheet automatically.":"Webhook cleared.");}
 function clearAllData(){
@@ -4198,7 +4220,9 @@ function addOrUpdateCustomer(s){
   if(!s.name)return;
   var d=s.data||{};
   var c=customers.find(function(x){return (x.name||"").toLowerCase()===s.name.toLowerCase();});
-  if(!c){c={name:s.name,tours:0,repeat:false,pay:"Deposit"};customers.unshift(c);}
+  if(!c){c={name:s.name,tours:0,repeat:false,pay:"Deposit"};ensureClientId(c);customers.unshift(c);}
+  ensureClientId(c);
+  c.type=(s.type==="interest"?"Lead":"Client");
   c.tours=(c.tours||0)+1;c.repeat=(c.tours>1);
   if(s.country)c.country=s.country;
   if(s.email)c.email=s.email;
@@ -4208,7 +4232,7 @@ function addOrUpdateCustomer(s){
     email:s.email||(c.details&&c.details.email),phone:s.phone||(c.details&&c.details.phone),nationality:s.country||(c.details&&c.details.nationality),
     gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
-    documents:d.documents,lastTour:s.tour||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
+    documents:d.documents,lastTour:s.tour||"",startDate:s.start_date||(c.details&&c.details.startDate)||"",endDate:s.end_date||(c.details&&c.details.endDate)||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
   });
   pushCustomer(c);
 }
@@ -4430,7 +4454,7 @@ function saveEditCustomer(){
 }
 function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();persistData();}
 function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
-function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();renderCustomers();}
+function saveNewCustomer(){var nc={name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,type:"Client",pref:document.getElementById("nc_pref").value||"—"};ensureClientId(nc);customers.push(nc);closeModal();renderCustomers();pushCustomer(nc);}
 function openCustomerSheet(name){var c=customers.find(function(x){return x.name===name;});if(!c)return;var url="https://docs.google.com/spreadsheets/create?title=Customer:+"+encodeURIComponent(c.name)+"&usp=sheets_web";window.open(url,"_blank");}
 
 /* ===== SOCIAL ===== */
