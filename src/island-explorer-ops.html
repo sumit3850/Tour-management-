@@ -455,14 +455,15 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 28</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 30</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 28</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div></div>
+      <span style="margin-left:auto;align-self:flex-start;font-size:10px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;white-space:nowrap">build 30</span>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -613,12 +614,44 @@ function resetData(){
 /* ===== CSV / spreadsheet export ===== */
 function toCSV(rows){return rows.map(function(r){return r.map(function(c){c=(c==null?"":String(c));return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(",");}).join("\n");}
 function downloadCSV(name,rows){var blob=new Blob([toCSV(rows)],{type:"text/csv;charset=utf-8"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name+"-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}
-function exportBookingsCSV(){var rows=[["Guest","Tour","Start","End","Party","Country","Email","Phone","Status","Payment","Total","Deposit","Pending","Notes"]];bookings.forEach(function(b){var t=tours.find(function(x){return x.id===b.tour;});rows.push([b.guest,t?shortName(t):"",b.start,b.end,b.party,b.country,b.email||"",b.phone||"",b.status,b.pay,bookingTotalCost(b),bookingDeposit(b),bookingPending(b),b.notes||""]);});downloadCSV("bookings",rows);}
-function exportCustomersCSV(){var rows=[["Name","Country","Past tours","Payment","Preferences"]];customers.forEach(function(c){rows.push([c.name,c.country,c.tours,c.pay,c.pref]);});downloadCSV("customers",rows);}
+function exportBookingsCSV(){downloadCSV("bookings",objsToCSV(bookings.map(bookingSheetRow)));}
+function exportCustomersCSV(){downloadCSV("customers",objsToCSV(customers.map(customerSheetRow)));}
 function exportToursCSV(){var rows=[["Code","Name","Category","Start","End","Nights","Capacity","Booked","Guide","Status"]];tours.forEach(function(t){rows.push([shortName(t),t.name,CATS[t.cat]||t.cat,t.start,t.end,durNights(t),t.cap,booked(t.id),t.guide,status(t)]);});downloadCSV("tours",rows);}
 function exportReservationsCSV(){var rows=[["Tour","Start","End","Location","Guide fee","Referral","Requested by","Stage","Responded by"]];reservations.forEach(function(r){rows.push([r.tour,r.date,r.endDate,r.location,r.guideFee,r.referral,r.by,r.stage,r.respondedBy||""]);});downloadCSV("reservations",rows);}
-function exportSubmissionsCSV(){var rows=[["Type","Name","Phone","Email","Country","Tour","Start","End","Status","Created"]];(_submissions||[]).forEach(function(s){rows.push([s.type,s.name,s.phone,s.email,s.country,s.tour,s.start_date,s.end_date,s.status,s.created_at]);});downloadCSV("submissions",rows);}
+function exportSubmissionsCSV(){
+  var objs=(_submissions||[]).map(function(s){
+    var o={type:s.type||"",name:s.name||"",phone:s.phone||"",email:s.email||"",country:s.country||"",tour:s.tour||"",start:s.start_date||"",end:s.end_date||"",party:s.party||"",status:s.status||"",created:s.created_at||""};
+    var d=s.data||{};Object.keys(d).forEach(function(k){if(k==="tourId")return;var v=d[k];if(k==="documents"&&Array.isArray(v))v=v.map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");o[k]=(v==null?"":v);});
+    return o;
+  });
+  downloadCSV("submissions",objsToCSV(objs));
+}
 function dlBtn(fn){return "<button class='btn btn-ghost btn-sm' onclick='"+fn+"()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>CSV</button>";}
+/* ===== Canonical row shapes — used by both CSV export and Google-Sheet push so
+   the spreadsheet and the downloaded file always carry the same full detail. ===== */
+function tourNights(t){return t?durNights(t):"";}
+function memberList(b){return (b.members?String(b.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", "):"");}
+function bookingSheetRow(b){
+  var t=tours.find(function(x){return x.id===b.tour;});
+  return {key:b.id,bookingDate:b.bookingDate||"",tour:(t?tourLabel(t):(b.customTour||"")),nights:tourNights(t),start:b.start||"",end:b.end||"",
+    poc:b.guest||"",members:memberList(b),party:b.party||1,country:b.country||"",email:b.email||"",phone:b.phone||"",status:b.status||"",
+    totalCost:bookingTotalCost(b),depositAmount:bookingDeposit(b),pending:bookingPending(b),paymentStatus:bookingPaymentStatus(b),dueDate:b.lastPendingDate||"",notes:b.notes||""};
+}
+function customerSheetRow(c){
+  var d=c.details||{};
+  var docs=(d.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
+  return {key:(c.email||c.phone||c.name||""),name:c.name||"",country:c.country||"",nationality:d.nationality||"",gender:d.gender||"",phone:c.phone||d.phone||"",email:c.email||d.email||"",
+    dob:d.dob||"",idType:d.idType||"",idNo:d.idNo||"",idExpiry:d.idExpiry||"",arrival:d.arrival||"",departure:d.departure||"",dietary:d.diet||"",room:d.room||"",
+    emergencyName:d.emergencyName||"",emergencyPhone:d.emergencyPhone||"",medical:d.medical||"",lastTour:d.lastTour||"",lastDates:d.lastDates||"",pastTours:c.tours||0,payment:c.pay||"",preferences:c.pref||"",documents:docs};
+}
+function pushBooking(b){if(b)postToSheet("booking",bookingSheetRow(b));}
+function pushCustomer(c){if(c)postToSheet("customer",customerSheetRow(c));}
+/* Turn an array of flat objects into a CSV with a header that is the union of all keys */
+function objsToCSV(objs){
+  var header=[];objs.forEach(function(o){Object.keys(o).forEach(function(k){if(header.indexOf(k)===-1)header.push(k);});});
+  var rows=[header];objs.forEach(function(o){rows.push(header.map(function(k){return o[k]==null?"":o[k];}));});
+  return rows;
+}
 /* ===== Google Sheet auto-push (Apps Script webhook) ===== */
 function sheetHook(){try{return localStorage.getItem("ieo_sheethook")||"";}catch(e){return "";}}
 function sheetViewUrl(){try{return localStorage.getItem("ieo_sheetview")||"";}catch(e){return "";}}
@@ -640,8 +673,8 @@ function clearAllData(){
 }
 function pushAllToSheet(){
   if(!sheetHook()){alert("Add your Google Apps Script webhook URL first.");return;}
-  bookings.forEach(function(b){var t=tours.find(function(x){return x.id===b.tour;});postToSheet("booking",{guest:b.guest,tour:t?shortName(t):"",start:b.start,end:b.end,party:b.party,country:b.country,email:b.email||"",phone:b.phone||"",total:bookingTotalCost(b),deposit:bookingDeposit(b),pending:bookingPending(b),status:b.status});});
-  customers.forEach(function(c){postToSheet("customer",{name:c.name,country:c.country,phone:c.phone||"",email:c.email||"",tours:c.tours,payment:c.pay,preferences:c.pref});});
+  bookings.forEach(pushBooking);
+  customers.forEach(pushCustomer);
   alert("Pushed "+(bookings.length+customers.length)+" rows to your Google Sheet.");
 }
 
@@ -778,6 +811,9 @@ function shortName(t){
   if(t.cat==="guided-half")return "GS- Half Day";
   return t.name;
 }
+/* User-facing tour label: the clean name for the 10 standard tours, otherwise the
+   exact name the user typed — never the auto-generated code like "4-N SNBT". */
+function tourLabel(t){if(!t)return "—";return TOUR_CODE[t.id]?TOUR_CODE[t.id]:(t.name||shortName(t));}
 function pill(s){const m={open:"Open",full:"Full",closed:"Closed",completed:"Completed"};return "<span class='pill "+s+"'>"+m[s]+"</span>"}
 function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='lab'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg>"+lab+"</div><div class='val'>"+val+"</div><div class='trend "+dir+"'>"+trend+"</div></div>"}
 
@@ -1002,8 +1038,8 @@ function renderView(v){
   else if(v==="accommodation")renderAccommodation();
   else if(v==="customers")renderCustomers();
   else if(v==="crm")renderCRM();
-  else if(v==="requests")loadSubmissions(true);
-  else if(v==="reservations"){renderReservations();loadSubmissions(false);}
+  else if(v==="requests"){loadSubmissions(true);startSubPoll();}
+  else if(v==="reservations"){renderReservations();loadSubmissions(false);startSubPoll();}
   else if(v==="settings")renderOperators();
   else if(v==="logistics")renderLog();
   else if(v==="social")renderSocial();
@@ -1094,13 +1130,14 @@ function viewDashboard(){
   var alerts="";
   alerts+="<div class='card card-pad'>"+
     "<div class='section-head'><div class='h-sec' style='font-size:15px'>Pending payments</div><span class='pill "+(totalPending>0?"full":"completed")+"'>"+fmt(totalPending)+"</span></div>"+
-    (pend.length?pend.slice(0,6).map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+" · "+(t?shortName(t):"—")+"</div><div class='s'>Pending "+fmt(bookingPending(b))+(b.lastPendingDate?" · due "+dShort(b.lastPendingDate):"")+"</div></div><div style='display:flex;gap:6px'><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\" title='WhatsApp'>WA</button>"+(b.email?"<button class='btn btn-ghost btn-sm' onclick=\"paymentReminderEmail('"+b.id+"')\" title='Email'>Email</button>":"")+"</div></div>";}).join(""):"<div class='empty'>All payments are settled. 🎉</div>")+
+    (pend.length?pend.slice(0,6).map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+" · "+(t?tourLabel(t):(b.customTour||"—"))+"</div><div class='s'>Pending "+fmt(bookingPending(b))+(b.lastPendingDate?" · due "+dShort(b.lastPendingDate):"")+"</div></div><div style='display:flex;gap:6px'><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\" title='WhatsApp'>WA</button>"+(b.email?"<button class='btn btn-ghost btn-sm' onclick=\"paymentReminderEmail('"+b.id+"')\" title='Email'>Email</button>":"")+"</div></div>";}).join(""):"<div class='empty'>All payments are settled. 🎉</div>")+
   "</div>";
   alerts+="<div class='card card-pad'>"+
     "<div class='h-sec' style='font-size:15px;margin-bottom:8px'>Upcoming departures</div>"+
-    (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+shortName(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
+    (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+tourLabel(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
   "</div>";
   return "<section class='view' id='v-dashboard'>"+
+    "<div class='section-head'><div><div class='eyebrow'>Overview</div><div class='h-sec'>Dashboard</div></div><button class='btn btn-ghost btn-sm' onclick='dashRefresh()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Refresh</button></div>"+
     "<div class='qa-grid'>"+
       qaTile("Create tour","M12 5v14M5 12h14","openCreateTour()")+
       qaTile("Add booking","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11","openAddBooking()")+
@@ -1236,7 +1273,7 @@ function viewBookings(){
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
-  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";return "<tr><td class='strong'>"+x.guest+"</td><td class='nowrap'>"+(t?shortName(t):(x.customTour||"—"))+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";var mem=(x.members&&String(x.members).trim())?"<div class='s' style='font-size:11.5px;color:var(--ink-soft);font-weight:400'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"";return "<tr><td class='strong'>"+x.guest+mem+"</td><td class='nowrap'>"+(t?tourLabel(t):(x.customTour||"—"))+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
   persistData();
 }
 function editBooking(id){
@@ -1246,8 +1283,9 @@ function editBooking(id){
     "<div class='field full'><label>Tour</label><select class='input' id='eb_tour'>"+tOpts+"</select></div>"+
     "<div class='field'><label>Start date</label><input class='input' type='date' id='eb_start' value='"+(b.start||"")+"'></div>"+
     "<div class='field'><label>End date</label><input class='input' type='date' id='eb_end' value='"+(b.end||"")+"'></div>"+
-    "<div class='field'><label>Guest name</label><input class='input' id='eb_guest' value='"+b.guest+"'></div>"+
+    "<div class='field'><label>Guest name (POC)</label><input class='input' id='eb_guest' value='"+b.guest+"'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='eb_party' value='"+b.party+"'></div>"+
+    "<div class='field full'><label>Other party members <span style='color:var(--ink-soft);font-weight:400'>(names, comma-separated)</span></label><input class='input' id='eb_members' value='"+(b.members||"").replace(/'/g,"&#39;")+"'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='eb_country' value='"+b.country+"'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='eb_email' value='"+(b.email||"")+"'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='eb_phone' value='"+(b.phone||"")+"'></div>"+
@@ -1278,6 +1316,7 @@ function saveEditBooking(){
   b.tour=document.getElementById("eb_tour").value;
   b.start=newStart;b.end=newEnd;
   b.guest=document.getElementById("eb_guest").value;
+  b.members=document.getElementById("eb_members").value||"";
   b.party=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
   b.country=document.getElementById("eb_country").value;
   b.email=document.getElementById("eb_email").value;
@@ -1288,7 +1327,7 @@ function saveEditBooking(){
   b.totalOverride=(tv===""||tv==null)?"":(parseFloat(tv)||0);
   b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
   b.notes=document.getElementById("eb_notes").value;
-  closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();
+  closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(b);
 }
 function ebRecalc(){
   var totalEl=document.getElementById("eb_total"),depEl=document.getElementById("eb_deposit"),penEl=document.getElementById("eb_pending");
@@ -4041,6 +4080,12 @@ function renderCRM(){
 }
 function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}
 function refreshDashboard(){var dash=document.getElementById("v-dashboard");if(!dash)return;var wasActive=dash.classList.contains("active");dash.outerHTML=viewDashboard();var nd=document.getElementById("v-dashboard");if(nd&&wasActive)nd.classList.add("active");renderPayments();attachClickHandlers();persistData();}
+/* Manual dashboard refresh — pull the latest cloud copy first, then redraw. */
+function dashRefresh(){var p=(typeof cloudPull==="function")?cloudPull(true):null;if(p&&p.then)p.then(function(){refreshDashboard();});else refreshDashboard();}
+/* Live inbox sync: while viewing Requests/Reservations, re-pull submissions every 5s. */
+var _subPoll=null;
+function startSubPoll(){stopSubPoll();_subPoll=setInterval(function(){if(curView==="requests"||curView==="reservations")loadSubmissions(false);else stopSubPoll();},5000);}
+function stopSubPoll(){if(_subPoll){clearInterval(_subPoll);_subPoll=null;}}
 function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();refreshDashboard();}
 
 /* ===== REQUESTS / PUBLIC FORMS ===== */
@@ -4052,9 +4097,9 @@ function copyLink(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURICom
 function shareWhatsApp(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURIComponent(tour)):"");var msg=encodeURIComponent("Please register here for Island Explorer Birding Tours:\n"+url);window.open("https://wa.me/?text="+msg,"_blank");}
 function shareTourForm(id,type){
   var t=tours.find(function(x){return x.id===id;});if(!t)return;
-  var url=formLink(type)+"&tour="+encodeURIComponent(shortName(t))+"&tid="+id+"&start="+(t.start||"")+"&end="+(t.end||"");
+  var url=formLink(type)+"&tour="+encodeURIComponent(tourLabel(t))+"&cat="+encodeURIComponent(t.cat||"")+"&tid="+id+"&start="+(t.start||"")+"&end="+(t.end||"");
   if(navigator.clipboard)navigator.clipboard.writeText(url);
-  var intro=type==="client"?"Please complete your guest details for "+shortName(t)+":\n":"Register your interest for "+shortName(t)+":\n";
+  var intro=type==="client"?"Please complete your guest details for "+tourLabel(t)+":\n":"Register your interest for "+tourLabel(t)+":\n";
   if(confirm("Link copied:\n\n"+url+"\n\nOpen WhatsApp to share it now?"))waShare(intro+url,t.phone);
 }
 function viewRequests(){
@@ -4076,6 +4121,18 @@ function reqLinkRow(title,desc,type){
     "<button class='btn btn-primary btn-sm' onclick=\"shareWhatsApp('"+type+"')\">WhatsApp</button></div></div>";
 }
 function saveSubmissionRow(s){var cl=sbClient();if(cl&&s&&s._rowid)cl.from("workspaces").update({data:s,updated_at:new Date().toISOString()}).eq("id",s._rowid).then(function(){});}
+/* Locally-persisted guard so a submission is auto-processed exactly once on this
+   device, even for legacy rows that can't write their status back to the cloud.
+   Without this, legacy submissions (no _rowid) were re-converted on every load,
+   inflating customer.tours and spawning duplicate bookings/leads. */
+function _procSet(){try{return JSON.parse(localStorage.getItem("ieo_processed")||"[]");}catch(e){return [];}}
+function subProcessed(id){if(!id)return false;return _procSet().indexOf(id)>-1;}
+function markSubProcessed(id){if(!id)return;var a=_procSet();if(a.indexOf(id)===-1){a.push(id);try{localStorage.setItem("ieo_processed",JSON.stringify(a));}catch(e){}}}
+/* Deleted-submissions guard: a submission the user removed stays gone, even if its
+   cloud row can't be deleted (legacy rows live inside a shared blob). */
+function _delSet(){try{return JSON.parse(localStorage.getItem("ieo_deleted_subs")||"[]");}catch(e){return [];}}
+function subDeleted(id){if(!id)return false;return _delSet().indexOf(id)>-1;}
+function markSubDeleted(id){if(!id)return;var a=_delSet();if(a.indexOf(id)===-1){a.push(id);try{localStorage.setItem("ieo_deleted_subs",JSON.stringify(a));}catch(e){}}}
 function loadSubmissions(force){
   var cl=(typeof sbClient==="function")?sbClient():null;
   var body=document.getElementById("reqBody");
@@ -4089,7 +4146,7 @@ function loadSubmissions(force){
     var rows=(r[0]&&r[0].data)||[];
     var list=rows.map(function(row){var o=Object.assign({},row.data);o._rowid=row.id;return o;});
     var legacy=(r[1]&&r[1].data&&r[1].data.data&&r[1].data.data.list)||[];
-    _submissions=list.concat(legacy).sort(function(a,b){return (b.created_at||"").localeCompare(a.created_at||"");});
+    _submissions=list.concat(legacy).filter(function(s){return !subDeleted(s.id);}).sort(function(a,b){return (b.created_at||"").localeCompare(a.created_at||"");});
     applyReservationResponses();
     autoProcessSubmissions();
     renderRequests();
@@ -4153,9 +4210,7 @@ function addOrUpdateCustomer(s){
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
     documents:d.documents,lastTour:s.tour||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
   });
-  var dd=c.details||{};
-  var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
-  postToSheet("customer",{key:(c.email||c.phone||c.name||""),name:c.name,country:c.country||"",nationality:dd.nationality||"",gender:dd.gender||"",phone:c.phone||"",email:c.email||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",pastTours:c.tours,payment:c.pay,preferences:c.pref,documents:docs});
+  pushCustomer(c);
 }
 function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
@@ -4164,7 +4219,7 @@ function viewCustomerDetail(name){
   var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours],["Payment status",c.pay],["Preferences",c.pref]];
   var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div style='font-weight:600;font-size:14px'>"+r[1]+"</div></div>";}).join("");
   if(d.documents&&d.documents.length)html+="<div class='field full'><label>Documents</label><div>"+d.documents.map(function(doc){var u=(typeof doc==="string")?doc:doc.url;var nm=(typeof doc==="string")?"file":(doc.name||"file");return u?"<a href='"+u+"' target='_blank' style='color:var(--sea);margin-right:10px'>"+nm+"</a>":nm;}).join("")+"</div></div>";
-  html+="<div class='field full'><label>Bookings</label><div style='font-size:13px'>"+(rel.length?rel.map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return (t?shortName(t):"—")+" · "+dShort(b.start)+" · "+fmt(bookingTotalCost(b));}).join("<br>"):"—")+"</div></div>";
+  html+="<div class='field full'><label>Bookings</label><div style='font-size:13px'>"+(rel.length?rel.map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return (t?tourLabel(t):(b.customTour||"—"))+" · "+dShort(b.start)+" · "+fmt(bookingTotalCost(b));}).join("<br>"):"—")+"</div></div>";
   html+="</div>";
   document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>Customer</span><h2 style='font-size:20px;margin-top:4px;font-weight:700'>"+c.name+"</h2></div>"+XBTN+"</div><div class='modal-body'>"+html+"</div><div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button><button class='btn btn-primary' onclick=\"closeModal();editCustomer('"+c.name.replace(/'/g,"\\'")+"')\">Edit</button></div>";
   openScrim();
@@ -4173,15 +4228,15 @@ function makeBookingFromSub(s){
   var t=null;
   if(s.data&&s.data.tourId)t=tours.find(function(x){return x.id===s.data.tourId;});
   if(!t&&s.tour)t=tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour;});
-  /* avoid duplicate booking for the same guest+tour */
-  var dup=bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
+  /* avoid duplicate booking: match the source submission first, then guest+tour+start */
+  var dup=bookings.find(function(b){return b.fromSub&&b.fromSub===s.id;})||
+          bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
   if(!dup){
     var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
-    bookings.unshift({id:"B"+Date.now()+Math.floor(Math.random()*100),tour:t?t.id:"",guest:s.name||"—",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""});
+    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:"",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""};
+    bookings.unshift(nb);
     addOrUpdateCustomer(s);
-    var dd=s.data||{};
-    var docs=(dd.documents||[]).map(function(x){return (typeof x==="string")?x:(x.url||x.name||"");}).filter(Boolean).join(" | ");
-    postToSheet("booking",{key:(s.email||s.phone||s.name||""),bookingDate:dShort(new Date()),guestPOC:s.name||"",tour:t?shortName(t):(s.tour||""),customTour:"",start:start,end:end,party:s.party||1,country:s.country||"",nationality:dd.nationality||s.country||"",email:s.email||"",phone:s.phone||"",dob:dd.dob||"",idType:dd.idType||"",idNo:dd.idNo||"",idExpiry:dd.idExpiry||"",arrival:dd.arrival||"",departure:dd.departure||"",dietary:dd.diet||"",room:dd.room||"",emergencyName:dd.emergencyName||"",emergencyPhone:dd.emergencyPhone||"",medical:dd.medical||"",documents:docs,status:"Confirmed",payment:"Deposit"});
+    pushBooking(nb);
   }
   return t;
 }
@@ -4197,12 +4252,13 @@ function autoProcessSubmissions(){
   var changed=false;
   (_submissions||[]).forEach(function(s){
     if(s.status==="booked"||s.status==="lead-added"||s.type==="reservation_response")return;
-    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";changed=true;saveSubmissionRow(s);}
+    if(subProcessed(s.id))return; /* never re-process the same submission on this device */
+    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);}
     else if(s.type==="interest"){
       addOrUpdateCustomer(s);
       if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
         leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
-      s.status="lead-added";changed=true;saveSubmissionRow(s);
+      s.status="lead-added";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
     }
   });
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();persistData();}
@@ -4214,6 +4270,7 @@ function setSubStatus(id,status,silent){
 function deleteSub(id){
   if(!confirm("Delete this submission?"))return;
   var s=_submissions.find(function(x){return x.id===id;});var cl=sbClient();
+  markSubDeleted(id);markSubProcessed(id); /* never reappear, never re-auto-process */
   _submissions=_submissions.filter(function(x){return x.id!==id;});renderRequests();
   if(cl&&s&&s._rowid)cl.from("workspaces").delete().eq("id",s._rowid).then(function(){});
 }
@@ -4231,7 +4288,7 @@ function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,
 function shareReservation(id,via){
   var r=reservations.find(function(x){return x.id===id;});if(!r)return;
   var dates=dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"");
-  function row(label,val){return label+(new Array(Math.max(1,18-label.length)).join(" "))+": "+val;}
+  function row(label,val){var w=16;var pad=label.length<w?new Array(w-label.length+1).join(" "):"";return label+pad+" : "+val;}
   var msg="Island Explorer — Guide Service Request\n\n"+
     row("Tour",r.tour||"—")+"\n"+
     row("Dates",dates||"—")+"\n"+
@@ -4369,9 +4426,9 @@ function saveEditCustomer(){
   c.name=g("ec_name");c.country=g("ec_country");c.phone=g("ec_phone");c.email=g("ec_email");
   c.tours=parseInt(g("ec_tours"))||0;c.pay=g("ec_pay");c.pref=g("ec_pref");
   c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med")});
-  closeModal();renderCustomers();
+  closeModal();renderCustomers();pushCustomer(c);
 }
-function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();}
+function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();persistData();}
 function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
 function saveNewCustomer(){customers.push({name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,pref:document.getElementById("nc_pref").value||"—"});closeModal();renderCustomers();}
 function openCustomerSheet(name){var c=customers.find(function(x){return x.name===name;});if(!c)return;var url="https://docs.google.com/spreadsheets/create?title=Customer:+"+encodeURIComponent(c.name)+"&usp=sheets_web";window.open(url,"_blank");}
@@ -4494,13 +4551,9 @@ function viewSettings(){
     "<div class='card card-pad'><div class='eyebrow'>Connections</div><div class='h-sec' style='margin-bottom:6px'>Integrations</div>"+
       integ.map(s=>"<div class='set-row'><div class='si'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+s[2]+"'/></svg></div><div class='sm'><b>"+s[0]+"</b><span>"+s[1]+"</span></div><div class='toggle "+(s[3]?"on":"")+"' onclick='this.classList.toggle(\'on\')'></div></div>").join("")+
     "</div>"+
-    "<div class='card card-pad'><div class='eyebrow'>Access</div><div class='h-sec' style='margin-bottom:6px'>User roles</div>"+
-      "<div class='tbl-wrap'><table><thead><tr><th>User</th><th>Role</th><th>Access</th></tr></thead><tbody>"+
-        "<tr><td class='strong'>Sumit Kumar</td><td><span class='pill completed'>Admin</span></td><td style='color:var(--ink-soft)'>All modules</td></tr>"+
-        "<tr><td>A. Kumar</td><td><span class='pill open'>Operations</span></td><td style='color:var(--ink-soft)'>Tours, Logistics</td></tr>"+
-        "<tr><td>R. Das</td><td><span class='pill plain'>Guide</span></td><td style='color:var(--ink-soft)'>Ops board (view)</td></tr>"+
-        "<tr><td>Sales desk</td><td><span class='pill plain'>Sales</span></td><td style='color:var(--ink-soft)'>CRM, Bookings</td></tr>"+
-      "</tbody></table></div>"+
+    "<div class='card card-pad'><div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Access</div><div class='h-sec'>User roles &amp; access</div></div><div style='display:flex;gap:6px'><button class='btn btn-ghost btn-sm' onclick='logout()'>Sign out</button><button class='btn btn-primary btn-sm' onclick='openAddOperator()'>Add user</button></div></div>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-bottom:10px'>Each user signs in with their phone number and personal code. Edit or remove anyone below.</p>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>User</th><th>Phone</th><th>Code</th><th>Role</th><th>Access</th><th></th></tr></thead><tbody id='opBody'></tbody></table></div>"+
     "</div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
@@ -4539,16 +4592,12 @@ function viewSettings(){
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Heads-up: the anon key is public. Anyone with your URL, key and workspace name can read/write this data — pick a hard-to-guess workspace name, or add Supabase Auth later for stricter access.</p>"+
     "</details>"+
   "</div>"+
-  "<div class='card card-pad' style='margin-top:16px'>"+
-    "<div class='section-head'><div><div class='eyebrow'>Access</div><div class='h-sec'>Operators &amp; login</div></div><div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='logout()'>Lock / sign out</button><button class='btn btn-primary btn-sm' onclick='openAddOperator()'>Add operator</button></div></div>"+
-    "<p style='font-size:12.5px;color:var(--ink-soft);margin:6px 0 12px'>Each operator signs in with their phone number and personal code. Codes are stored with your synced data.</p>"+
-    "<div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Phone</th><th>Code</th><th>Role</th><th></th></tr></thead><tbody id='opBody'></tbody></table></div>"+
-  "</div>"+
   "</section>";
 }
+var ROLE_ACCESS={Admin:"All modules",Operator:"Tours, Bookings, Logistics",Guide:"Ops board (view)",Sales:"CRM, Bookings"};
 function renderOperators(){
   var b=document.getElementById("opBody");if(!b)return;
-  b.innerHTML=operators.map(function(o,i){return "<tr><td class='strong'>"+o.name+"</td><td class='mono'>"+o.phone+"</td><td class='mono'>"+o.code+"</td><td>"+(o.role||"Operator")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editOperator' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteOperator' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='5' class='empty'>No operators — login is open until you add one.</td></tr>";
+  b.innerHTML=operators.map(function(o,i){return "<tr><td class='strong'>"+o.name+"</td><td class='mono'>"+o.phone+"</td><td class='mono'>"+o.code+"</td><td><span class='pill "+(o.role==="Admin"?"completed":(o.role==="Guide"||o.role==="Sales"?"plain":"open"))+"'>"+(o.role||"Operator")+"</span></td><td style='color:var(--ink-soft)'>"+(ROLE_ACCESS[o.role]||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editOperator' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteOperator' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='6' class='empty'>No users yet — tap “Add user”. Login stays open until you add one.</td></tr>";
 }
 function opForm(o){o=o||{};return "<div class='form-grid'>"+
   "<div class='field'><label>Name</label><input class='input' id='op_name' value='"+(o.name||"")+"'></div>"+
@@ -4640,6 +4689,7 @@ function openAddBooking(tourId){
     "<div class='field'><label>End date</label><input class='input' type='date' id='nb_end' value='"+defEnd+"'></div>"+
     "<div class='field'><label>Guest Name (POC)</label><input class='input' id='nb_guest' placeholder='Primary contact name'></div>"+
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='nb_party' value='2'></div>"+
+    "<div class='field full'><label>Other party members <span style='color:var(--ink-soft);font-weight:400'>(names, comma-separated)</span></label><input class='input' id='nb_members' placeholder='e.g. Mina Roy, Sumit Das'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='nb_country' placeholder='Country'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='nb_email' placeholder='guest@email.com'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='nb_phone' placeholder='+91 …'></div>"+
@@ -4660,10 +4710,11 @@ function saveBooking(){
   const start=document.getElementById("nb_start").value;
   const end=document.getElementById("nb_end").value;
   if(!start||!end||end<start){alert("Enter valid start and end dates.");return;}
-  bookings.push({id:"B"+Date.now(),tour:custom?"":tour,customTour:custom,guest:guest,party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
+  var nb={id:"B"+Date.now(),bookingDate:dShort(new Date()),tour:custom?"":tour,customTour:custom,guest:guest,members:document.getElementById("nb_members").value||"",party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
     country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:"Confirmed",pay:document.getElementById("nb_pay").value,
-    deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:""});
-  closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();
+    deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:""};
+  bookings.push(nb);
+  closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(nb);
 }
 
 function openAddLead(){
@@ -4708,7 +4759,7 @@ function openTour(id){
   const t=tours.find(x=>x.id===id);if(!t)return;const b=booked(id),bs=bookings.filter(x=>x.tour===id),wl=waitlist[id]||[];
   var poc=bs.find(function(x){return x.id===t.pocId;});
   document.getElementById("modal").innerHTML=
-    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span><h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+shortName(t)+"</h2><div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+t.name+" · "+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span><h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2><div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
       "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Seats sold</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
@@ -4722,7 +4773,7 @@ function openTour(id){
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourForm('"+id+"','client')\">Send guest form (after advance)</button>"+
       "</div>"+
       "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='"+id+"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
-      "<div class='tbl-wrap'><table><thead><tr><th>PoC</th><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th><th></th></tr></thead><tbody>"+(bs.map(x=>"<tr><td><button class='poc-star "+(t.pocId===x.id?"on":"")+"' title='Mark as point of contact' onclick=\"markPoc('"+id+"','"+x.id+"')\">"+(t.pocId===x.id?"★":"☆")+"</button></td><td class='strong nowrap'>"+x.guest+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Modify booking'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No bookings yet.</td></tr>")+"</tbody></table></div>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>PoC</th><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th><th></th></tr></thead><tbody>"+(bs.map(x=>"<tr><td><button class='poc-star "+(t.pocId===x.id?"on":"")+"' title='Mark as point of contact' onclick=\"markPoc('"+id+"','"+x.id+"')\">"+(t.pocId===x.id?"★":"☆")+"</button></td><td class='strong nowrap'>"+x.guest+((x.members&&String(x.members).trim())?"<div class='s' style='font-size:11px;color:var(--ink-soft);font-weight:400;white-space:normal'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Modify booking'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No bookings yet.</td></tr>")+"</tbody></table></div>"+
       (wl.length?"<div class='h-sec' style='font-size:14px;margin:16px 0 6px'>Waitlist</div>"+wl.map(w=>"<div class='list-row'><div class='meta'><div class='t'>"+w.guest+"</div></div><span class='pill plain'>"+w.party+" pax</span></div>").join(""):
 "")+
     "</div>";
@@ -4788,8 +4839,20 @@ function saveEditTrip(){
 }
 function deleteTrip(id){if(!confirm("Delete this trip record?"))return;tripLogs=tripLogs.filter(function(x){return x.id!==id;});saveLogs();renderLog("Daily Activity");}
 
+/* Collapse accidental duplicate bookings (same source submission, or identical
+   guest+tour+dates+party) that older builds could create. Keeps the first. */
+function dedupeBookings(){
+  var seen={},out=[],changed=false;
+  (bookings||[]).forEach(function(b){
+    var key=b.fromSub?("sub:"+b.fromSub):((b.guest||"").toLowerCase()+"|"+(b.tour||b.customTour||"")+"|"+(b.start||"")+"|"+(b.end||"")+"|"+(b.party||""));
+    if(seen[key]){changed=true;return;}
+    seen[key]=1;out.push(b);
+  });
+  if(changed){bookings=out;persistData();}
+}
 /* ===== BOOT ===== */
 function boot(){
+  dedupeBookings();
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   go("dashboard");
