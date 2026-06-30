@@ -110,9 +110,23 @@ function doPost(e){
   if (!e || !e.postData || !e.postData.contents) {
     return ContentService.createTextOutput("ready — send data from the app, don't press Run here.");
   }
-  var body = JSON.parse(e.postData.contents);          // {kind, row, keyField}
+  var body = JSON.parse(e.postData.contents);          // {kind, mode, header, rows} or {kind, row, keyField}
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
+
+  // --- Mirror mode: replace the whole tab with the console's current list ----
+  // The app sends every row it currently has (bookings = POC rows only), so the tab
+  // exactly matches the console: deletions disappear, edits update, old rows are wiped.
+  if (body.mode === "replace") {
+    var rHeader = body.header || [];
+    var rRows = body.rows || [];
+    sheet.clear();
+    var out = [rHeader];
+    rRows.forEach(function(r){ out.push(rHeader.map(function(h){ return r[h] != null ? r[h] : ""; })); });
+    if (rHeader.length) sheet.getRange(1, 1, out.length, rHeader.length).setValues(out);
+    return ContentService.createTextOutput("ok-replace " + rRows.length);
+  }
+
   var row = body.row || {};
   var keys = Object.keys(row);                          // app-defined column order
 
@@ -179,4 +193,4 @@ function doPost(e){
 **Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).
 
 ### 3. Connect
-Paste that URL in **Settings → Google Sheet auto-push → Save webhook**. Click **Push all now** to back-fill existing data. From then on, each new booking/customer is written to the **`Booking`** and **`Customer Database`** tabs automatically (these exact names — no duplicate lowercase tabs are created).
+Paste that URL in **Settings → Google Sheet auto-push → Save webhook**. Click **Push all now** once. From then on the **`Booking`** and **`Customer Database`** tabs are kept **in mirror-sync with the console**: whenever you add, edit or delete a booking/customer, the whole tab is rebuilt to match — so deletions disappear, edits update, and old/stale rows are wiped. The `Booking` tab lists **one row per tour (the POC)**; the other party members are summarised in the **Member (s)** column. (No duplicate lowercase tabs are created.)
