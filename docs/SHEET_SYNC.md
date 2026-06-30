@@ -101,7 +101,15 @@ The console can POST every new **booking** and **customer** to a Google Sheet vi
 In your Google Sheet → **Extensions → Apps Script** → paste:
 
 ```javascript
+// Visiting the URL in a browser (a GET) or pressing "Run" in the editor is fine —
+// you'll just see this message. Real data arrives via POST from the app.
+function doGet(e){ return ContentService.createTextOutput("Island Explorer sheet webhook is live."); }
+
 function doPost(e){
+  // Guard so a manual "Run" (no request) doesn't throw "Cannot read properties of undefined".
+  if (!e || !e.postData || !e.postData.contents) {
+    return ContentService.createTextOutput("ready — send data from the app, don't press Run here.");
+  }
   var body = JSON.parse(e.postData.contents);          // {kind, row, keyField}
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
