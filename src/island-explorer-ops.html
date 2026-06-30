@@ -455,15 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div style="text-align:center;margin-top:14px"><a href="#" onclick="authSkip();return false" style="color:var(--ink-soft);font-size:12.5px">Continue without signing in →</a></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair</div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 27</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 26</div></div>
+      <div><div class="name">Island Explorer</div><div class="sub">Ops Console · build 27</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -622,11 +621,23 @@ function exportSubmissionsCSV(){var rows=[["Type","Name","Phone","Email","Countr
 function dlBtn(fn){return "<button class='btn btn-ghost btn-sm' onclick='"+fn+"()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>CSV</button>";}
 /* ===== Google Sheet auto-push (Apps Script webhook) ===== */
 function sheetHook(){try{return localStorage.getItem("ieo_sheethook")||"";}catch(e){return "";}}
+function sheetViewUrl(){try{return localStorage.getItem("ieo_sheetview")||"";}catch(e){return "";}}
+function openSheet(){var u=sheetViewUrl();if(!u){alert("Paste your Google Sheet link in the field, then Save.");return;}window.open(u,"_blank");}
 function postToSheet(kind,row){
   var url=sheetHook();if(!url)return;
   try{fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kind:kind,row:row,at:new Date().toISOString()})});}catch(e){}
 }
-function saveSheetHook(){var v=document.getElementById("sheethook_url").value.trim();try{localStorage.setItem("ieo_sheethook",v);}catch(e){}alert(v?"Google Sheet webhook saved. New bookings & customers will be pushed automatically.":"Webhook cleared.");}
+function saveSheetHook(){var v=document.getElementById("sheethook_url").value.trim();try{localStorage.setItem("ieo_sheethook",v);}catch(e){}var sv=document.getElementById("sheetview_url");if(sv){try{localStorage.setItem("ieo_sheetview",sv.value.trim());}catch(e){}}alert(v?"Saved. New bookings & customers will be pushed to your Sheet automatically.":"Webhook cleared.");}
+function clearAllData(){
+  if(!confirm("This permanently removes ALL tours, bookings, customers, leads, reservations, accommodation, ops and trip logs from this device AND the cloud. Your login and rates stay. Continue?"))return;
+  if(!confirm("Are you absolutely sure? This cannot be undone."))return;
+  STORE.forEach(function(s){if(s.arr&&s.k!=="operators")s.set([]);});
+  try{tripLogs=[];localStorage.setItem("ieo_sync_trips","[]");}catch(e){}
+  persistData();
+  if(typeof cloudPush==="function")cloudPush(true);
+  boot();
+  alert("All data cleared on this device and the cloud. Only entries you add from now on will appear.");
+}
 function pushAllToSheet(){
   if(!sheetHook()){alert("Add your Google Apps Script webhook URL first.");return;}
   bookings.forEach(function(b){var t=tours.find(function(x){return x.id===b.tour;});postToSheet("booking",{guest:b.guest,tour:t?shortName(t):"",start:b.start,end:b.end,party:b.party,country:b.country,email:b.email||"",phone:b.phone||"",total:bookingTotalCost(b),deposit:bookingDeposit(b),pending:bookingPending(b),status:b.status});});
@@ -4318,7 +4329,7 @@ function deleteReservation(id){if(!confirm("Delete this reservation?"))return;re
 /* ===== CUSTOMERS ===== */
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
-    "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'>"+dlBtn('exportCustomersCSV')+"<button class='btn btn-sea btn-sm' onclick='openCustomerSheet(\"\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open in Google Sheets</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
+    "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px'>"+dlBtn('exportCustomersCSV')+"<button class='btn btn-sea btn-sm' onclick='openSheet()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open Google Sheet</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th>Phone</th><th>Email</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
 }
@@ -4492,14 +4503,15 @@ function viewSettings(){
     "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
       "<button class='btn btn-primary btn-sm' onclick='exportData()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export backup</button>"+
       "<label class='btn btn-sea btn-sm' style='cursor:pointer'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 8l5-5 5 5M12 3v12'/></svg>Import backup<input type='file' accept='application/json,.json' style='display:none' onchange='importData(this)'></label>"+
-      "<button class='btn btn-ghost btn-sm' onclick='resetData()' style='color:var(--coral)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Reset to sample data</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick='clearAllData()' style='color:var(--coral)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Clear ALL data (device + cloud)</button>"+
     "</div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Paste a Google Apps Script <b>web-app URL</b> below. New bookings &amp; customers are then pushed to your Sheet automatically. Setup steps are in docs/SHEET_SYNC.md.</p>"+
     "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHook())+"'></div>"+
-    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><button class='btn btn-primary btn-sm' onclick='saveSheetHook()'>Save webhook</button><button class='btn btn-sea btn-sm' onclick='pushAllToSheet()'>Push all now</button></div>"+
+    "<div class='field'><label>Your Google Sheet link (to open it from the app)</label><input class='input' id='sheetview_url' placeholder='https://docs.google.com/spreadsheets/d/…' value='"+(sheetViewUrl())+"'></div>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><button class='btn btn-primary btn-sm' onclick='saveSheetHook()'>Save</button><button class='btn btn-sea btn-sm' onclick='pushAllToSheet()'>Push all now</button><button class='btn btn-ghost btn-sm' onclick='openSheet()'>Open Google Sheet</button></div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Cloud Sync · Supabase</div>"+
@@ -4828,7 +4840,7 @@ function authSignIn(){
   }).catch(function(e){lgEl("lgBtn").disabled=false;authNetErr(e);});
 }
 function authNetErr(e){
-  lgMsg("err","Couldn't reach the sign-in server. Your Supabase project may be paused, or email auth may be disabled. Check the dashboard — or tap \"Continue without signing in\" below.");
+  lgMsg("err","Couldn't reach the sign-in server. Your Supabase project may be paused, or email auth may be disabled. Check the Supabase dashboard and try again.");
 }
 function authSignUp(){
   var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
@@ -4851,7 +4863,7 @@ function authForgot(){
     lgMsg("ok","Password reset link sent to "+email+".");
   }).catch(function(e){authNetErr(e);});
 }
-function authSkip(){hideLogin();}
+/* bypass removed per request */
 function logout(){
   var cl=authClient();
   if(cl)cl.auth.signOut().then(function(){showLogin();});
