@@ -92,7 +92,7 @@ document.getElementById("formIntro").textContent=TITLES[type]?TITLES[type][1]:TI
 
 function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*</span>":"";var t=opts.type||"text";
   var ctrl;
-  if(opts.tour){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+"><option value=''>Select a tour…</option>"+TOURS.map(function(t){return "<option "+(t===presetTour?"selected":"")+">"+t+"</option>";}).join("")+"</select>";}
+  if(opts.tour){var list=TOURS.slice();if(presetTour&&list.indexOf(presetTour)===-1)list.unshift(presetTour);ctrl="<select id='"+id+"' "+(opts.req?"required":"")+"><option value=''>Select a tour…</option>"+list.map(function(t){return "<option "+(t===presetTour?"selected":"")+">"+t+"</option>";}).join("")+"</select>";}
   else if(opts.select){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+">"+opts.select.map(function(o){return "<option>"+o+"</option>";}).join("")+"</select>";}
   else if(t==="textarea"){ctrl="<textarea id='"+id+"' placeholder='"+(opts.ph||"")+"'></textarea>";}
   else{ctrl="<input id='"+id+"' type='"+t+"' value='"+(opts.val||"")+"' placeholder='"+(opts.ph||"")+"' "+(opts.req?"required":"")+">";}
