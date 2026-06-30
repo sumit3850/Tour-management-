@@ -455,14 +455,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 31</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 32</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 31</span></div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub" style="display:flex;align-items:center;justify-content:space-between;gap:8px">Ops Console<span style="font-size:9.5px;font-weight:700;letter-spacing:.02em;color:#cfe6dd;background:rgba(255,255,255,.12);border-radius:6px;padding:2px 7px;white-space:nowrap;text-transform:none">build 32</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
@@ -1295,7 +1295,16 @@ function viewBookings(){
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
-  b.innerHTML=bookings.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";var mem=(x.members&&String(x.members).trim())?"<div class='s' style='font-size:11.5px;color:var(--ink-soft);font-weight:400'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"";return "<tr><td class='strong'>"+x.guest+mem+"</td><td class='nowrap'>"+(t?tourLabel(t):(x.customTour||"—"))+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
+  /* When a tour has a Point of Contact marked, only the POC shows here — the other
+     team members who submitted forms stay in the Customer Database but drop off the
+     bookings list (their names are listed under the POC instead). */
+  var rows=bookings.filter(function(x){if(!x.tour)return true;var t=tours.find(function(y){return y.id===x.tour;});if(!t||!t.pocId)return true;return x.id===t.pocId;});
+  b.innerHTML=rows.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";
+    var names=[];if(x.members)names=names.concat(String(x.members).split(/[,\n]/));
+    if(t&&t.pocId===x.id)names=names.concat(bookings.filter(function(o){return o.tour===x.tour&&o.id!==x.id;}).map(function(o){return o.guest;}));
+    names=names.map(function(s){return (s||"").trim();}).filter(Boolean);
+    var mem=names.length?"<div class='s' style='font-size:11.5px;color:var(--ink-soft);font-weight:400;white-space:normal'>+ "+names.join(", ")+"</div>":"";
+    return "<tr><td class='strong'>"+x.guest+mem+"</td><td class='nowrap'>"+(t?tourLabel(t):(x.customTour||"—"))+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td class='num mono'>"+x.party+"</td><td>"+x.country+"</td><td><span class='pill completed'>"+x.status+"</span></td><td class='num mono'>"+fmt(bookingTotalCost(x))+"</td><td class='num mono'>"+fmt(bookingDeposit(x))+"</td><td class='num mono' style='color:var(--coral)'>"+fmt(bookingPending(x))+"</td><td class='nowrap'>"+lp+"</td><td><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></td><td style='color:var(--ink-soft)'>"+(x.notes||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("");
   persistData();
 }
 function editBooking(id){
