@@ -101,18 +101,45 @@ The console can POST every new **booking** and **customer** to a Google Sheet vi
 In your Google Sheet → **Extensions → Apps Script** → paste:
 
 ```javascript
+// Visiting the URL in a browser (a GET) or pressing "Run" in the editor is fine —
+// you'll just see this message. Real data arrives via POST from the app.
+function doGet(e){ return ContentService.createTextOutput("Island Explorer sheet webhook is live."); }
+
 function doPost(e){
+  // Guard so a manual "Run" (no request) doesn't throw "Cannot read properties of undefined".
+  if (!e || !e.postData || !e.postData.contents) {
+    return ContentService.createTextOutput("ready — send data from the app, don't press Run here.");
+  }
   var body = JSON.parse(e.postData.contents);          // {kind, row, keyField}
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
   var row = body.row || {};
-  var keys = Object.keys(row);
-  // Header = exactly the columns the app sends, in order (auto-extends for new fields).
-  // The "customer" tab columns match Customer_Database.xlsx; "booking" carries the
-  // POC details + Deposit / Pending / Total cost / Payment status.
-  var header = sheet.getLastRow() ? sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0] : [];
-  keys.forEach(function(k){ if (header.indexOf(k) === -1) header.push(k); });
-  sheet.getRange(1,1,1,header.length).setValues([header]);
+  var keys = Object.keys(row);                          // app-defined column order
+
+  // --- Self-healing header order ---------------------------------------------
+  // The columns should follow the order the app sends (the "customer" tab then
+  // matches Customer_Database.xlsx exactly). Desired = sent columns first, then any
+  // extra columns that already exist but the app no longer sends, appended at the end.
+  var lastRow = sheet.getLastRow(), lastCol = sheet.getLastColumn();
+  var existing = lastRow ? sheet.getRange(1,1,1,lastCol).getValues()[0] : [];
+  var header = keys.slice();
+  existing.forEach(function(h){ if (h !== "" && header.indexOf(h) === -1) header.push(h); });
+
+  // If the current header doesn't already match, rewrite the whole sheet into the
+  // new column order (data is matched by column name, so nothing is lost).
+  var sameOrder = existing.length === header.length && existing.every(function(h,i){ return h === header[i]; });
+  if (!sameOrder) {
+    var newRows = [header];
+    if (lastRow > 1) {
+      var data = sheet.getRange(2,1,lastRow-1,lastCol).getValues();
+      data.forEach(function(r){
+        newRows.push(header.map(function(h){ var ci = existing.indexOf(h); return ci > -1 ? r[ci] : ""; }));
+      });
+    }
+    sheet.clear();
+    sheet.getRange(1,1,newRows.length,header.length).setValues(newRows);
+  }
+
   var line = header.map(function(h){ return row[h] != null ? row[h] : ""; });
   // Upsert (no duplicates) on the key column — defaults to the first column sent.
   var keyField = body.keyField || keys[0];
@@ -132,12 +159,21 @@ function doPost(e){
 
 > **Already deployed the older script?** Replace it with the code above, then
 > **Deploy → Manage deployments → ✎ Edit → Version: New version → Deploy** (re-using
-> the same URL). Start with a fresh `customer` tab so old columns don't linger. The
-> `customer` tab then has exactly: Client ID · Type · Client Name (Full name) · Start
-> Date · End Date · Tour Category · Phone / WhatsApp · Email · Nationality · Date of
-> birth · Gender · ID type · ID / passport number · Arrival date & flight · Departure
-> date & flight · Dietary needs · Room preference · Emergency contact name · Emergency
-> contact phone · Medical notes / mobility · Upload documents link.
+> the same URL). This version **re-orders the columns automatically** on the next push
+> (matching by column name, so no data is lost) — you do **not** need to delete the
+> tab. After re-deploying, click **Push all now** once and the tabs match the app:
+>
+> - **`booking`**: Booking ID · BookingDate · Point of Contact (POC) · Tour ID · Tour ·
+>   Tour Start_Date · Tour End_Date · Member (s) · Party Size · Country · Email · Phone ·
+>   status · Total Tour Cost · Deposit · Pending Amount · Due Date · Payment Status ·
+>   Additional Notes
+> - **`customer`**: Client ID · Type · Client Name (Full name) · Tour ID · Tour Category ·
+>   Tour Start_Date · Tour End_Date · Phone / WhatsApp · Email · Nationality · Date of
+>   birth · Gender · ID type · ID / passport number · Arrival date & flight · Departure
+>   date & flight · Dietary needs · Room preference · Emergency contact name · Emergency
+>   contact phone · Medical notes / mobility · Upload documents link
+>
+> (If you'd rather start clean, deleting the tab before pushing also works.)
 
 ### 2. Deploy
 **Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).
