@@ -76,6 +76,7 @@ async function load(){
         "<div class='row'><span>Tour</span><b>"+(r.tour||"—")+"</b></div>"+
         "<div class='row'><span>Dates</span><b>"+dmy(r.date)+(r.endDate?" – "+dmy(r.endDate):"")+"</b></div>"+
         "<div class='row'><span>Location</span><b>"+(r.location||"—")+"</b></div>"+
+        (r.guideName?"<div class='row'><span>Guide Name</span><b>"+r.guideName+"</b></div>":"")+
         "<div class='row'><span>Guide fee</span><b>"+fmt(r.guideFee)+"</b></div>"+
         "<div class='row'><span>Referral commission</span><b>"+fmt(r.referral)+"</b></div>"+
         (r.notes?"<div class='row'><span>Notes</span><b>"+r.notes+"</b></div>":"")+

@@ -156,7 +156,7 @@ if(type==="guide"){
   html+=rowOf(inp("c_start","Tour start date",{type:"date",val:presetStart}),inp("c_end","Tour end date",{type:"date",val:presetEnd}));
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
-  html+=inp("c_address","Address",{type:"textarea",ph:"Full postal address"});
+  html+=inp("c_address","Full residential Address",{type:"textarea",ph:"Full residential address"});
   html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
   html+=inp("c_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID","Other"]}),inp("c_idno","ID / passport number",{req:1}));
