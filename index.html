@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 48</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 49</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 48</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 49</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -716,12 +716,24 @@ var _sheetSyncTimer=null;
 function scheduleSheetSync(){if(!sheetHook())return;clearTimeout(_sheetSyncTimer);_sheetSyncTimer=setTimeout(syncSheets,1800);}
 /* Roster tab (one row per tour — no Remarks column) and Referral tab (from the
    reservation pipeline: guide fee + referral commission). */
-var ROSTER_COLS=["Tour ID","Tour","Tour Start_Date","Tour End_Date","Guide","External Guides","Pax","Capacity","Status"];
-function rosterSheetRow(t){return {"Tour ID":tourCode(t),"Tour":tourLabel(t),"Tour Start_Date":dOpt(t.start),"Tour End_Date":dOpt(t.end),"Guide":t.guide||"","External Guides":t.guideAlloted||"","Pax":booked(t.id),"Capacity":t.cap||"","Status":status(t)};}
+var ROSTER_COLS=["Tour ID","Tour","Tour Start_Date","Tour End_Date","Guide","External Guides","Pax","Capacity","Status","Session Type","Lead Fee/day","Assistant Fee/day","Days","Lead Payout","Assistant Payout"];
+function rosterSheetRow(t){var f=feeFor(t);return {"Tour ID":tourCode(t),"Tour":tourLabel(t),"Tour Start_Date":dOpt(t.start),"Tour End_Date":dOpt(t.end),"Guide":t.guide||"","External Guides":t.guideAlloted||"","Pax":booked(t.id),"Capacity":t.cap||"","Status":status(t),"Session Type":f.st,"Lead Fee/day":f.lead,"Assistant Fee/day":f.asst,"Days":f.days,"Lead Payout":f.leadTotal,"Assistant Payout":f.asstTotal};}
 var REFERRAL_COLS=["Tour ID","Tour","Tour Start_Date","Guide Name","Guide Fee","Referral Commission","Stage","Responded By"];
 /* External Bird Guide / Naturalist fee structure (Oct 2026 – Apr 2027) shown on the dashboard. */
 var GUIDE_FEE_ROWS=(typeof GUIDE_FEE_ROWS!=="undefined"&&GUIDE_FEE_ROWS&&GUIDE_FEE_ROWS.length)?GUIDE_FEE_ROWS:[["Session Tour",1000,500,1000,500,500,300,1500,800,1500,800],["South Andaman",1200,500,1500,700,500,300,1700,800,2000,1000],["Little Andaman",1500,700,2000,900,500,300,2000,1000,2500,1200],["Great Nicobar",1500,1000,2500,1200,500,300,2000,1300,3000,1500]];
 var FEE_HEADS=["Location","Half·Lead","Half·Asst","Full·Lead","Full·Asst","Night·Lead","Night·Asst","H+N·Lead","H+N·Asst","F+N·Lead","F+N·Asst"];
+/* Auto guide-payout lookup: tour category -> fee-table location, session type -> column. */
+var SESSION_TYPES=["Half day","Full day","Night","Half day + Night","Full day + Night"];
+var FEE_LOC={session:"Session Tour","guided-half":"Session Tour",southandaman:"South Andaman",littleandaman:"Little Andaman",nicobar:"Great Nicobar",narcondam:"Great Nicobar",custom:"Session Tour"};
+var SESSION_COL={"Half day":1,"Full day":3,"Night":5,"Half day + Night":7,"Full day + Night":9};
+function feeFor(t){
+  var loc=FEE_LOC[t.cat]||"Session Tour";
+  var row=(GUIDE_FEE_ROWS||[]).find(function(r){return r[0]===loc;});
+  var st=t.sessionType||"Full day";var col=SESSION_COL[st]||3;
+  var lead=row?(+row[col]||0):0,asst=row?(+row[col+1]||0):0;
+  var days=Math.max(durNights(t)||1,1);
+  return {loc:loc,st:st,lead:lead,asst:asst,days:days,leadTotal:lead*days,asstTotal:asst*days};
+}
 /* Own sidebar section — view + edit the guide/naturalist fee rates. */
 function viewFees(){
   var th=FEE_HEADS.map(function(h,i){return "<th style='padding:8px;font-size:11px;text-align:"+(i?"right":"left")+";color:var(--ink-soft);white-space:nowrap;border-bottom:1px solid var(--line)'>"+h+"</th>";}).join("");
@@ -4844,6 +4856,7 @@ function openCreateTour(){
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='nt_cap' value='8'></div>"+
     "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Kumar'></div>"+
     "<div class='field'><label>External Guides</label><select class='input' id='nt_guideAlloted'>"+guideOptions("")+"</select></div>"+
+    "<div class='field'><label>Session type <span style='color:var(--ink-soft);font-weight:400'>(for guide fee)</span></label><select class='input' id='nt_session'>"+SESSION_TYPES.map(function(s){return "<option "+(s==="Full day"?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
     "<div class='field full'><label>Pickup point</label><input class='input' id='nt_pickup' placeholder='e.g. Port Blair'></div>"+
     "<div class='field'><label>Total tour cost (₹)</label><input class='input mono' type='number' id='nt_cost' value='0' oninput='ntPend()'></div>"+
     "<div class='field'><label>Deposit received (₹)</label><input class='input mono' type='number' id='nt_deposit' value='0' oninput='ntPend()'></div>"+
@@ -4857,7 +4870,7 @@ function saveTour(){
   if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
   var nt={id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
-    guide:document.getElementById("nt_guide").value||"—",guideAlloted:document.getElementById("nt_guideAlloted").value||"",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
+    guide:document.getElementById("nt_guide").value||"—",guideAlloted:document.getElementById("nt_guideAlloted").value||"",sessionType:document.getElementById("nt_session").value,pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
     tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||""};
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
   closeModal();renderTours();renderCalendar();
@@ -4877,6 +4890,7 @@ function editTour(id){
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='et_cap' value='"+t.cap+"'></div>"+
     "<div class='field'><label>Team leader / guide</label><input class='input' id='et_guide' value='"+(t.guide||"")+"'></div>"+
     "<div class='field'><label>External Guides</label><select class='input' id='et_guideAlloted'>"+guideOptions(t.guideAlloted||"")+"</select></div>"+
+    "<div class='field'><label>Session type <span style='color:var(--ink-soft);font-weight:400'>(for guide fee)</span></label><select class='input' id='et_session'>"+SESSION_TYPES.map(function(s){return "<option "+(s===(t.sessionType||"Full day")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
     "<div class='field'><label>Guide phone</label><input class='input' id='et_guidephone' value='"+(t.guidePhone||"")+"' placeholder='+91 99332 02175'></div>"+
     "<div class='field'><label>Guide email</label><input class='input' id='et_guideemail' value='"+(t.guideEmail||"")+"' placeholder='info@islandexplorer.in'></div>"+
     "<div class='field full'><label>Pickup point</label><input class='input' id='et_pickup' value='"+(t.pickup||"")+"'></div>"+
@@ -4896,6 +4910,7 @@ function saveEditTour(){
   t.cap=Math.max(parseInt(document.getElementById("et_cap").value)||1,1);
   t.guide=document.getElementById("et_guide").value||"—";
   t.guideAlloted=document.getElementById("et_guideAlloted").value||"";
+  t.sessionType=document.getElementById("et_session").value;
   t.guidePhone=document.getElementById("et_guidephone").value||"";
   t.guideEmail=document.getElementById("et_guideemail").value||"";
   t.pickup=document.getElementById("et_pickup").value||"—";
@@ -5002,6 +5017,7 @@ function openTour(id){
         "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+t.startLoc+"</b></div>"+
         "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+"</div>"+
       "</div>"+
+      (function(){var f=feeFor(t);return "<div style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12.5px'><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → Lead payout <b>"+fmt(f.leadTotal)+"</b> · Assistant <b>"+fmt(f.asstTotal)+"</b></div>";})()+
       "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px'>"+
         "<button class='btn btn-sea btn-sm' onclick=\"shareTourForm('"+id+"','interest')\">Share interest form</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourForm('"+id+"','client')\">Send guest form (after advance)</button>"+
