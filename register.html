@@ -47,7 +47,7 @@ textarea{min-height:84px;resize:vertical}
 <div class="wrap">
   <div class="card">
     <div class="head">
-      <img src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:230px;max-height:96px;object-fit:contain;background:#fff;border-radius:12px;padding:8px 12px;margin:0 auto 6px;display:block" onerror="this.style.display='none';var f=document.getElementById('rf_textlogo');if(f)f.style.display='block'">
+      <img src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:230px;max-height:96px;object-fit:contain;background:#fff;border-radius:12px;padding:8px 12px;margin:0 auto 6px;display:block" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('rf_textlogo');if(f)f.style.display='block';}">
       <div id="rf_textlogo" style="display:none">
         <div class="logo"><span class="mk"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><span class="brand">Island <span class="ex">Explorer</span></span></div>
       </div>
