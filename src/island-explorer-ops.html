@@ -438,7 +438,8 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 <body>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
-    <div class="login-brand"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn">Island Explorer</div><div class="bs">Ops Console</div></div></div>
+    <img src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:260px;max-height:96px;object-fit:contain;display:block;margin:0 0 18px" onerror="this.style.display='none';var f=document.getElementById('lg_textbrand');if(f)f.style.display='flex'">
+    <div class="login-brand" id="lg_textbrand" style="display:none"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn">Island Explorer Birding Tours</div><div class="bs">Ops Console</div></div></div>
     <h2 id="lgTitle">Sign in</h2>
     <p class="lg-sub" id="lgSub">Welcome back. Sign in to your console.</p>
     <div class="lg-err" id="lgErr"></div>
@@ -455,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 38</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 39</span></div>
   </div>
 </div>
 <div class="app">
@@ -473,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 38</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 39</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -1139,7 +1140,7 @@ function pendingBookings(){return bookings.filter(function(b){return bookingPend
 function waShare(text,phone){var n=String(phone||"").replace(/\D/g,"");window.open("https://wa.me/"+n+"?text="+encodeURIComponent(text),"_blank");}
 function mailSend(to,subject,body){window.open("mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body),"_blank");}
 function paymentMsg(b){var t=tours.find(function(x){return x.id===b.tour;});return "Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(bookingPending(b))+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+").\n\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175 · info@islandexplorer.in";}
-function guestMsg(b){return "Hello "+b.guest+", thank you for your advance payment! Please complete your guest details here so we can finalise your trip:\n"+formLink("client");}
+function guestMsg(b){return "Hello "+b.guest+", please complete your guest details here so we can finalise your booking and travel arrangements:\n"+formLink("client");}
 function paymentReminder(id){var b=bookings.find(function(x){return x.id===id;});if(b)waShare(paymentMsg(b),b.phone);}
 function paymentReminderEmail(id){var b=bookings.find(function(x){return x.id===id;});if(!b)return;if(!b.email){alert("No email on this booking. Add one in the booking editor.");return;}mailSend(b.email,"Pending payment · Island Explorer Birding Tours",paymentMsg(b));}
 function sendGuestForm(id){var b=bookings.find(function(x){return x.id===id;});if(b)waShare(guestMsg(b),b.phone);}
@@ -1476,7 +1477,15 @@ function generateQuotation(){
       ${XBTN}
     </div>
     <div class="modal-body" style="padding:0">
-      <div id="quotationBody" style="padding:24px;background:#fff">
+      <div id="quotationBody" style="padding:24px;background:#fff;color:#20302b">
+        <style>
+          #quotationBody .qtbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden}
+          #quotationBody .qtbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}
+          #quotationBody .qtbl tbody tr:nth-child(even){background:#f5faf7}
+          #quotationBody .qtbl tbody td{padding:10px 12px;border-bottom:1px solid #eef4f0}
+          #quotationBody .qcard{background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f}
+          #quotationBody .qtot{background:#eaf4ee}
+        </style>
         <div style="text-align:center;border-bottom:2px solid #143a2e;padding-bottom:16px;margin-bottom:20px">
           <img src="${logoUrl}" alt="Island Explorer Birding Tours" style="max-width:280px;max-height:120px;object-fit:contain;margin:0 auto 6px" onerror="this.style.display='none';var f=document.getElementById('q_textlogo');if(f)f.style.display='block'">
           <div id="q_textlogo" style="display:none">
@@ -1499,8 +1508,8 @@ function generateQuotation(){
           </div>
         </div>
 
-        <div style="background:var(--surface-2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
-          <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--forest)">${tourName}</div>
+        <div class="qcard" style="border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c">${tourName}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><span style="color:var(--ink-soft)">Group Size:</span> <b>${pax} guests</b></div>
             <div><span style="color:var(--ink-soft)">Duration:</span> <b>${d.nights} nights</b></div>
@@ -1510,8 +1519,8 @@ function generateQuotation(){
           </div>
         </div>
 
-        <table style="width:100%;font-size:13px;margin-bottom:16px;border-collapse:collapse">
-          <thead><tr style="border-bottom:2px solid var(--line)">
+        <table class="qtbl" style="width:100%;font-size:13px;margin-bottom:16px;border-collapse:collapse">
+          <thead><tr>
             <th style="text-align:left;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Description</th>
             <th style="text-align:right;padding:8px 4px;font-size:11px;text-transform:uppercase;color:var(--ink-soft);letter-spacing:.05em">Amount</th>
           </tr></thead>
@@ -1524,8 +1533,8 @@ function generateQuotation(){
             ${row('Food (extra)', d.food)}
           </tbody>
           <tfoot>
-            <tr style="border-top:2px solid var(--line)"><td style="padding:10px 4px;font-size:14px"><b>Total tour cost (${pax} pax)</b></td><td style="padding:10px 4px;text-align:right;font-size:15px;font-weight:700">${fmt(d.total)}</td></tr>
-            <tr><td style="padding:6px 4px;font-size:14px"><b>Price per person</b></td><td style="padding:6px 4px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:var(--forest)"><b>${pricePerPerson}</b></td></tr>
+            <tr class="qtot"><td style="padding:11px 12px;font-size:14px"><b>Total tour cost (${pax} pax)</b></td><td style="padding:11px 12px;text-align:right;font-size:15px;font-weight:700">${fmt(d.total)}</td></tr>
+            <tr class="qtot"><td style="padding:9px 12px;font-size:14px"><b>Price per person</b></td><td style="padding:9px 12px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:#15563c"><b>${pricePerPerson}</b></td></tr>
           </tfoot>
         </table>
 
@@ -4318,6 +4327,7 @@ function ensureCustomer(name,opts){
   if(opts.country)c.country=opts.country;
   if(opts.email)c.email=opts.email;
   if(opts.phone)c.phone=opts.phone;
+  if(opts.pay)c.pay=opts.pay;
   c.details=Object.assign({},c.details||{},{
     email:opts.email||(c.details&&c.details.email),phone:opts.phone||(c.details&&c.details.phone),
     nationality:opts.country||(c.details&&c.details.nationality),
@@ -4334,7 +4344,9 @@ function syncBookingCustomers(b){
   if(!b)return;
   var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
   var tourName=t?tourLabel(t):(b.customTour||"");
-  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end});
+  /* mirror the booking's payment status onto the POC customer record */
+  var payMap={"Fully Paid":"Paid","Partial":"Deposit","Unpaid":"Balance due"};
+  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end,pay:payMap[bookingPaymentStatus(b)]||"Deposit"});
   if(b.members)String(b.members).split(/[,\n]/).forEach(function(nm){ensureCustomer(nm,{tourId:b.tour||"",tour:tourName,start:b.start,end:b.end});});
 }
 function viewCustomerDetail(name){

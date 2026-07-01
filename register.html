@@ -47,7 +47,10 @@ textarea{min-height:84px;resize:vertical}
 <div class="wrap">
   <div class="card">
     <div class="head">
-      <div class="logo"><span class="mk"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><span class="brand">Island <span class="ex">Explorer</span></span></div>
+      <img src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:230px;max-height:96px;object-fit:contain;background:#fff;border-radius:12px;padding:8px 12px;margin:0 auto 6px;display:block" onerror="this.style.display='none';var f=document.getElementById('rf_textlogo');if(f)f.style.display='block'">
+      <div id="rf_textlogo" style="display:none">
+        <div class="logo"><span class="mk"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><span class="brand">Island <span class="ex">Explorer</span></span></div>
+      </div>
       <div class="sub">Birding Tours · Andaman &amp; Nicobar</div>
       <h1 id="formTitle">Tour Registration</h1>
       <p id="formIntro">Tell us about your trip and we'll get back to you.</p>
@@ -85,7 +88,7 @@ const presetEnd=params.get("end")||"";
 
 const TITLES={
   interest:["Join a Tour","Register your interest and preferred dates — we'll confirm availability."],
-  client:["Guest Details","Thanks for your advance payment! Please share the details below so we can finalise your trip."],
+  client:["Guest Details","Please share the details below so we can finalise your booking and travel arrangements."],
   guide:["Guide Reservation Request","Propose dates to reserve Island Explorer's guiding services."]
 };
 document.getElementById("formTitle").textContent=TITLES[type]?TITLES[type][0]:TITLES.interest[0];
@@ -219,7 +222,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     setProgress(100,"Done ✓");
     document.getElementById("formBody").style.display="none";
     document.getElementById("success").style.display="block";
-    if(type==="client")document.getElementById("successMsg").textContent="Your guest details have been received. We'll finalise your trip and confirm by email/WhatsApp.";
+    if(type==="client")document.getElementById("successMsg").textContent="Thank you. Your details have been received — our team will confirm your booking and travel arrangements shortly.";
     if(type==="guide")document.getElementById("successMsg").textContent="Your reservation request has been sent to Island Explorer. We'll respond with availability soon.";
   }catch(err){btn.disabled=false;btn.textContent="Submit";showErr("Network error. Please try again or WhatsApp +91 99332 02175.");}
 });
