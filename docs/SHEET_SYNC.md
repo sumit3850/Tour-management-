@@ -112,6 +112,14 @@ function doPost(e){
   }
   var body = JSON.parse(e.postData.contents);          // {kind, mode, header, rows} or {kind, row, keyField}
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // --- Delete mode: remove a tab the app no longer uses (e.g. old Referral tabs) ---
+  if (body.mode === "delete") {
+    var toDelete = ss.getSheetByName(body.kind);
+    if (toDelete && ss.getSheets().length > 1) ss.deleteSheet(toDelete);
+    return ContentService.createTextOutput("ok-delete");
+  }
+
   var sheet = ss.getSheetByName(body.kind) || ss.insertSheet(body.kind);
 
   // --- Mirror mode: replace the whole tab with the console's current list ----
