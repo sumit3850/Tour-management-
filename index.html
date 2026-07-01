@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 47</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 48</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 47</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 48</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -1237,6 +1237,8 @@ function viewDashboard(){
   const upcoming=tours.filter(t=>status(t)!=="completed").length;
   const seats=tours.reduce((s,t)=>status(t)==="completed"?s:s+(t.cap-booked(t.id)),0);
   const totalParticipants=bookings.reduce((s,b)=>s+(b.party||0),0);
+  const finTotal=bookings.reduce((s,b)=>s+bookingTotalCost(b),0),finPaid=bookings.reduce((s,b)=>s+bookingDeposit(b),0),finDue=bookings.reduce((s,b)=>s+bookingPending(b),0);
+  const finCard="<div class='card card-pad' style='margin-top:16px'><div class='eyebrow'>Finance</div><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Revenue summary</div><div class='stat-strip' style='grid-template-columns:repeat(3,1fr)'><div class='s'><div class='v mono'>"+fmt(finTotal)+"</div><div class='l'>Total booked value</div></div><div class='s'><div class='v mono' style='color:var(--forest)'>"+fmt(finPaid)+"</div><div class='l'>Collected</div></div><div class='s'><div class='v mono' style='color:var(--coral)'>"+fmt(finDue)+"</div><div class='l'>Outstanding</div></div></div></div>";
   /* count the same bookings shown in the list (POC only when a POC is marked) */
   const visibleConfirmed=bookings.filter(function(b){if(b.status!=="Confirmed")return false;if(!b.tour)return true;var t=tours.find(function(x){return x.id===b.tour;});if(!t||!t.pocId)return true;return b.id===t.pocId;}).length;
   const occ=tours.filter(t=>status(t)!=="completed").slice(0,5).map(t=>({n:shortName(t).split(" ")[0],pct:Math.round(booked(t.id)/t.cap*100)}));
@@ -1265,6 +1267,7 @@ function viewDashboard(){
       qaTile("Share form","M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13","go('requests')")+
       qaTile("Google Sheet","M3 3h18v18H3zM3 9h18M9 3v18","openSheet()")+
     "</div>"+
+    finCard+
     "<div id='payPanel' style='margin-top:16px'></div>"+
     (clashes.length?"<div class='card card-pad alert-warn' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px;color:var(--coral)'>⚠ Scheduling clashes ("+clashes.length+")</div>"+clashes.slice(0,5).map(function(c){return "<div class='s' style='margin:3px 0'>"+c.who+" ("+c.what+") double-booked: <b>"+c.a.tour+"</b> &amp; <b>"+c.b.tour+"</b></div>";}).join("")+"</div>":"")+
     "<div class='kpis' style='margin-top:16px'>"+
@@ -4333,10 +4336,20 @@ function convertToLead(id){
   renderCRM();setSubStatus(id,"added",true);persistData();
   alert((s.name||"Lead")+" added to the CRM pipeline (New).");
 }
+/* Match an existing customer by name OR email OR phone, so the same person isn't
+   duplicated when they book again with slightly different details. */
+function findCustomer(name,email,phone){
+  name=(name||"").toLowerCase().trim();email=(email||"").toLowerCase().trim();phone=(""+(phone||"")).replace(/\D/g,"");
+  return customers.find(function(x){var d=x.details||{};
+    if(name&&(x.name||"").toLowerCase().trim()===name)return true;
+    if(email&&(x.email||d.email||"").toLowerCase().trim()===email)return true;
+    if(phone&&phone.length>=7&&(""+(x.phone||d.phone||"")).replace(/\D/g,"")===phone)return true;
+    return false;});
+}
 function addOrUpdateCustomer(s){
   if(!s.name)return;
   var d=s.data||{};
-  var c=customers.find(function(x){return (x.name||"").toLowerCase()===s.name.toLowerCase();});
+  var c=findCustomer(s.name,s.email,s.phone);
   if(!c){c={name:s.name,tours:0,repeat:false,pay:"Deposit"};ensureClientId(c);customers.unshift(c);}
   ensureClientId(c);
   c.type=(s.type==="interest"?"Lead":"Client");
@@ -4358,7 +4371,7 @@ function addOrUpdateCustomer(s){
 function ensureCustomer(name,opts){
   name=(name||"").trim();if(!name||name==="—")return null;
   opts=opts||{};
-  var c=customers.find(function(x){return (x.name||"").toLowerCase()===name.toLowerCase();});
+  var c=findCustomer(name,opts.email,opts.phone);
   if(!c){c={name:name,tours:1,repeat:false,pay:"Deposit",type:"Client"};ensureClientId(c);customers.unshift(c);}
   ensureClientId(c);if(!c.type)c.type="Client";
   if(opts.country)c.country=opts.country;
@@ -4475,6 +4488,7 @@ function editGuide(i){var g=externalGuides[i];if(!g)return;modalForm("Edit guide
 function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;persistData();closeModal();renderGuides();}
 function deleteGuide(i){if(!confirm("Remove this guide?"))return;externalGuides.splice(i,1);persistData();renderGuides();}
 function guideOptions(sel){return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("");}
+function rsGuidePick(){var s=document.getElementById("rs_guide");var by=document.getElementById("rs_by");if(s&&by&&!by.value)by.value=s.value;}
 function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"respond.html?rid="+rid;}
 function shareReservation(id,via){
   var r=reservations.find(function(x){return x.id===id;});if(!r)return;
@@ -4560,7 +4574,7 @@ function resForm(r){r=r||{};var list=resTourList();var known=list.indexOf(r.tour
     "<div class='field full'><label>Location</label><input class='input' id='rs_loc' value='"+(r.location||"")+"' placeholder='e.g. South Andaman'></div>"+
     "<div class='field'><label>Guide fee (₹)</label><input class='input mono' type='number' id='rs_fee' value='"+(r.guideFee||0)+"'></div>"+
     "<div class='field'><label>Referral commission (₹)</label><input class='input mono' type='number' id='rs_ref' value='"+(r.referral||0)+"'></div>"+
-    "<div class='field'><label>Guide Name</label><input class='input' id='rs_guide' value='"+(r.guideName||"")+"' placeholder='Guide to assign'></div>"+
+    "<div class='field'><label>Guide Name</label><select class='input' id='rs_guide' onchange='rsGuidePick()'>"+guideOptions(r.guideName||"")+"</select></div>"+
     "<div class='field'><label>Requested by</label><input class='input' id='rs_by' value='"+(r.by||"")+"' placeholder='Guide / agency name'></div>"+
     "<div class='field full'><label>Additional notes</label><input class='input' id='rs_notes' value='"+(r.notes||"")+"' placeholder='e.g. Food, accommodation & tickets covered'></div>"+
   "</div>";}
