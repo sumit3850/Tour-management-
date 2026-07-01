@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 39</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 40</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 39</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 40</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -678,13 +678,14 @@ function customerSheetRow(c){
   row["Tour End_Date"]=dOpt(d.endDate);
   row["Phone / WhatsApp"]=c.phone||d.phone||"";
   row["Email"]=c.email||d.email||"";
+  row["Address"]=d.address||"";
   row["Nationality"]=d.nationality||c.country||"";
   row["Date of birth"]=dOpt(d.dob);
   row["Gender"]=d.gender||"";
   row["ID type"]=d.idType||"";
   row["ID / passport number"]=d.idNo||"";
-  row["Arrival date & flight"]=d.arrival||"";
-  row["Departure date & flight"]=d.departure||"";
+  row["Arrival Flight and time"]=d.arrival||"";
+  row["Departure Flight and time"]=d.departure||"";
   row["Dietary needs"]=d.diet||"";
   row["Room preference"]=d.room||"";
   row["Emergency contact name"]=d.emergencyName||"";
@@ -695,7 +696,7 @@ function customerSheetRow(c){
 }
 /* Canonical column order for each tab (used for the full mirror-sync header). */
 var BOOKING_COLS=["Booking ID","BookingDate","Point of Contact (POC)","Tour ID","Tour","Tour Start_Date","Tour End_Date","Member (s)","Party Size","Country","Email","Phone","status","Total Tour Cost","Deposit","Pending Amount","Due Date","Payment Status","Additional Notes"];
-var CUSTOMER_COLS=["Client ID","Type","Client Name (Full name)","Tour ID","Tour Category","Tour Start_Date","Tour End_Date","Phone / WhatsApp","Email","Nationality","Date of birth","Gender","ID type","ID / passport number","Arrival date & flight","Departure date & flight","Dietary needs","Room preference","Emergency contact name","Emergency contact phone","Medical notes / mobility","Upload documents (passport / ID / photo) link"];
+var CUSTOMER_COLS=["Client ID","Type","Client Name (Full name)","Tour ID","Tour Category","Tour Start_Date","Tour End_Date","Phone / WhatsApp","Email","Address","Nationality","Date of birth","Gender","ID type","ID / passport number","Arrival Flight and time","Departure Flight and time","Dietary needs","Room preference","Emergency contact name","Emergency contact phone","Medical notes / mobility","Upload documents (passport / ID / photo) link"];
 /* Bookings that belong on the sheet: only the POC per tour (members are summarised in
    the Member(s) column, not as their own rows). Custom/unlinked bookings always show. */
 function bookingsForSheet(){
@@ -1227,6 +1228,7 @@ function viewDashboard(){
       qaTile("Cost calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z","go('calc')")+
       qaTile("Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z","go('logistics')")+
       qaTile("Share form","M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13","go('requests')")+
+      qaTile("Google Sheet","M3 3h18v18H3zM3 9h18M9 3v18","openSheet()")+
     "</div>"+
     "<div id='payPanel' style='margin-top:16px'></div>"+
     (clashes.length?"<div class='card card-pad alert-warn' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px;color:var(--coral)'>⚠ Scheduling clashes ("+clashes.length+")</div>"+clashes.slice(0,5).map(function(c){return "<div class='s' style='margin:3px 0'>"+c.who+" ("+c.what+") double-booked: <b>"+c.a.tour+"</b> &amp; <b>"+c.b.tour+"</b></div>";}).join("")+"</div>":"")+
@@ -4310,7 +4312,7 @@ function addOrUpdateCustomer(s){
   c.pref=d.diet||d.message||c.pref||"—";
   c.details=Object.assign({},c.details||{},{
     email:s.email||(c.details&&c.details.email),phone:s.phone||(c.details&&c.details.phone),nationality:s.country||(c.details&&c.details.nationality),
-    gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
+    address:d.address||(c.details&&c.details.address)||"",gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
     documents:d.documents,tourId:d.tourId||(c.details&&c.details.tourId)||"",tourCode:d.tourCode||(c.details&&c.details.tourCode)||"",lastTour:s.tour||"",startDate:s.start_date||(c.details&&c.details.startDate)||"",endDate:s.end_date||(c.details&&c.details.endDate)||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
   });
@@ -4771,6 +4773,10 @@ function openCreateTour(){
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='nt_cap' value='8'></div>"+
     "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Kumar'></div>"+
     "<div class='field full'><label>Pickup point</label><input class='input' id='nt_pickup' placeholder='e.g. Port Blair'></div>"+
+    "<div class='field'><label>Total tour cost (₹)</label><input class='input mono' type='number' id='nt_cost' value='0' oninput='ntPend()'></div>"+
+    "<div class='field'><label>Deposit received (₹)</label><input class='input mono' type='number' id='nt_deposit' value='0' oninput='ntPend()'></div>"+
+    "<div class='field'><label>Pending (₹)</label><input class='input mono' id='nt_pending' readonly value='0' style='background:var(--surface-2)'></div>"+
+    "<div class='field'><label>Due date</label><input class='input' type='date' id='nt_due'></div>"+
   "</div>","saveTour","Create tour");
 }
 function saveTour(){
@@ -4779,11 +4785,13 @@ function saveTour(){
   if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
   var nt={id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
-    guide:document.getElementById("nt_guide").value||"—",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—"};
+    guide:document.getElementById("nt_guide").value||"—",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
+    tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||""};
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
   closeModal();renderTours();renderCalendar();
   alert("Tour created. Tour ID: "+tourCode(nt));
 }
+function ntPend(){var c=parseFloat((document.getElementById("nt_cost")||{}).value)||0,d=parseFloat((document.getElementById("nt_deposit")||{}).value)||0,p=document.getElementById("nt_pending");if(p)p.value=Math.max(c-d,0);}
 function editTour(id){
   const t=tours.find(x=>x.id===id);if(!t)return;
   const catOpts=Object.entries(CATS).map(([k,v])=>"<option value='"+k+"' "+(k===t.cat?"selected":"")+">"+v+"</option>").join("");
@@ -4847,7 +4855,9 @@ function openAddBooking(tourId){
 }
 function nbTourPick(){
   var t=tours.find(function(x){return x.id===document.getElementById("nb_tour").value;});
-  if(t){document.getElementById("nb_start").value=t.start||"";document.getElementById("nb_end").value=t.end||"";}
+  if(t){document.getElementById("nb_start").value=t.start||"";document.getElementById("nb_end").value=t.end||"";
+    if(t.tourDeposit)document.getElementById("nb_amount").value=t.tourDeposit;
+    if(t.due)document.getElementById("nb_due").value=t.due;}
 }
 function saveBooking(){
   const guest=document.getElementById("nb_guest").value.trim();
@@ -4860,6 +4870,8 @@ function saveBooking(){
   var nb={id:"B"+Date.now(),bookingDate:dShort(new Date()),tour:custom?"":tour,customTour:custom,guest:guest,members:document.getElementById("nb_members").value||"",party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
     country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:document.getElementById("nb_status").value,pay:document.getElementById("nb_pay").value,
     deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:document.getElementById("nb_due").value||""};
+  var picked=tours.find(function(x){return x.id===tour;});
+  if(picked&&picked.tourCost)nb.totalOverride=picked.tourCost; /* inherit tour's total cost */
   bookings.push(nb);
   syncBookingCustomers(nb);
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(nb);

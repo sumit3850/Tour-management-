@@ -157,12 +157,13 @@ if(type==="guide"){
   html+=rowOf(inp("c_start","Tour start date",{type:"date",val:presetStart}),inp("c_end","Tour end date",{type:"date",val:presetEnd}));
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
+  html+=inp("c_address","Address",{type:"textarea",ph:"Full postal address"});
   html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
   html+=inp("c_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID","Other"]}),inp("c_idno","ID / passport number",{req:1}));
   html+=inp("c_idexp","ID / passport expiry",{type:"date"});
   html+=docField("c_docs","Upload documents (passport / ID / photo)");
-  html+=rowOf(inp("c_arrival","Arrival date & flight",{ph:"e.g. 18 Jun, 6E-237"}),inp("c_departure","Departure date & flight",{}));
+  html+=rowOf(inp("c_arrival","Arrival Flight and time",{ph:"e.g. 6E-237, 18 Jun 14:30"}),inp("c_departure","Departure Flight and time",{ph:"e.g. 6E-238, 25 Jun 09:10"}));
   html+=rowOf(inp("c_diet","Dietary needs",{ph:"Veg / non-veg / allergies"}),inp("c_room","Room preference",{select:["Twin share","Double","Single (supplement)","No preference","Other"]}));
   html+=rowOf(inp("c_emname","Emergency contact name",{}),inp("c_emphone","Emergency contact phone",{type:"tel"}));
   html+=inp("c_med","Medical notes / mobility",{type:"textarea",ph:"Anything we should know to keep you safe & comfortable"});
@@ -199,7 +200,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
     rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;
-    rec.data={gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
+    rec.data={address:val("c_address"),gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
     rec.tour=val("i_tour");rec.start_date=val("i_start")||null;rec.end_date=val("i_end")||null;
