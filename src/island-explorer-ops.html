@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 44</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 45</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 44</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 45</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -4799,6 +4799,7 @@ function openCreateTour(){
     "<div class='field'><label>End date</label><input class='input' type='date' id='nt_end' value='2026-07-05'></div>"+
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='nt_cap' value='8'></div>"+
     "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Kumar'></div>"+
+    "<div class='field'><label>Guide alloted</label><input class='input' id='nt_guideAlloted' placeholder='Assistant / allotted guide'></div>"+
     "<div class='field full'><label>Pickup point</label><input class='input' id='nt_pickup' placeholder='e.g. Port Blair'></div>"+
     "<div class='field'><label>Total tour cost (₹)</label><input class='input mono' type='number' id='nt_cost' value='0' oninput='ntPend()'></div>"+
     "<div class='field'><label>Deposit received (₹)</label><input class='input mono' type='number' id='nt_deposit' value='0' oninput='ntPend()'></div>"+
@@ -4812,7 +4813,7 @@ function saveTour(){
   if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
   var nt={id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
-    guide:document.getElementById("nt_guide").value||"—",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
+    guide:document.getElementById("nt_guide").value||"—",guideAlloted:document.getElementById("nt_guideAlloted").value||"",pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
     tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||""};
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
   closeModal();renderTours();renderCalendar();
@@ -4831,6 +4832,7 @@ function editTour(id){
     "<div class='field'><label>End date</label><input class='input' type='date' id='et_end' value='"+(t.end||"")+"'></div>"+
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='et_cap' value='"+t.cap+"'></div>"+
     "<div class='field'><label>Team leader / guide</label><input class='input' id='et_guide' value='"+(t.guide||"")+"'></div>"+
+    "<div class='field'><label>Guide alloted</label><input class='input' id='et_guideAlloted' value='"+(t.guideAlloted||"").replace(/'/g,"&#39;")+"' placeholder='Assistant / allotted guide'></div>"+
     "<div class='field'><label>Guide phone</label><input class='input' id='et_guidephone' value='"+(t.guidePhone||"")+"' placeholder='+91 99332 02175'></div>"+
     "<div class='field'><label>Guide email</label><input class='input' id='et_guideemail' value='"+(t.guideEmail||"")+"' placeholder='info@islandexplorer.in'></div>"+
     "<div class='field full'><label>Pickup point</label><input class='input' id='et_pickup' value='"+(t.pickup||"")+"'></div>"+
@@ -4849,6 +4851,7 @@ function saveEditTour(){
   t.start=start;t.end=end;
   t.cap=Math.max(parseInt(document.getElementById("et_cap").value)||1,1);
   t.guide=document.getElementById("et_guide").value||"—";
+  t.guideAlloted=document.getElementById("et_guideAlloted").value||"";
   t.guidePhone=document.getElementById("et_guidephone").value||"";
   t.guideEmail=document.getElementById("et_guideemail").value||"";
   t.pickup=document.getElementById("et_pickup").value||"—";
