@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 41</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 42</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 41</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 42</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -711,10 +711,26 @@ function bookingsForSheet(){
    console — deletions vanish, edits update, and stale/old-format rows are wiped. */
 var _sheetSyncTimer=null;
 function scheduleSheetSync(){if(!sheetHook())return;clearTimeout(_sheetSyncTimer);_sheetSyncTimer=setTimeout(syncSheets,1800);}
+/* Roster tab (one row per tour — no Remarks column) and Referral tab (from the
+   reservation pipeline: guide fee + referral commission). */
+var ROSTER_COLS=["Tour ID","Tour","Tour Start_Date","Tour End_Date","Guide","Pax","Capacity","Status"];
+function rosterSheetRow(t){return {"Tour ID":tourCode(t),"Tour":tourLabel(t),"Tour Start_Date":dOpt(t.start),"Tour End_Date":dOpt(t.end),"Guide":t.guide||"","Pax":booked(t.id),"Capacity":t.cap||"","Status":status(t)};}
+var REFERRAL_COLS=["Date","Tour","Guide Name","Guide Fee","Referral Commission","Stage","Responded By"];
+/* External Bird Guide / Naturalist fee structure (Oct 2026 – Apr 2027) shown on the dashboard. */
+var GUIDE_FEE_ROWS=[["Session Tour",1000,500,1000,500,500,300,1500,800,1500,800],["South Andaman",1200,500,1500,700,500,300,1700,800,2000,1000],["Little Andaman",1500,700,2000,900,500,300,2000,1000,2500,1200],["Great Nicobar",1500,1000,2500,1200,500,300,2000,1300,3000,1500]];
+function feeCard(){
+  var heads=["Location","Half·Lead","Half·Asst","Full·Lead","Full·Asst","Night·Lead","Night·Asst","H+N·Lead","H+N·Asst","F+N·Lead","F+N·Asst"];
+  var th=heads.map(function(h,i){return "<th style='padding:6px 8px;font-size:10.5px;text-align:"+(i?"right":"left")+";white-space:nowrap;color:var(--ink-soft);border-bottom:1px solid var(--line)'>"+h+"</th>";}).join("");
+  var tr=GUIDE_FEE_ROWS.map(function(r){return "<tr>"+r.map(function(c,i){return "<td style='padding:6px 8px;font-size:12px;white-space:nowrap;border-bottom:1px solid var(--line-soft);"+(i?"text-align:right;font-variant-numeric:tabular-nums":"font-weight:600")+"'>"+(i?fmt(c):c)+"</td>";}).join("")+"</tr>";}).join("");
+  return "<div class='card card-pad' style='margin-top:16px;overflow:auto'><div class='eyebrow'>Reference</div><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Bird Guide / Naturalist fee · Oct 2026 – Apr 2027</div><table style='width:100%;border-collapse:collapse;min-width:760px'><thead><tr>"+th+"</tr></thead><tbody>"+tr+"</tbody></table><div style='font-size:11px;color:var(--ink-soft);margin-top:6px'>Half = Half-day (5–6h) · Full = Full-day (7–8h) · Night (2–3h) · H+N / F+N = combos · Lead vs Assistant. Rates per guide per day (₹).</div></div>";
+}
+function referralSheetRow(r){return {"Date":dOpt(r.date),"Tour":r.tour||"","Guide Name":r.guideName||r.respondedBy||"","Guide Fee":r.guideFee||0,"Referral Commission":r.referral||0,"Stage":r.stage||"","Responded By":r.respondedBy||""};}
 function syncSheets(){
   if(!sheetHook())return;
   sheetReplace("Booking",BOOKING_COLS,bookingsForSheet());
   sheetReplace("Customer Database",CUSTOMER_COLS,(customers||[]).map(customerSheetRow));
+  sheetReplace("Roster",ROSTER_COLS,(tours||[]).map(rosterSheetRow));
+  sheetReplace("Referral",REFERRAL_COLS,(reservations||[]).map(referralSheetRow));
 }
 function sheetReplace(tab,header,rows){
   var url=sheetHook();if(!url)return;
@@ -1264,6 +1280,7 @@ function viewDashboard(){
         vehicles.map(v=>"<div class='list-row'><div class='meta'><div class='t'>"+v.name+"</div><div class='s'>"+v.driver+" · "+v.cap+" seats</div></div><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></div>").join("")+
       "</div>"+
     "</div>"+
+    feeCard()+
   "</section>";
 }
 
