@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 55</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 56</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 55</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 56</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -762,7 +762,12 @@ function syncSheets(){
   sheetReplace("Customer Database",CUSTOMER_COLS,(customers||[]).map(customerSheetRow));
   sheetReplace("Roster",ROSTER_COLS,(tours||[]).map(rosterSheetRow));
   sheetReplace("Logistics & Operations",OPS_COLS,(ops||[]).map(opSheetRow));
-  sheetReplace("External Guide/Referral",REFERRAL_COLS,(reservations||[]).map(referralSheetRow));
+  sheetReplace("Profit Calculator",PROFIT_COLS,(tours||[]).map(profitSheetRow));
+  sheetDeleteTab("External Guide/Referral");sheetDeleteTab("Referral");
+}
+function sheetDeleteTab(tab){
+  var url=sheetHook();if(!url)return;
+  try{fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({kind:tab,mode:"delete",at:new Date().toISOString()})});}catch(e){}
 }
 function sheetReplace(tab,header,rows){
   var url=sheetHook();if(!url)return;
@@ -960,6 +965,7 @@ const NAV=[
   ["bookings","Bookings","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
+  ["profit","Profit Calculator","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"],
   ["logistics","Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["requests","Requests / Forms","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
@@ -971,7 +977,7 @@ const NAV=[
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],fees:["Sales & Ops","Guide / Naturalist Fees"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Requests & Form Links"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],calc:["Sales & Ops","Tour Cost Calculator"],profit:["Sales & Ops","Profit Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Requests & Form Links"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -1053,23 +1059,40 @@ function renderAccCalendar(){
 function openAssignStay(id){
   var ab=accBookings.find(function(x){return x.id===id;})||{};
   var accOpts=accommodations.map(function(a){return "<option value='"+a.id+"' "+(a.id===ab.accId?"selected":"")+">"+a.name+"</option>";}).join("");
-  var tourOpts="<option value=''>—</option>"+tours.map(function(t){return "<option "+(ab.tour===shortName(t)?"selected":"")+">"+shortName(t)+"</option>";}).join("");
+  var tourOpts="<option value=''>—</option>"+tours.map(function(t){return "<option value='"+t.id+"' "+(ab.tourId===t.id?"selected":"")+">"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"<option value='custom' "+(ab.tourId==="custom"?"selected":"")+">Custom</option>";
   modalForm(id?"Edit accommodation booking":"Assign accommodation",id?"Update":"Add to calendar","<div class='form-grid'>"+
     "<div class='field full'><label>Accommodation</label><select class='input' id='ab_acc'>"+accOpts+"</select></div>"+
-    "<div class='field full'><label>Tour</label><select class='input' id='ab_tour'>"+tourOpts+"</select></div>"+
+    "<div class='field full'><label>Tour</label><select class='input' id='ab_tour' onchange='abTourPick()'>"+tourOpts+"</select></div>"+
+    "<div class='field full' id='ab_customwrap' style='display:"+(ab.tourId==="custom"?"block":"none")+"'><label>Custom tour name</label><input class='input' id='ab_customname' value='"+(ab.customTour||"")+"'></div>"+
     "<div class='field'><label>Guest name (POC)</label><input class='input' id='ab_poc' value='"+(ab.poc||"")+"'></div>"+
     "<div class='field'><label>No. of guests</label><input class='input mono' type='number' id='ab_guests' value='"+(ab.guests||2)+"'></div>"+
     "<div class='field'><label>Check-in</label><input class='input' type='date' id='ab_in' value='"+(ab.checkIn||"")+"'></div>"+
     "<div class='field'><label>Check-out</label><input class='input' type='date' id='ab_out' value='"+(ab.checkOut||"")+"'></div>"+
+    "<div class='field full'><label>Guide leading this tour</label><input class='input' id='ab_guide' value='"+(ab.guide||"")+"' readonly style='background:var(--surface-2)'></div>"+
     "<div class='field full'><label>Status</label><select class='input' id='ab_status'>"+["Held","Confirmed","Cancelled"].map(function(s){return "<option "+(s===(ab.status||"Held")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
   "</div>","saveAssignStay","Save");
   document.getElementById("modal").dataset.abid=id||"";
+}
+function abTourPick(){
+  var sel=document.getElementById("ab_tour");if(!sel)return;
+  var cw=document.getElementById("ab_customwrap");if(cw)cw.style.display=(sel.value==="custom")?"block":"none";
+  if(sel.value==="custom"||!sel.value)return;
+  var t=tours.find(function(x){return x.id===sel.value;});if(!t)return;
+  var ci=document.getElementById("ab_in"),co=document.getElementById("ab_out"),g=document.getElementById("ab_guests"),p=document.getElementById("ab_poc"),gd=document.getElementById("ab_guide");
+  if(ci)ci.value=t.start||"";if(co)co.value=t.end||"";
+  if(g)g.value=booked(t.id)||g.value;
+  var pb=t.pocId?bookings.find(function(b){return b.id===t.pocId;}):null;
+  if(p&&pb)p.value=pb.guest||p.value;
+  if(gd)gd.value=t.guide||"—";
 }
 function saveAssignStay(){
   var id=document.getElementById("modal").dataset.abid;
   var ci=document.getElementById("ab_in").value,co=document.getElementById("ab_out").value;
   if(!ci||!co||co<ci){alert("Enter valid check-in / check-out dates.");return;}
-  var rec={accId:document.getElementById("ab_acc").value,tour:document.getElementById("ab_tour").value,poc:document.getElementById("ab_poc").value,guests:parseInt(document.getElementById("ab_guests").value)||1,checkIn:ci,checkOut:co,status:document.getElementById("ab_status").value};
+  var tourId=document.getElementById("ab_tour").value;
+  var t=(tourId&&tourId!=="custom")?tours.find(function(x){return x.id===tourId;}):null;
+  var customName=(tourId==="custom")?document.getElementById("ab_customname").value:"";
+  var rec={accId:document.getElementById("ab_acc").value,tourId:tourId,tour:t?tourLabel(t):customName,customTour:customName,poc:document.getElementById("ab_poc").value,guests:parseInt(document.getElementById("ab_guests").value)||1,checkIn:ci,checkOut:co,status:document.getElementById("ab_status").value};
   if(id){var ab=accBookings.find(function(x){return x.id===id;});if(ab)Object.assign(ab,rec);}
   else{rec.id="AB"+Date.now();accBookings.unshift(rec);}
   closeModal();renderAccCalendar();
@@ -1177,6 +1200,7 @@ function renderView(v){
   else if(v==="logistics")renderLog();
   else if(v==="social")renderSocial();
   else if(v==="calc")calc();
+  else if(v==="profit")renderProfitCalc();
   else if(v==="dashboard")refreshDashboard();
 }
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
@@ -1287,6 +1311,7 @@ function viewDashboard(){
       qaTile("Share form","M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13","go('requests')")+
       qaTile("Google Sheet","M3 3h18v18H3zM3 9h18M9 3v18","openSheet()")+
     "</div>"+
+    profitBriefCard()+
     "<div id='payPanel' style='margin-top:16px'></div>"+
     (clashes.length?"<div class='card card-pad alert-warn' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px;color:var(--coral)'>⚠ Scheduling clashes ("+clashes.length+")</div>"+clashes.slice(0,5).map(function(c){return "<div class='s' style='margin:3px 0'>"+c.who+" ("+c.what+") double-booked: <b>"+c.a.tour+"</b> &amp; <b>"+c.b.tour+"</b></div>";}).join("")+"</div>":"")+
     "<div class='kpis' style='margin-top:16px'>"+
@@ -4178,8 +4203,10 @@ function opCard(o){
     "<div class='op-date'>"+(o.tourId?"<span class='mono'>"+o.tourId+"</span> · ":"")+o.dateDisplay+" · "+o.pax+" pax</div>"+
     (poc?"<div style='font-size:12px;margin:4px 0'><b>POC:</b> "+poc+"</div>":"")+
     "<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'><span class='mono'>"+o.start+"</span> → <span class='mono'>"+o.end+"</span></div>"+
-    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup",o.pickup)+row("Stay",o.stay)+row("Profit",fmt(opProfit(o)))+"</div>"+
-    "<div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div></div>";
+    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup",o.pickup)+row("Stay",o.stay)+"</div>"+
+    "<div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div>"+
+    (o.veh&&o.veh!=="—"?"<button class='edit-btn' style='width:100%;margin-top:6px' onclick=\"openDriverLog('"+o.veh.replace(/'/g,"&#39;")+"','"+(o.pickup||"").replace(/'/g,"&#39;")+"')\">Log daily activity for this vehicle</button>":"")+
+  "</div>";
 }
 function renderLog(t="Operations Board"){
   const b=document.getElementById("logBody");if(!b)return;
@@ -4228,7 +4255,7 @@ function renderLog(t="Operations Board"){
   }
   persistData();
 }
-function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+(o.end||"")+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle available</label><select class='input' id='eo_veh'>"+vehicleOptions(o.veh)+"</select></div><div class='field'><label>Driver available</label><select class='input' id='eo_driver'>"+driverOptions(o.driver)+"</select></div><div class='field'><label>Guide</label><input class='input' id='eo_guide' value='"+o.guide+"'></div><div class='field'><label>Status</label><select class='input' id='eo_status'>"+["Scheduled","In progress","Completed","Cancelled"].map(function(s){return "<option "+(s===(o.status||"Scheduled")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div><div class='field full'><label>Pickup</label><input class='input' id='eo_pickup' value='"+o.pickup+"'></div>"+
+function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+(o.end||"")+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle available</label><select class='input' id='eo_veh'>"+vehicleOptions(o.veh)+"</select></div><div class='field'><label>Driver available</label><select class='input' id='eo_driver'>"+driverOptions(o.driver)+"</select></div><div class='field'><label>Guide</label><input class='input' id='eo_guide' list='eo_guidelist' value='"+o.guide+"'><datalist id='eo_guidelist'>"+externalGuides.map(function(g){return "<option value='"+g.name+"'>";}).join("")+"</datalist></div><div class='field'><label>Status</label><select class='input' id='eo_status'>"+["Scheduled","In progress","Completed","Cancelled"].map(function(s){return "<option "+(s===(o.status||"Scheduled")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div><div class='field full'><label>Pickup</label><input class='input' id='eo_pickup' value='"+o.pickup+"'></div>"+
   "<div class='field'><label>Vehicle charge (₹)</label><input class='input mono' type='number' id='eo_vc' value='"+(o.vehCharge||0)+"'></div>"+
   "<div class='field'><label>Guide charge (₹)</label><input class='input mono' type='number' id='eo_gc' value='"+(o.guideCharge||0)+"'></div>"+
   "<div class='field'><label>Accommodation charge (₹)</label><input class='input mono' type='number' id='eo_ac' value='"+(o.accomCharge||0)+"'></div>"+
@@ -4238,7 +4265,7 @@ function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;modalForm("Edit 
   "<div class='field full'><label>Revenue (from bookings) "+fmt(opRevenue(o))+" · Profit updates on save</label><div style='font-size:12px;color:var(--ink-soft)'>Total charges + profit are auto-computed.</div></div></div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
 function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=document.getElementById("eo_driver").value;o.guide=document.getElementById("eo_guide").value;o.status=document.getElementById("eo_status").value;o.pickup=document.getElementById("eo_pickup").value;o.vehCharge=parseFloat(document.getElementById("eo_vc").value)||0;o.guideCharge=parseFloat(document.getElementById("eo_gc").value)||0;o.accomCharge=parseFloat(document.getElementById("eo_ac").value)||0;o.ticketCharge=parseFloat(document.getElementById("eo_tc").value)||0;o.foodCharge=parseFloat(document.getElementById("eo_fc").value)||0;o.extraCharge=parseFloat(document.getElementById("eo_ec").value)||0;closeModal();renderLog("Operations Board");}
 function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id);renderLog("Operations Board");}
-function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Date</label><input class='input' id='no_date' value='"+todayISO.slice(5,7)+" "+todayISO.slice(8,10)+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle available</label><select class='input' id='no_veh'>"+vehicleOptions("")+"</select></div><div class='field'><label>Driver available</label><select class='input' id='no_driver'>"+driverOptions("")+"</select></div><div class='field'><label>Guide</label><input class='input' id='no_guide' value='Sumit'></div><div class='field full'><label>Pickup</label><input class='input' id='no_pickup' placeholder='e.g. Port Blair 04:30'></div></div>","saveNewOp","Add operation");}
+function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Date</label><input class='input' id='no_date' value='"+todayISO.slice(5,7)+" "+todayISO.slice(8,10)+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle available</label><select class='input' id='no_veh'>"+vehicleOptions("")+"</select></div><div class='field'><label>Driver available</label><select class='input' id='no_driver'>"+driverOptions("")+"</select></div><div class='field'><label>Guide</label><input class='input' id='no_guide' list='no_guidelist' value='Sumit'><datalist id='no_guidelist'>"+externalGuides.map(function(g){return "<option value='"+g.name+"'>";}).join("")+"</datalist></div><div class='field full'><label>Pickup</label><input class='input' id='no_pickup' placeholder='e.g. Port Blair 04:30'></div></div>","saveNewOp","Add operation");}
 function saveNewOp(){var dt=document.getElementById("no_date").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:document.getElementById("no_driver").value||"—",guide:document.getElementById("no_guide").value||"—",pickup:document.getElementById("no_pickup").value||"—",birding:"—",stay:"—",status:"Scheduled"});closeModal();renderLog("Operations Board");}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
 function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;closeModal();renderLog("Vehicles");}
@@ -4611,6 +4638,56 @@ function opFromTour(t){
 function opCharges(o){return (+o.vehCharge||0)+(+o.guideCharge||0)+(+o.accomCharge||0)+(+o.ticketCharge||0)+(+o.foodCharge||0)+(+o.extraCharge||0);}
 function opRevenue(o){var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):(tours||[]).find(function(x){return tourCode(x)===o.tourId||tourLabel(x)===o.tour;});return t?bookings.filter(function(b){return b.tour===t.id;}).reduce(function(s,b){return s+bookingTotalCost(b);},0):0;}
 function opProfit(o){return opRevenue(o)-opCharges(o);}
+/* ===== PROFIT CALCULATOR — per-tour revenue, expenses by category, profit ===== */
+var PROFIT_EXP_FIELDS=[["accom","Accommodation"],["travel","Travel and Logistics"],["food","Food"],["entry","Entry tickets"],["ship","Ship tickets"],["guide","External guide charges"],["referral","Referral amount"]];
+function tourRevenue(t){return t?bookings.filter(function(b){return b.tour===t.id;}).reduce(function(s,b){return s+bookingTotalCost(b);},0):0;}
+function tourExpTotal(t){var e=(t&&t.profitExp)||{};return PROFIT_EXP_FIELDS.reduce(function(s,f){return s+(+e[f[0]]||0);},0);}
+function tourProfit(t){return tourRevenue(t)-tourExpTotal(t);}
+var PROFIT_COLS=["Tour ID","Tour","Total Tour Cost"].concat(PROFIT_EXP_FIELDS.map(function(f){return f[1];})).concat(["Total Expenses","Profit"]);
+function profitSheetRow(t){var e=(t.profitExp)||{};var row={"Tour ID":tourCode(t),"Tour":tourLabel(t),"Total Tour Cost":tourRevenue(t)};PROFIT_EXP_FIELDS.forEach(function(f){row[f[1]]=+e[f[0]]||0;});row["Total Expenses"]=tourExpTotal(t);row["Profit"]=tourProfit(t);return row;}
+function viewProfitCalc(){
+  if(!tours.length)return "<section class='view' id='v-profit'><div class='empty'>Create a tour first to use the profit calculator.</div></section>";
+  return "<section class='view' id='v-profit'>"+
+    "<div class='section-head'><div><div class='eyebrow'>Finance</div><div class='h-sec'>Profit Calculator</div></div>"+
+      "<select class='input' style='width:auto' id='pc_tour' onchange='renderProfitCalc()'>"+tours.map(function(t){return "<option value='"+t.id+"'>"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"</select>"+
+    "</div>"+
+    "<div id='pcBody'></div>"+
+  "</section>";
+}
+function renderProfitCalc(){
+  var el=document.getElementById("pcBody");if(!el)return;
+  var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:tours[0].id);});if(!t)return;
+  var e=t.profitExp||{};
+  el.innerHTML="<div class='card card-pad'>"+
+    "<div class='kpis'>"+kpi("Total Tour Cost",fmt(tourRevenue(t)),"from bookings","","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+"</div>"+
+    "<div class='form-grid' style='margin-top:14px'>"+PROFIT_EXP_FIELDS.map(function(f){return "<div class='field'><label>"+f[1]+" (₹)</label><input class='input mono' type='number' id='pc_"+f[0]+"' value='"+(e[f[0]]||0)+"' oninput='pcRecalc()'></div>";}).join("")+"</div>"+
+    "<div class='stat-strip' style='grid-template-columns:repeat(3,1fr);margin-top:14px'>"+
+      "<div class='s'><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='l'>Total Tour Cost</div></div>"+
+      "<div class='s'><div class='v mono' style='color:var(--coral)' id='pc_totexp'>"+fmt(tourExpTotal(t))+"</div><div class='l'>Total Expenses</div></div>"+
+      "<div class='s'><div class='v mono' style='color:var(--forest)' id='pc_profit'>"+fmt(tourProfit(t))+"</div><div class='l'>Profit</div></div>"+
+    "</div>"+
+    "<button class='btn btn-primary btn-sm' style='margin-top:12px' onclick='saveProfitCalc()'>Save</button>"+
+  "</div>";
+}
+function pcRecalc(){
+  var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:"");});if(!t)return;
+  var tot=0;PROFIT_EXP_FIELDS.forEach(function(f){tot+=parseFloat((document.getElementById("pc_"+f[0])||{}).value)||0;});
+  var cost=tourRevenue(t);
+  var ce=document.getElementById("pc_cost"),te=document.getElementById("pc_totexp"),pe=document.getElementById("pc_profit");
+  if(ce)ce.textContent=fmt(cost);if(te)te.textContent=fmt(tot);if(pe)pe.textContent=fmt(cost-tot);
+}
+function saveProfitCalc(){
+  var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:"");});if(!t)return;
+  var e={};PROFIT_EXP_FIELDS.forEach(function(f){e[f[0]]=parseFloat((document.getElementById("pc_"+f[0])||{}).value)||0;});
+  t.profitExp=e;persistData();alert("Profit saved for "+tourCode(t)+".");
+}
+/* Dashboard brief: Tour ID, tour amount, profit for every tour. */
+function profitBriefCard(){
+  if(!tours.length)return "";
+  var rows=tours.map(function(t){return "<div class='list-row'><div class='meta'><div class='t'>"+tourCode(t)+" · "+tourLabel(t)+"</div></div><span class='mono' style='margin-right:14px'>"+fmt(tourRevenue(t))+"</span><b class='mono' style='color:"+(tourProfit(t)>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(tourProfit(t))+"</b></div>";}).join("");
+  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Finance</div><div class='h-sec' style='font-size:15px'>Profit by tour</div></div><button class='btn btn-ghost btn-sm' onclick=\"go('profit')\">Open calculator</button></div>"+rows+"</div>";
+}
+function setGuideRole(id,role){var t=tours.find(function(x){return x.id===id;});if(!t)return;t.guideRole=role;persistData();openTour(id);}
 /* Share a Guide-Service reservation link for a specific tour (creates/reuses one). */
 function shareTourReservation(id){
   var t=tours.find(function(x){return x.id===id;});if(!t)return;
@@ -5121,7 +5198,10 @@ function openTour(id){
         "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+t.startLoc+"</b></div>"+
         "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+"</div>"+
       "</div>"+
-      (function(){var f=feeFor(t);return "<div style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12.5px'><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → Lead payout <b>"+fmt(f.leadTotal)+"</b> · Assistant <b>"+fmt(f.asstTotal)+"</b></div>";})()+
+      (function(){var f=feeFor(t);var role=t.guideRole||"Lead";var payout=role==="Lead"?f.leadTotal:f.asstTotal;return "<div style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
+        "<div><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → <b>"+role+" payout "+fmt(payout)+"</b></div>"+
+        "<div style='display:flex;gap:6px;align-items:center'><select class='input' style='width:auto;padding:5px 8px;font-size:12px' onchange=\"setGuideRole('"+id+"',this.value)\"><option "+(role==="Lead"?"selected":"")+">Lead</option><option "+(role==="Assistant"?"selected":"")+">Assistant</option></select><button class='btn btn-ghost btn-sm' onclick=\"editTour('"+id+"')\">Edit</button></div>"+
+      "</div>";})()+
       "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px'>"+
         "<button class='btn btn-sea btn-sm' onclick=\"shareTourForm('"+id+"','interest')\">Share interest form</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourForm('"+id+"','client')\">Send guest form (after advance)</button>"+
@@ -5137,8 +5217,8 @@ function openTour(id){
 }
 
 /* ===== DRIVER LOG ===== */
-function openDriverLog(){
-  const vehOpts=vehicles.map(v=>"<option value='"+v.name+"' data-d='"+v.driver+"'>"+v.name+"</option>").join("");
+function openDriverLog(preVeh,preLoc){
+  const vehOpts=vehicles.map(v=>"<option value='"+v.name+"' "+(preVeh&&v.name===preVeh?"selected":"")+" data-d='"+v.driver+"'>"+v.name+"</option>").join("");
   document.getElementById("modal").innerHTML=
     "<div class='modal-head'><div><span class='eyebrow'>Driver entry</span><h2 class='display' style='font-size:21px;margin-top:6px'>Log today's trip</h2></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
@@ -5151,13 +5231,13 @@ function openDriverLog(){
         "<div class='field'><label>End time</label><div class='time-row'><input class='input' type='time' id='dl_end_t' oninput='updateTripTime()'><button class='now-btn' data-action='setNow' data-arg='dl_end_t'>NOW</button></div></div>"+
         "<div class='field'><label>Start km</label><input class='input mono' type='number' id='dl_start' placeholder='0' oninput='recalcKm()'></div>"+
         "<div class='field'><label>End km</label><input class='input mono' type='number' id='dl_end' placeholder='0' oninput='recalcKm()'></div>"+
-        "<div class='field full'><label>Location / route</label><input class='input' id='dl_loc' placeholder='e.g. Port Blair → Chidiya Tapu → Port Blair'></div>"+
+        "<div class='field full'><label>Location / route</label><input class='input' id='dl_loc' value='"+(preLoc||"")+"' placeholder='e.g. Port Blair → Chidiya Tapu → Port Blair'></div>"+
       "</div>"+
       "<div class='time-chip'><svg width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='#3f5249' stroke-width='2'><circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2' stroke-linecap='round'/></svg>Duration<b id='dl_dur'>—</b></div>"+
       "<div class='kmline'><span class='lab'>Total distance</span><span class='big' id='dl_total'>0 km</span></div>"+
     "</div>"+
     "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Cancel</button><button class='btn btn-primary' onclick='saveDriverLog()'>Save trip</button></div>";
-  openScrim();
+  openScrim();if(preVeh)syncDriver();
 }
 function syncDriver(){const sel=document.getElementById("dl_veh");const d=sel.options[sel.selectedIndex].dataset.d;const f=document.getElementById("dl_driver");if(f&&d)f.value=d;}
 function setNow(id){const d=new Date();document.getElementById(id).value=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");updateTripTime();}
@@ -5211,9 +5291,9 @@ function boot(){
   dedupeBookings();
   ensureTourCodes();
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewProfitCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   go("dashboard");
-  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();renderReservations();
+  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderProfitCalc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();renderReservations();
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();
