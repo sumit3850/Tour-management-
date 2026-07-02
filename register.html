@@ -104,6 +104,13 @@ function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*
   return "<div class='field'><label>"+label+req+"</label>"+ctrl+(opts.hint?"<div class='hint'>"+opts.hint+"</div>":"")+"</div>";
 }
 function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
+/* One vehicle row (name + reg + remove) for the multi-vehicle driver form. */
+function addVehRow(){
+  var box=document.getElementById("veh_list");if(!box)return;
+  var d=document.createElement("div");d.className="veh-row";d.style.cssText="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:10px";
+  d.innerHTML="<div><input class='veh-name' placeholder='Vehicle name / model'></div><div><input class='veh-reg' placeholder='Reg. no.'></div><button type='button' onclick='this.closest(\".veh-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
+  box.appendChild(d);
+}
 function docField(id,label){return "<div class='field'><label>"+label+"</label><input id='"+id+"' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach one or more files (photo, PDF). Optional.</div></div>";}
 function readDataURL(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=function(){res(null);};r.readAsDataURL(f);});}
 /* Downscale large images to ~1500px JPEG so ID photos fit inline without a storage bucket */
@@ -161,8 +168,8 @@ if(type==="guide"){
 }else if(type==="driver"){
   html+=inp("d_name","Full name",{req:1});
   html+=rowOf(inp("d_phone","WhatsApp / Phone",{req:1,type:"tel"}),inp("d_email","Email",{type:"email"}));
-  html+=rowOf(inp("d_veh","Vehicle name / model",{ph:"e.g. Innova, Xylo"}),inp("d_reg","Vehicle reg. no.",{ph:"e.g. AN01 P9577"}));
-  html+=rowOf(inp("d_seats","Seats",{type:"number"}),inp("d_license","Driving licence no.",{}));
+  html+="<div class='field'><label>Vehicles <span class='req'>*</span></label><div id='veh_list'></div><button type='button' onclick='addVehRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add another vehicle</button><div class='hint'>Add every vehicle you drive — name and registration number for each.</div></div>";
+  html+=rowOf(inp("d_seats","Seats (main vehicle)",{type:"number"}),inp("d_license","Driving licence no.",{}));
   html+=inp("d_address","Full residential address",{type:"textarea",ph:"Full residential address"});
 }else if(type==="client"){
   html+=inp("c_tour","Tour category",{tour:1});
@@ -191,6 +198,7 @@ if(type==="guide"){
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
 }
 document.getElementById("fields").innerHTML=html;
+if(type==="driver")addVehRow(); /* seed the first vehicle row */
 
 var sb=null;
 try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
@@ -214,7 +222,8 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     rec.data={expertise:val("gd_expertise"),address:val("gd_address")};
   }else if(type==="driver"){
     rec.name=val("d_name");rec.phone=val("d_phone");rec.email=val("d_email");
-    rec.data={vehicle:val("d_veh"),reg:val("d_reg"),seats:val("d_seats"),license:val("d_license"),address:val("d_address")};
+    var vehs=[];document.querySelectorAll(".veh-row").forEach(function(r){var n=(r.querySelector(".veh-name")||{}).value||"";var rg=(r.querySelector(".veh-reg")||{}).value||"";n=n.trim();rg=rg.trim();if(n||rg)vehs.push({name:n,reg:rg});});
+    rec.data={vehicles:vehs,vehicle:(vehs[0]&&vehs[0].name)||"",reg:(vehs[0]&&vehs[0].reg)||"",seats:val("d_seats"),license:val("d_license"),address:val("d_address")};
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
     rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;

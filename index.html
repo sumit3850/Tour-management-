@@ -484,14 +484,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 78</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 79</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 78</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 79</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2325,15 +2325,30 @@ function openAddOp(){modalForm("New operation","Add operation","<div class='form
 "</div>","saveNewOp","Add operation");}
 function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:document.getElementById("no_driver").value||"—",guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",birding:"—",stay:"—",status:"Scheduled"});closeModal();renderDashOps();}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
-function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;closeModal();renderLog("Vehicles");}
-function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles");}
-function openAddVehicle(){modalForm("New vehicle","Add vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nv_name' placeholder='e.g. Scorpio'></div><div class='field'><label>Reg. No.</label><input class='input' id='nv_reg' placeholder='AN-01-...'></div><div class='field'><label>Type</label><input class='input' id='nv_type' placeholder='e.g. SUV'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='nv_cap' value='7'></div><div class='field'><label>Driver</label><input class='input' id='nv_driver' placeholder='Driver name'></div><div class='field'><label>Status</label><select class='input' id='nv_avail'><option>Available</option><option>On Tour</option><option>Maintenance</option></select></div></div>","saveNewVehicle","Add vehicle");}
-function saveNewVehicle(){vehicles.push({name:document.getElementById("nv_name").value||"—",reg:document.getElementById("nv_reg").value||"—",type:document.getElementById("nv_type").value||"—",cap:parseInt(document.getElementById("nv_cap").value)||0,driver:document.getElementById("nv_driver").value||"—",avail:document.getElementById("nv_avail").value});closeModal();renderLog("Vehicles");}
+function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;closeModal();renderLog("Vehicles & Drivers");}
+function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles & Drivers");}
+function openAddVehicle(){modalForm("New vehicle","Add vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nv_name' placeholder='e.g. Scorpio'></div><div class='field'><label>Reg. No.</label><input class='input' id='nv_reg' placeholder='AN-01-...'></div><div class='field'><label>Type</label><input class='input' id='nv_type' placeholder='e.g. SUV'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='nv_cap' value='7'></div><div class='field'><label>Driver name</label><input class='input' id='nv_driver' placeholder='Driver name'></div><div class='field'><label>Driver phone</label><input class='input' id='nv_dphone' placeholder='+91 …'></div><div class='field'><label>Driver login code <span style='color:var(--ink-soft);font-weight:400'>(auto · editable)</span></label><input class='input mono' id='nv_dcode' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Status</label><select class='input' id='nv_avail'><option>Available</option><option>On Tour</option><option>Maintenance</option></select></div></div>","saveNewVehicle","Add vehicle");}
+function saveNewVehicle(){
+  var name=document.getElementById("nv_name").value||"—";
+  var driver=document.getElementById("nv_driver").value.trim();
+  vehicles.push({name:name,reg:document.getElementById("nv_reg").value||"—",type:document.getElementById("nv_type").value||"—",cap:parseInt(document.getElementById("nv_cap").value)||0,driver:driver||"—",avail:document.getElementById("nv_avail").value});
+  /* a driver name here creates/links the driver with a login code + this vehicle */
+  if(driver){
+    var dphone=document.getElementById("nv_dphone").value.trim();
+    var dcode=document.getElementById("nv_dcode").value.trim();
+    var drv=drivers.find(function(x){return (x.name||"").toLowerCase()===driver.toLowerCase();});
+    if(!drv){drv={name:driver};drivers.unshift(drv);}
+    drv.phone=dphone||drv.phone||"";
+    drv.code=dcode||drv.code||String(Math.floor(1000+Math.random()*9000));
+    drv.veh=name;
+  }
+  closeModal();renderLog("Vehicles & Drivers");
+}
 function editDriver(name){const d=drivers.find(x=>x.name===name);if(!d)return;modalForm("Edit driver","Update driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ed_name' value='"+d.name+"'></div><div class='field'><label>Phone</label><input class='input' id='ed_phone' value='"+d.phone+"'></div><div class='field'><label>Login code</label><input class='input mono' id='ed_code' value='"+(d.code||String(Math.floor(1000+Math.random()*9000)))+"'></div><div class='field'><label>Vehicle</label><input class='input' id='ed_veh' value='"+d.veh+"'></div><div class='field'><label>Tour</label><input class='input' id='ed_tour' value='"+d.tour+"'></div></div>","saveEditDriver","Update");document.getElementById("modal").dataset.dname=name;}
-function saveEditDriver(){const name=document.getElementById("modal").dataset.dname;const d=drivers.find(x=>x.name===name);if(!d)return;d.name=document.getElementById("ed_name").value;d.phone=document.getElementById("ed_phone").value;d.code=document.getElementById("ed_code").value.trim();d.veh=document.getElementById("ed_veh").value;d.tour=document.getElementById("ed_tour").value;closeModal();renderLog("Drivers");}
-function deleteDriver(name){if(!confirm("Delete "+name+"?"))return;drivers=drivers.filter(d=>d.name!==name);renderLog("Drivers");}
+function saveEditDriver(){const name=document.getElementById("modal").dataset.dname;const d=drivers.find(x=>x.name===name);if(!d)return;d.name=document.getElementById("ed_name").value;d.phone=document.getElementById("ed_phone").value;d.code=document.getElementById("ed_code").value.trim();d.veh=document.getElementById("ed_veh").value;d.tour=document.getElementById("ed_tour").value;closeModal();renderLog("Vehicles & Drivers");}
+function deleteDriver(name){if(!confirm("Delete "+name+"?"))return;drivers=drivers.filter(d=>d.name!==name);renderLog("Vehicles & Drivers");}
 function openAddDriver(){modalForm("New driver","Add driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nd_name' placeholder='Full name'></div><div class='field'><label>Phone</label><input class='input' id='nd_phone' placeholder='+91 ...'></div><div class='field'><label>Login code</label><input class='input mono' id='nd_code' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Vehicle</label><input class='input' id='nd_veh' placeholder='Assigned vehicle'></div><div class='field'><label>Tour</label><input class='input' id='nd_tour' placeholder='Current tour or —'></div></div>","saveNewDriver","Add driver");}
-function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").value||"—",phone:document.getElementById("nd_phone").value||"—",code:document.getElementById("nd_code").value.trim(),veh:document.getElementById("nd_veh").value||"—",tour:document.getElementById("nd_tour").value||"—"});closeModal();renderLog("Drivers");}
+function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").value||"—",phone:document.getElementById("nd_phone").value||"—",code:document.getElementById("nd_code").value.trim(),veh:document.getElementById("nd_veh").value||"—",tour:document.getElementById("nd_tour").value||"—"});closeModal();renderLog("Vehicles & Drivers");}
 
 /* ===== CRM ===== */
 function viewCRM(){
@@ -2637,11 +2652,16 @@ function addOrUpdateDriver(s){
   if(!s.name)return;var d=s.data||{};
   var drv=drivers.find(function(x){return (x.name||"").toLowerCase()===s.name.toLowerCase()||(s.phone&&x.phone===s.phone);});
   if(!drv){drv={name:s.name,code:String(Math.floor(1000+Math.random()*9000))};drivers.unshift(drv);}
-  drv.name=s.name;drv.phone=s.phone||drv.phone||"";drv.veh=d.vehicle||drv.veh||"";drv.reg=d.reg||drv.reg||"";drv.license=d.license||drv.license||"";drv.address=d.address||drv.address||"";
+  drv.name=s.name;drv.phone=s.phone||drv.phone||"";drv.license=d.license||drv.license||"";drv.address=d.address||drv.address||"";
   if(!drv.code)drv.code=String(Math.floor(1000+Math.random()*9000));
-  if(d.vehicle&&!vehicles.find(function(v){return (v.name||"").toLowerCase()===d.vehicle.toLowerCase();})){
-    vehicles.unshift({name:d.vehicle,reg:d.reg||"",type:"Car",cap:parseInt(d.seats)||0,driver:s.name,avail:"Available"});
-  }
+  /* one or many vehicles from the registration form */
+  var vlist=(d.vehicles&&d.vehicles.length)?d.vehicles:(d.vehicle?[{name:d.vehicle,reg:d.reg}]:[]);
+  if(vlist[0]){drv.veh=vlist[0].name||drv.veh||"";drv.reg=vlist[0].reg||drv.reg||"";}
+  vlist.forEach(function(vv){
+    if(vv.name&&!vehicles.find(function(v){return (v.name||"").toLowerCase()===vv.name.toLowerCase();})){
+      vehicles.unshift({name:vv.name,reg:vv.reg||"",type:"Car",cap:parseInt(d.seats)||0,driver:s.name,avail:"Available"});
+    }
+  });
 }
 /* A guide's self-registration form flows straight into the External Guides directory. */
 function addOrUpdateExternalGuide(s){
