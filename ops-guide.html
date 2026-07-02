@@ -19,13 +19,26 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .top b{font-size:15px}
 .pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#e7f1fb;color:var(--blue);white-space:nowrap}
+.pill.warn{background:#fbe7e4;color:var(--err)}
+.pill.ok{background:#e4f3ea;color:var(--ok)}
 .dates{font-size:12.5px;color:var(--soft);margin-bottom:10px}
 .rows{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px}
 .rows span.k{color:var(--soft)}.rows span.v{font-weight:600;text-align:right}
 .remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
+.fb{margin-top:8px;padding:10px 12px;background:#fbe7e4;border-radius:10px;font-size:12.5px;color:var(--err)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts button{padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
+.acts button.on{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
+.reasonbox{display:none;margin-top:10px}
+.reasonbox textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;min-height:70px}
+.reasonbox button{margin-top:8px;width:100%;padding:11px;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;cursor:pointer}
 .empty{text-align:center;color:var(--soft);padding:40px 20px;font-size:14px}
 .err{background:#fbe7e4;color:var(--err);border:1px solid #f0c2bb;border-radius:12px;padding:14px;font-size:14px;margin-bottom:14px}
+.ok-box{background:#e4f3ea;color:var(--ok);border:1px solid #b6e0c6;border-radius:12px;padding:14px;font-size:14px;margin-bottom:14px;display:none}
 .foot{text-align:center;font-size:11px;color:var(--soft);padding:16px 0}
+label{display:block;font-size:12.5px;font-weight:600;margin:10px 0 5px}
+input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:11px}
+.btn{width:100%;margin-top:14px;padding:14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -33,42 +46,96 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
   <div class="head">
     <img src="assets/logo.png" alt="Island Explorer Birding Tours" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('brandtext');if(f)f.style.display='block';}">
     <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
-    <h1 id="who">Loading your operations…</h1>
+    <h1 id="who">Sign in to see your operations</h1>
   </div>
   <div id="err" class="err" style="display:none"></div>
-  <div id="list"></div>
+  <div class="card" id="gate">
+    <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered WhatsApp / phone number">
+    <label>Login code</label><input id="gateCode" inputmode="numeric" placeholder="4-digit code from Island Explorer">
+    <button class="btn" onclick="doLogin()">View my operations</button>
+  </div>
+  <div id="list" style="display:none"></div>
 </div>
 <div class="foot">Island Explorer Birding Tours · +91 99332 02175</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
-const guide=(new URLSearchParams(location.search).get("guide")||"").trim();
+const presetGuide=(new URLSearchParams(location.search).get("guide")||"").trim();
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
-function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display="block";}
+var myGuide=null,allOps=[];
+function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
+function normPhone(p){return String(p||"").replace(/\D/g,"");}
 
-async function load(){
-  if(!sb||!guide){showErr("This link is invalid or the service is unavailable. Ask Island Explorer for a fresh link.");document.getElementById("who").textContent="—";return;}
-  document.getElementById("who").textContent="Operations for "+guide;
+async function doLogin(){
+  showErr("");
+  var phone=normPhone(document.getElementById("gatePhone").value);
+  var code=document.getElementById("gateCode").value.trim();
+  if(!phone||!code){showErr("Enter your phone number and login code.");return;}
+  if(!sb){showErr("Service unavailable right now. Please try again shortly.");return;}
   try{
     var res=await sb.from("workspaces").select("data").eq("id","island-explorer").maybeSingle();
-    var ops=(res.data&&res.data.data&&res.data.data.ops)||[];
-    var mine=ops.filter(function(o){return (o.guide||"").trim().toLowerCase()===guide.toLowerCase();});
-    var list=document.getElementById("list");
-    if(!mine.length){list.innerHTML="<div class='empty'>No operations assigned to you yet.</div>";return;}
-    mine.sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
-    list.innerHTML=mine.map(function(o){
-      return "<div class='card'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill'>"+(o.status||"Scheduled")+"</span></div>"+
-        "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
-        "<div class='rows'>"+row("Pax",o.pax)+row("Pickup",o.pickup)+row("Stay",o.stay)+"</div>"+
-        (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
-      "</div>";
-    }).join("");
-  }catch(e){showErr("Couldn't load your operations. Please try again.");}
+    var guides=(res.data&&res.data.data&&res.data.data.externalGuides)||[];
+    var g=guides.find(function(x){return normPhone(x.phone)===phone&&String(x.code||"")===code;});
+    if(!g){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    myGuide=g;
+    allOps=(res.data&&res.data.data&&res.data.data.ops)||[];
+    document.getElementById("gate").style.display="none";
+    document.getElementById("who").textContent="Operations for "+g.name;
+    renderList();
+  }catch(e){showErr("Couldn't sign you in. Please try again.");}
 }
-load();
+
+function myOps(){return allOps.filter(function(o){return (o.guide||"").trim().toLowerCase()===myGuide.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+
+function renderList(){
+  var list=document.getElementById("list");list.style.display="block";
+  var mine=myOps();
+  if(!mine.length){list.innerHTML="<div class='empty'>No operations assigned to you yet.</div>";return;}
+  list.innerHTML=mine.map(function(o,idx){
+    var cls=o.status==="Withdrawn"||o.status==="Declined"?"warn":(o.status==="Completed"?"ok":"");
+    return "<div class='card'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+cls+"'>"+(o.status||"Scheduled")+"</span></div>"+
+      "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
+      "<div class='rows'>"+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
+      (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
+      (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
+      "<div class='acts'>"+
+        "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
+        "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
+        "<button onclick=\"toggleReason('"+o.id+"','Withdrawn')\">Withdrawn</button>"+
+        "<button onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
+      "</div>"+
+      "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
+    "</div>";
+  }).join("");
+}
+function toggleReason(opId,status){
+  document.querySelectorAll(".reasonbox").forEach(function(b){if(b.id!=="reason_"+opId)b.style.display="none";});
+  var box=document.getElementById("reason_"+opId);
+  box.dataset.status=status;
+  box.style.display=(box.style.display==="block")?"none":"block";
+}
+async function submitReason(opId){
+  var box=document.getElementById("reason_"+opId);
+  var text=document.getElementById("reasontext_"+opId).value.trim();
+  if(!text){alert("Please add a short reason before submitting.");return;}
+  await postStatus(opId,box.dataset.status,text);
+}
+async function setOpStatus(opId,status){await postStatus(opId,status,"");}
+async function postStatus(opId,status,reason){
+  if(!sb){showErr("Service unavailable right now.");return;}
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),
+    data:{opId:opId,newStatus:status,reason:reason,guide:myGuide.name}};
+  try{
+    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
+    if(up.error){showErr("Could not update: "+up.error.message);return;}
+    var o=allOps.find(function(x){return x.id===opId;});
+    if(o){o.status=status;if(reason){o.guideFeedback=reason;o.guideFeedbackAt=rec.created_at;}}
+    renderList();
+  }catch(e){showErr("Network error. Please try again.");}
+}
 </script>
 </body>
 </html>

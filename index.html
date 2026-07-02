@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 58</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 59</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 58</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 59</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -715,8 +715,8 @@ function bookingsForSheet(){
 var _sheetSyncTimer=null;
 function scheduleSheetSync(){if(!sheetHook())return;clearTimeout(_sheetSyncTimer);_sheetSyncTimer=setTimeout(syncSheets,1800);}
 /* Logistics & Operations tab — one row per operation (incl. completed tours). */
-var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Pickup","Stay","Status"];
-function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"Vehicle":o.veh||"","Reg. No.":v.reg||"","Driver":o.driver||"","Driver No.":d.phone||"","Guide":o.guide||"","Guide ID":g.gid||"","Guide phone":g.phone||"","Pickup":o.pickup||"","Stay":o.stay||"","Status":o.status||""};}
+var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Status","Remarks","Guide Feedback","Guide Feedback At"];
+function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"Vehicle":o.veh||"","Reg. No.":v.reg||"","Driver":o.driver||"","Driver No.":d.phone||"","Guide":o.guide||"","Guide ID":g.gid||"","Guide phone":g.phone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":o.stay||"","Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):""};}
 /* Dropdown option builders for operations (value kept clean via value attr). */
 function vehicleOptions(sel){return "<option value=''>—</option>"+(vehicles||[]).map(function(v){return "<option value='"+v.name+"' "+(v.name===sel?"selected":"")+">"+v.name+(v.avail&&v.avail!=="Available"?" ("+v.avail+")":"")+"</option>";}).join("");}
 function driverOptions(sel){return "<option value=''>—</option>"+(drivers||[]).map(function(d){return "<option value='"+d.name+"' "+(d.name===sel?"selected":"")+">"+d.name+"</option>";}).join("");}
@@ -1893,8 +1893,9 @@ function opCard(o){
     "<div class='op-date'>"+(o.tourId?"<span class='mono'>"+o.tourId+"</span> · ":"")+o.dateDisplay+" · "+o.pax+" pax</div>"+
     (poc?"<div style='font-size:12px;margin:4px 0'><b>POC:</b> "+poc+"</div>":"")+
     "<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'><span class='mono'>"+o.start+"</span> → <span class='mono'>"+o.end+"</span></div>"+
-    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup",o.pickup)+row("Stay",o.stay)+"</div>"+
+    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
+    (o.guideFeedback?"<div style='margin-top:6px;padding:8px 10px;background:#fbe7e4;border-radius:8px;font-size:12px'><b>Guide feedback ("+(o.guideFeedbackAt?dShort(o.guideFeedbackAt):"")+"):</b> "+o.guideFeedback+"</div>":"")+
     "<div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div>"+
     (o.veh&&o.veh!=="—"?"<button class='edit-btn' style='width:100%;margin-top:6px' onclick=\"openDriverLog('"+o.veh.replace(/'/g,"&#39;")+"','"+(o.pickup||"").replace(/'/g,"&#39;")+"')\">Log daily activity for this vehicle</button>":"")+
     (o.guide&&o.guide!=="—"?"<button class='edit-btn' style='width:100%;margin-top:6px' onclick=\"shareGuideOpsLink('"+o.guide.replace(/'/g,"&#39;")+"')\">Share this guide's ops link</button>":"")+
@@ -1933,7 +1934,7 @@ function renderLog(t="Operations Board"){
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
   }else if(t==="External Guides"){
     b.innerHTML="<div class='section-head'><div><div class='eyebrow'>Directory</div><div class='h-sec'>External Guides</div></div><div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick=\"shareGuideRegLink()\">Share registration link</button><button class='btn btn-primary btn-sm' onclick='openAddGuide()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add guide</button></div></div>"+
-      "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guide ID</th><th>Name</th><th>Expertise</th><th>WhatsApp / Phone</th><th>Email</th><th>Address</th><th></th></tr></thead><tbody id='guideBody'></tbody></table></div></div>";
+      "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guide ID</th><th>Name</th><th>Expertise</th><th>WhatsApp / Phone</th><th>Code</th><th>Email</th><th>Address</th><th></th></tr></thead><tbody id='guideBody'></tbody></table></div></div>";
     renderGuides();
   }else if(t==="Guide Fees"){
     var fth=FEE_HEADS.map(function(h,i){return "<th style='padding:8px;font-size:11px;text-align:"+(i?"right":"left")+";color:var(--ink-soft);white-space:nowrap;border-bottom:1px solid var(--line)'>"+h+"</th>";}).join("");
@@ -1958,19 +1959,31 @@ function ensureAccBookingForTour(t,accId){
   var rec={accId:accId,tourId:t.id,tour:tourLabel(t),poc:(pb&&pb.guest)||"",guests:booked(t.id)||1,rooms:(existing&&existing.rooms)||1,checkIn:t.start||"",checkOut:t.end||"",status:"Confirmed"};
   if(existing)Object.assign(existing,rec);else{rec.id="AB"+Date.now();accBookings.unshift(rec);}
 }
-function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=accommodations.some(function(a){return a.name===o.stay;});modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+(o.end||"")+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle available</label><select class='input' id='eo_veh'>"+vehicleOptions(o.veh)+"</select></div><div class='field'><label>Driver available</label><select class='input' id='eo_driver'>"+driverOptions(o.driver)+"</select></div><div class='field'><label>Guide</label><input class='input' id='eo_guide' list='eo_guidelist' value='"+o.guide+"'><datalist id='eo_guidelist'>"+externalGuides.map(function(g){return "<option value='"+g.name+"'>";}).join("")+"</datalist></div><div class='field'><label>Status</label><select class='input' id='eo_status'>"+["Scheduled","In progress","Completed","Cancelled"].map(function(s){return "<option "+(s===(o.status||"Scheduled")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div><div class='field full'><label>Pickup</label><input class='input' id='eo_pickup' value='"+o.pickup+"'></div>"+
+function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=accommodations.some(function(a){return a.name===o.stay;});var guideKnown=externalGuides.some(function(g){return g.name===o.guide;});modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+o.tour+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+(o.end||"")+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle available</label><select class='input' id='eo_veh'>"+vehicleOptions(o.veh)+"</select></div><div class='field'><label>Driver available</label><select class='input' id='eo_driver'>"+driverOptions(o.driver)+"</select></div><div class='field'><label>Guide</label><select class='input' id='eo_guide' onchange=\"opGuidePick('eo')\">"+opGuideOptions(o.guide)+"</select></div><div class='field' id='eo_guidecustomwrap' style='display:"+((o.guide&&!guideKnown)?"block":"none")+"'><label>Custom guide name</label><input class='input' id='eo_guidecustom' value='"+((o.guide&&!guideKnown)?o.guide.replace(/'/g,"&#39;"):"")+"'></div><div class='field'><label>Status</label><select class='input' id='eo_status'>"+["Scheduled","In progress","Completed","Withdrawn","Declined","Cancelled"].map(function(s){return "<option "+(s===(o.status||"Scheduled")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
+  "<div class='field'><label>Pickup Date</label><input class='input' type='date' id='eo_pudate' value='"+(o.pickupDate||"")+"'></div>"+
+  "<div class='field'><label>Pickup Location</label><input class='input' id='eo_puloc' value='"+((o.pickupLoc||o.pickup||"")).replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair 04:30'></div>"+
+  "<div class='field'><label>Drop Date</label><input class='input' type='date' id='eo_drdate' value='"+(o.dropDate||"")+"'></div>"+
+  "<div class='field'><label>Drop Location</label><input class='input' id='eo_drloc' value='"+(o.dropLoc||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair airport'></div>"+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='eo_remarks' style='min-height:70px'>"+(o.remarks||"")+"</textarea></div>"+
   "<div class='field full'><label>Stay</label><select class='input' id='eo_stay' onchange='eoStayPick()'>"+opStayOptions(o.stay)+"</select></div>"+
   "<div class='field full' id='eo_staycustomwrap' style='display:"+((o.stay&&!stayKnown)?"block":"none")+"'><label>Custom stay / notes</label><input class='input' id='eo_staycustom' value='"+((o.stay&&!stayKnown)?o.stay.replace(/'/g,"&#39;"):"")+"'></div>"+
 "</div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
-function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=document.getElementById("eo_driver").value;o.guide=document.getElementById("eo_guide").value;o.status=document.getElementById("eo_status").value;o.pickup=document.getElementById("eo_pickup").value;o.remarks=document.getElementById("eo_remarks").value;
+function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=document.getElementById("eo_driver").value;o.guide=opGuideValue("eo")||o.guide;o.status=document.getElementById("eo_status").value;
+  o.pickupDate=document.getElementById("eo_pudate").value||"";o.pickupLoc=document.getElementById("eo_puloc").value||"";o.pickup=o.pickupLoc||"—";
+  o.dropDate=document.getElementById("eo_drdate").value||"";o.dropLoc=document.getElementById("eo_drloc").value||"";
+  o.remarks=document.getElementById("eo_remarks").value;
   var staySel=document.getElementById("eo_stay").value;
   if(staySel==="custom"){o.stay=document.getElementById("eo_staycustom").value||"—";}
   else{var acc=accommodations.find(function(a){return a.id===staySel;});o.stay=acc?acc.name:"—";ensureAccBookingForOp(o,staySel);}
   closeModal();renderLog("Operations Board");renderAccCalendar();renderAccommodation();}
 function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id);renderLog("Operations Board");}
-function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Date</label><input class='input' id='no_date' value='"+todayISO.slice(5,7)+" "+todayISO.slice(8,10)+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle available</label><select class='input' id='no_veh'>"+vehicleOptions("")+"</select></div><div class='field'><label>Driver available</label><select class='input' id='no_driver'>"+driverOptions("")+"</select></div><div class='field'><label>Guide</label><input class='input' id='no_guide' list='no_guidelist' value='Sumit'><datalist id='no_guidelist'>"+externalGuides.map(function(g){return "<option value='"+g.name+"'>";}).join("")+"</datalist></div><div class='field full'><label>Pickup</label><input class='input' id='no_pickup' placeholder='e.g. Port Blair 04:30'></div></div>","saveNewOp","Add operation");}
-function saveNewOp(){var dt=document.getElementById("no_date").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:document.getElementById("no_driver").value||"—",guide:document.getElementById("no_guide").value||"—",pickup:document.getElementById("no_pickup").value||"—",birding:"—",stay:"—",status:"Scheduled"});closeModal();renderLog("Operations Board");}
+function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Date</label><input class='input' id='no_date' value='"+todayISO.slice(5,7)+" "+todayISO.slice(8,10)+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle available</label><select class='input' id='no_veh'>"+vehicleOptions("")+"</select></div><div class='field'><label>Driver available</label><select class='input' id='no_driver'>"+driverOptions("")+"</select></div><div class='field'><label>Guide</label><select class='input' id='no_guide' onchange=\"opGuidePick('no')\">"+opGuideOptions("")+"</select></div><div class='field' id='no_guidecustomwrap' style='display:none'><label>Custom guide name</label><input class='input' id='no_guidecustom' placeholder='Guide name'></div>"+
+  "<div class='field'><label>Pickup Date</label><input class='input' type='date' id='no_pudate' value='"+todayISO+"'></div>"+
+  "<div class='field'><label>Pickup Location</label><input class='input' id='no_puloc' placeholder='e.g. Port Blair 04:30'></div>"+
+  "<div class='field'><label>Drop Date</label><input class='input' type='date' id='no_drdate'></div>"+
+  "<div class='field'><label>Drop Location</label><input class='input' id='no_drloc' placeholder='e.g. Port Blair airport'></div>"+
+"</div>","saveNewOp","Add operation");}
+function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:document.getElementById("no_driver").value||"—",guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",birding:"—",stay:"—",status:"Scheduled"});closeModal();renderLog("Operations Board");}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
 function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;closeModal();renderLog("Vehicles");}
 function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles");}
@@ -2010,13 +2023,17 @@ function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filt
 /* ===== REQUESTS / PUBLIC FORMS ===== */
 var _submissions=[];
 function formLink(type){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"register.html?type="+type;}
-/* Read-only ops board filtered to one guide — safe to share, shows nothing else. */
+/* Guide ops link — signed in with phone + a personal login code (below), so only
+   that guide sees their own operations and can update status from their phone. */
 function shareGuideOpsLink(guideName){
-  var base=location.href.split("#")[0].replace(/[^/]*$/,"");
-  var url=base+"ops-guide.html?guide="+encodeURIComponent(guideName);
-  if(navigator.clipboard)navigator.clipboard.writeText(url);
   var g=externalGuides.find(function(x){return x.name===guideName;});
-  if(confirm("Link copied for "+guideName+":\n\n"+url+"\n\nOpen WhatsApp to share it now?"))waShare("Island Explorer — your upcoming operations:\n"+url,g?g.phone:"");
+  if(!g){alert("Add this guide to the External Guides directory first (with a phone number).");return;}
+  guideId(g);persistData();
+  var base=location.href.split("#")[0].replace(/[^/]*$/,"");
+  var url=base+"ops-guide.html";
+  if(navigator.clipboard)navigator.clipboard.writeText(url);
+  var msg="Island Explorer — your operations\n\nOpen this link, then sign in with:\nPhone: "+(g.phone||"—")+"\nCode: "+g.code+"\n\n"+url;
+  if(confirm("Link + login code copied for "+guideName+" (code "+g.code+"):\n\n"+url+"\n\nOpen WhatsApp to share it now?"))waShare(msg,g.phone||"");
 }
 function shareGuideRegLink(){
   var url=formLink("guidedir");
@@ -2080,13 +2097,14 @@ function loadSubmissions(force){
     var legacy=(r[1]&&r[1].data&&r[1].data.data&&r[1].data.data.list)||[];
     _submissions=list.concat(legacy).filter(function(s){return !subDeleted(s.id);}).sort(function(a,b){return (b.created_at||"").localeCompare(a.created_at||"");});
     applyReservationResponses();
+    applyOpStatusUpdates();
     autoProcessSubmissions();
     renderRequests();
   }).catch(function(e){if(body)body.innerHTML="<div class='empty'>Network error loading submissions.</div>";});
 }
 function renderRequests(){
   var body=document.getElementById("reqBody");if(!body)return;
-  var subs=(_submissions||[]).filter(function(s){return s.type!=="reservation_response";});
+  var subs=(_submissions||[]).filter(function(s){return s.type!=="reservation_response"&&s.type!=="op_status_update";});
   if(!subs.length){body.innerHTML="<div class='empty'>No submissions yet. Share a form link above — entries appear here automatically.</div>";return;}
   var TYPEN={interest:"Tour interest",client:"Guest details",guide:"Guide request"};
   body.innerHTML=subs.map(function(s){
@@ -2274,21 +2292,27 @@ function viewReservations(){
     "<div class='kanban' id='resKanban'></div>"+
   "</section>";
 }
-function guideId(g){if(g&&!g.gid){var max=0;externalGuides.forEach(function(x){var m=/^G(\d+)$/.exec(x.gid||"");if(m&&+m[1]>max)max=+m[1];});g.gid="G"+(max+1);}return g?g.gid:"";}
-function renderGuides(){var b=document.getElementById("guideBody");if(!b)return;b.innerHTML=externalGuides.map(function(g,i){return "<tr><td class='mono strong'>"+guideId(g)+"</td><td class='strong'>"+(g.name||"")+"</td><td>"+(g.expertise||"—")+"</td><td class='nowrap'>"+(g.phone||"—")+"</td><td class='nowrap'>"+(g.email||"—")+"</td><td style='color:var(--ink-soft)'>"+(g.address||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"shareGuideOpsLink('"+(g.name||"").replace(/'/g,"&#39;")+"')\" title='Share ops link'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg></button><button class='edit-btn' data-action='editGuide' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteGuide' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='7' class='empty'>No external guides yet. Add one to use it in tours & reservations.</td></tr>";}
+function guideId(g){if(g&&!g.gid){var max=0;externalGuides.forEach(function(x){var m=/^G(\d+)$/.exec(x.gid||"");if(m&&+m[1]>max)max=+m[1];});g.gid="G"+(max+1);}if(g&&!g.code)g.code=String(Math.floor(1000+Math.random()*9000));return g?g.gid:"";}
+function renderGuides(){var b=document.getElementById("guideBody");if(!b)return;b.innerHTML=externalGuides.map(function(g,i){guideId(g);return "<tr><td class='mono strong'>"+g.gid+"</td><td class='strong'>"+(g.name||"")+"</td><td>"+(g.expertise||"—")+"</td><td class='nowrap'>"+(g.phone||"—")+"</td><td class='mono'>"+(g.code||"—")+"</td><td class='nowrap'>"+(g.email||"—")+"</td><td style='color:var(--ink-soft)'>"+(g.address||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"shareGuideOpsLink('"+(g.name||"").replace(/'/g,"&#39;")+"')\" title='Share ops link'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg></button><button class='edit-btn' data-action='editGuide' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteGuide' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='8' class='empty'>No external guides yet. Add one to use it in tours & reservations.</td></tr>";}
 function guideForm(g){g=g||{};return "<div class='form-grid'>"+
   "<div class='field'><label>Guide name</label><input class='input' id='g_name' value='"+(g.name||"").replace(/'/g,"&#39;")+"'></div>"+
   "<div class='field'><label>Expertise</label><input class='input' id='g_exp' value='"+(g.expertise||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Endemics, waders'></div>"+
   "<div class='field'><label>WhatsApp / Phone</label><input class='input' id='g_phone' value='"+(g.phone||"")+"'></div>"+
+  "<div class='field'><label>Login code <span style='color:var(--ink-soft);font-weight:400'>(for the ops link)</span></label><input class='input mono' id='g_code' value='"+(g.code||String(Math.floor(1000+Math.random()*9000)))+"'></div>"+
   "<div class='field'><label>Email</label><input class='input' type='email' id='g_email' value='"+(g.email||"")+"'></div>"+
   "<div class='field full'><label>Full residential address</label><input class='input' id='g_addr' value='"+(g.address||"").replace(/'/g,"&#39;")+"'></div>"+
 "</div>";}
 function openAddGuide(){modalForm("New external guide","Add guide",guideForm(),"saveNewGuide","Add guide");}
-function saveNewGuide(){var n=document.getElementById("g_name").value.trim();if(!n){alert("Enter the guide name.");return;}var g={name:n,expertise:document.getElementById("g_exp").value,phone:document.getElementById("g_phone").value,email:document.getElementById("g_email").value,address:document.getElementById("g_addr").value};guideId(g);externalGuides.push(g);persistData();closeModal();renderGuides();}
+function saveNewGuide(){var n=document.getElementById("g_name").value.trim();if(!n){alert("Enter the guide name.");return;}var g={name:n,expertise:document.getElementById("g_exp").value,phone:document.getElementById("g_phone").value,code:document.getElementById("g_code").value.trim(),email:document.getElementById("g_email").value,address:document.getElementById("g_addr").value};guideId(g);externalGuides.push(g);persistData();closeModal();renderGuides();}
 function editGuide(i){var g=externalGuides[i];if(!g)return;modalForm("Edit guide","Update guide",guideForm(g),"saveEditGuide","Update");document.getElementById("modal").dataset.gi=i;}
-function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;persistData();closeModal();renderGuides();}
+function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;persistData();closeModal();renderGuides();}
 function deleteGuide(i){if(!confirm("Remove this guide?"))return;externalGuides.splice(i,1);persistData();renderGuides();}
 function guideOptions(sel){return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("");}
+/* Operation "Guide" field: a real dropdown of the External Guides directory + Custom
+   (so a guide not yet in the directory can still be typed in). */
+function opGuideOptions(sel){var known=externalGuides.some(function(g){return g.name===sel;});return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("")+"<option value='custom' "+((sel&&!known)?"selected":"")+">Custom / Other</option>";}
+function opGuidePick(prefix){var sel=document.getElementById(prefix+"_guide");var cw=document.getElementById(prefix+"_guidecustomwrap");if(cw)cw.style.display=(sel&&sel.value==="custom")?"block":"none";}
+function opGuideValue(prefix){var sel=document.getElementById(prefix+"_guide");if(!sel)return "";if(sel.value==="custom"){var c=document.getElementById(prefix+"_guidecustom");return (c&&c.value.trim())||"";}return sel.value;}
 function rsGuidePick(){var s=document.getElementById("rs_guide");var by=document.getElementById("rs_by");if(s&&by&&!by.value)by.value=s.value;}
 function etGuidePick(){var sel=document.getElementById("et_guideAlloted");if(!sel)return;var g=externalGuides.find(function(x){return x.name===sel.value;});if(!g)return;var ph=document.getElementById("et_guidephone"),em=document.getElementById("et_guideemail");if(ph)ph.value=g.phone||ph.value;if(em)em.value=g.email||em.value;}
 function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"respond.html?rid="+rid;}
@@ -2333,6 +2357,16 @@ function applyReservationResponses(){
   });
   if(changed){persistData();if(document.getElementById("resKanban"))renderReservations();renderTours&&renderTours();renderCalendar&&renderCalendar();}
 }
+/* A guide's status update / withdraw-decline reason, submitted from ops-guide.html. */
+function applyOpStatusUpdates(){
+  var changed=false;
+  (_submissions||[]).filter(function(s){return s.type==="op_status_update"&&!subProcessed(s.id);}).forEach(function(s){
+    var d=s.data||{};var o=ops.find(function(x){return x.id===d.opId;});
+    if(o){o.status=d.newStatus||o.status;if(d.reason){o.guideFeedback=d.reason;o.guideFeedbackAt=s.created_at;}changed=true;}
+    markSubProcessed(s.id);
+  });
+  if(changed){persistData();if(document.getElementById("logBody"))renderLog("Operations Board");}
+}
 /* When a guide accepts, set that guide as the lead on the matching tour + dates */
 function updateTourGuideFromReservation(r){
   if(!r)return;var who=r.guideName||r.respondedBy||r.by;if(!who)return;
@@ -2349,7 +2383,7 @@ function opFromReservation(r){
   ops.unshift({id:"OP"+Date.now()+Math.floor(Math.random()*100),fromRes:r.id,fromTour:t?t.id:"",tour:r.tour||"—",
     dateDisplay:r.date?dShort(r.date):"—",date:r.date?dShort(r.date):"—",start:r.date?dShort(r.date):"—",end:dShort(r.endDate||r.date),
     startISO:r.date||"",endISO:r.endDate||r.date||"",
-    pax:t?booked(t.id):0,clients:"—",veh:"—",driver:"—",guide:g,pickup:r.location||(t&&t.pickup)||"—",birding:(t&&t.startLoc)||"—",stay:(t&&t.stay)||"—",status:"Scheduled"});
+    pax:t?booked(t.id):0,clients:"—",veh:"—",driver:"—",guide:g,pickupDate:r.date||"",pickupLoc:r.location||(t&&t.pickup)||"—",pickup:r.location||(t&&t.pickup)||"—",dropDate:r.endDate||r.date||"",dropLoc:"",birding:(t&&t.startLoc)||"—",stay:(t&&t.stay)||"—",status:"Scheduled"});
   if(t)ops[0].tourId=tourCode(t);
   persistData();
   if(document.getElementById("logBody"))renderLog("Operations Board");
@@ -2361,7 +2395,7 @@ function opFromTour(t){
   ops.unshift({id:"OP"+Date.now()+Math.floor(Math.random()*100),fromTour:t.id,tourId:tourCode(t),tour:tourLabel(t),
     dateDisplay:dShort(t.start),date:dShort(t.start),start:dShort(t.start),end:dShort(t.end),
     startISO:t.start||"",endISO:t.end||"",
-    pax:booked(t.id),clients:"—",veh:"—",driver:"—",guide:t.guide||t.guideAlloted||"—",pickup:t.pickup||"—",birding:t.startLoc||"—",stay:t.stay||"—",status:"Scheduled"});
+    pax:booked(t.id),clients:"—",veh:"—",driver:"—",guide:t.guide||t.guideAlloted||"—",pickupDate:t.start||"",pickupLoc:t.pickup||"—",pickup:t.pickup||"—",dropDate:t.end||"",dropLoc:"",birding:t.startLoc||"—",stay:t.stay||"—",status:"Scheduled"});
   persistData();
   if(document.getElementById("logBody"))renderLog("Operations Board");
 }
