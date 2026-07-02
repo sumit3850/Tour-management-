@@ -478,14 +478,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 74</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 75</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 74</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 75</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1471,6 +1471,9 @@ function dispatchAction(e){
     else if(a==='openCustomerSheet')openCustomerSheet(t.dataset.arg);
     else if(a==='editOperator')editOperator(parseInt(t.dataset.arg));
     else if(a==='deleteOperator')deleteOperator(parseInt(t.dataset.arg));
+    else if(a==='editGuide')editGuide(parseInt(t.dataset.arg));
+    else if(a==='deleteGuide')deleteGuide(parseInt(t.dataset.arg));
+    else if(a==='gotoAlert'){var ga=t.dataset.arg.split('|');gotoAlert(ga[0],ga[1]);}
 }
 function go(v,isBack){
   if(!isBack&&v!==curView)navStack.push(curView);
@@ -1495,7 +1498,7 @@ function renderView(v){
   else if(v==="requests"){loadSubmissions(true);startSubPoll();}
   else if(v==="reservations"){renderReservations();renderGuides();loadSubmissions(false);startSubPoll();}
   else if(v==="settings")refreshSettings();
-  else if(v==="logistics"){renderLog();loadSubmissions(false);startSubPoll();}
+  else if(v==="logistics"){logTab(_logTab);loadSubmissions(false);startSubPoll();}
   else if(v==="calc")calc();
   else if(v==="profit")renderProfitCalc();
   else if(v==="dashboard")refreshDashboard();
@@ -1503,7 +1506,7 @@ function renderView(v){
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
 function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
 function openScrim(){document.getElementById("scrim").classList.add("show")}
-function closeModal(){document.getElementById("scrim").classList.remove("show");if(_pendingRefresh){_pendingRefresh=false;boot(true);}}
+function closeModal(){document.getElementById("scrim").classList.remove("show");if(_pendingRefresh){_pendingRefresh=false;refreshUI();}}
 
 /* ===== DASHBOARD ===== */
 /* ===== automation helpers ===== */
@@ -1517,18 +1520,56 @@ function paymentReminder(id){var b=bookings.find(function(x){return x.id===id;})
 function paymentReminderEmail(id){var b=bookings.find(function(x){return x.id===id;});if(!b)return;if(!b.email){alert("No email on this booking. Add one in the booking editor.");return;}mailSend(b.email,"Pending payment · Island Explorer Birding Tours",paymentMsg(b));}
 function sendGuestForm(id){var b=bookings.find(function(x){return x.id===id;});if(b)waShare(guestMsg(b),b.phone);}
 function sendGuestFormEmail(id){var b=bookings.find(function(x){return x.id===id;});if(!b)return;if(!b.email){alert("No email on this booking. Add one in the booking editor.");return;}mailSend(b.email,"Your guest details · Island Explorer Birding Tours",guestMsg(b));}
+/* A clash = the SAME vehicle/driver/guide assigned to two operations whose ACTUAL
+   date ranges overlap. Previously this compared o.start / o.end, which are display
+   strings like "14 Jun" — lexicographic nonsense that flagged non-overlapping tours.
+   Now it compares the real ISO dates (startISO/endISO), and ignores operations that
+   are Withdrawn / Declined / Cancelled / Completed (not a live conflict). */
+function opActive(o){var s=(o.status||"").toLowerCase();return s!=="withdrawn"&&s!=="declined"&&s!=="cancelled"&&s!=="completed";}
 function detectClashes(){
   var out=[];
-  for(var i=0;i<ops.length;i++)for(var j=i+1;j<ops.length;j++){
-    var a=ops[i],c=ops[j];
-    if(!overlaps(a.start,a.end,c.start,c.end))continue;
+  var live=(ops||[]).filter(opActive);
+  for(var i=0;i<live.length;i++)for(var j=i+1;j<live.length;j++){
+    var a=live[i],c=live[j];
+    var as=a.startISO||"",ae=a.endISO||a.startISO||"",cs=c.startISO||"",ce=c.endISO||c.startISO||"";
+    if(!as||!cs)continue;                    /* no real date on one of them → can't be a date clash */
+    if(!overlaps(as,ae,cs,ce))continue;      /* different, non-overlapping dates → no clash */
     ["veh","driver","guide"].forEach(function(k){
-      if(a[k]&&c[k]&&a[k]!=="—"&&a[k].toLowerCase()===String(c[k]).toLowerCase()){
+      if(a[k]&&c[k]&&a[k]!=="—"&&String(a[k]).toLowerCase()===String(c[k]).toLowerCase()){
         out.push({what:k,who:a[k],a:a,b:c});
       }
     });
   }
   return out;
+}
+/* Aggregate every actionable problem into one list for the dashboard Alerts card.
+   Each alert carries a kind+id so a tap can jump straight to the exact record. */
+function buildAlerts(){
+  var A=[];
+  detectClashes().forEach(function(c){
+    A.push({level:"err",text:c.who+" ("+c.what+") is double-booked on overlapping dates: "+c.a.tour+" & "+c.b.tour,kind:"op",arg:c.a.id});
+  });
+  (ops||[]).filter(opActive).forEach(function(o){
+    if((o.startISO||"")&&(o.startISO<todayISO))return; /* only flag upcoming/undated ops */
+    var missing=[];
+    if(!o.guide||o.guide==="—")missing.push("guide");
+    if(!o.driver||o.driver==="—")missing.push("driver");
+    if(!o.veh||o.veh==="—")missing.push("vehicle");
+    if(missing.length)A.push({level:"warn",text:o.tour+" ("+(o.dateDisplay||dShort(o.startISO)||"—")+") has no "+missing.join(" / "),kind:"op",arg:o.id});
+  });
+  bookings.forEach(function(b){
+    var p=bookingPending(b);
+    if(p>0&&b.lastPendingDate&&b.lastPendingDate<todayISO)A.push({level:"err",text:"Payment overdue — "+b.guest+": "+fmt(p)+" (due "+dShort(b.lastPendingDate)+")",kind:"booking",arg:b.id});
+  });
+  tours.filter(function(t){return t.start>=todayISO;}).forEach(function(t){
+    if(!t.pocId&&bookings.some(function(b){return b.tour===t.id;}))A.push({level:"warn",text:"No point-of-contact set for "+shortName(t),kind:"tour",arg:t.id});
+  });
+  return A;
+}
+function gotoAlert(kind,arg){
+  if(kind==="op"){go("logistics");logTab("Operations Board");setTimeout(function(){if(typeof editOp==="function")editOp(arg);},70);}
+  else if(kind==="booking"){go("bookings");setTimeout(function(){editBooking(arg);},70);}
+  else if(kind==="tour"){openTour(arg);}
 }
 function referralRollup(){
   var m={};reservations.forEach(function(r){if(r.referral>0){var key=r.by||"Unassigned";m[key]=(m[key]||0)+r.referral;}});
@@ -1605,7 +1646,9 @@ function viewDashboard(){
     "</div>"+
     "<div id='payPanel' style='margin-top:16px'></div>"+
     profitBriefCard()+
-    (clashes.length?"<div class='card card-pad alert-warn' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px;color:var(--coral)'>⚠ Scheduling clashes ("+clashes.length+")</div>"+clashes.slice(0,5).map(function(c){return "<div class='s' style='margin:3px 0'>"+c.who+" ("+c.what+") double-booked: <b>"+c.a.tour+"</b> &amp; <b>"+c.b.tour+"</b></div>";}).join("")+"</div>":"")+
+    (function(){var al=buildAlerts();
+      if(!al.length)return "<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Alerts</div><div class='empty'>All clear — no scheduling clashes, overdue payments or unassigned operations. ✓</div></div>";
+      return "<div class='card card-pad' style='margin-top:16px;border-left:3px solid var(--coral)'><div class='h-sec' style='font-size:15px;margin-bottom:8px;color:var(--coral)'>⚠ Alerts ("+al.length+")</div>"+al.map(function(x){return "<div class='list-row' data-action='gotoAlert' data-arg='"+x.kind+"|"+x.arg+"' style='cursor:pointer'><div class='ic' style='background:"+(x.level==="err"?"#fbe7e4":"#fff4e0")+"'><svg viewBox='0 0 24 24' fill='none' stroke='"+(x.level==="err"?"var(--coral)":"var(--amber)")+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg></div><div class='meta'><div class='t' style='font-weight:500;white-space:normal'>"+x.text+"</div><div class='s'>Tap to open →</div></div></div>";}).join("")+"</div>";})()+
     "<div class='kpis' style='margin-top:16px'>"+
       kpi("Upcoming Tours",upcoming,"departures ahead","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
       kpi("Total Participants",totalParticipants,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
@@ -1746,6 +1789,15 @@ function renderBookings(){
 function editBooking(id){
   const b=bookings.find(x=>x.id===id);if(!b)return;
   const tOpts=tours.map(t=>"<option value='"+t.id+"' "+(t.id===b.tour?"selected":"")+">"+t.name+"</option>").join("");
+  /* Pre-fill the money fields from the tour that was set up at creation, so opening a
+     participant that came in via a form already shows Total / Deposit / Pending / Due
+     without re-typing. The booking's own values win once it has them. */
+  var _lt=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
+  var _defTotal=(b.totalOverride!=null&&b.totalOverride!=="")?b.totalOverride:((_lt&&_lt.tourCost)?_lt.tourCost:"");
+  var _defDeposit=(b.deposit)?b.deposit:((_lt&&_lt.tourDeposit)?_lt.tourDeposit:0);
+  var _defDue=b.lastPendingDate||((_lt&&_lt.due)?_lt.due:"");
+  var _totalNum=(_defTotal!==""?parseFloat(_defTotal)||0:bookingTotalCost(b));
+  var _defPending=Math.max(_totalNum-(parseFloat(_defDeposit)||0),0);
   modalForm("Edit booking","Update booking","<div class='form-grid'>"+
     "<div class='field full'><label>Tour</label><select class='input' id='eb_tour'>"+tOpts+"</select></div>"+
     "<div class='field'><label>Start date</label><input class='input' type='date' id='eb_start' value='"+(b.start||"")+"'></div>"+
@@ -1762,10 +1814,10 @@ function editBooking(id){
       "<option value='Paid' "+(b.pay==="Paid"?"selected":"")+">Paid</option>"+
       "<option value='Balance due' "+(b.pay==="Balance due"?"selected":"")+">Balance due</option>"+
     "</select></div>"+
-    "<div class='field'><label>Total Cost (₹) <span style='color:var(--ink-soft);font-weight:400'>blank = auto</span></label><input class='input mono' type='number' id='eb_total' value='"+(b.totalOverride!=null&&b.totalOverride!==""?b.totalOverride:"")+"' placeholder='"+bookingTotalCost(b)+"' oninput='ebRecalc()'></div>"+
-    "<div class='field'><label>Deposit / paid (₹)</label><input class='input mono' type='number' id='eb_deposit' value='"+(b.deposit||0)+"' oninput='ebRecalc()'></div>"+
-    "<div class='field'><label>Pending (₹)</label><input class='input mono' id='eb_pending' value='"+bookingPending(b)+"' readonly style='background:var(--surface-2)'></div>"+
-    "<div class='field'><label>Due date</label><input class='input' type='date' id='eb_lastpend' value='"+(b.lastPendingDate||"")+"'></div>"+
+    "<div class='field'><label>Total Cost (₹) <span style='color:var(--ink-soft);font-weight:400'>blank = auto</span></label><input class='input mono' type='number' id='eb_total' value='"+_defTotal+"' placeholder='"+bookingTotalCost(b)+"' oninput='ebRecalc()'></div>"+
+    "<div class='field'><label>Deposit / paid (₹)</label><input class='input mono' type='number' id='eb_deposit' value='"+_defDeposit+"' oninput='ebRecalc()'></div>"+
+    "<div class='field'><label>Pending (₹)</label><input class='input mono' id='eb_pending' value='"+_defPending+"' readonly style='background:var(--surface-2)'></div>"+
+    "<div class='field'><label>Due date</label><input class='input' type='date' id='eb_lastpend' value='"+_defDue+"'></div>"+
     "<div class='field full'><label>Notes</label><input class='input' id='eb_notes' value='"+(b.notes||"")+"'></div>"+
     "<div class='field full'><label>Quick actions</label><div style='display:flex;gap:8px;flex-wrap:wrap'>"+
       "<button type='button' class='btn btn-sea btn-sm' onclick=\"sendGuestForm('"+b.id+"')\">Guest form · WhatsApp</button>"+
@@ -2112,7 +2164,8 @@ function viewLogistics(){
     "<div id='logBody'></div>"+
   "</section>";
 }
-function logTab(t,el){document.querySelectorAll("#logTabs .tab").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");else document.querySelectorAll("#logTabs .tab").forEach(x=>{if(x.textContent.trim()===t)x.classList.add("active")});renderLog(t);}
+var _logTab="Operations Board"; /* remembered so a background refresh keeps you on Vehicles/Guides/etc. instead of snapping back to the board */
+function logTab(t,el){_logTab=t;document.querySelectorAll("#logTabs .tab").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");else document.querySelectorAll("#logTabs .tab").forEach(x=>{if(x.textContent.trim()===t)x.classList.add("active")});renderLog(t);}
 function opCard(o){
   var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};
   var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};
@@ -2452,8 +2505,12 @@ function syncBookingCustomers(b){
   var tourName=t?tourLabel(t):(b.customTour||"");
   /* mirror the booking's payment status onto the POC customer record */
   var payMap={"Fully Paid":"Paid","Partial":"Deposit","Unpaid":"Balance due"};
-  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end,pay:payMap[bookingPaymentStatus(b)]||"Deposit"});
-  if(b.members)String(b.members).split(/[,\n]/).forEach(function(nm){ensureCustomer(nm,{tourId:b.tour||"",tour:tourName,start:b.start,end:b.end});});
+  var pocPay=payMap[bookingPaymentStatus(b)]||"Deposit";
+  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end,pay:pocPay});
+  /* every other member of the party inherits the POC's payment status — and because
+     ensureCustomer updates pay when it's passed, changing the POC/tour status later
+     re-runs this and updates all members too. */
+  if(b.members)String(b.members).split(/[,\n]/).forEach(function(nm){ensureCustomer(nm,{tourId:b.tour||"",tour:tourName,start:b.start,end:b.end,pay:pocPay});});
 }
 function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
@@ -3229,8 +3286,10 @@ function saveEditTour(){
   t.tourDeposit=parseFloat(document.getElementById("et_deposit").value)||0;
   t.due=document.getElementById("et_due").value||"";
   syncTourPaymentToBookings(t);
+  /* cascade the tour's payment change onto every booking's customer + members */
+  bookings.filter(function(b){return b.tour===t.id;}).forEach(syncBookingCustomers);
   renderAccCalendar();renderAccommodation();
-  closeModal();renderTours();renderCalendar();renderBookings();
+  closeModal();renderTours();renderCalendar();renderBookings();renderCustomers();
 }
 /* Once the tour is fully paid (pending = 0) and its due date has passed, mark every
    booking on that tour "Fully Paid" so the Bookings section reflects it automatically. */
@@ -3329,18 +3388,30 @@ function savePost(){
 
 /* ===== TOUR DETAIL ===== */
 function markPoc(tid,bid){var t=tours.find(function(x){return x.id===tid;});if(!t)return;t.pocId=(t.pocId===bid?"":bid);persistData();openTour(tid);}
+/* Payment status for a whole tour: the POC booking's status if set, else derived
+   from the tour's own cost vs deposit entered at creation. */
+function tourPayStatus(t){
+  var poc=t.pocId?bookings.find(function(x){return x.id===t.pocId;}):null;
+  if(poc&&poc.pay)return poc.pay;
+  var cost=parseFloat(t.tourCost)||0,dep=parseFloat(t.tourDeposit)||0;
+  if(cost>0&&dep>=cost)return "Paid";
+  if(dep>0)return "Deposit";
+  return "Pending";
+}
+function payPill(ps){var cls=ps==="Paid"?"completed":(ps==="Deposit"?"open":"full");return "<span class='pill "+cls+"'>"+ps+"</span>";}
 function openTour(id){
   const t=tours.find(x=>x.id===id);if(!t)return;const b=booked(id),bs=bookings.filter(x=>x.tour===id),wl=waitlist[id]||[];
   var poc=bs.find(function(x){return x.id===t.pocId;});
+  var payStatus=tourPayStatus(t);
   document.getElementById("modal").innerHTML=
-    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span><h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2><div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span><h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
       "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Pax</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
       "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
         "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+t.startLoc+"</b></div>"+
-        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+"</div>"+
+        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+" "+payPill(payStatus)+"</div>"+
       "</div>"+
       (function(){var f=feeFor(t);var role=t.guideRole||"Lead";var payout=role==="Lead"?f.leadTotal:f.asstTotal;return "<div style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
         "<div><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → <b>"+role+" payout "+fmt(payout)+"</b></div>"+
@@ -3461,7 +3532,27 @@ var _pendingRefresh=false;
 function refreshUI(){
   var scrim=document.getElementById("scrim");
   if(scrim&&scrim.classList.contains("show")){_pendingRefresh=true;return;}
-  boot(true);
+  /* Background/data sync: update ONLY the current view's dynamic content in place —
+     never rebuild #content (which visibly flashed the whole page) and never
+     re-navigate (which bounced logistics back to the Operations board). The
+     dashboard is deliberately NOT re-rendered here, so it never visibly "refreshes
+     itself"; it updates on navigation or via the manual refresh button.
+     _sbApplying is raised so the render functions' persistData() side-effects don't
+     kick off a push loop against the data we just pulled. */
+  var wasApplying=_sbApplying;_sbApplying=true;
+  try{
+    if(curView==="tours")renderTours();
+    else if(curView==="calendar")renderCalendar();
+    else if(curView==="bookings")renderBookings();
+    else if(curView==="accommodation")renderAccommodation();
+    else if(curView==="customers")renderCustomers();
+    else if(curView==="crm")renderCRM();
+    else if(curView==="reservations"){renderReservations();renderGuides();}
+    else if(curView==="logistics")renderLog(_logTab);
+    else if(curView==="profit"&&typeof renderProfitCalc==="function")renderProfitCalc();
+    /* dashboard, calc, requests, settings: intentionally no visible refresh */
+  }catch(e){}
+  _sbApplying=wasApplying;
 }
 /* Desktop sidebar collapse — slides the menu off to the left so the work area gets
    the full width. Remembered per device. (On phones the hamburger already does this.) */
