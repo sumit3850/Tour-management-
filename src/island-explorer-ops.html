@@ -73,6 +73,16 @@ svg{display:block}
 .search input{border:none;outline:none;background:none;font-size:14px;width:100%;color:var(--ink)}
 .iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;position:relative}
 .iconbtn svg{width:19px;height:19px;stroke:var(--ink)}
+/* Desktop-only sidebar collapse: slides the sidebar off to the left, content expands */
+.sidecollapse{display:none}
+@media(min-width:861px){
+  .sidecollapse{display:grid}
+  .sidebar{transition:margin-left .25s ease}
+  body.side-collapsed .sidebar{margin-left:calc(var(--sidebar-w)*-1)}
+  body.side-collapsed .sidecollapse svg{transform:rotate(180deg)}
+}
+@keyframes ieoSpin{to{transform:rotate(360deg)}}
+.iconbtn.spinning svg{animation:ieoSpin .8s linear infinite}
 .iconbtn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--coral);border:1.5px solid var(--surface)}
 .content{padding:28px;max-width:1320px;width:100%;margin:0 auto}
 
@@ -467,7 +477,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app on this device
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 69</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 70</span></div>
   </div>
 </div>
 <div class="app">
@@ -482,10 +492,12 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
   <div class="scrim-side" id="scrimSide" onclick="toggleNav(false)"></div>
   <div class="main">
     <header class="topbar">
+      <button class="iconbtn sidecollapse" id="sideCollapseBtn" onclick="toggleSidebarCollapse()" title="Hide sidebar" aria-label="Hide sidebar"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg></button>
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 69</span>
+      <button class="iconbtn" id="viewRefreshBtn" onclick="refreshCurrentView()" title="Refresh this section" aria-label="Refresh this section"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 70</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -632,7 +644,7 @@ function importData(input){
     try{
       var p=JSON.parse(reader.result);applyStore(p.data||p);
       if(p.trips){tripLogs=p.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
-      persistData();boot();
+      persistData();boot(true);
       alert("Backup restored successfully.");
     }catch(e){alert("Could not read that file. Please choose a valid Island Explorer backup (.json).");}
   };
@@ -832,7 +844,7 @@ function clearAllData(){
      suspiciously smaller dataset" safety net (meant for surprise auto-pushes)
      doesn't block this deliberate action. */
   if(typeof cloudPush==="function")cloudPush(false);
-  boot();
+  boot(true);
   alert("All data cleared on this device and the cloud. Only entries you add from now on will appear.");
 }
 function pushAllToSheet(){
@@ -964,7 +976,7 @@ async function cloudPull(silent){
     sbApply(res.data.data);
     try{localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));}catch(e){}
     setLocalUpdated(cloudTs||new Date().toISOString());
-    boot();
+    refreshUI();
     _sbApplying=false;
     if(!silent)sbStatus("Pulled from cloud ✓ "+new Date().toLocaleTimeString(),"ok");
     return "applied";
@@ -987,7 +999,7 @@ async function cloudInit(){
        per-record state. If the tables don't exist yet, this just fails harmlessly and
        everything keeps working exactly as it did before this layer existed. */
     _perRecordActive=await pullAllRecords();
-    if(_perRecordActive)boot();
+    if(_perRecordActive)refreshUI();
     _syncBooting=false; /* the decisive comparison is done — normal timestamp bumping resumes */
     /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
        copy) and 'kept-local' (this device's copy was genuinely newer) both make a
@@ -1007,7 +1019,7 @@ async function cloudInit(){
 function cloudResync(){
   var c=sbConfig();if(!c||!c.auto||!sbClient())return;
   cloudPull(true);
-  if(_perRecordActive)pullAllRecords().then(function(ok){if(ok)boot();});
+  if(_perRecordActive)pullAllRecords().then(function(ok){if(ok)refreshUI();});
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden)cloudResync();});
 window.addEventListener("focus",cloudResync);
@@ -1454,7 +1466,7 @@ function renderView(v){
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
 function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
 function openScrim(){document.getElementById("scrim").classList.add("show")}
-function closeModal(){document.getElementById("scrim").classList.remove("show")}
+function closeModal(){document.getElementById("scrim").classList.remove("show");if(_pendingRefresh){_pendingRefresh=false;boot(true);}}
 
 /* ===== DASHBOARD ===== */
 /* ===== automation helpers ===== */
@@ -3026,7 +3038,7 @@ function viewSettings(){
     "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Every tour, booking, customer, vehicle, driver, guide, operation, reservation, quotation and trip log gets its <b>own row in its own table</b>, instead of one shared file being overwritten wholesale. A sync can only ever touch the specific record that changed — never wipe your whole dataset. Run the SQL below <b>once</b> in the Supabase SQL editor; the app detects the tables automatically on its next load — no further setup.</p>"+
     "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px'>"+
       "<button class='btn btn-sea btn-sm' onclick='pushAllRecords();alert(\"Pushed every record to its own table.\")'>Push all records ↑</button>"+
-      "<button class='btn btn-ghost btn-sm' onclick='pullAllRecords().then(function(ok){_perRecordActive=ok;if(ok){boot();alert(\"Pulled — per-record sync is active.\");}else{alert(\"Tables not found yet — run the SQL below in Supabase first.\");}})'>Pull all records ↓</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick='pullAllRecords().then(function(ok){_perRecordActive=ok;if(ok){boot(true);alert(\"Pulled — per-record sync is active.\");}else{alert(\"Tables not found yet — run the SQL below in Supabase first.\");}})'>Pull all records ↓</button>"+
     "</div>"+
     "<details><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
       "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;margin-top:8px;white-space:pre-wrap'>"+perRecordSetupSQL()+"</pre>"+
@@ -3383,15 +3395,54 @@ function dedupeBookings(){
   if(changed){bookings=out;persistData();}
 }
 /* ===== BOOT ===== */
-function boot(){
+function boot(keepView){
   dedupeBookings();
   ensureTourCodes();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewProfitCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
-  go("dashboard");
   renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderProfitCalc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();renderReservations();
-  navStack=[];document.getElementById("backBtn").classList.remove("show");
+  if(keepView&&TITLES[curView]){
+    go(curView,true); /* stay where the user is working — no navigation, no history reset */
+  }else{
+    go("dashboard");
+    navStack=[];document.getElementById("backBtn").classList.remove("show");
+  }
+}
+/* Background sync used to re-run boot(), which always ended in go("dashboard") — so
+   every auto-pull that applied fresh cloud data (every 45s, plus each tab-focus)
+   yanked the user off whatever screen they were working on. Background refreshes now
+   rebuild in place: same view, same nav history — and if a dialog is open, the
+   refresh waits until it's closed so an in-progress edit is never wiped mid-typing. */
+var _pendingRefresh=false;
+function refreshUI(){
+  var scrim=document.getElementById("scrim");
+  if(scrim&&scrim.classList.contains("show")){_pendingRefresh=true;return;}
+  boot(true);
+}
+/* Desktop sidebar collapse — slides the menu off to the left so the work area gets
+   the full width. Remembered per device. (On phones the hamburger already does this.) */
+function toggleSidebarCollapse(){
+  var on=document.body.classList.toggle("side-collapsed");
+  try{localStorage.setItem("ieo_side_collapsed",on?"1":"0");}catch(e){}
+  var b=document.getElementById("sideCollapseBtn");
+  if(b){b.title=on?"Show sidebar":"Hide sidebar";b.setAttribute("aria-label",b.title);}
+}
+try{if(localStorage.getItem("ieo_side_collapsed")==="1")toggleSidebarCollapse();}catch(e){}
+/* Manual refresh for whichever section is open: pulls the latest cloud data and
+   re-renders the current view in place. */
+async function refreshCurrentView(){
+  var btn=document.getElementById("viewRefreshBtn");
+  if(btn){if(btn.classList.contains("spinning"))return;btn.classList.add("spinning");}
+  try{
+    var c=sbConfig();
+    if(c&&c.auto&&sbClient()){
+      await cloudPull(true);
+      if(_perRecordActive)await pullAllRecords();
+    }
+  }catch(e){}
+  boot(true);
+  if(btn)btn.classList.remove("spinning");
 }
 boot();
 initAuth().then(function(canSync){if(canSync)cloudInit();});
