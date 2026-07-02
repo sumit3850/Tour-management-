@@ -195,6 +195,7 @@ td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
 .view{display:none;animation:fade .25s ease}
+body.no-anim .view{animation:none} /* background data refresh — rebuild without the entry animation */
 .view.active{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -477,7 +478,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app on this device
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 70</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 71</span></div>
   </div>
 </div>
 <div class="app">
@@ -497,7 +498,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
       <button class="iconbtn" id="viewRefreshBtn" onclick="refreshCurrentView()" title="Refresh this section" aria-label="Refresh this section"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 70</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 71</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -999,7 +1000,7 @@ async function cloudInit(){
        per-record state. If the tables don't exist yet, this just fails harmlessly and
        everything keeps working exactly as it did before this layer existed. */
     _perRecordActive=await pullAllRecords();
-    if(_perRecordActive)refreshUI();
+    if(_perRecordActive&&_recordsChanged)refreshUI();
     _syncBooting=false; /* the decisive comparison is done — normal timestamp bumping resumes */
     /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
        copy) and 'kept-local' (this device's copy was genuinely newer) both make a
@@ -1019,7 +1020,7 @@ async function cloudInit(){
 function cloudResync(){
   var c=sbConfig();if(!c||!c.auto||!sbClient())return;
   cloudPull(true);
-  if(_perRecordActive)pullAllRecords().then(function(ok){if(ok)refreshUI();});
+  if(_perRecordActive)pullAllRecords().then(function(ok){if(ok&&_recordsChanged)refreshUI();});
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden)cloudResync();});
 window.addEventListener("focus",cloudResync);
@@ -1078,18 +1079,27 @@ async function fetchRecordsForKey(key){
    everything FIRST and only applies it once all fetches succeed — if any table is
    missing partway through, nothing gets mutated, so a partial read can never leave
    some collections on per-record data and others stale/untouched. */
+/* _recordsChanged: set by each pull to whether the fetched data actually differs
+   from what this device already had. Callers use it to skip the UI rebuild when
+   nothing changed — otherwise the every-45s poll visibly "refreshed" the screen
+   (fade-in replay + scroll reset) even though the data was identical. */
+var _recordsChanged=false;
 async function pullAllRecords(){
   var cl=sbClient();if(!cl)return false;
   try{
     var fetched={};
     for(var i=0;i<_recordKeys.length;i++)fetched[_recordKeys[i]]=await fetchRecordsForKey(_recordKeys[i]);
+    var changed=false;
     _recordKeys.forEach(function(key){
       var entry=recStoreEntry(key);if(!entry)return;
       var items=fetched[key];
-      entry.set(items);
       var snap={};items.forEach(function(item){var id=recId(key,item);if(id)snap[id]=JSON.stringify(item);});
+      var prev=_lastRecordSnapshot[key];
+      if(!prev||Object.keys(prev).length!==Object.keys(snap).length||Object.keys(snap).some(function(id){return prev[id]!==snap[id];}))changed=true;
+      entry.set(items);
       _lastRecordSnapshot[key]=snap;
     });
+    _recordsChanged=changed;
     return true;
   }catch(e){return false;}
 }
@@ -3403,7 +3413,14 @@ function boot(keepView){
   document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewProfitCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderProfitCalc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
-    go(curView,true); /* stay where the user is working — no navigation, no history reset */
+    /* In-place rebuild: no navigation, no history reset — and visually silent.
+       Suppress the .view fade-in (it replays on every innerHTML rebuild, which
+       reads as the page "refreshing itself") and keep the scroll position. */
+    document.body.classList.add("no-anim");
+    var _sx=window.scrollX,_sy=window.scrollY;
+    go(curView,true);
+    window.scrollTo(_sx,_sy);
+    setTimeout(function(){document.body.classList.remove("no-anim");},300);
   }else{
     go("dashboard");
     navStack=[];document.getElementById("backBtn").classList.remove("show");
