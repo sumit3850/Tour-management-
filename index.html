@@ -478,14 +478,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 73</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 74</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 73</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 74</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -615,11 +615,19 @@ function applyStore(d){if(!d)return;var snap=STORE.some(function(s){return d[s.k
    device's stale copy. Blocking the timestamp bump (not the save itself) during this
    window keeps the ORIGINAL local timestamp intact for that first, decisive comparison. */
 var _syncBooting=true;
+/* _localDirty: this device has a change that hasn't reached the cloud yet.
+   _pushInFlight: a flush is currently uploading. A background PULL must never run
+   while either is set — otherwise it overwrites your just-made add/delete with the
+   cloud's older copy (which doesn't have your change), and resets the change-tracking
+   snapshot so your pending push then thinks nothing changed and drops it. That race
+   is exactly why deletions "came back" and additions "disappeared". */
+var _localDirty=false,_pushInFlight=false;
 function persistData(){
   try{
     localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));
     if(!_syncBooting)localStorage.setItem("ieo_updated",new Date().toISOString());
   }catch(e){}
+  if(!_syncBooting&&!_sbApplying)_localDirty=true;
   cloudAutoPush();
   if(typeof scheduleRecordPush==="function")scheduleRecordPush();
   if(typeof scheduleSheetSync==="function")scheduleSheetSync();
@@ -951,6 +959,7 @@ async function cloudPush(silent){
     if(res.error)throw res.error;
     setLocalUpdated(ts);
     _lastKnownCloudTotal=totalRecordCount();
+    if(!_perRecordActive)_localDirty=false; /* blob mode: this push carried the change up */
     if(!silent)sbStatus("Pushed to cloud ✓ "+new Date().toLocaleTimeString(),"ok");
   }catch(e){if(!silent)sbStatus("Push failed: "+(e.message||e),"err");}
 }
@@ -1018,10 +1027,25 @@ async function cloudInit(){
    session left open never saw changes made on a laptop until it was closed and
    reopened. Now re-pull whenever the tab/app regains focus, and poll every 45s
    while it's visible, so every device converges on the newest cloud copy. */
-function cloudResync(){
+async function cloudResync(){
   var c=sbConfig();if(!c||!c.auto||!sbClient())return;
-  cloudPull(true);
-  if(_perRecordActive)pullAllRecords().then(function(ok){if(ok&&_recordsChanged)refreshUI();});
+  /* If this device has unsynced local edits, PUSH them first and skip the pull this
+     round — the next resync (focus / 45s) will bring down remote changes. This is the
+     fix for adds/deletes being clobbered by a background pull that raced the save. */
+  if(_localDirty||_pushInFlight){flushLocal();return;}
+  /* Pull the blob FIRST, then the per-record tables — sequentially, so the per-record
+     data (the precise source of truth for list collections) always wins over the
+     blob's copy of those same collections instead of racing it. */
+  await cloudPull(true);
+  if(_perRecordActive){var ok=await pullAllRecords();if(ok&&_recordsChanged)refreshUI();}
+}
+/* Upload every pending local change now (both sync layers), then clear the dirty flags. */
+function flushLocal(){
+  clearTimeout(_sbPushTimer);clearTimeout(_recPushTimer);
+  _pushInFlight=true;
+  var jobs=[cloudPush(true)];
+  if(_perRecordActive)jobs.push(pushAllRecords());
+  Promise.all(jobs).then(function(){_pushInFlight=false;_localDirty=false;}).catch(function(){_pushInFlight=false;});
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden)cloudResync();});
 window.addEventListener("focus",cloudResync);
@@ -1068,9 +1092,9 @@ async function pushRecordsForKey(key){
   }catch(e){/* table likely doesn't exist yet — per-record sync just stays inactive */}
 }
 var _recordKeys=PER_RECORD_KEYS.concat(["tripLogs"]);
-function pushAllRecords(){_recordKeys.forEach(pushRecordsForKey);}
+function pushAllRecords(){return Promise.all(_recordKeys.map(pushRecordsForKey)).then(function(){_localDirty=false;});}
 var _recPushTimer=null;
-function scheduleRecordPush(){if(!_perRecordActive)return;clearTimeout(_recPushTimer);_recPushTimer=setTimeout(pushAllRecords,1500);}
+function scheduleRecordPush(){if(!_perRecordActive||_sbApplying)return;clearTimeout(_recPushTimer);_recPushTimer=setTimeout(pushAllRecords,1500);}
 async function fetchRecordsForKey(key){
   var res=await sbClient().from(recTable(key)).select("id,data");
   if(res.error)throw res.error;
@@ -1115,7 +1139,13 @@ function loadLogs(){
   return [];
 }
 let tripLogs=loadLogs();
-function saveLogs(){try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs))}catch(e){}cloudAutoPush();}
+function saveLogs(){try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs))}catch(e){}
+  if(!_syncBooting&&!_sbApplying)_localDirty=true;
+  cloudAutoPush();
+  /* trip logs are a per-record collection too — was previously only pushed to the blob,
+     so a per-record pull could wipe locally-logged trips. Push them to their table now. */
+  if(typeof scheduleRecordPush==="function")scheduleRecordPush();
+}
 
 function driverKey(name){
   let h=2166136261>>>0;const s="ISLANDEXPLORER::"+(name||"").trim().toLowerCase();
