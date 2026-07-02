@@ -67,10 +67,9 @@ function pick(v){chosen=v;document.querySelectorAll(".opt").forEach(function(o){
 async function load(){
   if(!sb||!rid){showErr("This link is invalid or the service is unavailable.");return;}
   try{
-    var res=await sb.from("workspaces").select("data").eq("id","island-explorer").maybeSingle();
-    var list=(res.data&&res.data.data&&res.data.data.reservations)||[];
-    var r=list.find(function(x){return x.id===rid;});
-    if(!r){showErr("This request could not be found. It may have been withdrawn.");return;}
+    var res=await sb.rpc("get_reservation_public",{p_rid:rid});
+    var r=res.data;
+    if(res.error||!r||r.error){showErr("This request could not be found. It may have been withdrawn.");return;}
     document.getElementById("detail").innerHTML=
       "<div class='det'>"+
         "<div class='row'><span>Tour</span><b>"+(r.tour||"—")+"</b></div>"+
