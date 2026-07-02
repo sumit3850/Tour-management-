@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Island Explorer Ops</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<meta name="theme-color" content="#143a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Island Explorer">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -456,7 +463,11 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 65</span></div>
+    <button class="lg-btn" id="lgInstallBtn" style="display:none;background:var(--surface);color:var(--forest);border:1.5px solid var(--forest);margin-top:10px" onclick="installApp()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app on this device
+    </button>
+    <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 66</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +485,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 65</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 66</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -3345,6 +3356,38 @@ function initAuth(){
   }).catch(function(){showLogin();});
   cl.auth.onAuthStateChange(function(_e,session){if(session&&session.user){applyUser(session.user);hideLogin();}});
 }
+
+/* ===== Install as an app (PWA) — button + hint shown on the sign-in screen ===== */
+var _deferredInstallPrompt=null;
+function isStandaloneApp(){return window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();
+  _deferredInstallPrompt=e;
+  if(isStandaloneApp())return;
+  var btn=document.getElementById("lgInstallBtn");if(btn)btn.style.display="block";
+});
+window.addEventListener("appinstalled",function(){
+  _deferredInstallPrompt=null;
+  var btn=document.getElementById("lgInstallBtn");if(btn)btn.style.display="none";
+  var hint=document.getElementById("lgInstallHint");if(hint)hint.style.display="none";
+});
+function installApp(){
+  if(!_deferredInstallPrompt)return;
+  _deferredInstallPrompt.prompt();
+  _deferredInstallPrompt.userChoice.then(function(){_deferredInstallPrompt=null;var btn=document.getElementById("lgInstallBtn");if(btn)btn.style.display="none";});
+}
+(function initInstallHint(){
+  if(isStandaloneApp())return; /* already installed/opened as an app — nothing to offer */
+  var ua=navigator.userAgent||"";
+  var isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  var isSafari=/^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  if(isIOS){
+    var hint=document.getElementById("lgInstallHint");
+    if(hint){hint.style.display="block";hint.innerHTML=isSafari?"<b>Install on iPhone/iPad:</b> tap the Share icon <span style='font-family:monospace'>⬆</span>, then \"Add to Home Screen\".":"Open this page in Safari to install it on your Home Screen.";}
+  }
+  /* Android/desktop Chrome: the button appears automatically via beforeinstallprompt above, if/when the browser decides the app qualifies. */
+})();
 function authToggleMode(){
   _authMode=(_authMode==="signin")?"signup":"signin";
   lgClearMsg();

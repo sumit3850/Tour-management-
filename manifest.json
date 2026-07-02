@@ -1,0 +1,15 @@
+{
+  "name": "Island Explorer Birding Tours — Ops Console",
+  "short_name": "Island Explorer",
+  "description": "Tour, booking, guide and logistics console for Island Explorer Birding Tours.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef3f0",
+  "theme_color": "#143a2e",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
