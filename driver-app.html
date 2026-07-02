@@ -82,21 +82,16 @@ async function doLogin(){
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
   if(!sb){showErr("Service unavailable right now. Please try again shortly.");return;}
   try{
-    var res=await sb.from("workspaces").select("data").eq("id","island-explorer").maybeSingle();
-    var data=(res.data&&res.data.data)||{};
-    var drivers=data.drivers||[];
-    var roster=data.operators||[];
-    var d=drivers.find(function(x){return normPhone(x.phone)===phone&&String(x.code||"")===code;});
-    if(!d){
-      var op=roster.find(function(x){return normPhone(x.phone)===phone&&String(x.code||"")===code&&(x.role||"").toLowerCase()==="driver";});
-      if(op)d={name:op.name,phone:op.phone,code:op.code,veh:""};
-    }
-    if(!d){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
-    myDriver=d;
-    allOps=data.ops||[];
+    /* Server-side login check (RPC, security definer) — the driver directory and
+       full ops table are never sent to the browser; only this driver's own record
+       and their own assigned ops come back. */
+    var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
+    if(res.error||!res.data||res.data.error){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    myDriver=res.data.driver;
+    allOps=res.data.ops||[];
     document.getElementById("gate").style.display="none";
     document.getElementById("app").style.display="block";
-    document.getElementById("who").textContent="Welcome, "+d.name;
+    document.getElementById("who").textContent="Welcome, "+myDriver.name;
     renderTrips();renderLogForm();
   }catch(e){showErr("Couldn't sign you in. Please try again.");}
 }

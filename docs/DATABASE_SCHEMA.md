@@ -1,5 +1,11 @@
 # Per-record database
 
+> **Security note:** the SQL below (and the `workspaces` table before it) grants
+> full read/write to the public `anon` key — fine while you're only your own
+> tester, not once real client data is in there. After running this setup,
+> also run `docs/SECURE_ACCESS.md` once to lock every table to your signed-in
+> team and close that off.
+
 The app has always synced through a single Supabase table (`workspaces`): one row
 per device-group, holding the **entire dataset as one JSON blob**, replaced
 wholesale on every push. That's simple, but it means a sync bug (or a device with
