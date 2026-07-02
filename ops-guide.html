@@ -63,7 +63,7 @@ const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const presetGuide=(new URLSearchParams(location.search).get("guide")||"").trim();
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
-var myGuide=null,allOps=[];
+var myGuide=null,allOps=[],allVehicles=[],allDrivers=[];
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
@@ -89,7 +89,10 @@ async function doLogin(){
     }
     if(!g){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
     myGuide=g;
-    allOps=(res.data&&res.data.data&&res.data.data.ops)||[];
+    var data=(res.data&&res.data.data)||{};
+    allOps=data.ops||[];
+    allVehicles=data.vehicles||[];
+    allDrivers=data.drivers||[];
     document.getElementById("gate").style.display="none";
     document.getElementById("who").textContent="Operations for "+g.name;
     renderList();
@@ -102,14 +105,17 @@ function renderList(){
   var list=document.getElementById("list");list.style.display="block";
   var mine=myOps();
   if(!mine.length){list.innerHTML="<div class='empty'>No operations assigned to you yet.</div>";return;}
-  list.innerHTML=mine.map(function(o,idx){
+  list.innerHTML=mine.map(function(o){
     var cls=o.status==="Withdrawn"||o.status==="Declined"?"warn":(o.status==="Completed"?"ok":"");
-    return "<div class='card'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+cls+"'>"+(o.status||"Scheduled")+"</span></div>"+
+    var v=allVehicles.find(function(x){return x.name===o.veh;})||{};
+    var d=allDrivers.find(function(x){return x.name===o.driver;})||{};
+    return "<div class='card' id='card_"+o.id+"'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+cls+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
+      (o.tourId?"<div class='dates mono'>"+o.tourId+"</div>":"")+
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
-      "<div class='rows'>"+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
+      "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
-      "<div class='acts'>"+
+      "<div class='acts' id='acts_"+o.id+"'>"+
         "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
         "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
         "<button onclick=\"toggleReason('"+o.id+"','Withdrawn')\">Withdrawn</button>"+
@@ -118,6 +124,11 @@ function renderList(){
       "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
     "</div>";
   }).join("");
+}
+function setBusy(opId,busy,label){
+  var box=document.getElementById("acts_"+opId);if(!box)return;
+  box.querySelectorAll("button").forEach(function(b){b.disabled=busy;b.style.opacity=busy?"0.5":"1";});
+  if(busy&&label){var p=document.getElementById("statuspill_"+opId);if(p)p.textContent=label;}
 }
 function toggleReason(opId,status){
   document.querySelectorAll(".reasonbox").forEach(function(b){if(b.id!=="reason_"+opId)b.style.display="none";});
@@ -134,15 +145,17 @@ async function submitReason(opId){
 async function setOpStatus(opId,status){await postStatus(opId,status,"");}
 async function postStatus(opId,status,reason){
   if(!sb){showErr("Service unavailable right now.");return;}
+  showErr("");
+  setBusy(opId,true,"Saving…");
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),
     data:{opId:opId,newStatus:status,reason:reason,guide:myGuide.name}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
-    if(up.error){showErr("Could not update: "+up.error.message);return;}
+    if(up.error){setBusy(opId,false);showErr("Could not update: "+up.error.message);return;}
     var o=allOps.find(function(x){return x.id===opId;});
     if(o){o.status=status;if(reason){o.guideFeedback=reason;o.guideFeedbackAt=rec.created_at;}}
     renderList();
-  }catch(e){showErr("Network error. Please try again.");}
+  }catch(e){setBusy(opId,false);showErr("Network error. Please try again.");}
 }
 </script>
 </body>
