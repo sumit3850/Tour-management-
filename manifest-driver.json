@@ -1,0 +1,15 @@
+{
+  "name": "Island Explorer — Driver App",
+  "short_name": "Driver App",
+  "description": "Log your trips for Island Explorer Birding Tours.",
+  "start_url": "./driver-app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef1f6",
+  "theme_color": "#143a2e",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

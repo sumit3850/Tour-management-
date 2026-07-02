@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Island Explorer — Driver App</title>
+<link rel="manifest" href="manifest-driver.json">
+<meta name="theme-color" content="#143a2e">
+<link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -44,6 +47,9 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <img src="assets/logo.png" alt="Island Explorer Birding Tours" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('brandtext');if(f)f.style.display='block';}">
     <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
     <h1 id="who">Sign in to log your trips</h1>
+    <button id="installBtn" onclick="installApp()" style="display:flex;align-items:center;gap:7px;width:fit-content;margin:12px auto 0;padding:9px 15px;background:var(--surface);color:var(--forest);border:1.5px solid var(--forest);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
+    </button>
   </div>
   <div id="err" class="err" style="display:none"></div>
   <div class="ok-box" id="okbox"></div>
@@ -67,6 +73,20 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+/* ===== Install as an app (PWA) — always-visible button, instructions fallback ===== */
+var _deferredInstallPrompt=null;
+function isStandaloneApp(){return (window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;}
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferredInstallPrompt=e;});
+window.addEventListener("appinstalled",function(){_deferredInstallPrompt=null;var b=document.getElementById("installBtn");if(b){b.lastChild.textContent="App installed ✓";b.style.opacity="0.7";}});
+function installApp(){
+  if(_deferredInstallPrompt){_deferredInstallPrompt.prompt();_deferredInstallPrompt.userChoice.then(function(){_deferredInstallPrompt=null;});return;}
+  if(isStandaloneApp()){alert("The app is already installed on this device — open it from your home screen.");return;}
+  var ua=navigator.userAgent||"";
+  var isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  if(isIOS){alert("To install on iPhone/iPad:\n\n1. Tap the Share button (square with an up-arrow) at the bottom of Safari.\n2. Choose \"Add to Home Screen\".");return;}
+  alert("To install:\n\nOpen your browser menu (⋮ or ⋯) and choose \"Install app\" or \"Add to Home screen\".\n\nIf you don't see it, the app may already be installed, or try opening this site in Chrome.");
+}
 var myDriver=null,allOps=[];
 var todayISO=new Date().toISOString().slice(0,10);
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
