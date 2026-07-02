@@ -474,21 +474,21 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <button class="lg-btn" id="lgInstallBtn" style="display:none;background:var(--surface);color:var(--forest);border:1.5px solid var(--forest);margin-top:10px" onclick="installApp()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app on this device
+    <button id="lgInstallBtn" style="display:flex;align-items:center;gap:7px;width:fit-content;margin:14px auto 0;padding:9px 15px;background:var(--surface);color:var(--forest);border:1.5px solid var(--forest);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer" onclick="installApp()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 71</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 72</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 72</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
-    <div class="nav-foot"><div class="av">SK</div><div><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div></div>
+    <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="scrim-side" id="scrimSide" onclick="toggleNav(false)"></div>
   <div class="main">
@@ -498,8 +498,6 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
       <button class="iconbtn" id="viewRefreshBtn" onclick="refreshCurrentView()" title="Refresh this section" aria-label="Refresh this section"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 71</span>
-      <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
     <nav class="bottom-nav" id="bottomNav">
@@ -517,7 +515,10 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 <script>
 
 const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
-const todayISO="2026-06-14";
+/* Real current date (local time) — was hardcoded to a sample date, which froze
+   "today"/"this month" stats (Daily Activity km, trips today, active vehicles)
+   and calendar highlighting in the past. */
+const todayISO=(function(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
 const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session - Full Day","guided-night":"Guided Session - Night","guided-half":"Guided Session - Half Day",narcondam:"Narcondam Expedition",anbirding:"A & N Birding Expeditions",custom:"Custom"};
 const TOURCOLORS=["#1b4d3e","#107a86","#dd9a2b","#8a3d70","#3a527d","#c2603f","#5b8c3e","#a14b8a"];
 const XBTN="<button class='x' onclick='closeModal()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg></button>";
@@ -1180,14 +1181,11 @@ const NAV=[
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
   ["profit","Profit Calculator","M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"],
-  ["logistics","Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
+  ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["requests","Requests / Forms","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
-  ["group","Growth"],
-  ["social","Social Media","M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4"],
-  ["ai","AI Assistant","M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-1 8H9a4 4 0 0 1-1-8V6a4 4 0 0 1 4-4zM9 21h6M12 17v4"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
@@ -1468,7 +1466,6 @@ function renderView(v){
   else if(v==="reservations"){renderReservations();renderGuides();loadSubmissions(false);startSubPoll();}
   else if(v==="settings")refreshSettings();
   else if(v==="logistics"){renderLog();loadSubmissions(false);startSubPoll();}
-  else if(v==="social")renderSocial();
   else if(v==="calc")calc();
   else if(v==="profit")renderProfitCalc();
   else if(v==="dashboard")refreshDashboard();
@@ -1567,7 +1564,6 @@ function viewDashboard(){
     (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+tourLabel(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
   "</div>";
   return "<section class='view' id='v-dashboard'>"+
-    "<div class='section-head'><div><div class='eyebrow'>Overview</div><div class='h-sec'>Dashboard</div></div><button class='btn btn-ghost btn-sm' onclick='dashRefresh()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Refresh</button></div>"+
     "<div class='qa-grid'>"+
       qaTile("Create tour","M12 5v14M5 12h14","openCreateTour()")+
       qaTile("Add booking","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11","openAddBooking()")+
@@ -3410,8 +3406,8 @@ function boot(keepView){
   ensureTourCodes();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewProfitCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSocial(),viewAI(),viewSettings()].join("");
-  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderProfitCalc();renderLog();renderCRM();renderSocial();renderCustomers();renderOperators();renderReservations();
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewCalc(),viewProfitCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
+  renderTours();renderCalendar();renderBookings();renderAccommodation();calc();renderProfitCalc();renderLog();renderCRM();renderCustomers();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
     /* In-place rebuild: no navigation, no history reset — and visually silent.
        Suppress the .view fade-in (it replays on every innerHTML rebuild, which
@@ -3508,21 +3504,31 @@ function initAuth(){
 var _deferredInstallPrompt=null;
 function isStandaloneApp(){return window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+/* The install button on the sign-in screen is ALWAYS visible now (it no longer
+   hides itself after install or when no native prompt is available). We just
+   capture the native prompt when the browser offers it; installApp() falls back
+   to platform instructions when there's no prompt (iOS, already-installed, or a
+   browser that hasn't fired the event yet). */
 window.addEventListener("beforeinstallprompt",function(e){
   e.preventDefault();
   _deferredInstallPrompt=e;
-  if(isStandaloneApp())return;
-  var btn=document.getElementById("lgInstallBtn");if(btn)btn.style.display="block";
 });
 window.addEventListener("appinstalled",function(){
   _deferredInstallPrompt=null;
-  var btn=document.getElementById("lgInstallBtn");if(btn)btn.style.display="none";
-  var hint=document.getElementById("lgInstallHint");if(hint)hint.style.display="none";
+  var btn=document.getElementById("lgInstallBtn");
+  if(btn){btn.lastChild.textContent="App installed ✓";btn.style.opacity="0.7";}
 });
 function installApp(){
-  if(!_deferredInstallPrompt)return;
-  _deferredInstallPrompt.prompt();
-  _deferredInstallPrompt.userChoice.then(function(){_deferredInstallPrompt=null;var btn=document.getElementById("lgInstallBtn");if(btn)btn.style.display="none";});
+  if(_deferredInstallPrompt){
+    _deferredInstallPrompt.prompt();
+    _deferredInstallPrompt.userChoice.then(function(){_deferredInstallPrompt=null;});
+    return;
+  }
+  if(isStandaloneApp()){alert("The app is already installed on this device — open it from your home screen.");return;}
+  var ua=navigator.userAgent||"";
+  var isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  if(isIOS){alert("To install on iPhone/iPad:\n\n1. Tap the Share button (square with an up-arrow) at the bottom of Safari.\n2. Choose \"Add to Home Screen\".");return;}
+  alert("To install:\n\nOpen your browser menu (⋮ or ⋯) and choose \"Install app\" or \"Add to Home screen\".\n\nIf you don't see it, the app may already be installed, or try opening this site in Chrome.");
 }
 (function initInstallHint(){
   if(isStandaloneApp())return; /* already installed/opened as an app — nothing to offer */
