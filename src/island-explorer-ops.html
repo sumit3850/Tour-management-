@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 63</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 64</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 63</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 64</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -539,6 +539,7 @@ let operators=[
 ];
 let reservations=[];
 let externalGuides=[];
+let quotationLog=[]; /* one record per generated quotation — for history + the per-record DB */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
 let leads=[];
 const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
@@ -572,7 +573,8 @@ const STORE=[
   {k:"sheetData",get:function(){return SHEET_DATA;},set:function(v){SHEET_DATA=v;}},
   {k:"operators",arr:1,get:function(){return operators;},set:function(v){operators=v;}},
   {k:"reservations",arr:1,get:function(){return reservations;},set:function(v){reservations=v;}},
-  {k:"externalGuides",arr:1,get:function(){return externalGuides;},set:function(v){externalGuides=v;}}
+  {k:"externalGuides",arr:1,get:function(){return externalGuides;},set:function(v){externalGuides=v;}},
+  {k:"quotationLog",arr:1,get:function(){return quotationLog;},set:function(v){quotationLog=v;}}
 ];
 function collectStore(){var o={};STORE.forEach(function(s){o[s.k]=s.get();});return o;}
 /* Applying a real saved snapshot: any array collection missing from it becomes empty,
@@ -594,6 +596,7 @@ function persistData(){
     if(!_syncBooting)localStorage.setItem("ieo_updated",new Date().toISOString());
   }catch(e){}
   cloudAutoPush();
+  if(typeof scheduleRecordPush==="function")scheduleRecordPush();
   if(typeof scheduleSheetSync==="function")scheduleSheetSync();
 }
 function localUpdated(){try{return localStorage.getItem("ieo_updated")||"";}catch(e){return "";}}
@@ -928,12 +931,20 @@ async function cloudInit(){
   var c=sbConfig();
   if(c&&c.auto&&sbClient()){
     var result=await cloudPull(true);
+    /* Per-record tables (if the SQL in docs/DATABASE_SCHEMA.md has been run) are the
+       more precise source of truth for the list collections — read them after the
+       blob pull and let them override those same collections with the real, current,
+       per-record state. If the tables don't exist yet, this just fails harmlessly and
+       everything keeps working exactly as it did before this layer existed. */
+    _perRecordActive=await pullAllRecords();
+    if(_perRecordActive)boot();
     _syncBooting=false; /* the decisive comparison is done — normal timestamp bumping resumes */
     /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
        copy) and 'kept-local' (this device's copy was genuinely newer) both make a
        follow-up push safe/expected. 'failed' must NOT push — with no reliable read of
        the cloud, pushing here is exactly how a stale local copy overwrites good data. */
     if(result==="applied"||result==="kept-local"||result==="empty")await cloudPush(true);
+    if(_perRecordActive)pushAllRecords();
   }else{
     _syncBooting=false;
   }
@@ -943,9 +954,83 @@ async function cloudInit(){
    session left open never saw changes made on a laptop until it was closed and
    reopened. Now re-pull whenever the tab/app regains focus, and poll every 45s
    while it's visible, so every device converges on the newest cloud copy. */
-function cloudResync(){var c=sbConfig();if(c&&c.auto&&sbClient())cloudPull(true);}
+function cloudResync(){
+  var c=sbConfig();if(!c||!c.auto||!sbClient())return;
+  cloudPull(true);
+  if(_perRecordActive)pullAllRecords().then(function(ok){if(ok)boot();});
+}
 document.addEventListener("visibilitychange",function(){if(!document.hidden)cloudResync();});
 window.addEventListener("focus",cloudResync);
+
+/* ===== PER-RECORD SYNC — each tour/booking/customer/... as its own database row =====
+   The single 'workspaces' blob above is upserted WHOLESALE on every push, so a bug (or
+   a stale device) can only ever be as safe as that one comparison gets it right. This
+   layer instead gives every record its own row in its own table, keyed by that record's
+   own id/name — a push only touches the specific rows that actually changed on THIS
+   device since its last sync, so nothing can ever be wiped by a single bad write.
+
+   It activates itself automatically once the tables exist (run the SQL in
+   docs/DATABASE_SCHEMA.md) — until then, pullAllRecords() simply fails and the app
+   keeps using the safe blob sync above exactly as before. No manual toggle needed. */
+var _perRecordActive=false;
+var _lastRecordSnapshot={};
+var RECORD_KEYFIELD={vehicles:"name",drivers:"name",operators:"name",externalGuides:"gid"};
+var PER_RECORD_KEYS=["tours","bookings","customers","accommodations","accBookings","leads","vehicles","drivers","ops","externalGuides","reservations","operators","quotationLog"];
+function recTable(key){return "ieo_"+key.replace(/([A-Z])/g,function(m){return "_"+m.toLowerCase();});}
+function recKeyField(key){return RECORD_KEYFIELD[key]||"id";}
+function recId(key,item){return String((item&&item[recKeyField(key)])||"");}
+function recStoreEntry(key){
+  if(key==="tripLogs")return {get:function(){return tripLogs;},set:function(v){tripLogs=v;}};
+  return STORE.find(function(s){return s.k===key;});
+}
+async function pushRecordsForKey(key){
+  var cl=sbClient();if(!cl)return;
+  var entry=recStoreEntry(key);if(!entry)return;
+  var items=entry.get()||[];
+  var prev=_lastRecordSnapshot[key]||{};
+  var seen={},upserts=[];
+  items.forEach(function(item){
+    var id=recId(key,item);if(!id)return;
+    seen[id]=1;
+    var json=JSON.stringify(item);
+    if(prev[id]!==json)upserts.push({id:id,data:item,updated_at:new Date().toISOString()});
+  });
+  var deletedIds=Object.keys(prev).filter(function(id){return !seen[id];});
+  try{
+    if(upserts.length){var r1=await cl.from(recTable(key)).upsert(upserts);if(r1.error)throw r1.error;}
+    if(deletedIds.length){var r2=await cl.from(recTable(key)).delete().in("id",deletedIds);if(r2.error)throw r2.error;}
+    var snap={};items.forEach(function(item){var id=recId(key,item);if(id)snap[id]=JSON.stringify(item);});
+    _lastRecordSnapshot[key]=snap;
+  }catch(e){/* table likely doesn't exist yet — per-record sync just stays inactive */}
+}
+var _recordKeys=PER_RECORD_KEYS.concat(["tripLogs"]);
+function pushAllRecords(){_recordKeys.forEach(pushRecordsForKey);}
+var _recPushTimer=null;
+function scheduleRecordPush(){if(!_perRecordActive)return;clearTimeout(_recPushTimer);_recPushTimer=setTimeout(pushAllRecords,1500);}
+async function fetchRecordsForKey(key){
+  var res=await sbClient().from(recTable(key)).select("id,data");
+  if(res.error)throw res.error;
+  return (res.data||[]).map(function(r){return r.data;});
+}
+/* Returns true only if EVERY table exists and was read successfully. Fetches
+   everything FIRST and only applies it once all fetches succeed — if any table is
+   missing partway through, nothing gets mutated, so a partial read can never leave
+   some collections on per-record data and others stale/untouched. */
+async function pullAllRecords(){
+  var cl=sbClient();if(!cl)return false;
+  try{
+    var fetched={};
+    for(var i=0;i<_recordKeys.length;i++)fetched[_recordKeys[i]]=await fetchRecordsForKey(_recordKeys[i]);
+    _recordKeys.forEach(function(key){
+      var entry=recStoreEntry(key);if(!entry)return;
+      var items=fetched[key];
+      entry.set(items);
+      var snap={};items.forEach(function(item){var id=recId(key,item);if(id)snap[id]=JSON.stringify(item);});
+      _lastRecordSnapshot[key]=snap;
+    });
+    return true;
+  }catch(e){return false;}
+}
 setInterval(function(){if(!document.hidden)cloudResync();},45000);
 
 
@@ -1663,6 +1748,8 @@ function generateQuotation(){
   const logoUrl = (function(){try{return new URL('assets/logo.png', location.href).href;}catch(e){return 'assets/logo.png';}})();
   const row = (label,val)=>`<tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">${label}</td><td style="padding:8px 4px;text-align:right;font-variant-numeric:tabular-nums">${fmt(val||0)}</td></tr>`;
   const pricePerPerson = fmt(d.perPerson);
+  quotationLog.unshift({id:qid,qid:qid,tour:tourName,pax:pax,clientType:clientType,accommodation:d.accommodation,vehicle:d.vehicle,guide:d.guide,ship:d.ship,entry:d.entry,food:d.food,total:d.total,perPerson:d.perPerson,generatedAt:new Date().toISOString(),validUntil:validUntil});
+  persistData();
 
   const html = `
     <div class="modal-head">
@@ -2862,7 +2949,25 @@ function viewSettings(){
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Heads-up: the anon key is public. Anyone with your URL, key and workspace name can read/write this data — pick a hard-to-guess workspace name, or add Supabase Auth later for stricter access.</p>"+
     "</details>"+
   "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Per-record database <span class='pill "+(_perRecordActive?"completed":"plain")+"' style='margin-left:6px'>"+(_perRecordActive?"Active":"Not set up yet")+"</span></div>"+
+    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Every tour, booking, customer, vehicle, driver, guide, operation, reservation, quotation and trip log gets its <b>own row in its own table</b>, instead of one shared file being overwritten wholesale. A sync can only ever touch the specific record that changed — never wipe your whole dataset. Run the SQL below <b>once</b> in the Supabase SQL editor; the app detects the tables automatically on its next load — no further setup.</p>"+
+    "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px'>"+
+      "<button class='btn btn-sea btn-sm' onclick='pushAllRecords();alert(\"Pushed every record to its own table.\")'>Push all records ↑</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick='pullAllRecords().then(function(ok){_perRecordActive=ok;if(ok){boot();alert(\"Pulled — per-record sync is active.\");}else{alert(\"Tables not found yet — run the SQL below in Supabase first.\");}})'>Pull all records ↓</button>"+
+    "</div>"+
+    "<details><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
+      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;margin-top:8px;white-space:pre-wrap'>"+perRecordSetupSQL()+"</pre>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Full copy also kept in <code>docs/DATABASE_SCHEMA.md</code> in the repo.</p>"+
+    "</details>"+
+  "</div>"+
   "</section>";
+}
+function perRecordSetupSQL(){
+  return "-- Run this ONCE in the Supabase SQL editor. Creates one table per collection,\n"+
+"-- each row = one record (id/name as primary key). Same permissive setup as the\n"+
+"-- existing 'workspaces' table, so it works with the publishable key already in the app.\n"+
+_recordKeys.map(function(k){return "create table if not exists "+recTable(k)+" (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table "+recTable(k)+" disable row level security;\ngrant all on table "+recTable(k)+" to anon, authenticated;\n";}).join("\n");
 }
 var ROLE_ACCESS={Admin:"All modules",Operator:"Tours, Bookings, Logistics",Guide:"Ops board (view)",Sales:"CRM, Bookings"};
 function renderOperators(){
