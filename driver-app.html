@@ -107,9 +107,11 @@ function renderTrips(){
   var el=document.getElementById("tripsView");
   if(!mine.length){el.innerHTML="<div class='empty'>No trips assigned to you yet.</div>";return;}
   el.innerHTML=mine.map(function(o){
-    return "<div class='card'><div class='top'><b>"+(o.tour||"Trip")+"</b><span class='pill'>"+(o.status||"Scheduled")+"</span></div>"+
+    return "<div class='card'>"+
+      (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
+      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill'>"+(o.status||"Scheduled")+"</span></div>"+
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
-      "<div class='rows'>"+row("Vehicle",o.veh)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
+      "<div class='rows'>"+row("Vehicle",o.veh)+row("Reg. No.",o.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
     "</div>";
   }).join("");
@@ -120,12 +122,16 @@ function renderLogForm(){
     "<div class='sec-h'>Log today's trip</div>"+
     "<label>Date</label><input type='date' id='dl_date' value='"+todayISO+"'>"+
     "<label>Vehicle</label><input id='dl_veh' value='"+(myDriver.veh||"")+"' placeholder='e.g. Innova'>"+
-    "<div class='row2'><div><label>Start time</label><input type='time' id='dl_startt'></div><div><label>End time</label><input type='time' id='dl_endt'></div></div>"+
+    "<label>Start time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_startt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_startt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>Start Now</button></div>"+
+    "<label>End time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_endt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_endt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>End Now</button></div>"+
     "<div class='row2'><div><label>Start km</label><input type='number' id='dl_startkm' placeholder='0'></div><div><label>End km</label><input type='number' id='dl_endkm' placeholder='0'></div></div>"+
     "<label>Location / route</label><input id='dl_loc' placeholder='e.g. Port Blair → Chidiya Tapu → Port Blair'>"+
     "<button class='btn' id='dl_submit' onclick='submitTrip()'>Save trip</button>"+
   "</div>";
 }
+/* Stamp the current device time (HH:MM) — used by the Start Now / End Now buttons so
+   the driver never has to fight the phone's analog clock picker. */
+function stampNow(id){var d=new Date();document.getElementById(id).value=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
 async function submitTrip(){
   showErr("");showOk("");
   var date=document.getElementById("dl_date").value;
@@ -136,9 +142,11 @@ async function submitTrip(){
   var sT=document.getElementById("dl_startt").value,eT=document.getElementById("dl_endt").value;
   var time="—";
   if(sT&&eT){var sh=+sT.split(":")[0],sm=+sT.split(":")[1],eh=+eT.split(":")[0],em=+eT.split(":")[1];var mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=1440;time=Math.floor(mins/60)+"h "+String(mins%60).padStart(2,"0")+"m";}
+  /* tag the trip with its tour code (matched by vehicle + date on the driver's ops) */
+  var tc="";var mop=(allOps||[]).find(function(o){return o.veh&&veh&&String(o.veh).toLowerCase()===veh.toLowerCase()&&(o.startISO||"")<=date&&date<=(o.endISO||"");});if(mop)tc=mop.tourId||"";
   var btn=document.getElementById("dl_submit");btn.disabled=true;btn.textContent="Saving…";
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
-    data:{date:date,veh:veh,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time}};
+    data:{date:date,veh:veh,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     btn.disabled=false;btn.textContent="Save trip";
