@@ -89,7 +89,8 @@ const TITLES={
   interest:["Join a Tour","Register your interest and preferred dates — we'll confirm availability."],
   client:["Guest Details","Please share the details below so we can finalise your booking and travel arrangements."],
   guide:["Guide Reservation Request","Propose dates to reserve Island Explorer's guiding services."],
-  guidedir:["Guide / Naturalist Registration","Register as a bird guide / naturalist with Island Explorer."]
+  guidedir:["Guide / Naturalist Registration","Register as a bird guide / naturalist with Island Explorer."],
+  driver:["Driver Registration","Register your vehicle and details to drive for Island Explorer."]
 };
 document.getElementById("formTitle").textContent=TITLES[type]?TITLES[type][0]:TITLES.interest[0];
 document.getElementById("formIntro").textContent=TITLES[type]?TITLES[type][1]:TITLES.interest[1];
@@ -157,6 +158,12 @@ if(type==="guide"){
   html+=inp("gd_expertise","Expertise / specialisation",{ph:"e.g. Endemics, waders, night birding"});
   html+=rowOf(inp("gd_phone","WhatsApp / Phone",{req:1,type:"tel"}),inp("gd_email","Email",{type:"email"}));
   html+=inp("gd_address","Full residential address",{type:"textarea",ph:"Full residential address"});
+}else if(type==="driver"){
+  html+=inp("d_name","Full name",{req:1});
+  html+=rowOf(inp("d_phone","WhatsApp / Phone",{req:1,type:"tel"}),inp("d_email","Email",{type:"email"}));
+  html+=rowOf(inp("d_veh","Vehicle name / model",{ph:"e.g. Innova, Xylo"}),inp("d_reg","Vehicle reg. no.",{ph:"e.g. AN01 P9577"}));
+  html+=rowOf(inp("d_seats","Seats",{type:"number"}),inp("d_license","Driving licence no.",{}));
+  html+=inp("d_address","Full residential address",{type:"textarea",ph:"Full residential address"});
 }else if(type==="client"){
   html+=inp("c_tour","Tour category",{tour:1});
   html+=rowOf(inp("c_start","Tour start date",{type:"date",val:presetStart}),inp("c_end","Tour end date",{type:"date",val:presetEnd}));
@@ -205,6 +212,9 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else if(type==="guidedir"){
     rec.name=val("gd_name");rec.phone=val("gd_phone");rec.email=val("gd_email");
     rec.data={expertise:val("gd_expertise"),address:val("gd_address")};
+  }else if(type==="driver"){
+    rec.name=val("d_name");rec.phone=val("d_phone");rec.email=val("d_email");
+    rec.data={vehicle:val("d_veh"),reg:val("d_reg"),seats:val("d_seats"),license:val("d_license"),address:val("d_address")};
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
     rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;
@@ -234,6 +244,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     if(type==="client")document.getElementById("successMsg").textContent="Thank you. Your details have been received — our team will confirm your booking and travel arrangements shortly.";
     if(type==="guide")document.getElementById("successMsg").textContent="Your reservation request has been sent to Island Explorer. We'll respond with availability soon.";
     if(type==="guidedir")document.getElementById("successMsg").textContent="Thank you — you've been added to Island Explorer's guide directory.";
+    if(type==="driver")document.getElementById("successMsg").textContent="Thank you — your driver details have been received. Island Explorer will share your login code shortly.";
   }catch(err){btn.disabled=false;btn.textContent="Submit";showErr("Network error. Please try again or WhatsApp +91 99332 02175.");}
 });
 </script>

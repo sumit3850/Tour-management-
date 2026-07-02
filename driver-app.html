@@ -127,7 +127,14 @@ function renderLogForm(){
     "<div class='row2'><div><label>Start km</label><input type='number' id='dl_startkm' placeholder='0'></div><div><label>End km</label><input type='number' id='dl_endkm' placeholder='0'></div></div>"+
     "<label>Location / route</label><input id='dl_loc' placeholder='e.g. Port Blair → Chidiya Tapu → Port Blair'>"+
     "<button class='btn' id='dl_submit' onclick='submitTrip()'>Save trip</button>"+
+    "<button type='button' onclick='clearTrip()' style='width:100%;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--soft);font-size:14px;font-weight:700;cursor:pointer'>Clear &amp; start new</button>"+
   "</div>";
+}
+/* Wipe every field so the next trip can be entered from scratch. */
+function clearTrip(){
+  ["dl_startt","dl_endt","dl_startkm","dl_endkm","dl_loc"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  var dt=document.getElementById("dl_date");if(dt)dt.value=todayISO;
+  showErr("");showOk("");
 }
 /* Stamp the current device time (HH:MM) — used by the Start Now / End Now buttons so
    the driver never has to fight the phone's analog clock picker. */
@@ -142,8 +149,11 @@ async function submitTrip(){
   var sT=document.getElementById("dl_startt").value,eT=document.getElementById("dl_endt").value;
   var time="—";
   if(sT&&eT){var sh=+sT.split(":")[0],sm=+sT.split(":")[1],eh=+eT.split(":")[0],em=+eT.split(":")[1];var mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=1440;time=Math.floor(mins/60)+"h "+String(mins%60).padStart(2,"0")+"m";}
-  /* tag the trip with its tour code (matched by vehicle + date on the driver's ops) */
-  var tc="";var mop=(allOps||[]).find(function(o){return o.veh&&veh&&String(o.veh).toLowerCase()===veh.toLowerCase()&&(o.startISO||"")<=date&&date<=(o.endISO||"");});if(mop)tc=mop.tourId||"";
+  /* tag the trip with its tour code — prefer the op whose dates cover today, else any
+     op on this vehicle, else the driver's first assigned op. */
+  var _sn=function(a,b){return a&&b&&String(a).trim().toLowerCase()===String(b).trim().toLowerCase();};
+  var mop=(allOps||[]).find(function(o){return _sn(o.veh,veh)&&(o.startISO||"")<=date&&date<=(o.endISO||"");})||(allOps||[]).find(function(o){return _sn(o.veh,veh)&&o.tourId;})||(allOps||[]).find(function(o){return o.tourId;});
+  var tc=(mop&&mop.tourId)||"";
   var btn=document.getElementById("dl_submit");btn.disabled=true;btn.textContent="Saving…";
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
     data:{date:date,veh:veh,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
