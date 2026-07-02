@@ -233,6 +233,12 @@ body.no-anim .view{animation:none} /* background data refresh — rebuild withou
 .tour-del{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--coral-soft);color:var(--coral);display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s}
 .tour-card:hover .tour-del{opacity:1}.tour-del:hover{background:var(--coral);color:#fff}
 .tour-card{position:relative}.tour-card .guests{font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* All tour cards render at the same height regardless of content, and the status
+   footer pins to the bottom, so a category with a shorter card (e.g. Narcondam) is
+   the same size as the others. */
+.tour-cols .tour-card{display:flex;flex-direction:column;min-height:194px}
+.tour-cols .tour-card .foot{margin-top:auto}
+.tour-card .foot .pills{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 
 .tabs{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;width:max-content;max-width:100%;overflow-x:auto}
 .tab{padding:7px 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
@@ -478,14 +484,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 75</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 76</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 75</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 76</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -627,10 +633,19 @@ function persistData(){
     localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));
     if(!_syncBooting)localStorage.setItem("ieo_updated",new Date().toISOString());
   }catch(e){}
+  if(typeof enrichAllOps==="function")enrichAllOps();
   if(!_syncBooting&&!_sbApplying)_localDirty=true;
   cloudAutoPush();
   if(typeof scheduleRecordPush==="function")scheduleRecordPush();
   if(typeof scheduleSheetSync==="function")scheduleSheetSync();
+}
+/* Tour code for a trip log — matched by the vehicle being on an operation whose
+   date range covers the trip date. Shown before the date in Daily Activity and in
+   the Google Sheet's Daily Activity tab. */
+function tripTourCode(r){
+  if(r&&r.tourCode)return r.tourCode;
+  var op=(typeof ops!=="undefined"?ops:[]).find(function(o){return o.veh&&r.veh&&String(o.veh).toLowerCase()===String(r.veh).toLowerCase()&&o.startISO&&o.endISO&&o.startISO<=r.date&&r.date<=o.endISO;});
+  return (op&&op.tourId)||"—";
 }
 function localUpdated(){try{return localStorage.getItem("ieo_updated")||"";}catch(e){return "";}}
 function setLocalUpdated(ts){try{localStorage.setItem("ieo_updated",ts||new Date().toISOString());}catch(e){}}
@@ -764,8 +779,10 @@ function bookingsForSheet(){
 var _sheetSyncTimer=null;
 function scheduleSheetSync(){if(!sheetHook())return;clearTimeout(_sheetSyncTimer);_sheetSyncTimer=setTimeout(syncSheets,1800);}
 /* Logistics & Operations tab — one row per operation (incl. completed tours). */
-var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Status","Remarks","Guide Feedback","Guide Feedback At"];
-function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"Vehicle":o.veh||"","Reg. No.":v.reg||"","Driver":o.driver||"","Driver No.":d.phone||"","Guide":o.guide||"","Guide ID":g.gid||"","Guide phone":g.phone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":o.stay||"","Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):""};}
+var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","POC","POC Phone","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Status","Remarks","Guide Feedback","Guide Feedback At"];
+function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":o.stay||"","Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):""};}
+var DAILY_COLS=["Tour ID","Date","Vehicle","Driver","Start km","End km","Total km","Location","Time"];
+function dailyActivitySheetRow(r){return {"Tour ID":tripTourCode(r),"Date":dOpt(r.date),"Vehicle":r.veh||"","Driver":r.driver||"","Start km":r.startKm||0,"End km":r.endKm||0,"Total km":r.totalKm||0,"Location":r.loc||"","Time":r.time||""};}
 /* Dropdown option builders for operations (value kept clean via value attr). */
 function vehicleOptions(sel){return "<option value=''>—</option>"+(vehicles||[]).map(function(v){return "<option value='"+v.name+"' "+(v.name===sel?"selected":"")+">"+v.name+(v.avail&&v.avail!=="Available"?" ("+v.avail+")":"")+"</option>";}).join("");}
 function driverOptions(sel){return "<option value=''>—</option>"+(drivers||[]).map(function(d){return "<option value='"+d.name+"' "+(d.name===sel?"selected":"")+">"+d.name+"</option>";}).join("");}
@@ -815,6 +832,7 @@ function syncSheets(){
   sheetReplace("Logistics & Operations",OPS_COLS,(ops||[]).map(opSheetRow));
   sheetReplace("Profit Calculator",PROFIT_COLS,(tours||[]).map(profitSheetRow));
   sheetReplace("Accommodation Bookings",ACCBOOKING_COLS,(accBookings||[]).map(accBookingSheetRow));
+  sheetReplace("Daily Activity",DAILY_COLS,(typeof tripLogs!=="undefined"?tripLogs:[]).map(dailyActivitySheetRow));
   sheetDeleteTab("External Guide/Referral");sheetDeleteTab("Referral");
 }
 function sheetDeleteTab(tab){
@@ -1506,7 +1524,7 @@ function renderView(v){
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
 function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
 function openScrim(){document.getElementById("scrim").classList.add("show")}
-function closeModal(){document.getElementById("scrim").classList.remove("show");if(_pendingRefresh){_pendingRefresh=false;refreshUI();}}
+function closeModal(){document.getElementById("scrim").classList.remove("show");var _m=document.getElementById("modal");if(_m)_m.style.maxWidth="";if(_pendingRefresh){_pendingRefresh=false;refreshUI();}}
 
 /* ===== DASHBOARD ===== */
 /* ===== automation helpers ===== */
@@ -1526,6 +1544,19 @@ function sendGuestFormEmail(id){var b=bookings.find(function(x){return x.id===id
    Now it compares the real ISO dates (startISO/endISO), and ignores operations that
    are Withdrawn / Declined / Cancelled / Completed (not a live conflict). */
 function opActive(o){var s=(o.status||"").toLowerCase();return s!=="withdrawn"&&s!=="declined"&&s!=="cancelled"&&s!=="completed";}
+/* Denormalise vehicle reg, driver phone, guide phone/ID, POC name/phone, tour name
+   and stay onto each operation, so the guide app and driver app (which only receive
+   the ops rows) can show them without their own lookups. */
+function enrichOp(o){
+  if(!o)return;
+  var v=(vehicles||[]).find(function(x){return x.name===o.veh;});o.reg=(v&&v.reg)||o.reg||"";
+  var d=(drivers||[]).find(function(x){return x.name===o.driver;});o.driverPhone=(d&&d.phone)||o.driverPhone||"";
+  var g=(externalGuides||[]).find(function(x){return x.name===o.guide;});o.guidePhone=(g&&g.phone)||o.guidePhone||"";o.gid=(g&&g.gid)||o.gid||"";
+  var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
+  if(t){o.tourId=o.tourId||tourCode(t);o.tourName=t.name||tourLabel(t);if(t.stay&&!o.stay)o.stay=t.stay;
+    if(t.pocId){var pb=(bookings||[]).find(function(b){return b.id===t.pocId;});if(pb){o.pocName=pb.guest;o.pocPhone=pb.phone||"";}}}
+}
+function enrichAllOps(){(ops||[]).forEach(enrichOp);}
 function detectClashes(){
   var out=[];
   var live=(ops||[]).filter(opActive);
@@ -1570,6 +1601,11 @@ function gotoAlert(kind,arg){
   if(kind==="op"){go("logistics");logTab("Operations Board");setTimeout(function(){if(typeof editOp==="function")editOp(arg);},70);}
   else if(kind==="booking"){go("bookings");setTimeout(function(){editBooking(arg);},70);}
   else if(kind==="tour"){openTour(arg);}
+}
+function alertsCard(){
+  var al=buildAlerts();
+  if(!al.length)return "<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Alerts</div><div class='empty'>All clear — no scheduling clashes, overdue payments or unassigned operations. ✓</div></div>";
+  return "<div class='card card-pad' style='margin-top:16px;border-left:3px solid var(--coral)'><div class='h-sec' style='font-size:15px;margin-bottom:8px;color:var(--coral)'>⚠ Alerts ("+al.length+")</div>"+al.map(function(x){return "<div class='list-row' data-action='gotoAlert' data-arg='"+x.kind+"|"+x.arg+"' style='cursor:pointer'><div class='ic' style='background:"+(x.level==="err"?"#fbe7e4":"#fff4e0")+"'><svg viewBox='0 0 24 24' fill='none' stroke='"+(x.level==="err"?"var(--coral)":"var(--amber)")+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg></div><div class='meta'><div class='t' style='font-weight:500;white-space:normal'>"+x.text+"</div><div class='s'>Tap to open →</div></div></div>";}).join("")+"</div>";
 }
 function referralRollup(){
   var m={};reservations.forEach(function(r){if(r.referral>0){var key=r.by||"Unassigned";m[key]=(m[key]||0)+r.referral;}});
@@ -1645,16 +1681,14 @@ function viewDashboard(){
       qaTile("Google Sheet","M3 3h18v18H3zM3 9h18M9 3v18","openSheet()")+
     "</div>"+
     "<div id='payPanel' style='margin-top:16px'></div>"+
-    profitBriefCard()+
-    (function(){var al=buildAlerts();
-      if(!al.length)return "<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Alerts</div><div class='empty'>All clear — no scheduling clashes, overdue payments or unassigned operations. ✓</div></div>";
-      return "<div class='card card-pad' style='margin-top:16px;border-left:3px solid var(--coral)'><div class='h-sec' style='font-size:15px;margin-bottom:8px;color:var(--coral)'>⚠ Alerts ("+al.length+")</div>"+al.map(function(x){return "<div class='list-row' data-action='gotoAlert' data-arg='"+x.kind+"|"+x.arg+"' style='cursor:pointer'><div class='ic' style='background:"+(x.level==="err"?"#fbe7e4":"#fff4e0")+"'><svg viewBox='0 0 24 24' fill='none' stroke='"+(x.level==="err"?"var(--coral)":"var(--amber)")+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg></div><div class='meta'><div class='t' style='font-weight:500;white-space:normal'>"+x.text+"</div><div class='s'>Tap to open →</div></div></div>";}).join("")+"</div>";})()+
     "<div class='kpis' style='margin-top:16px'>"+
       kpi("Upcoming Tours",upcoming,"departures ahead","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
       kpi("Total Participants",totalParticipants,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
       kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
       kpi("Confirmed Bookings",visibleConfirmed,"confirmed","up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
+    profitBriefCard()+
+    alertsCard()+
     "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
     (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
     "<div class='grid-2' style='margin-top:16px'>"+
@@ -1703,7 +1737,7 @@ function tourCard(t){
     "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
     "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
-    "<div class='foot'>"+pill(s)+"<span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
+    "<div class='foot'><span class='pills'>"+pill(s)+payPill(tourPayStatus(t))+"</span><span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
   "</div>";
 }
 function renderTours(filter=curTab){
@@ -2157,7 +2191,7 @@ function saveCalcRates(){
 }
 
 /* ===== LOGISTICS ===== */
-const LOGTABS=["Operations Board","Vehicles","Drivers","External Guides","Guide Fees","Daily Activity"];
+const LOGTABS=["Operations Board","Vehicles & Drivers","External Guides","Guide Fees","Daily Activity"];
 function viewLogistics(){
   return "<section class='view' id='v-logistics'>"+
     "<div class='tabs' id='logTabs' style='margin-bottom:18px'>"+LOGTABS.map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='logTab' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
@@ -2181,22 +2215,22 @@ function opCard(o){
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
     (o.guideFeedback?"<div style='margin-top:6px;padding:8px 10px;background:#fbe7e4;border-radius:8px;font-size:12px'><b>Guide feedback ("+(o.guideFeedbackAt?dShort(o.guideFeedbackAt):"")+"):</b> "+o.guideFeedback+"</div>":"")+
     "<div class='op-actions'><button class='btn-edit' data-action='editOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit</button><button class='btn-del' data-action='deleteOp' data-arg='"+o.id+"'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Delete</button></div>"+
-    (o.veh&&o.veh!=="—"?"<button class='edit-btn' style='width:100%;margin-top:6px' onclick=\"openDriverLog('"+o.veh.replace(/'/g,"&#39;")+"','"+(o.pickup||"").replace(/'/g,"&#39;")+"')\">Log daily activity for this vehicle</button>":"")+
-    (o.guide&&o.guide!=="—"?"<button class='edit-btn' style='width:100%;margin-top:6px' onclick=\"shareGuideOpsLink('"+o.guide.replace(/'/g,"&#39;")+"')\">Share this guide's ops link</button>":"")+
+    "<div class='op-actions' style='margin-top:6px'>"+
+      (o.guide&&o.guide!=="—"?"<button class='btn-edit' onclick=\"shareGuideOpsLink('"+o.guide.replace(/'/g,"&#39;")+"')\"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg>Guide OPS</button>":"<button class='btn-edit' disabled style='opacity:.45'>Guide OPS</button>")+
+      (o.driver&&o.driver!=="—"?"<button class='btn-edit' onclick=\"shareDriverAppLink('"+o.driver.replace(/'/g,"&#39;")+"')\"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg>Driver OPS</button>":"<button class='btn-edit' disabled style='opacity:.45'>Driver OPS</button>")+
+    "</div>"+
   "</div>";
 }
 function renderLog(t="Operations Board"){
   const b=document.getElementById("logBody");if(!b)return;
-  if(t==="Vehicles"){
+  if(t==="Vehicles & Drivers"){
     b.innerHTML="<div class='section-head'><div class='h-sec'>Vehicles</div><button class='btn btn-primary btn-sm' onclick='openAddVehicle()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Vehicle</button></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Vehicle</th><th>Reg. No.</th><th>Type</th><th class='num'>Seats</th><th>Driver</th><th>Status</th><th></th></tr></thead><tbody>"+
-    vehicles.map(v=>"<tr><td class='strong'>"+v.name+"</td><td class='mono'>"+v.reg+"</td><td>"+v.type+"</td><td class='num mono'>"+v.cap+"</td><td>"+v.driver+"</td><td><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></td><td class='num'><div class='tbl-actions'><button class='edit-btn' data-action='editVehicle' data-arg='"+v.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteVehicle' data-arg='"+v.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")+
-    "</tbody></table></div></div>";
-  }else if(t==="Drivers"){
-    b.innerHTML="<div class='section-head'><div class='h-sec'>Drivers</div><button class='btn btn-primary btn-sm' onclick='openAddDriver()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Driver</button></div>"+
-    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px'>Each driver signs in to their own <b>Driver App</b> with their phone number and login code, sees only their assigned trips, and logs each trip themselves — entries appear here under Daily Activity automatically.</p>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Driver</th><th>Contact</th><th>Code</th><th>Assigned Vehicle</th><th>Assigned Tour</th><th></th></tr></thead><tbody>"+
-    drivers.map(d=>{if(!d.code)d.code=String(Math.floor(1000+Math.random()*9000));return "<tr><td class='strong'>"+d.name+"</td><td class='mono'>"+d.phone+"</td><td class='mono'>"+d.code+"</td><td>"+d.veh+"</td><td>"+d.tour+"</td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"shareDriverAppLink('"+d.name.replace(/'/g,"&#39;")+"')\" title='Share driver app link'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg></button><button class='edit-btn' data-action='editDriver' data-arg='"+d.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteDriver' data-arg='"+d.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("")+
+    vehicles.map(v=>"<tr><td class='strong'>"+v.name+"</td><td class='mono'>"+v.reg+"</td><td>"+v.type+"</td><td class='num mono'>"+v.cap+"</td><td>"+v.driver+"</td><td><span class='pill "+(v.avail==="Available"?"open":v.avail==="Maintenance"?"full":"plain")+"'>"+v.avail+"</span></td><td class='num'><div class='tbl-actions'><button class='edit-btn' data-action='editVehicle' data-arg='"+v.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteVehicle' data-arg='"+v.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No vehicles yet.</td></tr>"+
+    "</tbody></table></div></div>"+
+    "<div class='section-head' style='margin-top:22px'><div class='h-sec'>Drivers</div><button class='btn btn-primary btn-sm' onclick='openAddDriver()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Driver</button></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Driver</th><th>Contact</th><th>Code</th><th>Assigned Vehicle</th><th></th></tr></thead><tbody>"+
+    drivers.map(d=>{if(!d.code)d.code=String(Math.floor(1000+Math.random()*9000));return "<tr><td class='strong'>"+d.name+"</td><td class='mono'>"+d.phone+"</td><td class='mono'>"+d.code+"</td><td>"+d.veh+"</td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"shareDriverAppLink('"+d.name.replace(/'/g,"&#39;")+"')\" title='Share driver app link'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg></button><button class='edit-btn' data-action='editDriver' data-arg='"+d.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteDriver' data-arg='"+d.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>"}).join("")||"<tr><td colspan='5' class='empty'>No drivers yet.</td></tr>"+
     "</tbody></table></div></div>";
     persistData();
   }else if(t==="Daily Activity"){
@@ -2213,8 +2247,8 @@ function renderLog(t="Operations Board"){
       kpi("Vehicles active",activeVeh,"on the road","","M5 17a2 2 0 1 0 4 0M15 17a2 2 0 1 0 4 0M3 13h13V6H3z")+
       kpi("Trips on record",tripLogs.length,"this device","","M9 11l3 3 8-8")+
     "</div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th><th></th></tr></thead><tbody>"+
-    rows.map(r=>"<tr><td class='strong'>"+dShort(r.date)+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='9' class='empty'>No trips logged yet.</td></tr>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Tour</th><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th><th></th></tr></thead><tbody>"+
+    rows.map(r=>"<tr><td class='mono strong'>"+tripTourCode(r)+"</td><td class='strong'>"+dShort(r.date)+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='10' class='empty'>No trips logged yet.</td></tr>"+
     "</tbody></table></div></div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
   }else if(t==="External Guides"){
@@ -2686,7 +2720,7 @@ function applyDriverTripLogs(){
   logs.forEach(function(s){
     var d=s.data||{};
     if(!tripLogs.some(function(x){return x.fromSub===s.id;})){
-      tripLogs.push({id:"TR"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,date:d.date||todayISO,veh:d.veh||"—",driver:s.name||"—",startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:Math.max((+d.endKm||0)-(+d.startKm||0),0),loc:d.loc||"—",time:d.time||"—",startT:d.startT||"",endT:d.endT||""});
+      tripLogs.push({id:"TR"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,date:d.date||todayISO,veh:d.veh||"—",driver:s.name||"—",startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:Math.max((+d.endKm||0)-(+d.startKm||0),0),loc:d.loc||"—",time:d.time||"—",startT:d.startT||"",endT:d.endT||"",tourCode:d.tourCode||""});
       changed=true;
     }
     markSubProcessed(s.id);
@@ -3403,6 +3437,7 @@ function openTour(id){
   const t=tours.find(x=>x.id===id);if(!t)return;const b=booked(id),bs=bookings.filter(x=>x.tour===id),wl=waitlist[id]||[];
   var poc=bs.find(function(x){return x.id===t.pocId;});
   var payStatus=tourPayStatus(t);
+  var _md=document.getElementById("modal");if(_md)_md.style.maxWidth="780px"; /* roomier tour dialog on desktop */
   document.getElementById("modal").innerHTML=
     "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span><h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
@@ -3466,7 +3501,9 @@ function saveDriverLog(){
   const start=parseFloat(document.getElementById("dl_start").value||0),end=parseFloat(document.getElementById("dl_end").value||0),veh=document.getElementById("dl_veh").value;
   if(!veh||end<=start){alert("Choose a vehicle and enter an end km greater than start km.");return;}
   const dur=document.getElementById("dl_dur").textContent.replace("—","").trim();
-  tripLogs.push({id:"TR"+Date.now(),date:document.getElementById("dl_date").value||todayISO,veh,driver:document.getElementById("dl_driver").value||"—",startKm:start,endKm:end,totalKm:end-start,loc:document.getElementById("dl_loc").value||"—",time:dur||"—",startT:document.getElementById("dl_start_t").value||"",endT:document.getElementById("dl_end_t").value||""});
+  var _tr={id:"TR"+Date.now(),date:document.getElementById("dl_date").value||todayISO,veh,driver:document.getElementById("dl_driver").value||"—",startKm:start,endKm:end,totalKm:end-start,loc:document.getElementById("dl_loc").value||"—",time:dur||"—",startT:document.getElementById("dl_start_t").value||"",endT:document.getElementById("dl_end_t").value||""};
+  _tr.tourCode=tripTourCode(_tr);
+  tripLogs.push(_tr);
   saveLogs();closeModal();go("logistics");logTab("Daily Activity");
 }
 function editTrip(id){

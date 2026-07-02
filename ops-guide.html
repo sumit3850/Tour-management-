@@ -22,8 +22,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .pill.warn{background:#fbe7e4;color:var(--err)}
 .pill.ok{background:#e4f3ea;color:var(--ok)}
 .dates{font-size:12.5px;color:var(--soft);margin-bottom:10px}
-.rows{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px}
-.rows span.k{color:var(--soft)}.rows span.v{font-weight:600;text-align:right}
+.rows{display:grid;grid-template-columns:118px 1fr;gap:5px 10px;font-size:13px}
+.rows span.k{color:var(--soft)}.rows span.v{font-weight:600;text-align:left}
 .remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
 .fb{margin-top:8px;padding:10px 12px;background:#fbe7e4;border-radius:10px;font-size:12.5px;color:var(--err)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
@@ -104,7 +104,8 @@ function renderList(){
     return "<div class='card' id='card_"+o.id+"'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+cls+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
       (o.tourId?"<div class='dates mono'>"+o.tourId+"</div>":"")+
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
-      "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
+      (o.pocName?"<div class='rows' style='margin-bottom:6px'>"+row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):"")+"</div>":"")+
+      "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
