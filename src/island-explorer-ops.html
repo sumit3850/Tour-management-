@@ -467,7 +467,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app on this device
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 67</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 68</span></div>
   </div>
 </div>
 <div class="app">
@@ -485,7 +485,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 67</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 68</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -2982,8 +2982,10 @@ function viewSettings(){
     var mismatch=(sbc.url&&sbc.url!==SB_DEFAULTS.url)||(sbc.ws&&sbc.ws!==SB_DEFAULTS.ws);
     return "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Sync status <span class='pill "+(mismatch?"full":"completed")+"'>"+(mismatch?"Custom config":"Using shared default")+"</span></div>"+
+    "<p style='font-size:12px;color:var(--ink-soft);margin-bottom:10px'>Data sync now starts only once you're signed in — every authorized login shares the same one workspace below, so signing in on any device is what connects it to your team's data.</p>"+
     (mismatch?"<div style='background:#fbe7e4;border:1px solid #f0c2bb;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12.5px;color:var(--coral)'><b>This device is pointed at a different Project URL or workspace than the built-in default.</b> If your other devices are on the default, this device will never see their changes (and vice versa) — that alone explains additions/deletions not appearing elsewhere. Tap <b>Reset to shared default</b> below unless you deliberately set up your own Supabase project on every device.</div>":"")+
     "<div class='rows' style='display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin-bottom:14px'>"+
+      "<span style='color:var(--ink-soft)'>Signed in as</span><b id='diagUser'>"+((document.querySelector(".nav-foot .role")||{}).textContent||"Not signed in")+"</b>"+
       "<span style='color:var(--ink-soft)'>Workspace</span><b class='mono' id='diagWs'>"+(sbc.ws||"default")+"</b>"+
       "<span style='color:var(--ink-soft)'>Project</span><b class='mono' id='diagUrl' style='word-break:break-all'>"+(sbc.url||"—")+"</b>"+
       "<span style='color:var(--ink-soft)'>Auto-sync</span><b id='diagAuto'>"+(sbc.auto?"On":"Off")+"</b>"+
@@ -3391,8 +3393,7 @@ function boot(){
   navStack=[];document.getElementById("backBtn").classList.remove("show");
 }
 boot();
-cloudInit();
-initAuth();
+initAuth().then(function(canSync){if(canSync)cloudInit();});
 
 /* ===== AUTHENTICATION (Supabase email/password) ===== */
 var _authMode="signin"; /* signin | signup */
@@ -3408,14 +3409,30 @@ function applyUser(user){
   var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(user&&user.email)||"Signed in";
   var av=document.querySelector(".nav-foot .av");if(av)av.textContent=String(name).split(/[ @.]/).filter(Boolean).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
 }
+/* Auth and data sync used to be two unconnected systems: the login screen was just
+   a visual overlay, and the cloud data loaded regardless of whether you'd actually
+   signed in. Now cloud sync WAITS for a confirmed sign-in — the shared workspace
+   only loads once you're an authenticated user, and starts the moment you sign in
+   if you weren't already. (If Supabase Auth itself isn't configured/reachable at
+   all, this still fails open and syncs anyway, so a broken auth setup can't lock
+   you out of your own data.) */
+var _authResolved=false;
 function initAuth(){
-  var cl=authClient();
-  if(!cl){hideLogin();return;} /* fail open if Supabase unavailable, so you're never locked out */
-  cl.auth.getSession().then(function(res){
-    var s=res&&res.data&&res.data.session;
-    if(s&&s.user){applyUser(s.user);hideLogin();}else{showLogin();}
-  }).catch(function(){showLogin();});
-  cl.auth.onAuthStateChange(function(_e,session){if(session&&session.user){applyUser(session.user);hideLogin();}});
+  return new Promise(function(resolve){
+    var cl=authClient();
+    if(!cl){hideLogin();resolve(true);return;}
+    cl.auth.getSession().then(function(res){
+      var s=res&&res.data&&res.data.session;
+      if(s&&s.user){applyUser(s.user);hideLogin();resolve(true);}
+      else{showLogin();resolve(false);}
+    }).catch(function(){showLogin();resolve(true);});
+    cl.auth.onAuthStateChange(function(_e,session){
+      if(session&&session.user){
+        applyUser(session.user);hideLogin();
+        if(_authResolved&&!_sbReady)cloudInit(); /* signed in after boot -> sync now */
+      }
+    });
+  }).then(function(canSync){_authResolved=true;return canSync;});
 }
 
 /* ===== Install as an app (PWA) — button + hint shown on the sign-in screen ===== */
