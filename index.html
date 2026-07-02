@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 62</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 63</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 62</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 63</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -578,8 +578,21 @@ function collectStore(){var o={};STORE.forEach(function(s){o[s.k]=s.get();});ret
 /* Applying a real saved snapshot: any array collection missing from it becomes empty,
    so the hard-coded sample data never lingers / reappears once you've saved your own data. */
 function applyStore(d){if(!d)return;var snap=STORE.some(function(s){return d[s.k]!==undefined;});STORE.forEach(function(s){if(d[s.k]!==undefined&&d[s.k]!==null)s.set(d[s.k]);else if(snap&&s.arr&&s.k!=="operators")s.set([]);});ensureSheetDefaults();}
+/* Guards the window between page load and the first cloud sync decision. The very
+   first boot() call renders the UI from whatever is cached locally — and several
+   render*() functions call persistData() as a harmless-looking side effect. If that
+   were allowed to re-stamp "last updated" to right now, a device that hasn't opened
+   the app in days would look newer than the cloud (its data is old, but the
+   timestamp says "just now"), so cloudPull would wrongly skip pulling the real
+   latest data — and the follow-up push would then overwrite the cloud with this
+   device's stale copy. Blocking the timestamp bump (not the save itself) during this
+   window keeps the ORIGINAL local timestamp intact for that first, decisive comparison. */
+var _syncBooting=true;
 function persistData(){
-  try{localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));localStorage.setItem("ieo_updated",new Date().toISOString());}catch(e){}
+  try{
+    localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));
+    if(!_syncBooting)localStorage.setItem("ieo_updated",new Date().toISOString());
+  }catch(e){}
   cloudAutoPush();
   if(typeof scheduleSheetSync==="function")scheduleSheetSync();
 }
@@ -801,7 +814,10 @@ function clearAllData(){
   STORE.forEach(function(s){if(s.arr&&s.k!=="operators")s.set([]);});
   try{tripLogs=[];localStorage.setItem("ieo_sync_trips","[]");}catch(e){}
   persistData();
-  if(typeof cloudPush==="function")cloudPush(true);
+  /* Explicit, double-confirmed wipe — push non-silently so the "don't push a
+     suspiciously smaller dataset" safety net (meant for surprise auto-pushes)
+     doesn't block this deliberate action. */
+  if(typeof cloudPush==="function")cloudPush(false);
   boot();
   alert("All data cleared on this device and the cloud. Only entries you add from now on will appear.");
 }
@@ -846,32 +862,51 @@ function sbSaveConfig(){
   if(!window.supabase){sbStatus("Saved, but the Supabase library didn't load (check your connection / ad-blocker).","err");return;}
   sbStatus(url&&key?("Saved. Connected to workspace \""+ws+"\". Use Push / Pull below."):"Cleared.","ok");
 }
+/* Safety net: total record count as a rough "how much data does this device have"
+   signal. If an AUTOMATIC push would replace the cloud with dramatically less data
+   than the cloud already had, refuse it and re-pull instead — better a sync stalls
+   for a moment than it silently erases records. A manual "Push to cloud" click always
+   goes through (you're explicitly choosing to push). */
+function totalRecordCount(){return (tours.length||0)+(bookings.length||0)+(customers.length||0)+(accBookings.length||0)+(ops.length||0)+(leads.length||0)+(externalGuides.length||0);}
+var _lastKnownCloudTotal=0;
 async function cloudPush(silent){
   var c=sbConfig(),cl=sbClient();
   if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return;}
+  if(silent&&_lastKnownCloudTotal>5&&totalRecordCount()<_lastKnownCloudTotal*0.5){
+    console.warn("Auto-push skipped: local data ("+totalRecordCount()+" records) looks much smaller than the last known cloud copy ("+_lastKnownCloudTotal+"). Re-pulling instead.");
+    cloudPull(true);
+    return;
+  }
   if(!silent)sbStatus("Pushing to cloud…","");
   try{
     var ts=new Date().toISOString();
     var res=await cl.from("workspaces").upsert({id:c.ws||"default",data:sbCollect(),updated_at:ts});
     if(res.error)throw res.error;
     setLocalUpdated(ts);
+    _lastKnownCloudTotal=totalRecordCount();
     if(!silent)sbStatus("Pushed to cloud ✓ "+new Date().toLocaleTimeString(),"ok");
   }catch(e){if(!silent)sbStatus("Push failed: "+(e.message||e),"err");}
 }
+/* Returns a status so callers (cloudInit especially) can tell whether it's actually
+   safe to push afterwards: 'applied' | 'kept-local' | 'empty' | 'failed'. Never
+   silently swallow a failure into "proceed as normal" — a caller that pushes
+   unconditionally after a failed pull is exactly how stale data overwrites the cloud. */
 async function cloudPull(silent){
   var c=sbConfig(),cl=sbClient();
-  if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return;}
+  if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return "failed";}
   if(!silent)sbStatus("Pulling from cloud…","");
   try{
     var res=await cl.from("workspaces").select("data,updated_at").eq("id",c.ws||"default").maybeSingle();
     if(res.error)throw res.error;
-    if(!res.data){if(!silent)sbStatus("Nothing saved in the cloud yet — Push from one device first.","");return;}
+    if(!res.data){if(!silent)sbStatus("Nothing saved in the cloud yet — Push from one device first.","");return "empty";}
+    var cd=res.data.data||{};
+    _lastKnownCloudTotal=(cd.tours||[]).length+(cd.bookings||[]).length+(cd.customers||[]).length+(cd.accBookings||[]).length+(cd.ops||[]).length+(cd.leads||[]).length+(cd.externalGuides||[]).length;
     var cloudTs=res.data.updated_at||"",localTs=localUpdated();
     /* On auto-sync (silent), only overwrite local if the cloud copy is genuinely newer —
        this stops stale cloud data from wiping out your latest local changes/deletions.
        A manual "Pull from cloud" always applies. */
     var shouldApply=!silent||!localTs||(cloudTs&&cloudTs>localTs);
-    if(!shouldApply){if(!silent)sbStatus("Your local copy is newer — kept your changes.","ok");return;}
+    if(!shouldApply){if(!silent)sbStatus("Your local copy is newer — kept your changes.","ok");return "kept-local";}
     _sbApplying=true;
     sbApply(res.data.data);
     try{localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));}catch(e){}
@@ -879,7 +914,8 @@ async function cloudPull(silent){
     boot();
     _sbApplying=false;
     if(!silent)sbStatus("Pulled from cloud ✓ "+new Date().toLocaleTimeString(),"ok");
-  }catch(e){_sbApplying=false;if(!silent)sbStatus("Pull failed: "+(e.message||e),"err");}
+    return "applied";
+  }catch(e){_sbApplying=false;if(!silent)sbStatus("Pull failed: "+(e.message||e),"err");return "failed";}
 }
 function cloudAutoPush(){
   if(_sbApplying||!_sbReady)return;
@@ -890,7 +926,17 @@ function cloudAutoPush(){
 }
 async function cloudInit(){
   var c=sbConfig();
-  if(c&&c.auto&&sbClient()){await cloudPull(true);await cloudPush(true);}
+  if(c&&c.auto&&sbClient()){
+    var result=await cloudPull(true);
+    _syncBooting=false; /* the decisive comparison is done — normal timestamp bumping resumes */
+    /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
+       copy) and 'kept-local' (this device's copy was genuinely newer) both make a
+       follow-up push safe/expected. 'failed' must NOT push — with no reliable read of
+       the cloud, pushing here is exactly how a stale local copy overwrites good data. */
+    if(result==="applied"||result==="kept-local"||result==="empty")await cloudPush(true);
+  }else{
+    _syncBooting=false;
+  }
   _sbReady=true;
 }
 /* Multi-device sync: a silent pull only ever ran once, at page load — so a phone
