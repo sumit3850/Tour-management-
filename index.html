@@ -467,7 +467,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app on this device
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 66</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 67</span></div>
   </div>
 </div>
 <div class="app">
@@ -485,7 +485,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 66</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 67</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -875,6 +875,37 @@ function sbSaveConfig(){
   _sb=null;_sbReady=true;
   if(!window.supabase){sbStatus("Saved, but the Supabase library didn't load (check your connection / ad-blocker).","err");return;}
   sbStatus(url&&key?("Saved. Connected to workspace \""+ws+"\". Use Push / Pull below."):"Cleared.","ok");
+}
+/* One-click fix for the most common "my devices don't see each other" cause: this
+   device's saved Project URL / workspace silently drifted from the shared default
+   (e.g. from an old test config), so it's writing to/reading from a different row
+   than every other device entirely. */
+function resetToSharedDefault(){
+  if(!confirm("Reset this device to the shared default Supabase project & workspace, then pull the latest data? Any changes made only on this device since its last successful sync could be overwritten by the shared copy."))return;
+  try{localStorage.removeItem(SB_CFG_KEY);}catch(e){}
+  _sb=null;_sbReady=true;_perRecordActive=false;_syncBooting=false;
+  var st=document.getElementById("diagStatus");if(st)st.textContent="Resetting…";
+  Promise.resolve().then(async function(){
+    await cloudPull(false);
+    _perRecordActive=await pullAllRecords();
+    /* deliberately not boot() here — it would navigate away from Settings; the
+       other tabs re-render fresh from the now-updated data next time you open them */
+    refreshSettings();
+    renderTours();renderCalendar();renderBookings();renderAccommodation();renderCustomers();renderCRM();
+    alert("Reset to the shared default and pulled the latest data. If your other devices are also on the shared default, they should now all match.");
+  });
+}
+/* Force this device to take whatever the shared copy currently has, overriding any
+   "local looks newer" comparison — for when you just want certainty, not a race. */
+function forceFullResync(){
+  var st=document.getElementById("diagStatus");if(st)st.textContent="Syncing…";
+  Promise.resolve().then(async function(){
+    await cloudPull(false);
+    _perRecordActive=await pullAllRecords();
+    refreshSettings();
+    renderTours();renderCalendar();renderBookings();renderAccommodation();renderCustomers();renderCRM();
+    var st2=document.getElementById("diagStatus");if(st2)st2.textContent="Synced ✓ "+new Date().toLocaleTimeString();
+  });
 }
 /* Safety net: total record count as a rough "how much data does this device have"
    signal. If an AUTOMATIC push would replace the cloud with dramatically less data
@@ -1412,7 +1443,7 @@ function renderView(v){
   else if(v==="crm")renderCRM();
   else if(v==="requests"){loadSubmissions(true);startSubPoll();}
   else if(v==="reservations"){renderReservations();renderGuides();loadSubmissions(false);startSubPoll();}
-  else if(v==="settings")renderOperators();
+  else if(v==="settings")refreshSettings();
   else if(v==="logistics"){renderLog();loadSubmissions(false);startSubPoll();}
   else if(v==="social")renderSocial();
   else if(v==="calc")calc();
@@ -2947,9 +2978,29 @@ function viewSettings(){
     "<div class='field'><label>Your Google Sheet link (to open it from the app)</label><input class='input' id='sheetview_url' placeholder='https://docs.google.com/spreadsheets/d/…' value='"+(sheetViewUrl())+"'></div>"+
     "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><button class='btn btn-primary btn-sm' onclick='saveSheetHook()'>Save</button><button class='btn btn-sea btn-sm' onclick='pushAllToSheet()'>Push all now</button><button class='btn btn-ghost btn-sm' onclick='openSheet()'>Open Google Sheet</button></div>"+
   "</div>"+
+  (function(){
+    var mismatch=(sbc.url&&sbc.url!==SB_DEFAULTS.url)||(sbc.ws&&sbc.ws!==SB_DEFAULTS.ws);
+    return "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Sync status <span class='pill "+(mismatch?"full":"completed")+"'>"+(mismatch?"Custom config":"Using shared default")+"</span></div>"+
+    (mismatch?"<div style='background:#fbe7e4;border:1px solid #f0c2bb;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12.5px;color:var(--coral)'><b>This device is pointed at a different Project URL or workspace than the built-in default.</b> If your other devices are on the default, this device will never see their changes (and vice versa) — that alone explains additions/deletions not appearing elsewhere. Tap <b>Reset to shared default</b> below unless you deliberately set up your own Supabase project on every device.</div>":"")+
+    "<div class='rows' style='display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin-bottom:14px'>"+
+      "<span style='color:var(--ink-soft)'>Workspace</span><b class='mono' id='diagWs'>"+(sbc.ws||"default")+"</b>"+
+      "<span style='color:var(--ink-soft)'>Project</span><b class='mono' id='diagUrl' style='word-break:break-all'>"+(sbc.url||"—")+"</b>"+
+      "<span style='color:var(--ink-soft)'>Auto-sync</span><b id='diagAuto'>"+(sbc.auto?"On":"Off")+"</b>"+
+      "<span style='color:var(--ink-soft)'>Records on this device</span><b class='mono' id='diagCount'>"+totalRecordCount()+"</b>"+
+      "<span style='color:var(--ink-soft)'>Last synced (this device)</span><b id='diagLast'>"+(localUpdated()?dShort(localUpdated())+" "+new Date(localUpdated()).toLocaleTimeString():"never")+"</b>"+
+      "<span style='color:var(--ink-soft)'>Per-record database</span><b id='diagPerRec'>"+(_perRecordActive?"Active":"Not set up")+"</b>"+
+    "</div>"+
+    "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
+      (mismatch?"<button class='btn btn-primary btn-sm' onclick='resetToSharedDefault()'>Reset to shared default</button>":"")+
+      "<button class='btn btn-sea btn-sm' onclick='forceFullResync()'>Force full re-sync ↓</button>"+
+      "<span class='sb-status' id='diagStatus'></span>"+
+    "</div>"+
+  "</div>";
+  })()+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Cloud Sync · Supabase</div>"+
-    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:680px'>Connect a free Supabase project to sync data across devices automatically. Create a project at supabase.com, run the setup SQL below in the Supabase SQL editor, then paste your <b>Project URL</b> and <b>anon public key</b> here (Project Settings → API).</p>"+
+    "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:680px'>Every device should use the <b>exact same</b> Project URL, anon key and workspace name — that's what makes them see the same data. Leave these as the shared default unless you deliberately created your own Supabase project.</p>"+
     "<div class='form-grid'>"+
       "<div class='field full'><label>Project URL</label><input class='input' id='sb_url' placeholder='https://xxxxxxxx.supabase.co' value='"+(sbc.url||"")+"'></div>"+
       "<div class='field full'><label>Anon public key</label><input class='input' id='sb_key' placeholder='eyJhbGciOi...' value='"+(sbc.key||"")+"'></div>"+
@@ -2988,6 +3039,16 @@ function perRecordSetupSQL(){
 _recordKeys.map(function(k){return "create table if not exists "+recTable(k)+" (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table "+recTable(k)+" disable row level security;\ngrant all on table "+recTable(k)+" to anon, authenticated;\n";}).join("\n");
 }
 var ROLE_ACCESS={Admin:"All modules",Operator:"Tours, Bookings, Logistics",Guide:"Ops board (view)",Sales:"CRM, Bookings"};
+/* The sync-status diagnostics (record count, last-synced time, workspace mismatch
+   warning) are baked into the Settings HTML at render time — rebuild the whole view
+   so they're never stale, instead of only refreshing the operators table. */
+function refreshSettings(){
+  var el=document.getElementById("v-settings");if(!el){renderOperators();return;}
+  var wasActive=el.classList.contains("active");
+  el.outerHTML=viewSettings();
+  var ne=document.getElementById("v-settings");if(ne&&wasActive)ne.classList.add("active");
+  renderOperators();
+}
 function renderOperators(){
   var b=document.getElementById("opBody");if(!b)return;
   b.innerHTML=operators.map(function(o,i){return "<tr><td class='strong'>"+o.name+"</td><td class='mono'>"+o.phone+"</td><td class='mono'>"+o.code+"</td><td><span class='pill "+(o.role==="Admin"?"completed":(o.role==="Guide"||o.role==="Sales"?"plain":"open"))+"'>"+(o.role||"Operator")+"</span></td><td style='color:var(--ink-soft)'>"+(ROLE_ACCESS[o.role]||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editOperator' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteOperator' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='6' class='empty'>No users yet — tap “Add user”. Login stays open until you add one.</td></tr>";
