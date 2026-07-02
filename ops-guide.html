@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Island Explorer — My Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b2a4a;--soft:#5a6a86;--forest:#143a2e;--blue:#0a6ed1;--paper:#eef1f6;--surface:#fff;--line:#e2e8f1;--ok:#1b7a4d;--err:#c0392b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;padding:18px}
+.wrap{max-width:640px;margin:0 auto}
+.head{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px 16px;text-align:center;margin-bottom:16px}
+.head img{max-width:200px;max-height:80px;object-fit:contain;display:block;margin:0 auto}
+.head .brand{font-family:'Calistoga',serif;font-size:20px}.head .brand .ex{color:#1976d2}
+.head h1{font-size:15px;font-weight:600;margin-top:10px;color:var(--soft)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px -14px rgba(20,40,80,.2)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.top b{font-size:15px}
+.pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#e7f1fb;color:var(--blue);white-space:nowrap}
+.dates{font-size:12.5px;color:var(--soft);margin-bottom:10px}
+.rows{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px}
+.rows span.k{color:var(--soft)}.rows span.v{font-weight:600;text-align:right}
+.remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
+.empty{text-align:center;color:var(--soft);padding:40px 20px;font-size:14px}
+.err{background:#fbe7e4;color:var(--err);border:1px solid #f0c2bb;border-radius:12px;padding:14px;font-size:14px;margin-bottom:14px}
+.foot{text-align:center;font-size:11px;color:var(--soft);padding:16px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="assets/logo.png" alt="Island Explorer Birding Tours" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('brandtext');if(f)f.style.display='block';}">
+    <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
+    <h1 id="who">Loading your operations…</h1>
+  </div>
+  <div id="err" class="err" style="display:none"></div>
+  <div id="list"></div>
+</div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const guide=(new URLSearchParams(location.search).get("guide")||"").trim();
+var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display="block";}
+function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
+function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
+
+async function load(){
+  if(!sb||!guide){showErr("This link is invalid or the service is unavailable. Ask Island Explorer for a fresh link.");document.getElementById("who").textContent="—";return;}
+  document.getElementById("who").textContent="Operations for "+guide;
+  try{
+    var res=await sb.from("workspaces").select("data").eq("id","island-explorer").maybeSingle();
+    var ops=(res.data&&res.data.data&&res.data.data.ops)||[];
+    var mine=ops.filter(function(o){return (o.guide||"").trim().toLowerCase()===guide.toLowerCase();});
+    var list=document.getElementById("list");
+    if(!mine.length){list.innerHTML="<div class='empty'>No operations assigned to you yet.</div>";return;}
+    mine.sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
+    list.innerHTML=mine.map(function(o){
+      return "<div class='card'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill'>"+(o.status||"Scheduled")+"</span></div>"+
+        "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
+        "<div class='rows'>"+row("Pax",o.pax)+row("Pickup",o.pickup)+row("Stay",o.stay)+"</div>"+
+        (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
+      "</div>";
+    }).join("");
+  }catch(e){showErr("Couldn't load your operations. Please try again.");}
+}
+load();
+</script>
+</body>
+</html>
