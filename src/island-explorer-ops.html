@@ -456,7 +456,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
       <a href="#" id="lgToggle" onclick="authToggleMode();return false">Create new account</a>
     </div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 64</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 65</span></div>
   </div>
 </div>
 <div class="app">
@@ -474,7 +474,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
-      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 64</span>
+      <span id="topBuild" style="font-size:11px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:4px 9px;margin-right:8px;white-space:nowrap">build 65</span>
       <button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -869,14 +869,21 @@ function sbSaveConfig(){
    signal. If an AUTOMATIC push would replace the cloud with dramatically less data
    than the cloud already had, refuse it and re-pull instead — better a sync stalls
    for a moment than it silently erases records. A manual "Push to cloud" click always
-   goes through (you're explicitly choosing to push). */
+   goes through (you're explicitly choosing to push).
+   The threshold is deliberately extreme (lose more than 80% of a 30+ record dataset)
+   — an earlier, tighter version of this guard (any drop below 50%, baseline of just 5)
+   ended up blocking completely normal, small, intentional deletions (e.g. removing a
+   few customers/leads) in a modest-sized dataset, which is a far more common and more
+   damaging false positive than the rare true "wipe" scenario it exists to catch. The
+   real fix for that scenario is the boot-timestamp fix above; this is only a last-resort
+   backstop now, not the primary defense. */
 function totalRecordCount(){return (tours.length||0)+(bookings.length||0)+(customers.length||0)+(accBookings.length||0)+(ops.length||0)+(leads.length||0)+(externalGuides.length||0);}
 var _lastKnownCloudTotal=0;
 async function cloudPush(silent){
   var c=sbConfig(),cl=sbClient();
   if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return;}
-  if(silent&&_lastKnownCloudTotal>5&&totalRecordCount()<_lastKnownCloudTotal*0.5){
-    console.warn("Auto-push skipped: local data ("+totalRecordCount()+" records) looks much smaller than the last known cloud copy ("+_lastKnownCloudTotal+"). Re-pulling instead.");
+  if(silent&&_lastKnownCloudTotal>=30&&totalRecordCount()<_lastKnownCloudTotal*0.2){
+    console.warn("Auto-push skipped: local data ("+totalRecordCount()+" records) looks drastically smaller than the last known cloud copy ("+_lastKnownCloudTotal+"). Re-pulling instead.");
     cloudPull(true);
     return;
   }
@@ -2152,7 +2159,7 @@ function dashRefresh(){var p=(typeof cloudPull==="function")?cloudPull(true):nul
 var _subPoll=null;
 function startSubPoll(){stopSubPoll();_subPoll=setInterval(function(){if(curView==="requests"||curView==="reservations"||curView==="logistics")loadSubmissions(false);else stopSubPoll();},5000);}
 function stopSubPoll(){if(_subPoll){clearInterval(_subPoll);_subPoll=null;}}
-function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();refreshDashboard();}
+function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();persistData();if(document.getElementById("v-dashboard"))refreshDashboard();}
 
 /* ===== REQUESTS / PUBLIC FORMS ===== */
 var _submissions=[];
