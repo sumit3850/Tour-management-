@@ -40,6 +40,9 @@ textarea{min-height:84px;resize:vertical}
 .success h2{font-size:20px;margin:14px 0 6px}
 .success p{color:var(--soft);font-size:14px}
 .foot{text-align:center;font-size:11px;color:var(--soft);padding:14px}
+.veh-row{display:grid;grid-template-columns:1fr 1fr 84px auto;gap:8px;align-items:end;margin-bottom:10px}
+.veh-row>button{align-self:end}
+@media(max-width:520px){.row{grid-template-columns:1fr}.veh-row{grid-template-columns:1fr 1fr}.veh-row>button{grid-column:2;justify-self:end}}
 @media(max-width:480px){.row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -107,8 +110,8 @@ function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
 /* One vehicle row (name + reg + remove) for the multi-vehicle driver form. */
 function addVehRow(){
   var box=document.getElementById("veh_list");if(!box)return;
-  var d=document.createElement("div");d.className="veh-row";d.style.cssText="display:grid;grid-template-columns:1fr 1fr 74px auto;gap:8px;align-items:end;margin-bottom:10px";
-  d.innerHTML="<div><input class='veh-name' placeholder='Vehicle name / model'></div><div><input class='veh-reg' placeholder='Reg. no.'></div><div><input class='veh-seats' type='number' placeholder='Seats'></div><button type='button' onclick='this.closest(\".veh-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
+  var d=document.createElement("div");d.className="veh-row";
+  d.innerHTML="<div><input class='veh-name' placeholder='Vehicle name'></div><div><input class='veh-reg' placeholder='Reg. no.'></div><div><input class='veh-seats' type='number' placeholder='Seats'></div><button type='button' onclick='this.closest(\".veh-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
   box.appendChild(d);
 }
 function docField(id,label){return "<div class='field'><label>"+label+"</label><input id='"+id+"' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach one or more files (photo, PDF). Optional.</div></div>";}
