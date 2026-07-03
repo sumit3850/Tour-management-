@@ -485,14 +485,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 92</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 93</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 92</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 93</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2696,8 +2696,25 @@ function convertToBooking(id){
 function autoProcessSubmissions(){
   var changed=false;
   (_submissions||[]).forEach(function(s){
-    if(s.status==="booked"||s.status==="lead-added"||s.type==="reservation_response")return;
-    if(subProcessed(s.id))return; /* never re-process the same submission on this device */
+    if(s.type==="reservation_response"||s.type==="op_status_update"||s.type==="driver_trip_log")return;
+    /* Driver & guide registrations: RE-AFFIRM the directory record on every pass
+       (idempotent — matched by name/phone) so a sync race can never leave them
+       missing from the Drivers / External Guides tables. If the record already
+       exists nothing changes (no push spam); if it was lost, it's recreated. The
+       submission is the source of truth — delete the submission to remove the entry. */
+    if(s.type==="driver"){
+      if(addOrUpdateDriver(s))changed=true;
+      if(s.status!=="booked"){s.status="booked";saveSubmissionRow(s);changed=true;}
+      markSubProcessed(s.id);return;
+    }
+    if(s.type==="guidedir"){
+      if(addOrUpdateExternalGuide(s))changed=true;
+      if(s.status!=="booked"){s.status="booked";saveSubmissionRow(s);changed=true;}
+      markSubProcessed(s.id);return;
+    }
+    /* one-time conversions for the rest */
+    if(s.status==="booked"||s.status==="lead-added")return;
+    if(subProcessed(s.id))return;
     if(s.type==="client"){makeBookingFromSub(s);s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);}
     else if(s.type==="interest"){
       addOrUpdateCustomer(s);
@@ -2705,23 +2722,15 @@ function autoProcessSubmissions(){
         leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
       s.status="lead-added";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
     }
-    else if(s.type==="guidedir"){
-      addOrUpdateExternalGuide(s);
-      s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
-    }
-    else if(s.type==="driver"){
-      addOrUpdateDriver(s);
-      s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
-    }
   });
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();if(document.getElementById("guideBody"))renderGuides();if(document.getElementById("logBody"))renderLog(_logTab);persistData();}
 }
 /* A driver's self-registration flows into the Drivers directory (and adds their
    vehicle to the Vehicles list if it's new), with an auto login code. */
 function addOrUpdateDriver(s){
-  if(!s.name)return;var d=s.data||{};
+  if(!s.name)return false;var d=s.data||{};var changed=false;
   var drv=drivers.find(function(x){return (x.name||"").toLowerCase()===s.name.toLowerCase()||(s.phone&&x.phone===s.phone);});
-  if(!drv){drv={name:s.name,code:String(Math.floor(1000+Math.random()*9000))};drivers.unshift(drv);}
+  if(!drv){drv={name:s.name,code:String(Math.floor(1000+Math.random()*9000))};drivers.unshift(drv);changed=true;}
   drv.name=s.name;drv.phone=s.phone||drv.phone||"";drv.license=d.license||drv.license||"";drv.address=d.address||drv.address||"";
   drv.licenseDoc=d.licenseDoc||((d.documents&&d.documents[0]&&d.documents[0].url)||drv.licenseDoc||"");
   if(d.documents&&d.documents.length)drv.documents=d.documents;
@@ -2731,21 +2740,23 @@ function addOrUpdateDriver(s){
   if(vlist[0]){drv.veh=vlist[0].name||drv.veh||"";drv.reg=vlist[0].reg||drv.reg||"";}
   vlist.forEach(function(vv){
     if(vv.name&&!vehicles.find(function(v){return (v.name||"").toLowerCase()===vv.name.toLowerCase();})){
-      vehicles.unshift({name:vv.name,reg:vv.reg||"",type:"Car",cap:parseInt(vv.seats||d.seats)||0,driver:s.name,avail:"Available"});
+      vehicles.unshift({name:vv.name,reg:vv.reg||"",type:"Car",cap:parseInt(vv.seats||d.seats)||0,driver:s.name,avail:"Available"});changed=true;
     }
   });
+  return changed;
 }
 /* A guide's self-registration form flows straight into the External Guides directory. */
 function addOrUpdateExternalGuide(s){
-  if(!s.name)return;
-  var d=s.data||{};
+  if(!s.name)return false;
+  var d=s.data||{};var changed=false;
   var g=externalGuides.find(function(x){return (x.name||"").toLowerCase()===s.name.toLowerCase()||(s.phone&&x.phone===s.phone);});
-  if(!g){g={name:s.name};externalGuides.unshift(g);}
+  if(!g){g={name:s.name};externalGuides.unshift(g);changed=true;}
   g.name=s.name;g.phone=s.phone||g.phone||"";g.email=s.email||g.email||"";g.expertise=d.expertise||g.expertise||"";g.address=d.address||g.address||"";
   g.idNo=d.idNo||g.idNo||"";
   g.idDoc=d.licenseDoc||((d.documents&&d.documents[0]&&d.documents[0].url)||g.idDoc||"");
   if(d.documents&&d.documents.length)g.documents=d.documents;
   guideId(g);
+  return changed;
 }
 function setSubStatus(id,status,silent){
   var s=_submissions.find(function(x){return x.id===id;});if(s){s.status=status;saveSubmissionRow(s);}
