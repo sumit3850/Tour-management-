@@ -125,19 +125,20 @@ function compressImage(f){return new Promise(function(res){
   };img.onerror=function(){res(null);};img.src=rd.result;};
   rd.onerror=function(){res(null);};rd.readAsDataURL(f);
 });}
-async function uploadDocs(inputId){
+async function uploadDocs(inputId,bucket,prefix){
+  bucket=bucket||"uploads";prefix=prefix||"forms/";
   var el=document.getElementById(inputId);
   if(!el||!el.files||!el.files.length||!sb)return [];
   var out=[];var total=el.files.length;
   setProgress(3,"Preparing documents…");
   for(var i=0;i<el.files.length;i++){
     setProgress(5+Math.round(i/total*88),"Uploading "+(i+1)+" of "+total+"…");
-    var f=el.files[i];var path="forms/"+Date.now()+"_"+i+"_"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+    var f=el.files[i];var path=prefix+Date.now()+"_"+i+"_"+f.name.replace(/[^a-zA-Z0-9._-]/g,"_");
     var done=false;
     /* Prefer a Storage bucket if it exists (keeps full quality + real URLs) */
     try{
-      var up=await sb.storage.from("uploads").upload(path,f,{upsert:false});
-      if(up&&!up.error){var pub=sb.storage.from("uploads").getPublicUrl(path);out.push({name:f.name,url:(pub&&pub.data&&pub.data.publicUrl)||""});done=true;}
+      var up=await sb.storage.from(bucket).upload(path,f,{upsert:false});
+      if(up&&!up.error){var pub=sb.storage.from(bucket).getPublicUrl(path);out.push({name:f.name,url:(pub&&pub.data&&pub.data.publicUrl)||""});done=true;}
     }catch(e){}
     /* Fallback with no bucket: compress images, embed inline */
     if(!done){
@@ -145,7 +146,7 @@ async function uploadDocs(inputId){
       if(!dataUrl&&f.size<=1200000)dataUrl=await readDataURL(f);
       if(dataUrl){out.push({name:f.name,url:dataUrl});done=true;}
     }
-    if(!done)out.push({name:f.name,note:"too large — create a public 'uploads' bucket in Supabase Storage for full-size files"});
+    if(!done)out.push({name:f.name,note:"too large — create a public '"+bucket+"' bucket in Supabase Storage for full-size files"});
   }
   return out;
 }
@@ -168,7 +169,8 @@ if(type==="guide"){
 }else if(type==="driver"){
   html+=inp("d_name","Full name",{req:1});
   html+=rowOf(inp("d_phone","WhatsApp / Phone",{req:1,type:"tel"}),inp("d_email","Email",{type:"email"}));
-  html+=inp("d_license","Driving licence no.",{});
+  html+=inp("d_license","Driving licence no.",{req:1});
+  html+="<div class='field'><label>Upload driving licence <span class='req'>*</span></label><input id='d_docs' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach a clear photo or PDF of your driving licence. Required.</div></div>";
   html+=inp("d_address","Full residential address",{type:"textarea",ph:"Full residential address"});
   html+="<div class='field'><label>Vehicles <span class='req'>*</span></label><div id='veh_list'></div><button type='button' onclick='addVehRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add another vehicle</button><div class='hint'>Add every vehicle you drive — name, registration number and seats for each.</div></div>";
 }else if(type==="client"){
@@ -211,7 +213,9 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   e.preventDefault();
   document.getElementById("errBox").style.display="none";
   var rec={type:type,status:"new"};
-  var docInput=(type==="client")?"c_docs":(type==="interest"?"i_docs":null);
+  var docInput=(type==="client")?"c_docs":(type==="interest"?"i_docs":(type==="driver"?"d_docs":null));
+  var docBucket=(type==="driver")?"driver-details":"uploads";
+  var docPrefix=(type==="driver")?"drivers/":"forms/";
   if(type==="guide"){
     rec.name=val("g_name");rec.phone=val("g_phone");rec.email=val("g_email");
     rec.tour=val("g_tour");rec.start_date=val("g_start")||null;rec.end_date=val("g_end")||null;
@@ -237,10 +241,17 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   if(params.get("tid"))rec.data.tourId=params.get("tid");
   if(presetTourCode)rec.data.tourCode=presetTourCode;
   if(!rec.name||!rec.phone){showErr("Please fill in at least your name and phone number.");return;}
+  if(type==="driver"){
+    if(!val("d_license")){showErr("Driving licence number is required.");return;}
+    var _de=document.getElementById("d_docs");
+    if(!_de||!_de.files||!_de.files.length){showErr("Please upload a photo or PDF of your driving licence — it's required.");return;}
+    var _hasVeh=Array.prototype.some.call(document.querySelectorAll(".veh-row"),function(r){return ((r.querySelector(".veh-name")||{}).value||"").trim()||((r.querySelector(".veh-reg")||{}).value||"").trim();});
+    if(!_hasVeh){showErr("Please add at least one vehicle (name and reg. no.).");return;}
+  }
   if(!sb){showErr("Sorry, the form service is unavailable right now. Please WhatsApp us at +91 99332 02175.");return;}
   var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
   try{
-    if(docInput){var docs=await uploadDocs(docInput);if(docs.length)rec.data.documents=docs;}
+    if(docInput){var docs=await uploadDocs(docInput,docBucket,docPrefix);if(docs.length){rec.data.documents=docs;rec.data.licenseDoc=(docs[0]&&docs[0].url)||"";}}
     setProgress(96,"Saving…");
     rec.id="S"+Date.now()+Math.floor(Math.random()*100000);
     rec.created_at=new Date().toISOString();
