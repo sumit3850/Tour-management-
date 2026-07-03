@@ -484,14 +484,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 83</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 84</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 83</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 84</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1234,6 +1234,10 @@ function tourCode(t){if(!t)return "";if(!t.code)ensureTourCodes();return t.code|
 /* Resolve a clean Tour ID from either a tour-id or whatever we stored on a record. */
 function tourCodeFromId(id){if(!id)return "";var t=(tours||[]).find(function(x){return x.id===id;});return t?tourCode(t):id;}
 function pill(s){const m={open:"Open",full:"Full",closed:"Closed",completed:"Completed"};return "<span class='pill "+s+"'>"+m[s]+"</span>"}
+/* Seat status derived from ACTUAL bookings vs capacity (not a stored field), so a tour
+   with 0 booked never shows "Full". Only "completed" comes from the lifecycle status. */
+function seatStatus(t){if(t.status==="completed")return "completed";var b=booked(t.id);return (t.cap>0&&b>=t.cap)?"full":"open";}
+function tourHasBooking(t){return bookings.some(function(b){return b.tour===t.id;});}
 function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='lab'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg>"+lab+"</div><div class='val'>"+val+"</div><div class='trend "+dir+"'>"+trend+"</div></div>"}
 
 /* ===== NAV + history ===== */
@@ -1751,7 +1755,7 @@ function tourCard(t){
     "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
     "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
-    "<div class='foot'><span class='pills'>"+pill(s)+payPill(tourPayStatus(t))+"</span><span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
+    "<div class='foot'><span class='pills'>"+pill(seatStatus(t))+(tourHasBooking(t)?payPill(tourPayStatus(t)):"")+"</span><span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
   "</div>";
 }
 function renderTours(filter=curTab){
@@ -3557,7 +3561,7 @@ function openTour(id){
       "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
         "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+t.startLoc+"</b></div>"+
-        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(status(t))+" "+payPill(payStatus)+"</div>"+
+        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(seatStatus(t))+(tourHasBooking(t)?" "+payPill(payStatus):"")+"</div>"+
       "</div>"+
       (function(){var f=feeFor(t);var role=t.guideRole||"Lead";var payout=role==="Lead"?f.leadTotal:f.asstTotal;return "<div style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
         "<div><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → <b>"+role+" payout "+fmt(payout)+"</b></div>"+
