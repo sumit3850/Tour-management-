@@ -165,6 +165,8 @@ if(type==="guide"){
   html+=inp("gd_name","Full name",{req:1});
   html+=inp("gd_expertise","Expertise / specialisation",{ph:"e.g. Endemics, waders, night birding"});
   html+=rowOf(inp("gd_phone","WhatsApp / Phone",{req:1,type:"tel"}),inp("gd_email","Email",{type:"email"}));
+  html+=inp("gd_idno","Guide ID / govt ID number",{req:1,ph:"ID / naturalist licence number"});
+  html+="<div class='field'><label>Upload ID document <span class='req'>*</span></label><input id='gd_docs' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach a clear photo or PDF of your ID. Required.</div></div>";
   html+=inp("gd_address","Full residential address",{type:"textarea",ph:"Full residential address"});
 }else if(type==="driver"){
   html+=inp("d_name","Full name",{req:1});
@@ -213,9 +215,9 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   e.preventDefault();
   document.getElementById("errBox").style.display="none";
   var rec={type:type,status:"new"};
-  var docInput=(type==="client")?"c_docs":(type==="interest"?"i_docs":(type==="driver"?"d_docs":null));
-  var docBucket=(type==="driver")?"driver-details":"uploads";
-  var docPrefix=(type==="driver")?"drivers/":"forms/";
+  var docInput=(type==="client")?"c_docs":(type==="interest"?"i_docs":(type==="driver"?"d_docs":(type==="guidedir"?"gd_docs":null)));
+  var docBucket=(type==="driver")?"driver-details":(type==="guidedir"?"guide-ids":"uploads");
+  var docPrefix=(type==="driver")?"drivers/":(type==="guidedir"?"guides/":"forms/");
   if(type==="guide"){
     rec.name=val("g_name");rec.phone=val("g_phone");rec.email=val("g_email");
     rec.tour=val("g_tour");rec.start_date=val("g_start")||null;rec.end_date=val("g_end")||null;
@@ -223,7 +225,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     rec.data={organisation:val("g_org"),clientType:val("g_clienttype"),notes:val("g_notes")};
   }else if(type==="guidedir"){
     rec.name=val("gd_name");rec.phone=val("gd_phone");rec.email=val("gd_email");
-    rec.data={expertise:val("gd_expertise"),address:val("gd_address")};
+    rec.data={expertise:val("gd_expertise"),address:val("gd_address"),idNo:val("gd_idno")};
   }else if(type==="driver"){
     rec.name=val("d_name");rec.phone=val("d_phone");rec.email=val("d_email");
     var vehs=[];document.querySelectorAll(".veh-row").forEach(function(r){var n=(r.querySelector(".veh-name")||{}).value||"";var rg=(r.querySelector(".veh-reg")||{}).value||"";var st=(r.querySelector(".veh-seats")||{}).value||"";n=n.trim();rg=rg.trim();if(n||rg)vehs.push({name:n,reg:rg,seats:st.trim()});});
@@ -247,6 +249,11 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     if(!_de||!_de.files||!_de.files.length){showErr("Please upload a photo or PDF of your driving licence — it's required.");return;}
     var _hasVeh=Array.prototype.some.call(document.querySelectorAll(".veh-row"),function(r){return ((r.querySelector(".veh-name")||{}).value||"").trim()||((r.querySelector(".veh-reg")||{}).value||"").trim();});
     if(!_hasVeh){showErr("Please add at least one vehicle (name and reg. no.).");return;}
+  }
+  if(type==="guidedir"){
+    if(!val("gd_idno")){showErr("Guide ID / govt ID number is required.");return;}
+    var _ge=document.getElementById("gd_docs");
+    if(!_ge||!_ge.files||!_ge.files.length){showErr("Please upload a photo or PDF of your ID — it's required.");return;}
   }
   if(!sb){showErr("Sorry, the form service is unavailable right now. Please WhatsApp us at +91 99332 02175.");return;}
   var btn=document.getElementById("submitBtn");btn.disabled=true;btn.textContent="Submitting…";
