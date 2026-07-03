@@ -484,14 +484,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 84</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 85</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 84</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 85</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1755,7 +1755,7 @@ function tourCard(t){
     "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
     "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
-    "<div class='foot'><span class='pills'>"+pill(seatStatus(t))+(tourHasBooking(t)?payPill(tourPayStatus(t)):"")+"</span><span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
+    "<div class='foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+"</span><span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
   "</div>";
 }
 function renderTours(filter=curTab){
@@ -3043,10 +3043,8 @@ function viewCustomers(){
 function cascadeTourCustomers(tourId){
   if(!tourId)return;
   var t=tours.find(function(x){return x.id===tourId;});if(!t)return;
-  var poc=t.pocId?bookings.find(function(b){return b.id===t.pocId;}):bookings.find(function(b){return b.tour===tourId;});
-  if(!poc)return;
-  var payMap={"Fully Paid":"Paid","Partial":"Deposit","Unpaid":"Balance due"};
-  var pay=payMap[bookingPaymentStatus(poc)]||poc.pay||"Deposit";
+  var pay=tourPayStatus(t);
+  if(!pay)return; /* no financial figures yet — leave customers as-is */
   customers.forEach(function(c){if(c.details&&c.details.tourId===tourId)c.pay=pay;});
 }
 function cascadeAllCustomerPayments(){(tours||[]).forEach(function(t){cascadeTourCustomers(t.id);});}
@@ -3442,12 +3440,14 @@ function saveEditTour(){
 }
 /* Once the tour is fully paid (pending = 0) and its due date has passed, mark every
    booking on that tour "Fully Paid" so the Bookings section reflects it automatically. */
+/* The tour's payment status (from its total vs deposit) drives every booking on it,
+   so the booking entries update automatically when the tour's figures change. */
 function syncTourPaymentToBookings(t){
-  var pending=Math.max((t.tourCost||0)-(t.tourDeposit||0),0);
-  var dueReached=t.due&&t.due<=todayISO;
-  if(pending>0||!dueReached)return;
+  var pay=tourPayStatus(t);
+  if(!pay)return;
   bookings.filter(function(b){return b.tour===t.id;}).forEach(function(b){
-    b.pay="Paid";b.totalOverride=(b.totalOverride!=null&&b.totalOverride!=="")?b.totalOverride:t.tourCost;b.deposit=bookingTotalCost(b);
+    b.pay=pay;
+    if(pay==="Paid"){b.totalOverride=(b.totalOverride!=null&&b.totalOverride!=="")?b.totalOverride:t.tourCost;b.deposit=bookingTotalCost(b);}
   });
 }
 
@@ -3539,15 +3539,18 @@ function savePost(){
 function markPoc(tid,bid){var t=tours.find(function(x){return x.id===tid;});if(!t)return;t.pocId=(t.pocId===bid?"":bid);persistData();openTour(tid);}
 /* Payment status for a whole tour: the POC booking's status if set, else derived
    from the tour's own cost vs deposit entered at creation. */
+/* Tour payment status is driven by the money entered on the tour: total cost vs
+   deposit received. Pending == 0 (deposit >= total) -> "Paid"; a deposit that is
+   less than the total -> "Deposit". Returns "" (show nothing) when no financial
+   figures have been entered yet — on the tour or on its POC booking. */
 function tourPayStatus(t){
-  var poc=t.pocId?bookings.find(function(x){return x.id===t.pocId;}):null;
-  if(poc&&poc.pay)return poc.pay;
   var cost=parseFloat(t.tourCost)||0,dep=parseFloat(t.tourDeposit)||0;
-  if(cost>0&&dep>=cost)return "Paid";
-  if(dep>0)return "Deposit";
-  return "Pending";
+  if(cost>0||dep>0)return (cost>0&&dep>=cost)?"Paid":"Deposit";
+  var poc=t.pocId?bookings.find(function(x){return x.id===t.pocId;}):null;
+  if(poc){var tot=bookingTotalCost(poc),d=bookingDeposit(poc);if(tot>0||d>0)return bookingPending(poc)<=0?"Paid":"Deposit";}
+  return "";
 }
-function payPill(ps){var cls=ps==="Paid"?"completed":(ps==="Deposit"?"open":"full");return "<span class='pill "+cls+"'>"+ps+"</span>";}
+function payPill(ps){if(!ps)return "";var cls=ps==="Paid"?"completed":(ps==="Deposit"?"open":"full");var label=ps==="Paid"?"Full payment received":ps;return "<span class='pill "+cls+"'>"+label+"</span>";}
 function openTour(id){
   const t=tours.find(x=>x.id===id);if(!t)return;const b=booked(id),bs=bookings.filter(x=>x.tour===id),wl=waitlist[id]||[];
   var poc=bs.find(function(x){return x.id===t.pocId;});
@@ -3561,7 +3564,7 @@ function openTour(id){
       "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
         "<div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+t.pickup+"</b></div><div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+t.startLoc+"</b></div>"+
-        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(seatStatus(t))+(tourHasBooking(t)?" "+payPill(payStatus):"")+"</div>"+
+        "<div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+t.stay+"</b></div><div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(seatStatus(t))+(payStatus?" "+payPill(payStatus):"")+"</div>"+
       "</div>"+
       (function(){var f=feeFor(t);var role=t.guideRole||"Lead";var payout=role==="Lead"?f.leadTotal:f.asstTotal;return "<div style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
         "<div><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → <b>"+role+" payout "+fmt(payout)+"</b></div>"+
