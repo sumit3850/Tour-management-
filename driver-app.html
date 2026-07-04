@@ -59,7 +59,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 .trip-actions button{flex:1}
 .head{position:relative}
 .logout-btn{position:absolute;top:16px;right:16px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--soft);cursor:pointer}
-.install-btn{width:100%;margin-top:10px;padding:11px;border:1px dashed var(--blue);border-radius:11px;background:#e7f1fb;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;display:none}
+.install-btn{width:100%;margin-top:10px;padding:11px;border:1px dashed var(--blue);border-radius:11px;background:#e7f1fb;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -100,20 +100,21 @@ var myDriver=null,myPhone="",myCode="",allOps=[],myVehicles=[];
 var mySavedTrips=null,_savedLoading=false; /* null = not fetched yet */
 var todayISO=new Date().toISOString().slice(0,10);
 /* "Add to Home Screen" support — only shown on the sign-in screen, so this
-   never gets confused with the main console app's own install prompt. */
+   never gets confused with the main console app's own install prompt.
+   The button is always visible in the HTML/CSS (no browser reliably fires
+   beforeinstallprompt — iOS Safari and Firefox never do, and Chrome/Edge
+   often delay or skip it) — its click handler uses the native prompt when
+   available and otherwise falls back to manual instructions, so drivers
+   always have a way to install/bookmark instead of a silently-hidden button. */
 var _deferredInstall=null;
-window.addEventListener("beforeinstallprompt",function(e){
-  e.preventDefault();_deferredInstall=e;
-  var b=document.getElementById("installBtn");if(b)b.style.display="block";
-});
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferredInstall=e;});
 window.addEventListener("appinstalled",function(){_deferredInstall=null;var b=document.getElementById("installBtn");if(b)b.style.display="none";});
+if(window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone){
+  var _b=document.getElementById("installBtn");if(_b)_b.style.display="none"; /* already installed/running standalone */
+}
 function installDriverApp(){
   if(_deferredInstall){_deferredInstall.prompt();_deferredInstall.userChoice.then(function(){_deferredInstall=null;});return;}
   alert("To add this page to your home screen:\n\niPhone (Safari): tap the Share icon, then \"Add to Home Screen\".\n\nAndroid (Chrome): tap the ⋮ menu, then \"Add to Home screen\" or \"Install app\".");
-}
-if(!window.matchMedia("(display-mode: standalone)").matches&&!window.navigator.standalone){
-  var _b=document.getElementById("installBtn");
-  if(_b&&/iPhone|iPad|iPod/.test(navigator.userAgent))_b.style.display="block"; /* iOS never fires beforeinstallprompt */
 }
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
