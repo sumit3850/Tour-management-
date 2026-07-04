@@ -185,18 +185,26 @@ function switchTab(t){
 }
 /* A tour can switch vehicle/driver partway (e.g. one pair in South Andaman,
    a different pair once the group reaches Great Nicobar) — each such leg is
-   a separate vehicle+driver+date-range on the operation. A driver is "on"
-   an operation if they're the primary driver OR any leg's driver. */
-function myOps(){
+   a separate vehicle+driver+date-range on the operation. The SAME driver can
+   appear more than once on the SAME operation too (e.g. drives leg 1, hands
+   off, then drives leg 3 again) — so a driver's assignments are a list of
+   entries (one per matching segment), not one entry per operation, or a
+   repeat assignment would silently disappear behind the first match. */
+function myTripEntries(){
   var mine=myDriver.name.trim().toLowerCase();
-  return allOps.filter(function(o){
-    if((o.driver||"").trim().toLowerCase()===mine)return true;
-    return (o.legs||[]).some(function(l){return (l.driver||"").trim().toLowerCase()===mine;});
-  }).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
+  var entries=[];
+  allOps.forEach(function(o){
+    var segs=[{start:o.startISO||o.start,end:(o.legs&&o.legs.length)?o.legs[0].start:(o.endISO||o.end),veh:o.veh,reg:o.reg,driver:o.driver}].concat(o.legs||[]);
+    segs.forEach(function(seg,idx){
+      if((seg.driver||"").trim().toLowerCase()===mine)entries.push({o:o,leg:seg,entryId:o.id+"_"+idx});
+    });
+  });
+  return entries.sort(function(a,b){return (a.leg.start||"").localeCompare(b.leg.start||"");});
 }
 /* This driver's own slice of a (possibly multi-leg) operation — only their
    own working dates and vehicle, never the whole tour's span or another
-   leg's assignment. */
+   leg's assignment. Used only for the Log-trip form's pre-fill, where
+   showing just the first matching segment is a fine default. */
 function myLeg(o){
   var mine=myDriver.name.trim().toLowerCase();
   if((o.driver||"").trim().toLowerCase()===mine){
@@ -214,68 +222,68 @@ function setTripFilter(f){_tripFilter=f;renderTrips();}
 function myStatus(o){return o.driverStatus||o.status||"Scheduled";}
 function tripMatchesFilter(o,f){return myStatus(o).toLowerCase()===f.toLowerCase();}
 function renderTrips(){
-  var mine=myOps();
+  var mine=myTripEntries();
   var el=document.getElementById("tripsView");
   var subtabs="<div class='tabs' style='overflow-x:auto;flex-wrap:nowrap;gap:4px'>"+TRIP_FILTERS.map(function(f){return "<button class='tab "+(f===_tripFilter?"on":"")+"' style='flex:0 0 auto;white-space:nowrap' onclick=\"setTripFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
   if(!mine.length){el.innerHTML=subtabs+"<div class='empty'>No trips assigned to you yet.</div>";return;}
-  var shown=mine.filter(function(o){return tripMatchesFilter(o,_tripFilter);});
-  el.innerHTML=subtabs+(shown.length?shown.map(function(o){
-    var lg=myLeg(o);
-    return "<div class='card' id='card_"+o.id+"'>"+
+  var shown=mine.filter(function(e){return tripMatchesFilter(e.o,_tripFilter);});
+  el.innerHTML=subtabs+(shown.length?shown.map(function(e){
+    var o=e.o,lg=e.leg,eid=e.entryId;
+    return "<div class='card' id='card_"+eid+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
-      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(myStatus(o))+"' id='statuspill_"+o.id+"'>"+myStatus(o)+"</span></div>"+
+      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(myStatus(o))+"' id='statuspill_"+eid+"'>"+myStatus(o)+"</span></div>"+
       "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+"</div>"+
       "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
-      (o.driverFeedback?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div><button onclick=\"clearMyNote('"+o.id+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
-      "<div class='acts' id='acts_"+o.id+"'>"+
-        "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
-        "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
-        "<button onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
-        "<button onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
+      (o.driverFeedback?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div><button onclick=\"clearMyNote('"+eid+"','"+o.id+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
+      "<div class='acts' id='acts_"+eid+"'>"+
+        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','In progress')\">In Progress</button>"+
+        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','Completed')\">Completed</button>"+
+        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','Declined')\">Declined</button>"+
+        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','Transferred')\">Transferred</button>"+
       "</div>"+
-      "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / note</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
+      "<div class='reasonbox' id='reason_"+eid+"'><label>Reason / note</label><textarea id='reasontext_"+eid+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+eid+"')\">Submit</button></div>"+
       "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
     "</div>";
   }).join(""):"<div class='empty'>No trips in this view.</div>");
 }
-function setBusy(opId,busy,label){
-  var box=document.getElementById("acts_"+opId);if(!box)return;
+function setBusy(entryId,busy,label){
+  var box=document.getElementById("acts_"+entryId);if(!box)return;
   box.querySelectorAll("button").forEach(function(b){b.disabled=busy;b.style.opacity=busy?"0.5":"1";});
-  if(busy&&label){var p=document.getElementById("statuspill_"+opId);if(p)p.textContent=label;}
+  if(busy&&label){var p=document.getElementById("statuspill_"+entryId);if(p)p.textContent=label;}
 }
-function toggleReason(opId,status){
-  document.querySelectorAll(".reasonbox").forEach(function(b){if(b.id!=="reason_"+opId)b.style.display="none";});
-  var box=document.getElementById("reason_"+opId);
-  box.dataset.status=status;
+function toggleReason(entryId,opId,status){
+  document.querySelectorAll(".reasonbox").forEach(function(b){if(b.id!=="reason_"+entryId)b.style.display="none";});
+  var box=document.getElementById("reason_"+entryId);
+  box.dataset.status=status;box.dataset.opid=opId;
   box.style.display=(box.style.display==="block")?"none":"block";
 }
-async function submitReason(opId){
-  var text=document.getElementById("reasontext_"+opId).value.trim();
+async function submitReason(entryId){
+  var text=document.getElementById("reasontext_"+entryId).value.trim();
   if(!text){alert("Please add a short reason before submitting.");return;}
-  var box=document.getElementById("reason_"+opId);
-  await postOpStatus(opId,box.dataset.status,text);
+  var box=document.getElementById("reason_"+entryId);
+  await postOpStatus(entryId,box.dataset.opid,box.dataset.status,text);
 }
-async function setOpStatus(opId,status){await postOpStatus(opId,status,"");}
+async function setOpStatus(entryId,opId,status){await postOpStatus(entryId,opId,status,"");}
 /* Remove a previously-submitted note without changing the operation's status. */
-async function clearMyNote(opId){
+async function clearMyNote(entryId,opId){
   if(!confirm("Remove this note?"))return;
   var o=allOps.find(function(x){return x.id===opId;});
-  await postOpStatus(opId,o?myStatus(o):"Scheduled","",true);
+  await postOpStatus(entryId,opId,o?myStatus(o):"Scheduled","",true);
 }
-async function postOpStatus(opId,status,reason,clearFeedback){
+async function postOpStatus(entryId,opId,status,reason,clearFeedback){
   if(!sb){showErr("Service unavailable right now.");return;}
   showErr("");
-  setBusy(opId,true,"Saving…");
+  setBusy(entryId,true,"Saving…");
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
     data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,clearFeedback:!!clearFeedback}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
-    if(up.error){setBusy(opId,false);showErr("Could not update: "+up.error.message);return;}
+    if(up.error){setBusy(entryId,false);showErr("Could not update: "+up.error.message);return;}
     var o=allOps.find(function(x){return x.id===opId;});
     if(o){o.driverStatus=status;if(reason){o.driverFeedback=reason;o.driverFeedbackAt=rec.created_at;}else if(clearFeedback){o.driverFeedback="";o.driverFeedbackAt="";}}
     renderTrips();
-  }catch(e){setBusy(opId,false);showErr("Network error. Please try again.");}
+  }catch(e){setBusy(entryId,false);showErr("Network error. Please try again.");}
 }
 /* Jump to the log-trip tab with this operation's tour + vehicle pre-selected. */
 function startLogFor(opId){
