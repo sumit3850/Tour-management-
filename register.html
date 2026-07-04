@@ -111,7 +111,7 @@ function rowOf(a,b){return "<div class='row'>"+a+b+"</div>";}
 function addVehRow(){
   var box=document.getElementById("veh_list");if(!box)return;
   var d=document.createElement("div");d.className="veh-row";
-  d.innerHTML="<div><input class='veh-name' placeholder='Vehicle name'></div><div><input class='veh-reg' placeholder='Reg. no.'></div><div><input class='veh-seats' type='number' placeholder='Seats'></div><button type='button' onclick='this.closest(\".veh-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
+  d.innerHTML="<div><input class='veh-name' placeholder='Vehicle name'></div><div><input class='veh-reg' placeholder='AN01 XXXXX'></div><div><input class='veh-seats' type='number' placeholder='Seats'></div><button type='button' onclick='this.closest(\".veh-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
   box.appendChild(d);
 }
 function docField(id,label){return "<div class='field'><label>"+label+"</label><input id='"+id+"' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach one or more files (photo, PDF). Optional.</div></div>";}
