@@ -192,13 +192,28 @@ function switchTab(t){
    off, then drives leg 3 again) — so a driver's assignments are a list of
    entries (one per matching segment), not one entry per operation, or a
    repeat assignment would silently disappear behind the first match. */
+/* Segment key — identifies WHICH leg of an operation a status update is for.
+   "primary" for the operation's own Vehicle/Driver fields; legs are keyed by
+   start-date + driver (stable across the chronological re-sort, unlike an
+   array index). The console routes updates to the same key. */
+function segKeyFor(seg,idx){return idx===0?"primary":(seg.start||"")+"|"+(seg.driver||"");}
 function myTripEntries(){
   var mine=myDriver.name.trim().toLowerCase();
   var entries=[];
   allOps.forEach(function(o){
     var segs=[{start:o.startISO||o.start,end:(o.legs&&o.legs.length)?o.legs[0].start:(o.endISO||o.end),veh:o.veh,reg:o.reg,driver:o.driver}].concat(o.legs||[]);
     segs.forEach(function(seg,idx){
-      if((seg.driver||"").trim().toLowerCase()===mine)entries.push({o:o,leg:seg,entryId:o.id+"_"+idx});
+      if((seg.driver||"").trim().toLowerCase()!==mine)return;
+      var isPrimary=(idx===0);
+      entries.push({
+        o:o,leg:seg,entryId:o.id+"_"+idx,segKey:segKeyFor(seg,idx),
+        /* Each leg has its OWN driver-reported status/note — leg 1 can be
+           Completed while leg 3 is still Scheduled. Falls back to the
+           operation's real status when this driver hasn't set one. */
+        status:(isPrimary?o.driverStatus:seg.driverStatus)||o.status||"Scheduled",
+        fb:(isPrimary?o.driverFeedback:seg.driverFeedback)||"",
+        fbAt:(isPrimary?o.driverFeedbackAt:seg.driverFeedbackAt)||""
+      });
     });
   });
   return entries.sort(function(a,b){return (a.leg.start||"").localeCompare(b.leg.start||"");});
@@ -222,27 +237,26 @@ var TRIP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"
 var _tripFilter="Scheduled";
 function setTripFilter(f){_tripFilter=f;renderTrips();}
 function myStatus(o){return o.driverStatus||o.status||"Scheduled";}
-function tripMatchesFilter(o,f){return myStatus(o).toLowerCase()===f.toLowerCase();}
 function renderTrips(){
   var mine=myTripEntries();
   var el=document.getElementById("tripsView");
   var subtabs="<div class='tabs' style='overflow-x:auto;flex-wrap:nowrap;gap:4px'>"+TRIP_FILTERS.map(function(f){return "<button class='tab "+(f===_tripFilter?"on":"")+"' style='flex:0 0 auto;white-space:nowrap' onclick=\"setTripFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
   if(!mine.length){el.innerHTML=subtabs+"<div class='empty'>No trips assigned to you yet.</div>";return;}
-  var shown=mine.filter(function(e){return tripMatchesFilter(e.o,_tripFilter);});
+  var shown=mine.filter(function(e){return e.status.toLowerCase()===_tripFilter.toLowerCase();});
   el.innerHTML=subtabs+(shown.length?shown.map(function(e){
-    var o=e.o,lg=e.leg,eid=e.entryId;
+    var o=e.o,lg=e.leg,eid=e.entryId,sk=e.segKey;
     return "<div class='card' id='card_"+eid+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
-      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(myStatus(o))+"' id='statuspill_"+eid+"'>"+myStatus(o)+"</span></div>"+
+      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(e.status)+"' id='statuspill_"+eid+"'>"+e.status+"</span></div>"+
       "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+"</div>"+
       "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
-      (o.driverFeedback?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div><button onclick=\"clearMyNote('"+eid+"','"+o.id+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
+      (e.fb?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(e.fbAt)+"):</b> "+e.fb+"</div><button onclick=\"clearMyNote('"+eid+"','"+o.id+"','"+sk+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
       "<div class='acts' id='acts_"+eid+"'>"+
-        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','In progress')\">In Progress</button>"+
-        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','Completed')\">Completed</button>"+
-        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','Declined')\">Declined</button>"+
-        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','Transferred')\">Transferred</button>"+
+        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','In progress')\">In Progress</button>"+
+        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','Completed')\">Completed</button>"+
+        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','"+sk+"','Declined')\">Declined</button>"+
+        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','"+sk+"','Transferred')\">Transferred</button>"+
       "</div>"+
       "<div class='reasonbox' id='reason_"+eid+"'><label>Reason / note</label><textarea id='reasontext_"+eid+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+eid+"')\">Submit</button></div>"+
       "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
@@ -254,36 +268,48 @@ function setBusy(entryId,busy,label){
   box.querySelectorAll("button").forEach(function(b){b.disabled=busy;b.style.opacity=busy?"0.5":"1";});
   if(busy&&label){var p=document.getElementById("statuspill_"+entryId);if(p)p.textContent=label;}
 }
-function toggleReason(entryId,opId,status){
+function toggleReason(entryId,opId,segKey,status){
   document.querySelectorAll(".reasonbox").forEach(function(b){if(b.id!=="reason_"+entryId)b.style.display="none";});
   var box=document.getElementById("reason_"+entryId);
-  box.dataset.status=status;box.dataset.opid=opId;
+  box.dataset.status=status;box.dataset.opid=opId;box.dataset.segkey=segKey;
   box.style.display=(box.style.display==="block")?"none":"block";
 }
 async function submitReason(entryId){
   var text=document.getElementById("reasontext_"+entryId).value.trim();
   if(!text){alert("Please add a short reason before submitting.");return;}
   var box=document.getElementById("reason_"+entryId);
-  await postOpStatus(entryId,box.dataset.opid,box.dataset.status,text);
+  await postOpStatus(entryId,box.dataset.opid,box.dataset.segkey,box.dataset.status,text);
 }
-async function setOpStatus(entryId,opId,status){await postOpStatus(entryId,opId,status,"");}
-/* Remove a previously-submitted note without changing the operation's status. */
-async function clearMyNote(entryId,opId){
+async function setOpStatus(entryId,opId,segKey,status){await postOpStatus(entryId,opId,segKey,status,"");}
+/* Remove a previously-submitted note without changing this leg's status. */
+async function clearMyNote(entryId,opId,segKey){
   if(!confirm("Remove this note?"))return;
   var o=allOps.find(function(x){return x.id===opId;});
-  await postOpStatus(entryId,opId,o?myStatus(o):"Scheduled","",true);
+  var cur="Scheduled";
+  if(o){
+    if(segKey==="primary")cur=o.driverStatus||o.status||"Scheduled";
+    else{var l=(o.legs||[]).find(function(x){return ((x.start||"")+"|"+(x.driver||""))===segKey;});cur=(l&&l.driverStatus)||o.status||"Scheduled";}
+  }
+  await postOpStatus(entryId,opId,segKey,cur,"",true);
 }
-async function postOpStatus(entryId,opId,status,reason,clearFeedback){
+async function postOpStatus(entryId,opId,segKey,status,reason,clearFeedback){
   if(!sb){showErr("Service unavailable right now.");return;}
   showErr("");
   setBusy(entryId,true,"Saving…");
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
-    data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,clearFeedback:!!clearFeedback}};
+    data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,segKey:segKey||"primary",clearFeedback:!!clearFeedback}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     if(up.error){setBusy(entryId,false);showErr("Could not update: "+up.error.message);return;}
     var o=allOps.find(function(x){return x.id===opId;});
-    if(o){o.driverStatus=status;if(reason){o.driverFeedback=reason;o.driverFeedbackAt=rec.created_at;}else if(clearFeedback){o.driverFeedback="";o.driverFeedbackAt="";}}
+    if(o){
+      /* Apply to THIS segment only — leg 1 completing must not move leg 3. */
+      var tgt=o;
+      if(segKey&&segKey!=="primary"){tgt=(o.legs||[]).find(function(x){return ((x.start||"")+"|"+(x.driver||""))===segKey;})||o;}
+      tgt.driverStatus=status;
+      if(reason){tgt.driverFeedback=reason;tgt.driverFeedbackAt=rec.created_at;}
+      else if(clearFeedback){tgt.driverFeedback="";tgt.driverFeedbackAt="";}
+    }
     renderTrips();
   }catch(e){setBusy(entryId,false);showErr("Network error. Please try again.");}
 }

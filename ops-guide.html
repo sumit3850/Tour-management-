@@ -154,9 +154,9 @@ function pillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(
    case. */
 function opLegsSummaryHtml(o){
   if(!o.legs||!o.legs.length)return "";
-  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone}].concat(o.legs);
+  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone,driverStatus:o.driverStatus}].concat(o.legs);
   return "<div class='rows' style='margin-top:6px;background:var(--paper);border-radius:8px;padding:8px 10px;grid-template-columns:1fr'><span class='k' style='margin-bottom:2px'>Legs</span>"+
-    rows.map(function(l,i){return "<span class='v' style='text-align:left;font-weight:500;margin-top:2px'>Leg "+(i+1)+" ("+(dmy(l.start))+" – "+(dmy(l.end))+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+"</span>";}).join("")+
+    rows.map(function(l,i){return "<span class='v' style='text-align:left;font-weight:500;margin-top:2px'>Leg "+(i+1)+" ("+(dmy(l.start))+" – "+(dmy(l.end))+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+(l.driverStatus?" <span style='color:#b8860b'>· driver: "+l.driverStatus+"</span>":"")+"</span>";}).join("")+
   "</div>";
 }
 
