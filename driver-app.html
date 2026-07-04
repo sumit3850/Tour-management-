@@ -71,7 +71,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
   <div id="app" style="display:none">
     <div class="tabs">
       <button class="tab on" id="tab_trips" onclick="switchTab('trips')">My Trips</button>
-      <button class="tab" id="tab_log" onclick="switchTab('log')">Log any additional trips</button>
+      <button class="tab" id="tab_log" onclick="switchTab('log')">Log trip</button>
       <button class="tab" id="tab_saved" onclick="switchTab('saved')">Saved Trips</button>
     </div>
     <div id="tripsView"></div>
@@ -85,8 +85,8 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
-var myDriver=null,myPhone="",myCode="",allOps=[];
-var mySavedTrips=null; /* null = not fetched yet */
+var myDriver=null,myPhone="",myCode="",allOps=[],myVehicles=[];
+var mySavedTrips=null,_savedLoading=false; /* null = not fetched yet */
 var todayISO=new Date().toISOString().slice(0,10);
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function showOk(m){var b=document.getElementById("okbox");b.textContent=m;b.style.display=m?"block":"none";}
@@ -114,12 +114,22 @@ async function doLogin(){
     if(!res.data||res.data.error){btn.disabled=false;btn.textContent=oldTxt;showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
     myDriver=res.data.driver;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
+    myVehicles=res.data.vehicles||[];
     document.getElementById("gate").style.display="none";
     document.getElementById("app").style.display="block";
     document.getElementById("who").textContent="Welcome, "+myDriver.name;
     renderTrips();renderLogForm();
+    loadSavedTrips(); /* prefetch in the background — Saved Trips is ready by the time it's opened */
   }catch(e){btn.disabled=false;btn.textContent=oldTxt;showErr("Couldn't sign you in. Please try again.");}
 }
+/* Registration number for a vehicle name — used wherever a vehicle is shown, so a
+   bare name is never displayed alone when we know its reg. no. */
+function regForVeh(name){
+  if(!name)return "";
+  var v=(myVehicles||[]).find(function(x){return (x.name||"").toLowerCase()===String(name).toLowerCase();});
+  return v?(v.reg||""):"";
+}
+function vehLabel(name,reg){reg=reg||regForVeh(name);return name?(reg?name+" · "+reg:name):"—";}
 function switchTab(t){
   document.getElementById("tab_trips").classList.toggle("on",t==="trips");
   document.getElementById("tab_log").classList.toggle("on",t==="log");
@@ -127,7 +137,10 @@ function switchTab(t){
   document.getElementById("tripsView").style.display=(t==="trips")?"block":"none";
   document.getElementById("logView").style.display=(t==="log")?"block":"none";
   document.getElementById("savedView").style.display=(t==="saved")?"block":"none";
-  if(t==="saved"&&mySavedTrips===null)loadSavedTrips();
+  if(t==="saved"){
+    if(mySavedTrips!==null)renderSavedTrips();
+    else{document.getElementById("savedView").innerHTML="<div class='empty'>Loading your trips…</div>";if(!_savedLoading)loadSavedTrips();}
+  }
 }
 function myOps(){return allOps.filter(function(o){return (o.driver||"").trim().toLowerCase()===myDriver.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
 function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="withdrawn"||s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
@@ -195,22 +208,36 @@ function startLogFor(opId){
 function tourOptionsHtml(sel){
   var opts="<option value=''>— None / other —</option>";
   (allOps||[]).forEach(function(o){opts+="<option value='"+o.id+"' "+(o.id===sel?"selected":"")+">"+(o.tourId||"—")+" — "+(o.tourName||o.tour||"Trip")+"</option>";});
+  opts+="<option value='custom' "+(sel==="custom"?"selected":"")+">+ Add custom tour</option>";
   return opts;
 }
 function onTourPick(){
   var sel=document.getElementById("dl_tour");if(!sel)return;
+  var customWrap=document.getElementById("dl_customwrap");
+  if(sel.value==="custom"){if(customWrap)customWrap.style.display="block";return;}
+  if(customWrap)customWrap.style.display="none";
   var op=allOps.find(function(o){return o.id===sel.value;});
-  var vf=document.getElementById("dl_veh");
-  if(op&&vf)vf.value=op.veh||vf.value;
+  var vf=document.getElementById("dl_veh"),rf=document.getElementById("dl_reg");
+  if(op){if(vf)vf.value=op.veh||vf.value;if(rf)rf.value=op.reg||regForVeh(op.veh)||rf.value;}
+}
+/* Auto-fill Reg. No. when the driver types/changes the vehicle name manually,
+   matching it against their own vehicle list. */
+function onVehInput(){
+  var vf=document.getElementById("dl_veh"),rf=document.getElementById("dl_reg");
+  if(!vf||!rf)return;
+  var r=regForVeh(vf.value.trim());
+  if(r)rf.value=r;
 }
 function renderLogForm(){
   var el=document.getElementById("logView");
   el.innerHTML="<div class='card'>"+
-    "<div class='sec-h'>Log any additional trips</div>"+
+    "<div class='sec-h'>Log trip</div>"+
     "<label>Tour</label><select id='dl_tour' onchange='onTourPick()'>"+tourOptionsHtml("")+"</select>"+
-    "<div class='hint'>Pick the tour this trip belongs to, or leave it as “None / other” for an ad-hoc trip.</div>"+
+    "<div class='hint'>Pick the tour this trip belongs to, “+ Add custom tour” for a one-off job, or leave it as “None / other” for an ad-hoc trip.</div>"+
+    "<div id='dl_customwrap' style='display:none'><label>Custom tour name</label><input id='dl_customtour' placeholder='e.g. Private airport transfer'></div>"+
     "<label>Date</label><input type='date' id='dl_date' value='"+todayISO+"'>"+
-    "<label>Vehicle</label><input id='dl_veh' value='"+(myDriver.veh||"")+"' placeholder='e.g. Innova'>"+
+    "<label>Vehicle</label><input id='dl_veh' value='"+(myDriver.veh||"")+"' placeholder='e.g. Innova' oninput='onVehInput()'>"+
+    "<label>Reg. No.</label><input id='dl_reg' value='"+(regForVeh(myDriver.veh)||"")+"' placeholder='e.g. AN01 P9577'>"+
     "<label>Start time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_startt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_startt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>Start Now</button></div>"+
     "<label>End time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_endt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_endt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>End Now</button></div>"+
     "<div class='row2'><div><label>Start km</label><input type='number' id='dl_startkm' placeholder='0'></div><div><label>End km</label><input type='number' id='dl_endkm' placeholder='0'></div></div>"+
@@ -221,9 +248,10 @@ function renderLogForm(){
 }
 /* Wipe every field so the next trip can be entered from scratch. */
 function clearTrip(){
-  ["dl_startt","dl_endt","dl_startkm","dl_endkm","dl_loc"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  ["dl_startt","dl_endt","dl_startkm","dl_endkm","dl_loc","dl_customtour"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
   var dt=document.getElementById("dl_date");if(dt)dt.value=todayISO;
   var tf=document.getElementById("dl_tour");if(tf)tf.value="";
+  var cw=document.getElementById("dl_customwrap");if(cw)cw.style.display="none";
   showErr("");showOk("");
 }
 /* Stamp the current device time (HH:MM) — used by the Start Now / End Now buttons so
@@ -243,16 +271,20 @@ async function submitTrip(){
      date match against assigned ops) only for an ad-hoc trip with no tour picked. */
   var tc="";
   var selOpId=document.getElementById("dl_tour").value;
-  var selOp=selOpId?allOps.find(function(o){return o.id===selOpId;}):null;
-  if(selOp){tc=selOp.tourId||"";}
+  var selOp=selOpId&&selOpId!=="custom"?allOps.find(function(o){return o.id===selOpId;}):null;
+  if(selOpId==="custom"){
+    tc=document.getElementById("dl_customtour").value.trim();
+    if(!tc){showErr("Enter a name for the custom tour.");return;}
+  }else if(selOp){tc=selOp.tourId||"";}
   else{
     var _sn=function(a,b){return a&&b&&String(a).trim().toLowerCase()===String(b).trim().toLowerCase();};
     var mop=(allOps||[]).find(function(o){return _sn(o.veh,veh)&&(o.startISO||"")<=date&&date<=(o.endISO||"");})||(allOps||[]).find(function(o){return _sn(o.veh,veh)&&o.tourId;})||(allOps||[]).find(function(o){return o.tourId;});
     tc=(mop&&mop.tourId)||"";
   }
+  var reg=document.getElementById("dl_reg").value.trim();
   var btn=document.getElementById("dl_submit");btn.disabled=true;btn.textContent="Saving…";
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
-    data:{date:date,veh:veh,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
+    data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     btn.disabled=false;btn.textContent="Save trip";
@@ -265,15 +297,26 @@ async function submitTrip(){
 
 /* ===== SAVED TRIPS ===== */
 async function loadSavedTrips(force){
+  if(_savedLoading)return;
+  _savedLoading=true;
   var el=document.getElementById("savedView");
-  if(!sb){el.innerHTML="<div class='empty'>Service unavailable right now.</div>";return;}
-  if(force||mySavedTrips===null)el.innerHTML="<div class='empty'>Loading your trips…</div>";
+  if(!sb){_savedLoading=false;if(el.style.display!=="none")el.innerHTML="<div class='empty'>Service unavailable right now.</div>";return;}
+  if((force||mySavedTrips===null)&&el.style.display!=="none")el.innerHTML="<div class='empty'>Loading your trips…</div>";
   try{
     var res=await sb.rpc("driver_trips",{p_phone:myPhone,p_code:myCode});
-    if(res.error||!res.data||res.data.error){mySavedTrips=[];el.innerHTML="<div class='empty'>Couldn't load your saved trips right now.</div>";return;}
+    _savedLoading=false;
+    if(res.error||!res.data||res.data.error){mySavedTrips=mySavedTrips||[];if(el.style.display!=="none")el.innerHTML="<div class='empty'>Couldn't load your saved trips right now.</div>";return;}
     mySavedTrips=(res.data.trips||[]).sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
-    renderSavedTrips();
-  }catch(e){mySavedTrips=[];el.innerHTML="<div class='empty'>Network error loading your trips.</div>";}
+    if(document.getElementById("tab_saved").classList.contains("on"))renderSavedTrips();
+  }catch(e){_savedLoading=false;mySavedTrips=mySavedTrips||[];if(el.style.display!=="none")el.innerHTML="<div class='empty'>Network error loading your trips.</div>";}
+}
+/* The tour's own date range (e.g. "18/10/2026 – 24/10/2026"), looked up from this
+   driver's assigned ops by tour code — falls back to the trip's own single date
+   for an ad-hoc entry with no matching tour. */
+function tourDateRangeForCode(tc,fallbackDate){
+  var op=tc?(allOps||[]).find(function(o){return o.tourId===tc;}):null;
+  if(op)return dmy(op.startISO||op.start)+((op.endISO||op.end)?" – "+dmy(op.endISO||op.end):"");
+  return dmy(fallbackDate);
 }
 function renderSavedTrips(){
   var el=document.getElementById("savedView");
@@ -281,25 +324,27 @@ function renderSavedTrips(){
   var head="<div class='trip-actions' style='margin-bottom:14px'><button class='btn-sm btn-ghost' style='flex:1;padding:11px' onclick='loadSavedTrips(true)'>Refresh</button><button class='btn-sm' style='flex:1;padding:11px;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;cursor:pointer' onclick='exportTripsCSV()'>⬇ Download Excel (CSV)</button></div>";
   if(!list.length){el.innerHTML=head+"<div class='empty'>No saved trips yet.</div>";return;}
   el.innerHTML=head+list.map(function(t,i){
+    var reg=t.reg||regForVeh(t.veh);
     return "<div class='card'>"+
-      (t.tourCode?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+t.tourCode+"</div>":"<div class='dates' style='margin-bottom:2px'>Ad-hoc trip</div>")+
-      "<div class='top'><b>"+dmy(t.date)+"</b><span class='pill'>"+(t.veh||"—")+"</span></div>"+
-      "<div class='rows'>"+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Location",t.loc)+row("Time",t.time)+"</div>"+
+      "<div class='dates mono' style='font-weight:600;color:var(--soft);font-size:11px;margin-bottom:3px'>"+(t.tourCode||"Ad-hoc trip")+"</div>"+
+      "<div style='font-size:19px;font-weight:700;color:var(--ink);margin-bottom:10px'>"+tourDateRangeForCode(t.tourCode,t.date)+"</div>"+
+      "<div class='rows'>"+row("Trip date",dmy(t.date))+row("Vehicle",vehLabel(t.veh,reg))+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Location",t.loc)+row("Time",t.time)+"</div>"+
       "<div class='trip-actions'><button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick='shareTripWA("+i+")'>Share on WhatsApp</button></div>"+
     "</div>";
   }).join("");
 }
 function shareTripWA(i){
   var t=(mySavedTrips||[])[i];if(!t)return;
-  var msg="Island Explorer — trip log\n"+(t.tourCode?"Tour: "+t.tourCode+"\n":"")+"Date: "+dmy(t.date)+"\nVehicle: "+(t.veh||"—")+"\nRoute: "+(t.loc||"—")+"\nKM: "+(t.startKm||0)+" → "+(t.endKm||0)+" ("+(t.totalKm||0)+" km)\nTime: "+(t.time||"—");
+  var reg=t.reg||regForVeh(t.veh);
+  var msg="Island Explorer — trip log\n"+(t.tourCode?"Tour: "+t.tourCode+"\n":"")+"Date: "+dmy(t.date)+"\nVehicle: "+vehLabel(t.veh,reg)+"\nRoute: "+(t.loc||"—")+"\nKM: "+(t.startKm||0)+" → "+(t.endKm||0)+" ("+(t.totalKm||0)+" km)\nTime: "+(t.time||"—");
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 }
 function exportTripsCSV(){
   var list=mySavedTrips||[];
   if(!list.length){alert("No saved trips yet.");return;}
-  var cols=["Tour Code","Date","Vehicle","Start KM","End KM","Total KM","Location","Time"];
+  var cols=["Tour Code","Date","Vehicle","Reg. No.","Start KM","End KM","Total KM","Location","Time"];
   var esc=function(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';};
-  var lines=[cols.join(",")].concat(list.map(function(t){return [t.tourCode||"—",dmy(t.date),t.veh||"",t.startKm||0,t.endKm||0,t.totalKm||0,t.loc||"",t.time||""].map(esc).join(",");}));
+  var lines=[cols.join(",")].concat(list.map(function(t){return [t.tourCode||"—",dmy(t.date),t.veh||"",t.reg||regForVeh(t.veh)||"",t.startKm||0,t.endKm||0,t.totalKm||0,t.loc||"",t.time||""].map(esc).join(",");}));
   var blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
   var url=URL.createObjectURL(blob);
   var a=document.createElement("a");a.href=url;a.download="my-trips-"+todayISO+".csv";document.body.appendChild(a);a.click();document.body.removeChild(a);

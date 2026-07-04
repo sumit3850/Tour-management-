@@ -159,7 +159,7 @@ security definer
 set search_path = public
 as $$
 declare
-  ws jsonb; drivers jsonb; roster jsonb; d jsonb; dname text; ops jsonb;
+  ws jsonb; drivers jsonb; roster jsonb; d jsonb; dname text; ops jsonb; vehs jsonb;
 begin
   select data into ws from workspaces where id = 'island-explorer';
   if ws is null then return jsonb_build_object('error','not_found'); end if;
@@ -182,7 +182,11 @@ begin
   select coalesce(jsonb_agg(o),'[]'::jsonb) into ops
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
     where lower(trim(coalesce(o->>'driver',''))) = dname;
-  return jsonb_build_object('driver',d,'ops',ops);
+  -- this driver's own vehicles (name + reg no.), so the app can show/select them
+  select coalesce(jsonb_agg(v),'[]'::jsonb) into vehs
+    from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
+    where lower(trim(coalesce(v->>'driver',''))) = dname;
+  return jsonb_build_object('driver',d,'ops',ops,'vehicles',vehs);
 end;
 $$;
 grant execute on function public.driver_login(text,text) to anon, authenticated;
