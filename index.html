@@ -485,14 +485,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 97</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 98</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 97</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 98</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2776,6 +2776,10 @@ function autoProcessSubmissions(){
   });
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();if(document.getElementById("guideBody"))renderGuides();if(document.getElementById("logBody"))renderLog(_logTab);persistData();}
 }
+/* Registration-number identity: strips spaces/punctuation and case so "AN01 P9577",
+   "AN01-P9577" and "an01p9577" all compare equal — reg no. is the true unique
+   identifier for a vehicle, unlike its (often generic/repeated) name. */
+function normReg(s){return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");}
 /* A driver's self-registration flows into the Drivers directory (and adds their
    vehicle(s) to the Vehicles list if new), with an auto login code.
    IDENTITY: matched by source-submission id (fromSub) FIRST, then name/phone —
@@ -2809,18 +2813,30 @@ function addOrUpdateDriver(s){
     if(!drv.documents&&d.documents&&d.documents.length)drv.documents=d.documents;
   }
   if(!drv.code)drv.code=String(Math.floor(1000+Math.random()*9000));
-  drv.vehSubsSynced=drv.vehSubsSynced||[];
-  if(drv.vehSubsSynced.indexOf(s.id)===-1){
-    var vlist=(d.vehicles&&d.vehicles.length)?d.vehicles:(d.vehicle?[{name:d.vehicle,reg:d.reg}]:[]);
-    if(vlist[0]&&!drv.adminLocked){drv.veh=drv.veh||vlist[0].name||"";drv.reg=drv.reg||vlist[0].reg||"";}
-    vlist.forEach(function(vv){
-      if(vv.name&&!vehicles.find(function(v){return (v.name||"").toLowerCase()===vv.name.toLowerCase();})){
-        vehicles.unshift({name:vv.name,reg:vv.reg||"",type:"Car",cap:parseInt(vv.seats||d.seats)||0,driver:s.name,avail:"Available",fromSub:s.id});
-        changed=true;
-      }
-    });
-    drv.vehSubsSynced.push(s.id);changed=true;
-  }
+  /* Vehicle identity is the REG. NO., not the name — two different physical
+     vehicles can share a generic name (e.g. two "Xylo"s). Matching by name only
+     (the old bug) treated a newly-registered vehicle as "already exists" whenever
+     its name collided with an unrelated vehicle, silently dropping it forever.
+     Tracked per VEHICLE (drv.vehKeysSynced, keyed by submission+reg/name) rather
+     than per submission, so: (a) every vehicle in a multi-vehicle registration is
+     evaluated on its own merits even if a sibling entry in the same submission
+     collided by name, and (b) a vehicle already synced once won't reappear if an
+     admin deletes it later. */
+  var vlist=(d.vehicles&&d.vehicles.length)?d.vehicles:(d.vehicle?[{name:d.vehicle,reg:d.reg}]:[]);
+  if(vlist[0]&&!drv.adminLocked){drv.veh=drv.veh||vlist[0].name||"";drv.reg=drv.reg||vlist[0].reg||"";}
+  drv.vehKeysSynced=drv.vehKeysSynced||[];
+  vlist.forEach(function(vv){
+    if(!vv.name)return;
+    var key=s.id+"|"+(normReg(vv.reg)||vv.name.toLowerCase());
+    if(drv.vehKeysSynced.indexOf(key)>-1)return; /* already handled once — respects a later admin delete */
+    var vvReg=normReg(vv.reg);
+    var existing=vehicles.find(function(v){return vvReg?normReg(v.reg)===vvReg:(v.name||"").toLowerCase()===vv.name.toLowerCase();});
+    if(!existing){
+      vehicles.unshift({name:vv.name,reg:vv.reg||"",type:"Car",cap:parseInt(vv.seats||d.seats)||0,driver:s.name,avail:"Available",fromSub:s.id});
+      changed=true;
+    }
+    drv.vehKeysSynced.push(key);changed=true;
+  });
   return changed;
 }
 /* A guide's self-registration flows into the External Guides directory. Same identity
