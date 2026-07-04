@@ -143,12 +143,18 @@ function switchTab(t){
   }
 }
 function myOps(){return allOps.filter(function(o){return (o.driver||"").trim().toLowerCase()===myDriver.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
-function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="withdrawn"||s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
+function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
+var TRIP_FILTERS=["All","Scheduled","In progress","Completed","Transferred","Declined"];
+var _tripFilter="All";
+function setTripFilter(f){_tripFilter=f;renderTrips();}
+function tripMatchesFilter(o,f){if(f==="All")return true;return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
 function renderTrips(){
   var mine=myOps();
   var el=document.getElementById("tripsView");
-  if(!mine.length){el.innerHTML="<div class='empty'>No trips assigned to you yet.</div>";return;}
-  el.innerHTML=mine.map(function(o){
+  var subtabs="<div class='tabs' style='overflow-x:auto;flex-wrap:nowrap'>"+TRIP_FILTERS.map(function(f){return "<button class='tab "+(f===_tripFilter?"on":"")+"' style='flex:0 0 auto;white-space:nowrap' onclick=\"setTripFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
+  if(!mine.length){el.innerHTML=subtabs+"<div class='empty'>No trips assigned to you yet.</div>";return;}
+  var shown=mine.filter(function(o){return tripMatchesFilter(o,_tripFilter);});
+  el.innerHTML=subtabs+(shown.length?shown.map(function(o){
     return "<div class='card' id='card_"+o.id+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
       "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
@@ -159,13 +165,13 @@ function renderTrips(){
       "<div class='acts' id='acts_"+o.id+"'>"+
         "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
         "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
-        "<button onclick=\"toggleReason('"+o.id+"','Withdrawn')\">Withdrawn</button>"+
+        "<button onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
         "<button onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
       "</div>"+
       "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / note</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
       "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
     "</div>";
-  }).join("");
+  }).join(""):"<div class='empty'>No trips in this view.</div>");
 }
 function setBusy(opId,busy,label){
   var box=document.getElementById("acts_"+opId);if(!box)return;
@@ -243,7 +249,7 @@ function renderLogForm(){
     "<div id='dl_customwrap' style='display:none'><label>Custom tour name</label><input id='dl_customtour' placeholder='e.g. Private airport transfer'></div>"+
     "<label>Date</label><input type='date' id='dl_date' value='"+todayISO+"'>"+
     "<label>Vehicle</label><input id='dl_veh' value='"+(myDriver.veh||"")+"' placeholder='e.g. Innova' oninput='onVehInput()'>"+
-    "<label>Reg. No.</label><input id='dl_reg' value='"+(regForVeh(myDriver.veh)||"")+"' placeholder='e.g. AN01 P9577'>"+
+    "<label>Reg. No.</label><input id='dl_reg' value='"+(regForVeh(myDriver.veh)||"")+"' placeholder='AN01 XXXXX'>"+
     "<label>Start time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_startt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_startt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>Start Now</button></div>"+
     "<label>End time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_endt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_endt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>End Now</button></div>"+
     "<div class='row2'><div><label>Start km</label><input type='number' id='dl_startkm' placeholder='0'></div><div><label>End km</label><input type='number' id='dl_endkm' placeholder='0'></div></div>"+

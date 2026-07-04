@@ -485,14 +485,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 102</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 103</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 102</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 103</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -611,7 +611,26 @@ const STORE=[
 function collectStore(){var o={};STORE.forEach(function(s){o[s.k]=s.get();});return o;}
 /* Applying a real saved snapshot: any array collection missing from it becomes empty,
    so the hard-coded sample data never lingers / reappears once you've saved your own data. */
-function applyStore(d){if(!d)return;var snap=STORE.some(function(s){return d[s.k]!==undefined;});STORE.forEach(function(s){if(d[s.k]!==undefined&&d[s.k]!==null)s.set(d[s.k]);else if(snap&&s.arr&&s.k!=="operators")s.set([]);});ensureSheetDefaults();}
+/* Once per-record sync is active, the per-record tables are the ONLY source of
+   truth for their tracked collections (vehicles, drivers, ops, tours, ...) —
+   applying the whole blob here must skip them entirely. Without this guard, a
+   blob pull that happens to be stale for just one collection (e.g. another
+   device pushed the blob before it had picked up a newly-added vehicle) would
+   silently wipe that collection from memory, and the NEXT per-record push would
+   then read the wipe as an intentional deletion and delete it from the cloud too
+   — this is exactly how a vehicle could vanish repeatedly and need a manual
+   re-sync every time. */
+function applyStore(d){
+  if(!d)return;
+  var snap=STORE.some(function(s){return d[s.k]!==undefined;});
+  var skipKeys=(typeof _perRecordActive!=="undefined"&&_perRecordActive&&typeof PER_RECORD_KEYS!=="undefined")?PER_RECORD_KEYS:[];
+  STORE.forEach(function(s){
+    if(skipKeys.indexOf(s.k)>-1)return;
+    if(d[s.k]!==undefined&&d[s.k]!==null)s.set(d[s.k]);
+    else if(snap&&s.arr&&s.k!=="operators")s.set([]);
+  });
+  ensureSheetDefaults();
+}
 /* Guards the window between page load and the first cloud sync decision. The very
    first boot() call renders the UI from whatever is cached locally — and several
    render*() functions call persistData() as a harmless-looking side effect. If that
@@ -2428,7 +2447,7 @@ function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var 
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
 function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;v.adminLocked=true;persistData();closeModal();renderLog("Vehicles & Drivers");}
 function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles & Drivers");}
-function openAddVehicle(){modalForm("New vehicle","Add vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nv_name' placeholder='e.g. Scorpio'></div><div class='field'><label>Reg. No.</label><input class='input' id='nv_reg' placeholder='AN-01-...'></div><div class='field'><label>Type</label><input class='input' id='nv_type' placeholder='e.g. SUV'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='nv_cap' value='7'></div><div class='field'><label>Driver name</label><input class='input' id='nv_driver' placeholder='Driver name'></div><div class='field'><label>Driver phone</label><input class='input' id='nv_dphone' placeholder='+91 …'></div><div class='field'><label>Driver login code <span style='color:var(--ink-soft);font-weight:400'>(auto · editable)</span></label><input class='input mono' id='nv_dcode' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Status</label><select class='input' id='nv_avail'><option>Available</option><option>On Tour</option><option>Maintenance</option></select></div></div>","saveNewVehicle","Add vehicle");}
+function openAddVehicle(){modalForm("New vehicle","Add vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nv_name' placeholder='e.g. Scorpio'></div><div class='field'><label>Reg. No.</label><input class='input' id='nv_reg' placeholder='AN01 XXXXX'></div><div class='field'><label>Type</label><input class='input' id='nv_type' placeholder='e.g. SUV'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='nv_cap' value='7'></div><div class='field'><label>Driver name</label><input class='input' id='nv_driver' placeholder='Driver name'></div><div class='field'><label>Driver phone</label><input class='input' id='nv_dphone' placeholder='+91 …'></div><div class='field'><label>Driver login code <span style='color:var(--ink-soft);font-weight:400'>(auto · editable)</span></label><input class='input mono' id='nv_dcode' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Status</label><select class='input' id='nv_avail'><option>Available</option><option>On Tour</option><option>Maintenance</option></select></div></div>","saveNewVehicle","Add vehicle");}
 function saveNewVehicle(){
   var name=document.getElementById("nv_name").value||"—";
   var driver=document.getElementById("nv_driver").value.trim();
