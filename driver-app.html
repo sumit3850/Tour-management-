@@ -86,7 +86,12 @@ async function doLogin(){
        full ops table are never sent to the browser; only this driver's own record
        and their own assigned ops come back. */
     var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
-    if(res.error||!res.data||res.data.error){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    /* Distinguish "the RPC itself failed" (setup problem — the security SQL hasn't
+       been run, or was run before this login existed) from "it ran fine but no
+       driver matched" (a real wrong phone/code), so a setup issue doesn't look
+       identical to a typo and go unnoticed. */
+    if(res.error){showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
+    if(!res.data||res.data.error){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
     myDriver=res.data.driver;
     allOps=res.data.ops||[];
     document.getElementById("gate").style.display="none";
