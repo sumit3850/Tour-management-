@@ -162,12 +162,23 @@ begin
     end;
     -- Only the fields the guide/driver apps actually display — never the
     -- (often large, base64) document/photo fields — go over the wire here.
+    -- Also only the vehicles/drivers actually referenced by THIS guide's own
+    -- ops, not the whole fleet directory — a guide never needs any others,
+    -- and a large fleet made this the slowest part of guide sign-in.
     begin
-      select coalesce(jsonb_agg(jsonb_build_object('name',v.data->>'name','reg',v.data->>'reg','driver',v.data->>'driver')),'[]'::jsonb) into vehs from ieo_vehicles v;
+      select coalesce(jsonb_agg(jsonb_build_object('name',v.data->>'name','reg',v.data->>'reg','driver',v.data->>'driver')),'[]'::jsonb) into vehs
+        from ieo_vehicles v
+        where lower(trim(coalesce(v.data->>'name',''))) in (
+          select lower(trim(coalesce(x->>'veh',''))) from jsonb_array_elements(ops) x
+        );
     exception when undefined_table then vehs := '[]'::jsonb;
     end;
     begin
-      select coalesce(jsonb_agg(jsonb_build_object('name',d.data->>'name','phone',d.data->>'phone')),'[]'::jsonb) into drvs from ieo_drivers d;
+      select coalesce(jsonb_agg(jsonb_build_object('name',d.data->>'name','phone',d.data->>'phone')),'[]'::jsonb) into drvs
+        from ieo_drivers d
+        where lower(trim(coalesce(d.data->>'name',''))) in (
+          select lower(trim(coalesce(x->>'driver',''))) from jsonb_array_elements(ops) x
+        );
     exception when undefined_table then drvs := '[]'::jsonb;
     end;
     return jsonb_build_object('guide',g,'ops',ops,'vehicles',vehs,'drivers',drvs);
@@ -196,9 +207,15 @@ begin
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
     where lower(trim(coalesce(o->>'guide',''))) = gname;
   select coalesce(jsonb_agg(jsonb_build_object('name',v->>'name','reg',v->>'reg','driver',v->>'driver')),'[]'::jsonb) into vehs
-    from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v;
+    from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
+    where lower(trim(coalesce(v->>'name',''))) in (
+      select lower(trim(coalesce(x->>'veh',''))) from jsonb_array_elements(ops) x
+    );
   select coalesce(jsonb_agg(jsonb_build_object('name',d->>'name','phone',d->>'phone')),'[]'::jsonb) into drvs
-    from jsonb_array_elements(coalesce(ws->'drivers','[]'::jsonb)) d;
+    from jsonb_array_elements(coalesce(ws->'drivers','[]'::jsonb)) d
+    where lower(trim(coalesce(d->>'name',''))) in (
+      select lower(trim(coalesce(x->>'driver',''))) from jsonb_array_elements(ops) x
+    );
   return jsonb_build_object('guide',g,'ops',ops,'vehicles',vehs,'drivers',drvs);
 end;
 $$;
@@ -386,9 +403,20 @@ On top of that, `guide_login` and `driver_login` now also strip the heavy
 `documents` / `idDoc` / `licenseDoc` fields (inline base64 licence/ID photos)
 from every record before sending it back, and send only the handful of fields
 (`name`, `reg`, `phone`, etc.) the guide/driver apps actually display for the
-bulk vehicle and driver lists, instead of every field on every record. **Re-run
-this whole SQL file once more in the Supabase SQL editor** to pick up this
-change — it replaces the existing functions, so it's safe to run again.
+bulk vehicle and driver lists, instead of every field on every record.
+
+`guide_login` specifically used to return the **entire** vehicle and driver
+directory on every sign-in, unfiltered — every vehicle and driver in the whole
+fleet, not just the ones on that guide's own tours. `driver_login` never did
+this (it only ever returned that one driver's own vehicle), so this was the
+one place a growing fleet made guide sign-in specifically slower than driver
+sign-in. It now filters both lists down to only the vehicles/drivers that
+actually appear on that guide's own operations, same as the driver app already
+did.
+
+**Re-run this whole SQL file once more in the Supabase SQL editor** to pick up
+both of these changes — it replaces the existing functions, so it's safe to
+run again.
 
 Two remaining causes if it's still slow after re-running this SQL:
 
