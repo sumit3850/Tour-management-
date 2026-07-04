@@ -187,6 +187,44 @@ end;
 $$;
 grant execute on function public.driver_login(text,text) to anon, authenticated;
 
+-- Powers the Driver App's "Saved Trips" tab — re-validates phone+code (same as
+-- driver_login) and returns only that driver's own logged trips, never the
+-- full trip log for every driver.
+create or replace function public.driver_trips(p_phone text, p_code text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  ws jsonb; drivers jsonb; roster jsonb; d jsonb; dname text; trips jsonb;
+begin
+  select data into ws from workspaces where id = 'island-explorer';
+  if ws is null then return jsonb_build_object('error','not_found'); end if;
+  drivers := coalesce(ws->'drivers','[]'::jsonb);
+  roster := coalesce(ws->'operators','[]'::jsonb);
+  select x into d from jsonb_array_elements(drivers) x
+    where regexp_replace(coalesce(x->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+      and coalesce(x->>'code','') = p_code
+    limit 1;
+  if d is null then
+    select jsonb_build_object('name',x->>'name','phone',x->>'phone','code',x->>'code') into d
+      from jsonb_array_elements(roster) x
+      where regexp_replace(coalesce(x->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+        and coalesce(x->>'code','') = p_code
+        and lower(coalesce(x->>'role','')) = 'driver'
+      limit 1;
+  end if;
+  if d is null then return jsonb_build_object('error','no_match'); end if;
+  dname := lower(trim(d->>'name'));
+  select coalesce(jsonb_agg(t),'[]'::jsonb) into trips
+    from jsonb_array_elements(coalesce(ws->'trips','[]'::jsonb)) t
+    where lower(trim(coalesce(t->>'driver',''))) = dname;
+  return jsonb_build_object('trips',trips);
+end;
+$$;
+grant execute on function public.driver_trips(text,text) to anon, authenticated;
+
 create or replace function public.get_reservation_public(p_rid text)
 returns jsonb
 language plpgsql
@@ -208,6 +246,25 @@ end;
 $$;
 grant execute on function public.get_reservation_public(text) to anon, authenticated;
 ```
+
+## If Guide/Driver sign-in is slow (10+ seconds)
+
+Two independent causes, both outside the app's code:
+
+1. **Supabase free-tier "cold start."** A paused/inactive project takes a few
+   seconds to wake up on its first request after a while — every sign-in after a
+   quiet period pays this once. Nothing to fix; it's a one-time delay per idle
+   period, and stays fast afterward until it goes idle again.
+2. **The shared data blob has gotten large.** If you haven't created the
+   `driver-details` / `guide-ids` Storage buckets from `docs/DATABASE_SCHEMA.md`'s
+   upload flow yet, every licence/ID photo a driver or guide uploads is embedded
+   as inline base64 text directly inside the one shared `workspaces` row instead
+   of a separate file — and `guide_login`/`driver_login` read that whole row to
+   check credentials. A few uploaded photos can add several MB to that single
+   row, and every sign-in pays for reading all of it. **Creating those two public
+   Storage buckets** (Storage → New bucket → public) makes new uploads store as
+   small links instead, shrinking the row back down — this speeds up sign-in and
+   every other sync in the app, not just logins.
 
 ## After running it
 

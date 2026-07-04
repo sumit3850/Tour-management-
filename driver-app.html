@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1b2a4a;--soft:#5a6a86;--forest:#143a2e;--blue:#0a6ed1;--paper:#eef1f6;--surface:#fff;--line:#e2e8f1;--ok:#1b7a4d;--err:#c0392b}
+:root{--ink:#1b2a4a;--soft:#5a6a86;--forest:#143a2e;--blue:#0a6ed1;--paper:#eef1f6;--surface:#fff;--line:#e2e8f1;--ok:#1b7a4d;--err:#c0392b;--amber:#b8860b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;padding:18px}
 .wrap{max-width:640px;margin:0 auto}
@@ -19,6 +19,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .top b{font-size:15px}
 .pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#e7f1fb;color:var(--blue);white-space:nowrap}
+.pill.warn{background:#fbe7e4;color:var(--err)}
+.pill.ok{background:#e4f3ea;color:var(--ok)}
+.pill.mid{background:#fff4e0;color:var(--amber)}
 .dates{font-size:12.5px;color:var(--soft);margin-bottom:10px}
 .dates.mono{font-family:monospace}
 .rows{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:13px}
@@ -32,10 +35,22 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{width:100%;margin-top:14px;padding:14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
 .btn:disabled{opacity:.6}
+.btn-sm{width:auto;margin-top:0;padding:9px 14px;font-size:13px;border-radius:10px}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
 .sec-h{font-size:15px;font-weight:700;margin-bottom:10px}
+.hint{font-size:11.5px;color:var(--soft);margin-top:4px}
 .tabs{display:flex;gap:8px;margin-bottom:14px}
-.tab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:13px;cursor:pointer;color:var(--ink)}
+.tab{flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink)}
 .tab.on{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.acts button{padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
+.acts button.on{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
+.reasonbox{display:none;margin-top:10px}
+.reasonbox textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;min-height:70px}
+.reasonbox button{margin-top:8px;width:100%;padding:11px;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;cursor:pointer}
+.fb{margin-top:8px;padding:10px 12px;background:#fff4e0;border-radius:10px;font-size:12.5px;color:#7a5a00}
+.trip-actions{display:flex;gap:8px;margin-top:10px}
+.trip-actions button{flex:1}
 </style>
 </head>
 <body>
@@ -50,15 +65,18 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
   <div class="card" id="gate">
     <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered phone number">
     <label>Login code</label><input id="gateCode" inputmode="numeric" placeholder="4-digit code from Island Explorer">
-    <button class="btn" onclick="doLogin()">Sign in</button>
+    <button class="btn" id="loginBtn" onclick="doLogin()">Sign in</button>
+    <div class="hint" style="text-align:center;margin-top:8px">First sign-in after a while can take a few seconds while the server wakes up.</div>
   </div>
   <div id="app" style="display:none">
     <div class="tabs">
       <button class="tab on" id="tab_trips" onclick="switchTab('trips')">My Trips</button>
-      <button class="tab" id="tab_log" onclick="switchTab('log')">Log a Trip</button>
+      <button class="tab" id="tab_log" onclick="switchTab('log')">Log any additional trips</button>
+      <button class="tab" id="tab_saved" onclick="switchTab('saved')">Saved Trips</button>
     </div>
     <div id="tripsView"></div>
     <div id="logView" style="display:none"></div>
+    <div id="savedView" style="display:none"></div>
   </div>
 </div>
 <div class="foot">Island Explorer Birding Tours · +91 99332 02175</div>
@@ -67,7 +85,8 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
-var myDriver=null,allOps=[];
+var myDriver=null,myPhone="",myCode="",allOps=[];
+var mySavedTrips=null; /* null = not fetched yet */
 var todayISO=new Date().toISOString().slice(0,10);
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function showOk(m){var b=document.getElementById("okbox");b.textContent=m;b.style.display=m?"block":"none";}
@@ -81,6 +100,7 @@ async function doLogin(){
   var code=document.getElementById("gateCode").value.trim();
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
   if(!sb){showErr("Service unavailable right now. Please try again shortly.");return;}
+  var btn=document.getElementById("loginBtn");btn.disabled=true;var oldTxt=btn.textContent;btn.textContent="Signing in…";
   try{
     /* Server-side login check (RPC, security definer) — the driver directory and
        full ops table are never sent to the browser; only this driver's own record
@@ -90,41 +110,105 @@ async function doLogin(){
        been run, or was run before this login existed) from "it ran fine but no
        driver matched" (a real wrong phone/code), so a setup issue doesn't look
        identical to a typo and go unnoticed. */
-    if(res.error){showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
-    if(!res.data||res.data.error){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
-    myDriver=res.data.driver;
+    if(res.error){btn.disabled=false;btn.textContent=oldTxt;showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
+    if(!res.data||res.data.error){btn.disabled=false;btn.textContent=oldTxt;showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    myDriver=res.data.driver;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
     document.getElementById("gate").style.display="none";
     document.getElementById("app").style.display="block";
     document.getElementById("who").textContent="Welcome, "+myDriver.name;
     renderTrips();renderLogForm();
-  }catch(e){showErr("Couldn't sign you in. Please try again.");}
+  }catch(e){btn.disabled=false;btn.textContent=oldTxt;showErr("Couldn't sign you in. Please try again.");}
 }
 function switchTab(t){
   document.getElementById("tab_trips").classList.toggle("on",t==="trips");
   document.getElementById("tab_log").classList.toggle("on",t==="log");
+  document.getElementById("tab_saved").classList.toggle("on",t==="saved");
   document.getElementById("tripsView").style.display=(t==="trips")?"block":"none";
   document.getElementById("logView").style.display=(t==="log")?"block":"none";
+  document.getElementById("savedView").style.display=(t==="saved")?"block":"none";
+  if(t==="saved"&&mySavedTrips===null)loadSavedTrips();
 }
 function myOps(){return allOps.filter(function(o){return (o.driver||"").trim().toLowerCase()===myDriver.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="withdrawn"||s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
 function renderTrips(){
   var mine=myOps();
   var el=document.getElementById("tripsView");
   if(!mine.length){el.innerHTML="<div class='empty'>No trips assigned to you yet.</div>";return;}
   el.innerHTML=mine.map(function(o){
-    return "<div class='card'>"+
+    return "<div class='card' id='card_"+o.id+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
-      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill'>"+(o.status||"Scheduled")+"</span></div>"+
+      "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
       "<div class='rows'>"+row("Vehicle",o.veh)+row("Reg. No.",o.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
+      (o.driverFeedback?"<div class='fb'><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div>":"")+
+      "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
+      "<div class='acts' id='acts_"+o.id+"'>"+
+        "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
+        "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
+        "<button onclick=\"toggleReason('"+o.id+"','Withdrawn')\">Withdrawn</button>"+
+        "<button onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
+      "</div>"+
+      "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / note</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
     "</div>";
   }).join("");
+}
+function setBusy(opId,busy,label){
+  var box=document.getElementById("acts_"+opId);if(!box)return;
+  box.querySelectorAll("button").forEach(function(b){b.disabled=busy;b.style.opacity=busy?"0.5":"1";});
+  if(busy&&label){var p=document.getElementById("statuspill_"+opId);if(p)p.textContent=label;}
+}
+function toggleReason(opId,status){
+  document.querySelectorAll(".reasonbox").forEach(function(b){if(b.id!=="reason_"+opId)b.style.display="none";});
+  var box=document.getElementById("reason_"+opId);
+  box.dataset.status=status;
+  box.style.display=(box.style.display==="block")?"none":"block";
+}
+async function submitReason(opId){
+  var text=document.getElementById("reasontext_"+opId).value.trim();
+  if(!text){alert("Please add a short reason before submitting.");return;}
+  var box=document.getElementById("reason_"+opId);
+  await postOpStatus(opId,box.dataset.status,text);
+}
+async function setOpStatus(opId,status){await postOpStatus(opId,status,"");}
+async function postOpStatus(opId,status,reason){
+  if(!sb){showErr("Service unavailable right now.");return;}
+  showErr("");
+  setBusy(opId,true,"Saving…");
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
+    data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name}};
+  try{
+    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
+    if(up.error){setBusy(opId,false);showErr("Could not update: "+up.error.message);return;}
+    var o=allOps.find(function(x){return x.id===opId;});
+    if(o){o.status=status;if(reason){o.driverFeedback=reason;o.driverFeedbackAt=rec.created_at;}}
+    renderTrips();
+  }catch(e){setBusy(opId,false);showErr("Network error. Please try again.");}
+}
+/* Jump to the log-trip tab with this operation's tour + vehicle pre-selected. */
+function startLogFor(opId){
+  switchTab("log");
+  var sel=document.getElementById("dl_tour");
+  if(sel){sel.value=opId;onTourPick();}
+}
+function tourOptionsHtml(sel){
+  var opts="<option value=''>— None / other —</option>";
+  (allOps||[]).forEach(function(o){opts+="<option value='"+o.id+"' "+(o.id===sel?"selected":"")+">"+(o.tourId||"—")+" — "+(o.tourName||o.tour||"Trip")+"</option>";});
+  return opts;
+}
+function onTourPick(){
+  var sel=document.getElementById("dl_tour");if(!sel)return;
+  var op=allOps.find(function(o){return o.id===sel.value;});
+  var vf=document.getElementById("dl_veh");
+  if(op&&vf)vf.value=op.veh||vf.value;
 }
 function renderLogForm(){
   var el=document.getElementById("logView");
   el.innerHTML="<div class='card'>"+
-    "<div class='sec-h'>Log today's trip</div>"+
+    "<div class='sec-h'>Log any additional trips</div>"+
+    "<label>Tour</label><select id='dl_tour' onchange='onTourPick()'>"+tourOptionsHtml("")+"</select>"+
+    "<div class='hint'>Pick the tour this trip belongs to, or leave it as “None / other” for an ad-hoc trip.</div>"+
     "<label>Date</label><input type='date' id='dl_date' value='"+todayISO+"'>"+
     "<label>Vehicle</label><input id='dl_veh' value='"+(myDriver.veh||"")+"' placeholder='e.g. Innova'>"+
     "<label>Start time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_startt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_startt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>Start Now</button></div>"+
@@ -139,6 +223,7 @@ function renderLogForm(){
 function clearTrip(){
   ["dl_startt","dl_endt","dl_startkm","dl_endkm","dl_loc"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
   var dt=document.getElementById("dl_date");if(dt)dt.value=todayISO;
+  var tf=document.getElementById("dl_tour");if(tf)tf.value="";
   showErr("");showOk("");
 }
 /* Stamp the current device time (HH:MM) — used by the Start Now / End Now buttons so
@@ -154,11 +239,17 @@ async function submitTrip(){
   var sT=document.getElementById("dl_startt").value,eT=document.getElementById("dl_endt").value;
   var time="—";
   if(sT&&eT){var sh=+sT.split(":")[0],sm=+sT.split(":")[1],eh=+eT.split(":")[0],em=+eT.split(":")[1];var mins=(eh*60+em)-(sh*60+sm);if(mins<0)mins+=1440;time=Math.floor(mins/60)+"h "+String(mins%60).padStart(2,"0")+"m";}
-  /* tag the trip with its tour code — prefer the op whose dates cover today, else any
-     op on this vehicle, else the driver's first assigned op. */
-  var _sn=function(a,b){return a&&b&&String(a).trim().toLowerCase()===String(b).trim().toLowerCase();};
-  var mop=(allOps||[]).find(function(o){return _sn(o.veh,veh)&&(o.startISO||"")<=date&&date<=(o.endISO||"");})||(allOps||[]).find(function(o){return _sn(o.veh,veh)&&o.tourId;})||(allOps||[]).find(function(o){return o.tourId;});
-  var tc=(mop&&mop.tourId)||"";
+  /* Prefer the explicitly-selected tour; fall back to the old heuristic (vehicle +
+     date match against assigned ops) only for an ad-hoc trip with no tour picked. */
+  var tc="";
+  var selOpId=document.getElementById("dl_tour").value;
+  var selOp=selOpId?allOps.find(function(o){return o.id===selOpId;}):null;
+  if(selOp){tc=selOp.tourId||"";}
+  else{
+    var _sn=function(a,b){return a&&b&&String(a).trim().toLowerCase()===String(b).trim().toLowerCase();};
+    var mop=(allOps||[]).find(function(o){return _sn(o.veh,veh)&&(o.startISO||"")<=date&&date<=(o.endISO||"");})||(allOps||[]).find(function(o){return _sn(o.veh,veh)&&o.tourId;})||(allOps||[]).find(function(o){return o.tourId;});
+    tc=(mop&&mop.tourId)||"";
+  }
   var btn=document.getElementById("dl_submit");btn.disabled=true;btn.textContent="Saving…";
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
     data:{date:date,veh:veh,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
@@ -166,9 +257,53 @@ async function submitTrip(){
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     btn.disabled=false;btn.textContent="Save trip";
     if(up.error){showErr("Could not save: "+up.error.message);return;}
-    showOk("Trip saved — it will appear in Island Explorer's Daily Activity shortly.");
+    showOk("Trip saved — it will appear in Island Explorer's Activities Log shortly.");
+    mySavedTrips=null; /* force a refetch next time Saved Trips is opened */
     renderLogForm();
   }catch(e){btn.disabled=false;btn.textContent="Save trip";showErr("Network error. Please try again.");}
+}
+
+/* ===== SAVED TRIPS ===== */
+async function loadSavedTrips(force){
+  var el=document.getElementById("savedView");
+  if(!sb){el.innerHTML="<div class='empty'>Service unavailable right now.</div>";return;}
+  if(force||mySavedTrips===null)el.innerHTML="<div class='empty'>Loading your trips…</div>";
+  try{
+    var res=await sb.rpc("driver_trips",{p_phone:myPhone,p_code:myCode});
+    if(res.error||!res.data||res.data.error){mySavedTrips=[];el.innerHTML="<div class='empty'>Couldn't load your saved trips right now.</div>";return;}
+    mySavedTrips=(res.data.trips||[]).sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+    renderSavedTrips();
+  }catch(e){mySavedTrips=[];el.innerHTML="<div class='empty'>Network error loading your trips.</div>";}
+}
+function renderSavedTrips(){
+  var el=document.getElementById("savedView");
+  var list=mySavedTrips||[];
+  var head="<div class='trip-actions' style='margin-bottom:14px'><button class='btn-sm btn-ghost' style='flex:1;padding:11px' onclick='loadSavedTrips(true)'>Refresh</button><button class='btn-sm' style='flex:1;padding:11px;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;cursor:pointer' onclick='exportTripsCSV()'>⬇ Download Excel (CSV)</button></div>";
+  if(!list.length){el.innerHTML=head+"<div class='empty'>No saved trips yet.</div>";return;}
+  el.innerHTML=head+list.map(function(t,i){
+    return "<div class='card'>"+
+      (t.tourCode?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+t.tourCode+"</div>":"<div class='dates' style='margin-bottom:2px'>Ad-hoc trip</div>")+
+      "<div class='top'><b>"+dmy(t.date)+"</b><span class='pill'>"+(t.veh||"—")+"</span></div>"+
+      "<div class='rows'>"+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Location",t.loc)+row("Time",t.time)+"</div>"+
+      "<div class='trip-actions'><button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick='shareTripWA("+i+")'>Share on WhatsApp</button></div>"+
+    "</div>";
+  }).join("");
+}
+function shareTripWA(i){
+  var t=(mySavedTrips||[])[i];if(!t)return;
+  var msg="Island Explorer — trip log\n"+(t.tourCode?"Tour: "+t.tourCode+"\n":"")+"Date: "+dmy(t.date)+"\nVehicle: "+(t.veh||"—")+"\nRoute: "+(t.loc||"—")+"\nKM: "+(t.startKm||0)+" → "+(t.endKm||0)+" ("+(t.totalKm||0)+" km)\nTime: "+(t.time||"—");
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+function exportTripsCSV(){
+  var list=mySavedTrips||[];
+  if(!list.length){alert("No saved trips yet.");return;}
+  var cols=["Tour Code","Date","Vehicle","Start KM","End KM","Total KM","Location","Time"];
+  var esc=function(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';};
+  var lines=[cols.join(",")].concat(list.map(function(t){return [t.tourCode||"—",dmy(t.date),t.veh||"",t.startKm||0,t.endKm||0,t.totalKm||0,t.loc||"",t.time||""].map(esc).join(",");}));
+  var blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");a.href=url;a.download="my-trips-"+todayISO+".csv";document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},60000);
 }
 </script>
 </body>
