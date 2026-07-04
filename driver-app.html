@@ -248,7 +248,10 @@ function staysTextForRange(o,s,e){
     return xs<=ee&&xe>=ss;
   });
   if(!hits.length)hits=rows;
-  return hits.map(function(x){return x.stay+((x.start||x.end)?" ("+dmy(x.start)+" – "+dmy(x.end)+")":"");}).join(" · ");
+  return hits.map(function(x){
+    var extra=[];if(x.rooms!=null&&x.rooms!=="")extra.push(x.rooms+" room"+(x.rooms==1?"":"s"));if(x.note)extra.push(x.note);
+    return x.stay+((x.start||x.end)?" ("+dmy(x.start)+" – "+dmy(x.end)+")":"")+(extra.length?" — "+extra.join(" · "):"");
+  }).join(" · ");
 }
 var TRIP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
 var _tripFilter="Scheduled";

@@ -154,7 +154,10 @@ function pillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(
 function allStaysText(o){
   if(!o.stays||!o.stays.length)return (o.stay&&o.stay!=="—")?o.stay:"";
   var rows=[{start:o.startISO||o.start,end:o.stays[0].start,stay:o.stay}].concat(o.stays);
-  return rows.filter(function(x){return x.stay&&x.stay!=="—";}).map(function(x){return x.stay+((x.start||x.end)?" ("+dmy(x.start)+" – "+dmy(x.end)+")":"");}).join(" · ");
+  return rows.filter(function(x){return x.stay&&x.stay!=="—";}).map(function(x){
+    var extra=[];if(x.rooms!=null&&x.rooms!=="")extra.push(x.rooms+" room"+(x.rooms==1?"":"s"));if(x.note)extra.push(x.note);
+    return x.stay+((x.start||x.end)?" ("+dmy(x.start)+" – "+dmy(x.end)+")":"")+(extra.length?" — "+extra.join(" · "):"");
+  }).join(" · ");
 }
 /* Read-only breakdown of a multi-leg tour's vehicle/driver changes (e.g. one
    pair in South Andaman, a different pair once the group reaches Great
