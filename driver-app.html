@@ -152,11 +152,10 @@ function renderTrips(){
     return "<div class='card' id='card_"+o.id+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
       "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
-      "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
+      "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
       "<div class='rows'>"+row("Vehicle",o.veh)+row("Reg. No.",o.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
-      (o.driverFeedback?"<div class='fb'><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div>":"")+
-      "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
+      (o.driverFeedback?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div><button onclick=\"clearMyNote('"+o.id+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
         "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
         "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
@@ -164,6 +163,7 @@ function renderTrips(){
         "<button onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
       "</div>"+
       "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / note</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
+      "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
     "</div>";
   }).join("");
 }
@@ -185,17 +185,23 @@ async function submitReason(opId){
   await postOpStatus(opId,box.dataset.status,text);
 }
 async function setOpStatus(opId,status){await postOpStatus(opId,status,"");}
-async function postOpStatus(opId,status,reason){
+/* Remove a previously-submitted note without changing the operation's status. */
+async function clearMyNote(opId){
+  if(!confirm("Remove this note?"))return;
+  var o=allOps.find(function(x){return x.id===opId;});
+  await postOpStatus(opId,(o&&o.status)||"Scheduled","",true);
+}
+async function postOpStatus(opId,status,reason,clearFeedback){
   if(!sb){showErr("Service unavailable right now.");return;}
   showErr("");
   setBusy(opId,true,"Saving…");
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
-    data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name}};
+    data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,clearFeedback:!!clearFeedback}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     if(up.error){setBusy(opId,false);showErr("Could not update: "+up.error.message);return;}
     var o=allOps.find(function(x){return x.id===opId;});
-    if(o){o.status=status;if(reason){o.driverFeedback=reason;o.driverFeedbackAt=rec.created_at;}}
+    if(o){o.status=status;if(reason){o.driverFeedback=reason;o.driverFeedbackAt=rec.created_at;}else if(clearFeedback){o.driverFeedback="";o.driverFeedbackAt="";}}
     renderTrips();
   }catch(e){setBusy(opId,false);showErr("Network error. Please try again.");}
 }
@@ -326,12 +332,28 @@ function renderSavedTrips(){
   el.innerHTML=head+list.map(function(t,i){
     var reg=t.reg||regForVeh(t.veh);
     return "<div class='card'>"+
-      "<div class='dates mono' style='font-weight:600;color:var(--soft);font-size:11px;margin-bottom:3px'>"+(t.tourCode||"Ad-hoc trip")+"</div>"+
-      "<div style='font-size:19px;font-weight:700;color:var(--ink);margin-bottom:10px'>"+tourDateRangeForCode(t.tourCode,t.date)+"</div>"+
-      "<div class='rows'>"+row("Trip date",dmy(t.date))+row("Vehicle",vehLabel(t.veh,reg))+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Location",t.loc)+row("Time",t.time)+"</div>"+
-      "<div class='trip-actions'><button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick='shareTripWA("+i+")'>Share on WhatsApp</button></div>"+
+      "<div class='dates mono' style='font-weight:600;color:var(--soft);font-size:12.5px;margin-bottom:3px'>"+(t.tourCode||"Ad-hoc trip")+"</div>"+
+      "<div style='font-size:16px;font-weight:700;color:var(--ink);margin-bottom:10px'>"+tourDateRangeForCode(t.tourCode,t.date)+"</div>"+
+      "<div class='rows'>"+row("Trip date",dmy(t.date))+row("Vehicle",vehLabel(t.veh,reg))+row("Location",t.loc)+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Time",t.time)+"</div>"+
+      "<div class='trip-actions'><button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick='shareTripWA("+i+")'>Share on WhatsApp</button><button class='btn-sm' style='flex:1;padding:10px;border:1px solid #f0c2bb;background:#fff;color:var(--err);border-radius:10px;font-weight:700;cursor:pointer' onclick='deleteSavedTrip("+i+")'>Delete</button></div>"+
     "</div>";
   }).join("");
+}
+/* A driver can only submit new rows (RLS locks anon writes to insert-only), so a
+   delete here is a request the console applies — mirrors the op-status-update
+   pattern. Removed from view immediately for responsiveness. */
+async function deleteSavedTrip(i){
+  var t=(mySavedTrips||[])[i];if(!t)return;
+  if(!confirm("Delete this trip log?"))return;
+  if(!sb){showErr("Service unavailable right now.");return;}
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_delete",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
+    data:{tripId:t.id,fromSub:t.fromSub,driver:myDriver.name}};
+  try{
+    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
+    if(up.error){showErr("Could not delete: "+up.error.message);return;}
+    mySavedTrips.splice(i,1);
+    renderSavedTrips();
+  }catch(e){showErr("Network error. Please try again.");}
 }
 function shareTripWA(i){
   var t=(mySavedTrips||[])[i];if(!t)return;
