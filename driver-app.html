@@ -51,11 +51,14 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 .fb{margin-top:8px;padding:10px 12px;background:#fff4e0;border-radius:10px;font-size:12.5px;color:#7a5a00}
 .trip-actions{display:flex;gap:8px;margin-top:10px}
 .trip-actions button{flex:1}
+.head{position:relative}
+.logout-btn{position:absolute;top:16px;right:16px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--soft);cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="head">
+    <button class="logout-btn" id="logoutBtn" style="display:none" onclick="doLogout()">Log out</button>
     <img src="assets/logo.png" alt="Island Explorer Birding Tours" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('brandtext');if(f)f.style.display='block';}">
     <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
     <h1 id="who">Sign in to log your trips</h1>
@@ -117,10 +120,22 @@ async function doLogin(){
     myVehicles=res.data.vehicles||[];
     document.getElementById("gate").style.display="none";
     document.getElementById("app").style.display="block";
+    document.getElementById("logoutBtn").style.display="block";
     document.getElementById("who").textContent="Welcome, "+myDriver.name;
     renderTrips();renderLogForm();
     loadSavedTrips(); /* prefetch in the background — Saved Trips is ready by the time it's opened */
   }catch(e){btn.disabled=false;btn.textContent=oldTxt;showErr("Couldn't sign you in. Please try again.");}
+}
+function doLogout(){
+  myDriver=null;myPhone="";myCode="";allOps=[];myVehicles=[];mySavedTrips=null;_savedLoading=false;_tripFilter="Scheduled";
+  document.getElementById("gatePhone").value="";
+  document.getElementById("gateCode").value="";
+  document.getElementById("app").style.display="none";
+  document.getElementById("gate").style.display="block";
+  document.getElementById("logoutBtn").style.display="none";
+  document.getElementById("who").textContent="Sign in to log your trips";
+  showErr("");showOk("");
+  switchTab("trips");
 }
 /* Registration number for a vehicle name — used wherever a vehicle is shown, so a
    bare name is never displayed alone when we know its reg. no. */
@@ -144,14 +159,14 @@ function switchTab(t){
 }
 function myOps(){return allOps.filter(function(o){return (o.driver||"").trim().toLowerCase()===myDriver.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
 function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
-var TRIP_FILTERS=["All","Scheduled","In progress","Completed","Transferred","Declined"];
-var _tripFilter="All";
+var TRIP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
+var _tripFilter="Scheduled";
 function setTripFilter(f){_tripFilter=f;renderTrips();}
-function tripMatchesFilter(o,f){if(f==="All")return true;return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
+function tripMatchesFilter(o,f){return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
 function renderTrips(){
   var mine=myOps();
   var el=document.getElementById("tripsView");
-  var subtabs="<div class='tabs' style='overflow-x:auto;flex-wrap:nowrap'>"+TRIP_FILTERS.map(function(f){return "<button class='tab "+(f===_tripFilter?"on":"")+"' style='flex:0 0 auto;white-space:nowrap' onclick=\"setTripFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
+  var subtabs="<div class='tabs' style='overflow-x:auto;flex-wrap:nowrap;gap:4px'>"+TRIP_FILTERS.map(function(f){return "<button class='tab "+(f===_tripFilter?"on":"")+"' style='flex:0 0 auto;white-space:nowrap' onclick=\"setTripFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
   if(!mine.length){el.innerHTML=subtabs+"<div class='empty'>No trips assigned to you yet.</div>";return;}
   var shown=mine.filter(function(o){return tripMatchesFilter(o,_tripFilter);});
   el.innerHTML=subtabs+(shown.length?shown.map(function(o){
