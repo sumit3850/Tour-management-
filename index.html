@@ -485,14 +485,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 95</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 96</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 95</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 96</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2395,7 +2395,7 @@ function openAddOp(){modalForm("New operation","Add operation","<div class='form
 "</div>","saveNewOp","Add operation");}
 function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",birding:"—",stay:"—",status:"Scheduled"});persistData();closeModal();renderDashOps();}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
-function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;closeModal();renderLog("Vehicles & Drivers");}
+function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;v.adminLocked=true;persistData();closeModal();renderLog("Vehicles & Drivers");}
 function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles & Drivers");}
 function openAddVehicle(){modalForm("New vehicle","Add vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nv_name' placeholder='e.g. Scorpio'></div><div class='field'><label>Reg. No.</label><input class='input' id='nv_reg' placeholder='AN-01-...'></div><div class='field'><label>Type</label><input class='input' id='nv_type' placeholder='e.g. SUV'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='nv_cap' value='7'></div><div class='field'><label>Driver name</label><input class='input' id='nv_driver' placeholder='Driver name'></div><div class='field'><label>Driver phone</label><input class='input' id='nv_dphone' placeholder='+91 …'></div><div class='field'><label>Driver login code <span style='color:var(--ink-soft);font-weight:400'>(auto · editable)</span></label><input class='input mono' id='nv_dcode' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Status</label><select class='input' id='nv_avail'><option>Available</option><option>On Tour</option><option>Maintenance</option></select></div></div>","saveNewVehicle","Add vehicle");}
 function saveNewVehicle(){
@@ -2421,7 +2421,7 @@ function vehicleSelectOptions(sel){
   return "<option value=''>— none —</option>"+(vehicles||[]).map(function(v){return "<option value='"+String(v.name).replace(/'/g,"&#39;")+"' "+(v.name===sel?"selected":"")+">"+v.name+(v.reg?" ("+v.reg+")":"")+"</option>";}).join("")+((sel&&!known)?"<option value='"+String(sel).replace(/'/g,"&#39;")+"' selected>"+sel+"</option>":"");
 }
 function editDriver(name){const d=drivers.find(x=>x.name===name);if(!d)return;modalForm("Edit driver","Update driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ed_name' value='"+d.name+"'></div><div class='field'><label>Phone</label><input class='input' id='ed_phone' value='"+d.phone+"'></div><div class='field'><label>Login code</label><input class='input mono' id='ed_code' value='"+(d.code||String(Math.floor(1000+Math.random()*9000)))+"'></div><div class='field'><label>Driver licence no.</label><input class='input' id='ed_license' value='"+((d.license||"")).replace(/'/g,"&#39;")+"'></div><div class='field'><label>Assigned vehicle</label><select class='input' id='ed_veh'>"+vehicleSelectOptions(d.veh)+"</select></div></div>","saveEditDriver","Update");document.getElementById("modal").dataset.dname=name;}
-function saveEditDriver(){const name=document.getElementById("modal").dataset.dname;const d=drivers.find(x=>x.name===name);if(!d)return;d.name=document.getElementById("ed_name").value;d.phone=document.getElementById("ed_phone").value;d.code=document.getElementById("ed_code").value.trim();d.license=document.getElementById("ed_license").value;d.veh=document.getElementById("ed_veh").value;closeModal();renderLog("Vehicles & Drivers");}
+function saveEditDriver(){const name=document.getElementById("modal").dataset.dname;const d=drivers.find(x=>x.name===name);if(!d)return;d.name=document.getElementById("ed_name").value;d.phone=document.getElementById("ed_phone").value;d.code=document.getElementById("ed_code").value.trim();d.license=document.getElementById("ed_license").value;d.veh=document.getElementById("ed_veh").value;d.adminLocked=true;persistData();closeModal();renderLog("Vehicles & Drivers");}
 /* Deleting a registration-created record must also retire its source submission,
    otherwise the self-healing re-affirm would bring the row straight back. */
 function retireSourceSub(fromSub){
@@ -2757,18 +2757,22 @@ function autoProcessSubmissions(){
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();if(document.getElementById("guideBody"))renderGuides();if(document.getElementById("logBody"))renderLog(_logTab);persistData();}
 }
 /* A driver's self-registration flows into the Drivers directory (and adds their
-   vehicle to the Vehicles list if it's new), with an auto login code.
+   vehicle(s) to the Vehicles list if new), with an auto login code.
    IDENTITY: matched by source-submission id (fromSub) FIRST, then name/phone —
    so an admin rename/phone-edit still matches the same record instead of spawning
-   a duplicate. On an existing record only BLANK fields are filled, so admin edits
-   are never overwritten.
-   VEHICLES: synced from the registration exactly ONCE per driver, tracked by
-   drv.vehiclesSynced — independent of whether the driver row itself was newly
-   created here or already existed (e.g. matched an earlier record by name/phone).
-   Gating vehicle creation on "row is brand new" was the bug: if the driver row
-   already existed for any reason, their registered vehicle was silently dropped
-   and never retried. Once synced, deleting/renaming a vehicle later won't see it
-   re-added (vehiclesSynced stays true), preserving the earlier anti-duplication fix. */
+   a duplicate. Once adminLocked (set when the admin saves an edit in the console),
+   registration data can never overwrite the record's fields again — only new
+   vehicles from a later registration still get added (that's additive, never
+   overwrites anything the admin touched).
+   VEHICLES: tracked PER SUBMISSION via drv.vehSubsSynced (a list of submission ids
+   already processed) — not a single once-ever flag. That was the bug: if the same
+   driver submitted the form more than once (e.g. one registration per vehicle),
+   only the first submission's vehicle(s) were ever added; the flag being already
+   "true" silently blocked every later submission's vehicles forever. Per-submission
+   tracking means every distinct registration's vehicles get added exactly once,
+   however many times (or forms) a driver submits, while a submission already
+   processed is never repeated (so a manually deleted vehicle from an
+   already-processed submission won't reappear). */
 function addOrUpdateDriver(s){
   if(!s.name)return false;var d=s.data||{};var changed=false;
   var drv=drivers.find(function(x){return x.fromSub===s.id;})
@@ -2776,27 +2780,32 @@ function addOrUpdateDriver(s){
   var created=false;
   if(!drv){drv={name:s.name,code:String(Math.floor(1000+Math.random()*9000))};drivers.unshift(drv);changed=true;created=true;}
   drv.fromSub=drv.fromSub||s.id;
-  if(created){drv.name=s.name;drv.phone=s.phone||"";}
-  if(!drv.phone&&s.phone)drv.phone=s.phone;
-  if(!drv.license&&d.license)drv.license=d.license;
-  if(!drv.address&&d.address)drv.address=d.address;
-  if(!drv.licenseDoc)drv.licenseDoc=d.licenseDoc||((d.documents&&d.documents[0]&&d.documents[0].url)||"");
-  if(!drv.documents&&d.documents&&d.documents.length)drv.documents=d.documents;
+  if(!drv.adminLocked){
+    if(created){drv.name=s.name;drv.phone=s.phone||"";}
+    if(!drv.phone&&s.phone)drv.phone=s.phone;
+    if(!drv.license&&d.license)drv.license=d.license;
+    if(!drv.address&&d.address)drv.address=d.address;
+    if(!drv.licenseDoc)drv.licenseDoc=d.licenseDoc||((d.documents&&d.documents[0]&&d.documents[0].url)||"");
+    if(!drv.documents&&d.documents&&d.documents.length)drv.documents=d.documents;
+  }
   if(!drv.code)drv.code=String(Math.floor(1000+Math.random()*9000));
-  if(!drv.vehiclesSynced){
+  drv.vehSubsSynced=drv.vehSubsSynced||[];
+  if(drv.vehSubsSynced.indexOf(s.id)===-1){
     var vlist=(d.vehicles&&d.vehicles.length)?d.vehicles:(d.vehicle?[{name:d.vehicle,reg:d.reg}]:[]);
-    if(vlist[0]){drv.veh=drv.veh||vlist[0].name||"";drv.reg=drv.reg||vlist[0].reg||"";}
+    if(vlist[0]&&!drv.adminLocked){drv.veh=drv.veh||vlist[0].name||"";drv.reg=drv.reg||vlist[0].reg||"";}
     vlist.forEach(function(vv){
       if(vv.name&&!vehicles.find(function(v){return (v.name||"").toLowerCase()===vv.name.toLowerCase();})){
         vehicles.unshift({name:vv.name,reg:vv.reg||"",type:"Car",cap:parseInt(vv.seats||d.seats)||0,driver:s.name,avail:"Available",fromSub:s.id});
+        changed=true;
       }
     });
-    drv.vehiclesSynced=true;changed=true;
+    drv.vehSubsSynced.push(s.id);changed=true;
   }
   return changed;
 }
 /* A guide's self-registration flows into the External Guides directory. Same identity
-   rules as drivers: match by fromSub first, fill only blank fields on existing records. */
+   rules as drivers: match by fromSub first; once adminLocked (admin saved an edit),
+   registration data can never overwrite the record's fields again. */
 function addOrUpdateExternalGuide(s){
   if(!s.name)return false;
   var d=s.data||{};var changed=false;
@@ -2805,14 +2814,16 @@ function addOrUpdateExternalGuide(s){
   var created=false;
   if(!g){g={name:s.name};externalGuides.unshift(g);changed=true;created=true;}
   g.fromSub=g.fromSub||s.id;
-  if(created){g.name=s.name;g.phone=s.phone||"";}
-  if(!g.phone&&s.phone)g.phone=s.phone;
-  if(!g.email&&s.email)g.email=s.email;
-  if(!g.expertise&&d.expertise)g.expertise=d.expertise;
-  if(!g.address&&d.address)g.address=d.address;
-  if(!g.idNo&&d.idNo)g.idNo=d.idNo;
-  if(!g.idDoc)g.idDoc=d.licenseDoc||((d.documents&&d.documents[0]&&d.documents[0].url)||"");
-  if(!g.documents&&d.documents&&d.documents.length)g.documents=d.documents;
+  if(!g.adminLocked){
+    if(created){g.name=s.name;g.phone=s.phone||"";}
+    if(!g.phone&&s.phone)g.phone=s.phone;
+    if(!g.email&&s.email)g.email=s.email;
+    if(!g.expertise&&d.expertise)g.expertise=d.expertise;
+    if(!g.address&&d.address)g.address=d.address;
+    if(!g.idNo&&d.idNo)g.idNo=d.idNo;
+    if(!g.idDoc)g.idDoc=d.licenseDoc||((d.documents&&d.documents[0]&&d.documents[0].url)||"");
+    if(!g.documents&&d.documents&&d.documents.length)g.documents=d.documents;
+  }
   guideId(g);
   return changed;
 }
@@ -2850,7 +2861,7 @@ function guideForm(g){g=g||{};return "<div class='form-grid'>"+
 function openAddGuide(){modalForm("New external guide","Add guide",guideForm(),"saveNewGuide","Add guide");}
 function saveNewGuide(){var n=document.getElementById("g_name").value.trim();if(!n){alert("Enter the guide name.");return;}var g={name:n,expertise:document.getElementById("g_exp").value,phone:document.getElementById("g_phone").value,code:document.getElementById("g_code").value.trim(),email:document.getElementById("g_email").value,address:document.getElementById("g_addr").value};guideId(g);externalGuides.push(g);persistData();closeModal();renderGuides();}
 function editGuide(i){var g=externalGuides[i];if(!g)return;modalForm("Edit guide","Update guide",guideForm(g),"saveEditGuide","Update");document.getElementById("modal").dataset.gi=i;}
-function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;persistData();closeModal();renderGuides();}
+function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;g.adminLocked=true;persistData();closeModal();renderGuides();}
 function deleteGuide(i){if(!confirm("Remove this guide?"))return;var g=externalGuides[i];if(g)retireSourceSub(g.fromSub);externalGuides.splice(i,1);persistData();renderGuides();}
 function guideOptions(sel){return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("");}
 /* Operation "Guide" field: a real dropdown of the External Guides directory + Custom
