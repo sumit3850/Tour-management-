@@ -39,11 +39,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 label{display:block;font-size:12.5px;font-weight:600;margin:10px 0 5px}
 input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:11px}
 .btn{width:100%;margin-top:14px;padding:14px;border:none;border-radius:12px;background:var(--forest);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.pill.mid{background:#fff4e0;color:#b8860b}
+.tabs{display:flex;gap:4px;margin-bottom:14px;overflow-x:auto}
+.tab{flex:0 0 auto;white-space:nowrap;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:700;font-size:12.5px;cursor:pointer;color:var(--ink)}
+.tab.on{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
+.logout-btn{position:absolute;top:16px;right:16px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--soft);cursor:pointer}
+.head{position:relative}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="head">
+    <button class="logout-btn" id="logoutBtn" style="display:none" onclick="doLogout()">Log out</button>
     <img src="assets/logo.png" alt="Island Explorer Birding Tours" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('brandtext');if(f)f.style.display='block';}">
     <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
     <h1 id="who">Sign in to see your operations</h1>
@@ -63,7 +70,7 @@ const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const presetGuide=(new URLSearchParams(location.search).get("guide")||"").trim();
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
-var myGuide=null,allOps=[],allVehicles=[],allDrivers=[];
+var myGuide=null,myPhone="",myCode="",allOps=[],allVehicles=[],allDrivers=[];
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
@@ -75,6 +82,7 @@ async function doLogin(){
   var code=document.getElementById("gateCode").value.trim();
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
   if(!sb){showErr("Service unavailable right now. Please try again shortly.");return;}
+  var btn=document.querySelector("#gate .btn");if(btn){btn.disabled=true;btn.textContent="Signing in…";}
   try{
     /* Server-side login check (RPC, security definer) — the guide/driver directory
        and full ops table are never sent to the browser; only this guide's own
@@ -84,29 +92,45 @@ async function doLogin(){
        been run, or was run before this login existed) from "it ran fine but no
        guide matched" (a real wrong phone/code), so a setup issue doesn't look
        identical to a typo and go unnoticed. */
-    if(res.error){showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
-    if(!res.data||res.data.error){showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
-    myGuide=res.data.guide;
+    if(res.error){if(btn){btn.disabled=false;btn.textContent="View my operations";}showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
+    if(!res.data||res.data.error){if(btn){btn.disabled=false;btn.textContent="View my operations";}showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    myGuide=res.data.guide;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
     allVehicles=res.data.vehicles||[];
     allDrivers=res.data.drivers||[];
     document.getElementById("gate").style.display="none";
+    document.getElementById("logoutBtn").style.display="block";
     document.getElementById("who").textContent="Operations for "+myGuide.name;
     renderList();
-  }catch(e){showErr("Couldn't sign you in. Please try again.");}
+  }catch(e){if(btn){btn.disabled=false;btn.textContent="View my operations";}showErr("Couldn't sign you in. Please try again.");}
+}
+function doLogout(){
+  myGuide=null;myPhone="";myCode="";allOps=[];allVehicles=[];allDrivers=[];
+  document.getElementById("gatePhone").value="";document.getElementById("gateCode").value="";
+  document.getElementById("gate").style.display="block";
+  document.getElementById("logoutBtn").style.display="none";
+  document.getElementById("list").style.display="none";
+  document.getElementById("who").textContent="Sign in to see your operations";
+  showErr("");
 }
 
 function myOps(){return allOps.filter(function(o){return (o.guide||"").trim().toLowerCase()===myGuide.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+var OP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
+var _opFilter="Scheduled";
+function setOpFilter(f){_opFilter=f;renderList();}
+function opMatchesFilter(o,f){return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
+function pillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
 
 function renderList(){
   var list=document.getElementById("list");list.style.display="block";
   var mine=myOps();
-  if(!mine.length){list.innerHTML="<div class='empty'>No operations assigned to you yet.</div>";return;}
-  list.innerHTML=mine.map(function(o){
-    var cls=o.status==="Withdrawn"||o.status==="Declined"?"warn":(o.status==="Completed"?"ok":"");
+  var subtabs="<div class='tabs'>"+OP_FILTERS.map(function(f){return "<button class='tab "+(f===_opFilter?"on":"")+"' onclick=\"setOpFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
+  if(!mine.length){list.innerHTML=subtabs+"<div class='empty'>No operations assigned to you yet.</div>";return;}
+  var shown=mine.filter(function(o){return opMatchesFilter(o,_opFilter);});
+  list.innerHTML=subtabs+(shown.length?shown.map(function(o){
     var v=allVehicles.find(function(x){return x.name===o.veh;})||{};
     var d=allDrivers.find(function(x){return x.name===o.driver;})||{};
-    return "<div class='card' id='card_"+o.id+"'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+cls+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
+    return "<div class='card' id='card_"+o.id+"'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
       (o.tourId?"<div class='dates mono'>"+o.tourId+"</div>":"")+
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
       (o.pocName?"<div class='rows' style='margin-bottom:6px'>"+row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):"")+"</div>":"")+
@@ -116,12 +140,12 @@ function renderList(){
       "<div class='acts' id='acts_"+o.id+"'>"+
         "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
         "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
-        "<button onclick=\"toggleReason('"+o.id+"','Withdrawn')\">Withdrawn</button>"+
         "<button onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
+        "<button onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
       "</div>"+
       "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
     "</div>";
-  }).join("");
+  }).join(""):"<div class='empty'>No operations in this view.</div>");
 }
 function setBusy(opId,busy,label){
   var box=document.getElementById("acts_"+opId);if(!box)return;

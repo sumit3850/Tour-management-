@@ -134,7 +134,7 @@ declare
   has_precord boolean := true;
 begin
   begin
-    select data into g from ieo_external_guides
+    select (data - 'documents' - 'idDoc' - 'licenseDoc') into g from ieo_external_guides
       where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
         and coalesce(data->>'code','') = p_code
       limit 1;
@@ -160,12 +160,14 @@ begin
         where lower(trim(coalesce(o.data->>'guide',''))) = gname;
     exception when undefined_table then ops := '[]'::jsonb;
     end;
+    -- Only the fields the guide/driver apps actually display — never the
+    -- (often large, base64) document/photo fields — go over the wire here.
     begin
-      select coalesce(jsonb_agg(v.data),'[]'::jsonb) into vehs from ieo_vehicles v;
+      select coalesce(jsonb_agg(jsonb_build_object('name',v.data->>'name','reg',v.data->>'reg','driver',v.data->>'driver')),'[]'::jsonb) into vehs from ieo_vehicles v;
     exception when undefined_table then vehs := '[]'::jsonb;
     end;
     begin
-      select coalesce(jsonb_agg(d.data),'[]'::jsonb) into drvs from ieo_drivers d;
+      select coalesce(jsonb_agg(jsonb_build_object('name',d.data->>'name','phone',d.data->>'phone')),'[]'::jsonb) into drvs from ieo_drivers d;
     exception when undefined_table then drvs := '[]'::jsonb;
     end;
     return jsonb_build_object('guide',g,'ops',ops,'vehicles',vehs,'drivers',drvs);
@@ -176,7 +178,7 @@ begin
   if ws is null then return jsonb_build_object('error','not_found'); end if;
   guides := coalesce(ws->'externalGuides','[]'::jsonb);
   roster := coalesce(ws->'operators','[]'::jsonb);
-  select x into g from jsonb_array_elements(guides) x
+  select (x - 'documents' - 'idDoc' - 'licenseDoc') into g from jsonb_array_elements(guides) x
     where regexp_replace(coalesce(x->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
       and coalesce(x->>'code','') = p_code
     limit 1;
@@ -193,9 +195,11 @@ begin
   select coalesce(jsonb_agg(o),'[]'::jsonb) into ops
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
     where lower(trim(coalesce(o->>'guide',''))) = gname;
-  return jsonb_build_object('guide',g,'ops',ops,
-    'vehicles',coalesce(ws->'vehicles','[]'::jsonb),
-    'drivers',coalesce(ws->'drivers','[]'::jsonb));
+  select coalesce(jsonb_agg(jsonb_build_object('name',v->>'name','reg',v->>'reg','driver',v->>'driver')),'[]'::jsonb) into vehs
+    from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v;
+  select coalesce(jsonb_agg(jsonb_build_object('name',d->>'name','phone',d->>'phone')),'[]'::jsonb) into drvs
+    from jsonb_array_elements(coalesce(ws->'drivers','[]'::jsonb)) d;
+  return jsonb_build_object('guide',g,'ops',ops,'vehicles',vehs,'drivers',drvs);
 end;
 $$;
 grant execute on function public.guide_login(text,text) to anon, authenticated;
@@ -211,7 +215,7 @@ declare
   has_precord boolean := true;
 begin
   begin
-    select data into d from ieo_drivers
+    select (data - 'documents' - 'idDoc' - 'licenseDoc') into d from ieo_drivers
       where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
         and coalesce(data->>'code','') = p_code
       limit 1;
@@ -238,7 +242,7 @@ begin
     exception when undefined_table then ops := '[]'::jsonb;
     end;
     begin
-      select coalesce(jsonb_agg(v.data),'[]'::jsonb) into vehs from ieo_vehicles v
+      select coalesce(jsonb_agg(jsonb_build_object('name',v.data->>'name','reg',v.data->>'reg')),'[]'::jsonb) into vehs from ieo_vehicles v
         where lower(trim(coalesce(v.data->>'driver',''))) = dname;
     exception when undefined_table then vehs := '[]'::jsonb;
     end;
@@ -250,7 +254,7 @@ begin
   if ws is null then return jsonb_build_object('error','not_found'); end if;
   drivers := coalesce(ws->'drivers','[]'::jsonb);
   roster := coalesce(ws->'operators','[]'::jsonb);
-  select x into d from jsonb_array_elements(drivers) x
+  select (x - 'documents' - 'idDoc' - 'licenseDoc') into d from jsonb_array_elements(drivers) x
     where regexp_replace(coalesce(x->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
       and coalesce(x->>'code','') = p_code
     limit 1;
@@ -267,7 +271,7 @@ begin
   select coalesce(jsonb_agg(o),'[]'::jsonb) into ops
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
     where lower(trim(coalesce(o->>'driver',''))) = dname;
-  select coalesce(jsonb_agg(v),'[]'::jsonb) into vehs
+  select coalesce(jsonb_agg(jsonb_build_object('name',v->>'name','reg',v->>'reg')),'[]'::jsonb) into vehs
     from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
     where lower(trim(coalesce(v->>'driver',''))) = dname;
   return jsonb_build_object('driver',d,'ops',ops,'vehicles',vehs);
@@ -377,6 +381,14 @@ carries every tour/booking/customer, plus any inline document photos) just to
 check one phone + code. This needs the per-record tables from
 `docs/DATABASE_SCHEMA.md` to exist; if they don't yet, it automatically falls back
 to the old, slower, whole-row check — same result, just not the speed-up.
+
+On top of that, `guide_login` and `driver_login` now also strip the heavy
+`documents` / `idDoc` / `licenseDoc` fields (inline base64 licence/ID photos)
+from every record before sending it back, and send only the handful of fields
+(`name`, `reg`, `phone`, etc.) the guide/driver apps actually display for the
+bulk vehicle and driver lists, instead of every field on every record. **Re-run
+this whole SQL file once more in the Supabase SQL editor** to pick up this
+change — it replaces the existing functions, so it's safe to run again.
 
 Two remaining causes if it's still slow after re-running this SQL:
 
