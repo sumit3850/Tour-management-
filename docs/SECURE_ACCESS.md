@@ -115,6 +115,14 @@ create policy "public can submit forms" on workspaces for insert to anon
 --    (security definer) but only ever returns the caller's own slice of
 --    data — the tables themselves stay locked to the team.
 
+-- FAST PATH: reads the small per-record tables (each holds only one kind of
+-- record, e.g. just guides, just ops) instead of the one shared "workspaces" row
+-- that also carries every tour/booking/customer and any inline base64 document
+-- photos. Falls back to that shared row automatically if the per-record tables
+-- haven't been set up yet (docs/DATABASE_SCHEMA.md) — same result either way,
+-- just slower on the fallback path. This is what actually fixes slow sign-in for
+-- most setups, since Postgres no longer has to load the whole shared blob just
+-- to check one phone + code.
 create or replace function public.guide_login(p_phone text, p_code text)
 returns jsonb
 language plpgsql
@@ -122,8 +130,48 @@ security definer
 set search_path = public
 as $$
 declare
-  ws jsonb; guides jsonb; roster jsonb; g jsonb; gname text; ops jsonb;
+  ws jsonb; guides jsonb; roster jsonb; g jsonb; gname text; ops jsonb; vehs jsonb; drvs jsonb;
+  has_precord boolean := true;
 begin
+  begin
+    select data into g from ieo_external_guides
+      where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+        and coalesce(data->>'code','') = p_code
+      limit 1;
+  exception when undefined_table then has_precord := false;
+  end;
+
+  if has_precord then
+    if g is null then
+      begin
+        select jsonb_build_object('name',data->>'name','phone',data->>'phone','code',data->>'code') into g
+          from ieo_operators
+          where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+            and coalesce(data->>'code','') = p_code
+            and lower(coalesce(data->>'role','')) = 'guide'
+          limit 1;
+      exception when undefined_table then null;
+      end;
+    end if;
+    if g is null then return jsonb_build_object('error','no_match'); end if;
+    gname := lower(trim(g->>'name'));
+    begin
+      select coalesce(jsonb_agg(o.data),'[]'::jsonb) into ops from ieo_ops o
+        where lower(trim(coalesce(o.data->>'guide',''))) = gname;
+    exception when undefined_table then ops := '[]'::jsonb;
+    end;
+    begin
+      select coalesce(jsonb_agg(v.data),'[]'::jsonb) into vehs from ieo_vehicles v;
+    exception when undefined_table then vehs := '[]'::jsonb;
+    end;
+    begin
+      select coalesce(jsonb_agg(d.data),'[]'::jsonb) into drvs from ieo_drivers d;
+    exception when undefined_table then drvs := '[]'::jsonb;
+    end;
+    return jsonb_build_object('guide',g,'ops',ops,'vehicles',vehs,'drivers',drvs);
+  end if;
+
+  -- FALLBACK: per-record tables not set up yet — read the shared blob (slower).
   select data into ws from workspaces where id = 'island-explorer';
   if ws is null then return jsonb_build_object('error','not_found'); end if;
   guides := coalesce(ws->'externalGuides','[]'::jsonb);
@@ -160,7 +208,44 @@ set search_path = public
 as $$
 declare
   ws jsonb; drivers jsonb; roster jsonb; d jsonb; dname text; ops jsonb; vehs jsonb;
+  has_precord boolean := true;
 begin
+  begin
+    select data into d from ieo_drivers
+      where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+        and coalesce(data->>'code','') = p_code
+      limit 1;
+  exception when undefined_table then has_precord := false;
+  end;
+
+  if has_precord then
+    if d is null then
+      begin
+        select jsonb_build_object('name',data->>'name','phone',data->>'phone','code',data->>'code','veh','') into d
+          from ieo_operators
+          where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+            and coalesce(data->>'code','') = p_code
+            and lower(coalesce(data->>'role','')) = 'driver'
+          limit 1;
+      exception when undefined_table then null;
+      end;
+    end if;
+    if d is null then return jsonb_build_object('error','no_match'); end if;
+    dname := lower(trim(d->>'name'));
+    begin
+      select coalesce(jsonb_agg(o.data),'[]'::jsonb) into ops from ieo_ops o
+        where lower(trim(coalesce(o.data->>'driver',''))) = dname;
+    exception when undefined_table then ops := '[]'::jsonb;
+    end;
+    begin
+      select coalesce(jsonb_agg(v.data),'[]'::jsonb) into vehs from ieo_vehicles v
+        where lower(trim(coalesce(v.data->>'driver',''))) = dname;
+    exception when undefined_table then vehs := '[]'::jsonb;
+    end;
+    return jsonb_build_object('driver',d,'ops',ops,'vehicles',vehs);
+  end if;
+
+  -- FALLBACK: per-record tables not set up yet — read the shared blob (slower).
   select data into ws from workspaces where id = 'island-explorer';
   if ws is null then return jsonb_build_object('error','not_found'); end if;
   drivers := coalesce(ws->'drivers','[]'::jsonb);
@@ -182,7 +267,6 @@ begin
   select coalesce(jsonb_agg(o),'[]'::jsonb) into ops
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
     where lower(trim(coalesce(o->>'driver',''))) = dname;
-  -- this driver's own vehicles (name + reg no.), so the app can show/select them
   select coalesce(jsonb_agg(v),'[]'::jsonb) into vehs
     from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
     where lower(trim(coalesce(v->>'driver',''))) = dname;
@@ -202,7 +286,39 @@ set search_path = public
 as $$
 declare
   ws jsonb; drivers jsonb; roster jsonb; d jsonb; dname text; trips jsonb;
+  has_precord boolean := true;
 begin
+  begin
+    select data into d from ieo_drivers
+      where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+        and coalesce(data->>'code','') = p_code
+      limit 1;
+  exception when undefined_table then has_precord := false;
+  end;
+
+  if has_precord then
+    if d is null then
+      begin
+        select jsonb_build_object('name',data->>'name','phone',data->>'phone','code',data->>'code') into d
+          from ieo_operators
+          where regexp_replace(coalesce(data->>'phone',''),'\D','','g') = regexp_replace(p_phone,'\D','','g')
+            and coalesce(data->>'code','') = p_code
+            and lower(coalesce(data->>'role','')) = 'driver'
+          limit 1;
+      exception when undefined_table then null;
+      end;
+    end if;
+    if d is null then return jsonb_build_object('error','no_match'); end if;
+    dname := lower(trim(d->>'name'));
+    begin
+      select coalesce(jsonb_agg(t.data),'[]'::jsonb) into trips from ieo_trip_logs t
+        where lower(trim(coalesce(t.data->>'driver',''))) = dname;
+      return jsonb_build_object('trips',trips);
+    exception when undefined_table then null; -- fall through to the blob below
+    end;
+  end if;
+
+  -- FALLBACK: per-record tables not set up yet — read the shared blob (slower).
   select data into ws from workspaces where id = 'island-explorer';
   if ws is null then return jsonb_build_object('error','not_found'); end if;
   drivers := coalesce(ws->'drivers','[]'::jsonb);
@@ -253,22 +369,28 @@ grant execute on function public.get_reservation_public(text) to anon, authentic
 
 ## If Guide/Driver sign-in is slow (10+ seconds)
 
-Two independent causes, both outside the app's code:
+`guide_login` / `driver_login` / `driver_trips` now check credentials against the
+small per-record tables first (`ieo_drivers`, `ieo_external_guides`, `ieo_operators`,
+`ieo_ops`, `ieo_vehicles`, `ieo_trip_logs`) — each holds only one kind of record, so
+a login no longer has to load the entire shared `workspaces` row (which also
+carries every tour/booking/customer, plus any inline document photos) just to
+check one phone + code. This needs the per-record tables from
+`docs/DATABASE_SCHEMA.md` to exist; if they don't yet, it automatically falls back
+to the old, slower, whole-row check — same result, just not the speed-up.
+
+Two remaining causes if it's still slow after re-running this SQL:
 
 1. **Supabase free-tier "cold start."** A paused/inactive project takes a few
    seconds to wake up on its first request after a while — every sign-in after a
    quiet period pays this once. Nothing to fix; it's a one-time delay per idle
    period, and stays fast afterward until it goes idle again.
-2. **The shared data blob has gotten large.** If you haven't created the
-   `driver-details` / `guide-ids` Storage buckets from `docs/DATABASE_SCHEMA.md`'s
-   upload flow yet, every licence/ID photo a driver or guide uploads is embedded
-   as inline base64 text directly inside the one shared `workspaces` row instead
-   of a separate file — and `guide_login`/`driver_login` read that whole row to
-   check credentials. A few uploaded photos can add several MB to that single
-   row, and every sign-in pays for reading all of it. **Creating those two public
+2. **The shared data blob is still large**, which slows the fallback path (if the
+   per-record tables above aren't set up) and every full sync in the app. If you
+   haven't created the `driver-details` / `guide-ids` Storage buckets from
+   `docs/DATABASE_SCHEMA.md`'s upload flow yet, every licence/ID photo is embedded
+   as inline base64 text instead of a separate file. **Creating those two public
    Storage buckets** (Storage → New bucket → public) makes new uploads store as
-   small links instead, shrinking the row back down — this speeds up sign-in and
-   every other sync in the app, not just logins.
+   small links instead.
 
 ## After running it
 
