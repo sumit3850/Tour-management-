@@ -143,6 +143,8 @@ async function doLogin(){
     if(!res.data||res.data.error){btn.disabled=false;btn.textContent=oldTxt;showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
     myDriver=res.data.driver;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
+    /* legs must be chronological — myTripEntries treats legs[0].start as where the primary segment ends */
+    allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     myVehicles=res.data.vehicles||[];
     document.getElementById("gate").style.display="none";
     document.getElementById("app").style.display="block";
