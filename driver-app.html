@@ -234,14 +234,14 @@ function myLeg(o){
 }
 function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
 /* A tour can sleep in more than one place. This driver's card shows only the
-   stays overlapping THEIR leg's dates — the primary Stay covers the tour up
-   to the first additional stay's check-in; a stay without dates applies to
-   the whole tour. Falls back to showing all stays rather than none. */
-function staysTextForRange(o,s,e){
-  var rows=[];
-  if(o.stay&&o.stay!=="—")rows.push({start:o.startISO||o.start||"",end:(o.stays&&o.stays.length&&o.stays[0].start)?o.stays[0].start:(o.endISO||o.end||""),stay:o.stay});
-  (o.stays||[]).forEach(function(x){if(x.stay&&x.stay!=="—")rows.push(x);});
-  if(!rows.length)return "";
+   stays overlapping THEIR leg's dates (a stay with no dates applies to the
+   whole tour). Every stay lives in o.stays now; o.stay is only a legacy
+   fallback for old operations that never had a stays list. Returns an array
+   of formatted lines (one per stay) so the card can list them left-aligned. */
+function staysLinesForRange(o,s,e){
+  var rows=(o.stays||[]).filter(function(x){return x.stay&&x.stay!=="—";});
+  if(!rows.length&&o.stay&&o.stay!=="—")rows=[{stay:o.stay}];
+  if(!rows.length)return [];
   var hits=rows.filter(function(x){
     if(!x.start&&!x.end)return true;
     var xs=x.start||"0000",xe=x.end||"9999",ss=s||"0000",ee=e||"9999";
@@ -251,7 +251,7 @@ function staysTextForRange(o,s,e){
   return hits.map(function(x){
     var extra=[];if(x.rooms!=null&&x.rooms!=="")extra.push(x.rooms+" room"+(x.rooms==1?"":"s"));if(x.note)extra.push(x.note);
     return x.stay+((x.start||x.end)?" ("+dmy(x.start)+" – "+dmy(x.end)+")":"")+(extra.length?" — "+extra.join(" · "):"");
-  }).join(" · ");
+  });
 }
 var TRIP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
 var _tripFilter="Scheduled";
@@ -269,15 +269,17 @@ function renderTrips(){
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
       "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(e.status)+"' id='statuspill_"+eid+"'>"+e.status+"</span></div>"+
       "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+"</div>"+
-      "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",staysTextForRange(o,lg.start,lg.end)||o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
+      "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
+      (function(){var lines=staysLinesForRange(o,lg.start,lg.end);if(!lines.length)return "";return "<div style='margin-top:8px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
       (e.fb?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(e.fbAt)+"):</b> "+e.fb+"</div><button onclick=\"clearMyNote('"+eid+"','"+o.id+"','"+sk+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
       "<div class='acts' id='acts_"+eid+"'>"+
-        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','In progress')\">In Progress</button>"+
-        "<button onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','Completed')\">Completed</button>"+
-        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','"+sk+"','Declined')\">Declined</button>"+
-        "<button onclick=\"toggleReason('"+eid+"','"+o.id+"','"+sk+"','Transferred')\">Transferred</button>"+
+        "<button class='"+(e.status==='In progress'?'on':'')+"' onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','In progress')\">In Progress</button>"+
+        "<button class='"+(e.status==='Completed'?'on':'')+"' onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','Completed')\">Completed</button>"+
+        "<button class='"+(e.status==='Declined'?'on':'')+"' onclick=\"toggleReason('"+eid+"','"+o.id+"','"+sk+"','Declined')\">Declined</button>"+
+        "<button class='"+(e.status==='Transferred'?'on':'')+"' onclick=\"toggleReason('"+eid+"','"+o.id+"','"+sk+"','Transferred')\">Transferred</button>"+
       "</div>"+
+      (e.status!=='Scheduled'?"<button style='width:100%;margin-top:8px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--soft);font-weight:700;font-size:12.5px;cursor:pointer' onclick=\"setOpStatus('"+eid+"','"+o.id+"','"+sk+"','Scheduled')\">↺ Move back to Scheduled</button>":"")+
       "<div class='reasonbox' id='reason_"+eid+"'><label>Reason / note</label><textarea id='reasontext_"+eid+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+eid+"')\">Submit</button></div>"+
       "<button class='btn' style='background:var(--blue)' onclick=\"startLogFor('"+o.id+"')\">Log trip for this tour</button>"+
     "</div>";
