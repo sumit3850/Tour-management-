@@ -485,14 +485,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 111</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 112</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 111</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 112</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -822,7 +822,7 @@ function opLegsSheetText(o){
   var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverStatus:o.driverStatus}].concat(o.legs);
   return rows.map(function(l,i){return "Leg "+(i+1)+" ("+(l.start||"—")+" to "+(l.end||"—")+"): "+(l.veh||"—")+(l.reg?" "+l.reg:"")+" / "+(l.driver||"—")+(l.driverStatus?" ["+l.driverStatus+"]":"");}).join(" | ");
 }
-function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":o.stay||"","Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
+function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
 var DAILY_COLS=["Tour ID","Date","Vehicle","Reg. No.","Driver","Start km","End km","Total km","Location","Time"];
 function dailyActivitySheetRow(r){return {"Tour ID":tripTourCode(r),"Date":dOpt(r.date),"Vehicle":r.veh||"","Reg. No.":r.reg||"","Driver":r.driver||"","Start km":r.startKm||0,"End km":r.endKm||0,"Total km":r.totalKm||0,"Location":r.loc||"","Time":r.time||""};}
 var VEHICLE_COLS=["Vehicle","Reg. No.","Type","Seats","Driver","Login Code","Status"];
@@ -879,6 +879,62 @@ function collectOpLegs(prefix){
      without a start date sort last). */
   legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});
   return legs;
+}
+/* Additional stays — a tour can sleep in more than one place (e.g. Port
+   Blair for the South Andaman days, a different lodge on Great Nicobar).
+   Each row is a date range + a stay picked from Accommodation or typed as
+   custom text. The main Stay field stays the first/primary stay; these are
+   the later ones. Drivers see only the stays overlapping their own leg's
+   dates; the guide sees all of them. */
+function stayNameOptions(sel){
+  return "<option value=''>—</option>"+(accommodations||[]).map(function(a){return "<option value='"+String(a.name).replace(/'/g,"&#39;")+"' "+(a.name===sel?"selected":"")+">"+a.name+"</option>";}).join("");
+}
+function opStayRowHtml(s){
+  s=s||{};
+  var known=(accommodations||[]).some(function(a){return a.name===s.stay;});
+  return "<div class='op-stay-row' style='display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px'>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>Check-in</label><input class='input op-stay-start' type='date' value='"+(s.start||"")+"'></div>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>Check-out</label><input class='input op-stay-end' type='date' value='"+(s.end||"")+"'></div>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>Stay</label><select class='input op-stay-sel'>"+stayNameOptions(known?s.stay:"")+"</select></div>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>or custom stay</label><input class='input op-stay-custom' value='"+((!known&&s.stay)?String(s.stay).replace(/'/g,"&#39;"):"")+"' placeholder='Type a name'></div>"+
+    "<button type='button' onclick='this.closest(\".op-stay-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--coral);font-weight:700;cursor:pointer'>✕</button>"+
+  "</div>";
+}
+function addOpStayRow(prefix,s){var box=document.getElementById(prefix+"_stays");if(!box)return;box.insertAdjacentHTML("beforeend",opStayRowHtml(s));}
+function opStaysFieldHtml(prefix,stays){
+  return "<div class='field full' style='border-top:1px solid var(--line);padding-top:14px;margin-top:6px'>"+
+    "<label>Additional stays <span style='color:var(--ink-soft);font-weight:400'>(only for tours that sleep in more than one place — the Stay field above is the first stay)</span></label>"+
+    "<div id='"+prefix+"_stays'>"+(stays||[]).map(opStayRowHtml).join("")+"</div>"+
+    "<button type='button' class='btn btn-ghost btn-sm' onclick=\"addOpStayRow('"+prefix+"')\">+ Add stay</button>"+
+  "</div>";
+}
+function collectOpStays(prefix){
+  var box=document.getElementById(prefix+"_stays");if(!box)return [];
+  var stays=[];
+  box.querySelectorAll(".op-stay-row").forEach(function(r){
+    var start=(r.querySelector(".op-stay-start")||{}).value||"";
+    var end=(r.querySelector(".op-stay-end")||{}).value||"";
+    var sel=(r.querySelector(".op-stay-sel")||{}).value||"";
+    var custom=((r.querySelector(".op-stay-custom")||{}).value||"").trim();
+    var stay=custom||sel; /* typed custom text wins over the dropdown */
+    if(stay||start||end)stays.push({start:start,end:end,stay:stay});
+  });
+  stays.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});
+  return stays;
+}
+/* Read-only stays breakdown for the operation card ("" when single-stay). */
+function opStaysSummaryHtml(o){
+  if(!o.stays||!o.stays.length)return "";
+  var rows=[{start:o.start,end:o.stays[0].start,stay:o.stay}].concat(o.stays);
+  return "<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Stays:</b>"+
+    rows.map(function(s,i){return "<div style='margin-top:4px'>Stay "+(i+1)+" ("+(dShort(s.start)||"—")+" → "+(dShort(s.end)||"—")+"): "+(s.stay&&s.stay!=="—"?s.stay:"<span style='color:var(--coral);font-weight:600'>not set</span>")+"</div>";}).join("")+
+  "</div>";
+}
+/* One-cell text for the Google Sheet's Stay column when there are extra stays. */
+function opStaySheetText(o){
+  if(!o.stays||!o.stays.length)return o.stay||"";
+  var rows=[{start:o.start,end:o.stays[0].start,stay:o.stay}].concat(o.stays);
+  return rows.map(function(s,i){return "Stay "+(i+1)+" ("+(s.start||"—")+" to "+(s.end||"—")+"): "+(s.stay||"—");}).join(" | ");
 }
 /* Read-only breakdown of a multi-leg tour's vehicle/driver changes, shown on
    the operation card. Nothing to show for the common single-driver case. */
@@ -1767,6 +1823,13 @@ function buildAlerts(){
     if(!o.guide||o.guide==="—")missing.push("guide");
     if(!o.driver||o.driver==="—")missing.push("driver");
     if(!o.veh||o.veh==="—")missing.push("vehicle");
+    /* Stay counts as missing when the primary field is empty/"—" (which is
+       also what an empty custom-stay entry saves as) AND no additional-stays
+       row names one either. A multi-stay op is also flagged if ANY of its
+       stay rows was left without a name. */
+    var namedStays=(o.stays||[]).filter(function(s){return s.stay&&s.stay!=="—";}).length;
+    if((!o.stay||o.stay==="—")&&!namedStays)missing.push("stay");
+    else if((o.stays||[]).length>namedStays)missing.push("stay name on one of its stay rows");
     if(missing.length)A.push({level:"warn",text:o.tour+" ("+(o.dateDisplay||dShort(o.startISO)||"—")+") has no "+missing.join(" / "),kind:"op",arg:o.id});
   });
   bookings.forEach(function(b){
@@ -2425,6 +2488,7 @@ function opCard(o){
     "<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'><span class='mono'>"+o.start+"</span> → <span class='mono'>"+o.end+"</span></div>"+
     "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
     opLegsSummaryHtml(o)+
+    opStaysSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
     opDriverReportsHtml(o)+
     (o.guideFeedback?"<div style='margin-top:6px;padding:8px 10px;background:#fbe7e4;border-radius:8px;font-size:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Guide feedback ("+(o.guideFeedbackAt?dShort(o.guideFeedbackAt):"")+"):</b> "+o.guideFeedback+"</div><button onclick=\"clearOpFeedback('"+o.id+"','guide')\" title='Remove this note' style='flex-shrink:0;border:1px solid var(--coral);background:#fff;border-radius:7px;padding:3px 7px;font-size:11px;font-weight:700;color:var(--coral);cursor:pointer'>✕</button></div>":"")+
@@ -2500,6 +2564,7 @@ function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=ac
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='eo_drdate' value='"+(o.dropDate||"")+"'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='eo_drloc' value='"+(o.dropLoc||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair airport'></div>"+
   opLegsFieldHtml("eo",o.legs)+
+  opStaysFieldHtml("eo",o.stays)+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='eo_remarks' style='min-height:70px'>"+(o.remarks||"")+"</textarea></div>"+
   "<div class='field full'><label>Stay</label><select class='input' id='eo_stay' onchange='eoStayPick()'>"+opStayOptions(o.stay)+"</select></div>"+
   "<div class='field full' id='eo_staycustomwrap' style='display:"+((o.stay&&!stayKnown)?"block":"none")+"'><label>Custom stay / notes</label><input class='input' id='eo_staycustom' value='"+((o.stay&&!stayKnown)?o.stay.replace(/'/g,"&#39;"):"")+"'></div>"+
@@ -2517,6 +2582,7 @@ function saveEditOp(){const id=document.getElementById("modal").dataset.oid;cons
     if(prev){l.driverStatus=prev.driverStatus||"";l.driverFeedback=prev.driverFeedback||"";l.driverFeedbackAt=prev.driverFeedbackAt||"";}
   });
   if(_statusChanged)clearDriverStatuses(o);
+  o.stays=collectOpStays("eo");
   o.remarks=document.getElementById("eo_remarks").value;
   var staySel=document.getElementById("eo_stay").value;
   if(staySel==="custom"){o.stay=document.getElementById("eo_staycustom").value||"—";}
@@ -2548,8 +2614,9 @@ function openAddOp(){modalForm("New operation","Add operation","<div class='form
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='no_drdate'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='no_drloc' placeholder='e.g. Port Blair airport'></div>"+
   opLegsFieldHtml("no",[])+
+  opStaysFieldHtml("no",[])+
 "</div>","saveNewOp","Add operation");}
-function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),birding:"—",stay:"—",status:"Scheduled"});persistData();closeModal();renderDashOps();}
+function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),stays:collectOpStays("no"),birding:"—",stay:"—",status:"Scheduled"});persistData();closeModal();renderDashOps();}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
 function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;v.adminLocked=true;persistData();closeModal();renderLog("Vehicles & Drivers");}
 function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles & Drivers");}
