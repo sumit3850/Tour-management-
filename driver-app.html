@@ -183,7 +183,30 @@ function switchTab(t){
     else{document.getElementById("savedView").innerHTML="<div class='empty'>Loading your trips…</div>";if(!_savedLoading)loadSavedTrips();}
   }
 }
-function myOps(){return allOps.filter(function(o){return (o.driver||"").trim().toLowerCase()===myDriver.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+/* A tour can switch vehicle/driver partway (e.g. one pair in South Andaman,
+   a different pair once the group reaches Great Nicobar) — each such leg is
+   a separate vehicle+driver+date-range on the operation. A driver is "on"
+   an operation if they're the primary driver OR any leg's driver. */
+function myOps(){
+  var mine=myDriver.name.trim().toLowerCase();
+  return allOps.filter(function(o){
+    if((o.driver||"").trim().toLowerCase()===mine)return true;
+    return (o.legs||[]).some(function(l){return (l.driver||"").trim().toLowerCase()===mine;});
+  }).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
+}
+/* This driver's own slice of a (possibly multi-leg) operation — only their
+   own working dates and vehicle, never the whole tour's span or another
+   leg's assignment. */
+function myLeg(o){
+  var mine=myDriver.name.trim().toLowerCase();
+  if((o.driver||"").trim().toLowerCase()===mine){
+    var end=(o.legs&&o.legs.length)?o.legs[0].start:(o.endISO||o.end);
+    return {start:o.startISO||o.start,end:end,veh:o.veh,reg:o.reg};
+  }
+  var leg=(o.legs||[]).find(function(l){return (l.driver||"").trim().toLowerCase()===mine;});
+  if(leg)return {start:leg.start,end:leg.end,veh:leg.veh,reg:leg.reg};
+  return {start:o.startISO||o.start,end:o.endISO||o.end,veh:o.veh,reg:o.reg};
+}
 function opStatusPillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
 var TRIP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
 var _tripFilter="Scheduled";
@@ -197,11 +220,12 @@ function renderTrips(){
   if(!mine.length){el.innerHTML=subtabs+"<div class='empty'>No trips assigned to you yet.</div>";return;}
   var shown=mine.filter(function(o){return tripMatchesFilter(o,_tripFilter);});
   el.innerHTML=subtabs+(shown.length?shown.map(function(o){
+    var lg=myLeg(o);
     return "<div class='card' id='card_"+o.id+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
       "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(myStatus(o))+"' id='statuspill_"+o.id+"'>"+myStatus(o)+"</span></div>"+
-      "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
-      "<div class='rows'>"+row("Vehicle",o.veh)+row("Reg. No.",o.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
+      "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+"</div>"+
+      "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
       (o.driverFeedback?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(o.driverFeedbackAt)+"):</b> "+o.driverFeedback+"</div><button onclick=\"clearMyNote('"+o.id+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
@@ -272,7 +296,7 @@ function onTourPick(){
   if(customWrap)customWrap.style.display="none";
   var op=allOps.find(function(o){return o.id===sel.value;});
   var vf=document.getElementById("dl_veh"),rf=document.getElementById("dl_reg");
-  if(op){if(vf)vf.value=op.veh||vf.value;if(rf)rf.value=op.reg||regForVeh(op.veh)||rf.value;}
+  if(op){var lg=myLeg(op);if(vf)vf.value=lg.veh||vf.value;if(rf)rf.value=lg.reg||regForVeh(lg.veh)||rf.value;}
 }
 /* Auto-fill Reg. No. when the driver types/changes the vehicle name manually,
    matching it against their own vehicle list. */

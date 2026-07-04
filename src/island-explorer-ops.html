@@ -485,14 +485,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 107</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 108</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 107</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 108</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -833,6 +833,51 @@ function driverOptions(sel){var real=sel&&sel!=="—";var known=!real||(drivers|
 function opDriverPick(prefix){var sel=document.getElementById(prefix+"_driver");var on=(sel&&sel.value==="custom");["_drivercustomwrap","_driverphonewrap"].forEach(function(s){var w=document.getElementById(prefix+s);if(w)w.style.display=on?"block":"none";});}
 function opDriverValue(prefix){var sel=document.getElementById(prefix+"_driver");if(!sel)return "";if(sel.value==="custom"){var c=document.getElementById(prefix+"_drivercustom");return (c&&c.value.trim())||"";}return sel.value;}
 function opDriverPhoneValue(prefix,name){var sel=document.getElementById(prefix+"_driver");if(sel&&sel.value==="custom"){var p=document.getElementById(prefix+"_driverphone");return (p&&p.value.trim())||"";}var d=(drivers||[]).find(function(x){return x.name===name;});return (d&&d.phone)||"";}
+/* Additional vehicle/driver legs — for tours that change vehicle+driver
+   partway (e.g. one pair in South Andaman, a different pair once the group
+   reaches Great Nicobar). The primary Vehicle/Driver fields above always
+   cover the tour from its Start Date up to the first leg's Start Date (or
+   the whole tour if no legs are added) — the common, single-driver case
+   needs no legs at all. */
+function opLegRowHtml(l){
+  l=l||{};
+  return "<div class='op-leg-row' style='display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;margin-bottom:8px'>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>Start Date</label><input class='input op-leg-start' type='date' value='"+(l.start||"")+"'></div>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>End Date</label><input class='input op-leg-end' type='date' value='"+(l.end||"")+"'></div>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>Vehicle</label><select class='input op-leg-veh'>"+vehicleOptions(l.veh)+"</select></div>"+
+    "<div><label style='font-size:11px;color:var(--ink-soft)'>Driver</label><select class='input op-leg-driver'>"+driverOptions(l.driver)+"</select></div>"+
+    "<button type='button' onclick='this.closest(\".op-leg-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--coral);font-weight:700;cursor:pointer'>✕</button>"+
+  "</div>";
+}
+function addOpLegRow(prefix,leg){var box=document.getElementById(prefix+"_legs");if(!box)return;box.insertAdjacentHTML("beforeend",opLegRowHtml(leg));}
+function opLegsFieldHtml(prefix,legs){
+  return "<div class='field full' style='border-top:1px solid var(--line);padding-top:14px;margin-top:6px'>"+
+    "<label>Additional vehicle/driver legs <span style='color:var(--ink-soft);font-weight:400'>(only for tours that change vehicle/driver partway — e.g. South Andaman then Great Nicobar)</span></label>"+
+    "<div id='"+prefix+"_legs'>"+(legs||[]).map(opLegRowHtml).join("")+"</div>"+
+    "<button type='button' class='btn btn-ghost btn-sm' onclick=\"addOpLegRow('"+prefix+"')\">+ Add leg</button>"+
+  "</div>";
+}
+function collectOpLegs(prefix){
+  var box=document.getElementById(prefix+"_legs");if(!box)return [];
+  var legs=[];
+  box.querySelectorAll(".op-leg-row").forEach(function(r){
+    var start=(r.querySelector(".op-leg-start")||{}).value||"";
+    var end=(r.querySelector(".op-leg-end")||{}).value||"";
+    var veh=(r.querySelector(".op-leg-veh")||{}).value||"";
+    var driver=(r.querySelector(".op-leg-driver")||{}).value||"";
+    if(start||end||veh||driver)legs.push({start:start,end:end,veh:veh,driver:driver});
+  });
+  return legs;
+}
+/* Read-only breakdown of a multi-leg tour's vehicle/driver changes, shown on
+   the operation card. Nothing to show for the common single-driver case. */
+function opLegsSummaryHtml(o){
+  if(!o.legs||!o.legs.length)return "";
+  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone}].concat(o.legs);
+  return "<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Legs:</b>"+
+    rows.map(function(l,i){return "<div style='margin-top:4px'>Leg "+(i+1)+" ("+(dShort(l.start)||"—")+" → "+(dShort(l.end)||"—")+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+"</div>";}).join("")+
+  "</div>";
+}
 /* Roster tab (one row per tour — no Remarks column) and Referral tab (from the
    reservation pipeline: guide fee + referral commission). */
 var ROSTER_COLS=["Tour ID","Tour","Tour Start_Date","Tour End_Date","Guide","External Guides","Pax","Capacity","Status","Session Type","Lead Fee/day","Assistant Fee/day","Days","Lead Payout","Assistant Payout"];
@@ -1649,6 +1694,14 @@ function enrichOp(o){
   var v=(vehicles||[]).find(function(x){return x.name===o.veh;});o.reg=(v&&v.reg)||o.reg||"";
   var d=(drivers||[]).find(function(x){return x.name===o.driver;});o.driverPhone=(d&&d.phone)||o.driverPhone||"";
   var g=(externalGuides||[]).find(function(x){return x.name===o.guide;});o.guidePhone=(g&&g.phone)||o.guidePhone||"";o.gid=(g&&g.gid)||o.gid||"";
+  /* Multi-leg tours (e.g. one vehicle+driver in South Andaman, a different
+     pair for Great Nicobar) — denormalize each leg's reg/phone the same way
+     as the primary assignment, so the driver/guide apps never need to look
+     the fleet directory up themselves. */
+  (o.legs||[]).forEach(function(l){
+    var lv=(vehicles||[]).find(function(x){return x.name===l.veh;});l.reg=(lv&&lv.reg)||l.reg||"";
+    var ld=(drivers||[]).find(function(x){return x.name===l.driver;});l.driverPhone=(ld&&ld.phone)||l.driverPhone||"";
+  });
   var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
   if(t){o.tourId=o.tourId||tourCode(t);o.tourName=t.name||tourLabel(t);if(t.stay&&!o.stay)o.stay=t.stay;
     if(t.pocId){var pb=(bookings||[]).find(function(b){return b.id===t.pocId;});if(pb){o.pocName=pb.guest;o.pocPhone=pb.phone||"";}}}
@@ -2340,6 +2393,7 @@ function opCard(o){
     (poc?"<div style='font-size:12px;margin:4px 0'><b>POC:</b> "+poc+"</div>":"")+
     "<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'><span class='mono'>"+o.start+"</span> → <span class='mono'>"+o.end+"</span></div>"+
     "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
+    opLegsSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
     (o.driverStatus&&o.driverStatus!==(o.status||"Scheduled")?"<div style='margin-top:6px;padding:6px 10px;background:#fff4e0;border-radius:8px;font-size:11.5px;color:#7a5a00'><b>Driver reports:</b> "+o.driverStatus+" <span style='opacity:.7'>(does not change the operation's status)</span></div>":"")+
     (o.guideFeedback?"<div style='margin-top:6px;padding:8px 10px;background:#fbe7e4;border-radius:8px;font-size:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Guide feedback ("+(o.guideFeedbackAt?dShort(o.guideFeedbackAt):"")+"):</b> "+o.guideFeedback+"</div><button onclick=\"clearOpFeedback('"+o.id+"','guide')\" title='Remove this note' style='flex-shrink:0;border:1px solid var(--coral);background:#fff;border-radius:7px;padding:3px 7px;font-size:11px;font-weight:700;color:var(--coral);cursor:pointer'>✕</button></div>":"")+
@@ -2348,6 +2402,7 @@ function opCard(o){
     "<div class='op-actions' style='margin-top:6px'>"+
       (o.guide&&o.guide!=="—"?"<button class='btn-edit' onclick=\"shareGuideOpsLink('"+o.guide.replace(/'/g,"&#39;")+"')\"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg>Guide OPS</button>":"<button class='btn-edit' disabled style='opacity:.45'>Guide OPS</button>")+
       (o.driver&&o.driver!=="—"?"<button class='btn-edit' onclick=\"shareDriverAppLink('"+o.driver.replace(/'/g,"&#39;")+"')\"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg>Driver OPS</button>":"<button class='btn-edit' disabled style='opacity:.45'>Driver OPS</button>")+
+      (o.legs||[]).filter(function(l){return l.driver&&l.driver!==o.driver;}).map(function(l){return "<button class='btn-edit' onclick=\"shareDriverAppLink('"+l.driver.replace(/'/g,"&#39;")+"')\">"+l.driver+" OPS</button>";}).join("")+
     "</div>"+
   "</div>";
 }
@@ -2413,6 +2468,7 @@ function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=ac
   "<div class='field'><label>Pickup Location</label><input class='input' id='eo_puloc' value='"+((o.pickupLoc||o.pickup||"")).replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair 04:30'></div>"+
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='eo_drdate' value='"+(o.dropDate||"")+"'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='eo_drloc' value='"+(o.dropLoc||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair airport'></div>"+
+  opLegsFieldHtml("eo",o.legs)+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='eo_remarks' style='min-height:70px'>"+(o.remarks||"")+"</textarea></div>"+
   "<div class='field full'><label>Stay</label><select class='input' id='eo_stay' onchange='eoStayPick()'>"+opStayOptions(o.stay)+"</select></div>"+
   "<div class='field full' id='eo_staycustomwrap' style='display:"+((o.stay&&!stayKnown)?"block":"none")+"'><label>Custom stay / notes</label><input class='input' id='eo_staycustom' value='"+((o.stay&&!stayKnown)?o.stay.replace(/'/g,"&#39;"):"")+"'></div>"+
@@ -2420,6 +2476,7 @@ function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=ac
 function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=opDriverValue("eo");o.driverPhone=opDriverPhoneValue("eo",o.driver);o.guide=opGuideValue("eo")||o.guide;o.status=document.getElementById("eo_status").value;
   o.pickupDate=document.getElementById("eo_pudate").value||"";o.pickupLoc=document.getElementById("eo_puloc").value||"";o.pickup=o.pickupLoc||"—";
   o.dropDate=document.getElementById("eo_drdate").value||"";o.dropLoc=document.getElementById("eo_drloc").value||"";
+  o.legs=collectOpLegs("eo");
   o.remarks=document.getElementById("eo_remarks").value;
   var staySel=document.getElementById("eo_stay").value;
   if(staySel==="custom"){o.stay=document.getElementById("eo_staycustom").value||"—";}
@@ -2443,8 +2500,9 @@ function openAddOp(){modalForm("New operation","Add operation","<div class='form
   "<div class='field'><label>Pickup Location</label><input class='input' id='no_puloc' placeholder='e.g. Port Blair 04:30'></div>"+
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='no_drdate'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='no_drloc' placeholder='e.g. Port Blair airport'></div>"+
+  opLegsFieldHtml("no",[])+
 "</div>","saveNewOp","Add operation");}
-function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",birding:"—",stay:"—",status:"Scheduled"});persistData();closeModal();renderDashOps();}
+function saveNewOp(){var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";ops.push({id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),birding:"—",stay:"—",status:"Scheduled"});persistData();closeModal();renderDashOps();}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
 function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;v.adminLocked=true;persistData();closeModal();renderLog("Vehicles & Drivers");}
 function deleteVehicle(name){if(!confirm("Delete "+name+"?"))return;vehicles=vehicles.filter(v=>v.name!==name);renderLog("Vehicles & Drivers");}
