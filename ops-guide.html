@@ -146,6 +146,17 @@ var _opFilter="Scheduled";
 function setOpFilter(f){_opFilter=f;renderList();}
 function opMatchesFilter(o,f){return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
 function pillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
+/* Read-only breakdown of a multi-leg tour's vehicle/driver changes (e.g. one
+   pair in South Andaman, a different pair once the group reaches Great
+   Nicobar) — nothing to show for the common single-driver-for-the-whole-tour
+   case. */
+function opLegsSummaryHtml(o){
+  if(!o.legs||!o.legs.length)return "";
+  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone}].concat(o.legs);
+  return "<div class='rows' style='margin-top:6px;background:var(--paper);border-radius:8px;padding:8px 10px;grid-template-columns:1fr'><span class='k' style='margin-bottom:2px'>Legs</span>"+
+    rows.map(function(l,i){return "<span class='v' style='text-align:left;font-weight:500;margin-top:2px'>Leg "+(i+1)+" ("+(dmy(l.start))+" – "+(dmy(l.end))+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+"</span>";}).join("")+
+  "</div>";
+}
 
 function renderList(){
   var list=document.getElementById("list");list.style.display="block";
@@ -161,6 +172,7 @@ function renderList(){
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
       (o.pocName?"<div class='rows' style='margin-bottom:6px'>"+row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):"")+"</div>":"")+
       "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
+      opLegsSummaryHtml(o)+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+

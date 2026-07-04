@@ -164,12 +164,17 @@ begin
     -- (often large, base64) document/photo fields — go over the wire here.
     -- Also only the vehicles/drivers actually referenced by THIS guide's own
     -- ops, not the whole fleet directory — a guide never needs any others,
-    -- and a large fleet made this the slowest part of guide sign-in.
+    -- and a large fleet made this the slowest part of guide sign-in. A tour
+    -- can switch vehicle/driver partway (multi-leg tours, e.g. South Andaman
+    -- then Great Nicobar), so every leg's vehicle/driver counts as
+    -- "referenced" too, not just the operation's primary one.
     begin
       select coalesce(jsonb_agg(jsonb_build_object('name',v.data->>'name','reg',v.data->>'reg','driver',v.data->>'driver')),'[]'::jsonb) into vehs
         from ieo_vehicles v
         where lower(trim(coalesce(v.data->>'name',''))) in (
           select lower(trim(coalesce(x->>'veh',''))) from jsonb_array_elements(ops) x
+          union
+          select lower(trim(coalesce(l->>'veh',''))) from jsonb_array_elements(ops) x, jsonb_array_elements(coalesce(x->'legs','[]'::jsonb)) l
         );
     exception when undefined_table then vehs := '[]'::jsonb;
     end;
@@ -178,6 +183,8 @@ begin
         from ieo_drivers d
         where lower(trim(coalesce(d.data->>'name',''))) in (
           select lower(trim(coalesce(x->>'driver',''))) from jsonb_array_elements(ops) x
+          union
+          select lower(trim(coalesce(l->>'driver',''))) from jsonb_array_elements(ops) x, jsonb_array_elements(coalesce(x->'legs','[]'::jsonb)) l
         );
     exception when undefined_table then drvs := '[]'::jsonb;
     end;
@@ -210,11 +217,15 @@ begin
     from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
     where lower(trim(coalesce(v->>'name',''))) in (
       select lower(trim(coalesce(x->>'veh',''))) from jsonb_array_elements(ops) x
+      union
+      select lower(trim(coalesce(l->>'veh',''))) from jsonb_array_elements(ops) x, jsonb_array_elements(coalesce(x->'legs','[]'::jsonb)) l
     );
   select coalesce(jsonb_agg(jsonb_build_object('name',d->>'name','phone',d->>'phone')),'[]'::jsonb) into drvs
     from jsonb_array_elements(coalesce(ws->'drivers','[]'::jsonb)) d
     where lower(trim(coalesce(d->>'name',''))) in (
       select lower(trim(coalesce(x->>'driver',''))) from jsonb_array_elements(ops) x
+      union
+      select lower(trim(coalesce(l->>'driver',''))) from jsonb_array_elements(ops) x, jsonb_array_elements(coalesce(x->'legs','[]'::jsonb)) l
     );
   return jsonb_build_object('guide',g,'ops',ops,'vehicles',vehs,'drivers',drvs);
 end;
@@ -253,9 +264,14 @@ begin
     end if;
     if d is null then return jsonb_build_object('error','no_match'); end if;
     dname := lower(trim(d->>'name'));
+    -- A tour can switch vehicle/driver partway (multi-leg tours, e.g. one
+    -- pair in South Andaman, a different pair once the group reaches Great
+    -- Nicobar) — a driver sees the operation if they're the primary driver
+    -- OR any leg's driver, same as the console's own matching.
     begin
       select coalesce(jsonb_agg(o.data),'[]'::jsonb) into ops from ieo_ops o
-        where lower(trim(coalesce(o.data->>'driver',''))) = dname;
+        where lower(trim(coalesce(o.data->>'driver',''))) = dname
+          or exists (select 1 from jsonb_array_elements(coalesce(o.data->'legs','[]'::jsonb)) l where lower(trim(coalesce(l->>'driver',''))) = dname);
     exception when undefined_table then ops := '[]'::jsonb;
     end;
     begin
@@ -287,7 +303,8 @@ begin
   dname := lower(trim(d->>'name'));
   select coalesce(jsonb_agg(o),'[]'::jsonb) into ops
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
-    where lower(trim(coalesce(o->>'driver',''))) = dname;
+    where lower(trim(coalesce(o->>'driver',''))) = dname
+      or exists (select 1 from jsonb_array_elements(coalesce(o->'legs','[]'::jsonb)) l where lower(trim(coalesce(l->>'driver',''))) = dname);
   select coalesce(jsonb_agg(jsonb_build_object('name',v->>'name','reg',v->>'reg')),'[]'::jsonb) into vehs
     from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
     where lower(trim(coalesce(v->>'driver',''))) = dname;
@@ -431,6 +448,21 @@ Two remaining causes if it's still slow after re-running this SQL:
    as inline base64 text instead of a separate file. **Creating those two public
    Storage buckets** (Storage → New bucket → public) makes new uploads store as
    small links instead.
+
+## Multi-leg tours (different vehicle/driver per date range)
+
+An operation can now have additional "legs" — e.g. one vehicle/driver for the
+South Andaman days, a different vehicle/driver once the group reaches Great
+Nicobar — added from the console's Edit Operation dialog ("+ Add leg"). This
+is optional: a tour with no legs works exactly as before (one driver, one
+vehicle, for the whole tour).
+
+`guide_login` and `driver_login` both needed updating so a driver who's only
+assigned via a leg (not the operation's primary Driver field) still sees that
+operation, and so a guide's vehicle/driver list includes every leg's vehicle
+and driver, not just the primary one. **Re-run this whole SQL file once more**
+if you use multi-leg tours — without it, a driver added only via a leg won't
+see that operation on their sign-in.
 
 ## After running it
 
