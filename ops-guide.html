@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Island Explorer — My Operations</title>
+<link rel="manifest" href="guide-manifest.json">
+<meta name="theme-color" content="#143a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Guide Ops">
+<link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -45,6 +51,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
 .tab.on{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
 .logout-btn{position:absolute;top:16px;right:16px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--soft);cursor:pointer}
 .head{position:relative}
+.install-btn{width:100%;margin-top:10px;padding:11px;border:1px dashed var(--blue);border-radius:11px;background:#e7f1fb;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer;display:none}
 </style>
 </head>
 <body>
@@ -60,6 +67,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
     <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered WhatsApp / phone number">
     <label>Login code</label><input id="gateCode" inputmode="numeric" placeholder="4-digit code from Island Explorer">
     <button class="btn" onclick="doLogin()">View my operations</button>
+    <button class="install-btn" id="installBtn" onclick="installGuideApp()">📲 Install Guide App on this device</button>
   </div>
   <div id="list" style="display:none"></div>
 </div>
@@ -71,6 +79,23 @@ const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const presetGuide=(new URLSearchParams(location.search).get("guide")||"").trim();
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
 var myGuide=null,myPhone="",myCode="",allOps=[],allVehicles=[],allDrivers=[];
+/* "Add to Home Screen" support — only shown on the sign-in screen, so this
+   never gets confused with the main console app's own install prompt. */
+var _deferredInstall=null;
+window.addEventListener("beforeinstallprompt",function(e){
+  e.preventDefault();_deferredInstall=e;
+  var b=document.getElementById("installBtn");if(b)b.style.display="block";
+});
+window.addEventListener("appinstalled",function(){_deferredInstall=null;var b=document.getElementById("installBtn");if(b)b.style.display="none";});
+function installGuideApp(){
+  if(_deferredInstall){_deferredInstall.prompt();_deferredInstall.userChoice.then(function(){_deferredInstall=null;});return;}
+  alert("To add this page to your home screen:\n\niPhone (Safari): tap the Share icon, then \"Add to Home Screen\".\n\nAndroid (Chrome): tap the ⋮ menu, then \"Add to Home screen\" or \"Install app\".");
+}
+if(!window.matchMedia("(display-mode: standalone)").matches&&!window.navigator.standalone){
+  var _b=document.getElementById("installBtn");
+  if(_b&&/iPhone|iPad|iPod/.test(navigator.userAgent))_b.style.display="block"; /* iOS never fires beforeinstallprompt */
+}
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}

@@ -1,0 +1,15 @@
+{
+  "name": "Island Explorer — Guide Ops",
+  "short_name": "Guide Ops",
+  "description": "Sign in to view your assigned operations and report status for Island Explorer Birding Tours.",
+  "start_url": "./ops-guide.html",
+  "scope": "./ops-guide.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#eef1f6",
+  "theme_color": "#143a2e",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
