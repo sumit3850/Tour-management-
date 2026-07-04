@@ -494,14 +494,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 113</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 114</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 113</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 114</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -914,10 +914,26 @@ function opStayRowHtml(s){
 function addOpStayRow(prefix,s){var box=document.getElementById(prefix+"_stays");if(!box)return;box.insertAdjacentHTML("beforeend",opStayRowHtml(s));}
 function opStaysFieldHtml(prefix,stays){
   return "<div class='field full' style='border-top:1px solid var(--line);padding-top:14px;margin-top:6px'>"+
-    "<label>Additional stays <span style='color:var(--ink-soft);font-weight:400'>(only for tours that sleep in more than one place — the Stay field above is the first stay)</span></label>"+
+    "<label>Stays <span style='color:var(--ink-soft);font-weight:400'>(each place the group sleeps, with its dates — add one row per stay)</span></label>"+
     "<div id='"+prefix+"_stays'>"+(stays||[]).map(opStayRowHtml).join("")+"</div>"+
     "<button type='button' class='btn btn-ghost btn-sm' onclick=\"addOpStayRow('"+prefix+"')\">+ Add stay</button>"+
   "</div>";
+}
+/* Legacy ops stored a single primary stay string in o.stay and extra stays in
+   o.stays. Now every stay lives in o.stays; when opening the dialog, fold a
+   legacy primary stay into the list (as the first row) so nothing is lost. */
+function opStaysForForm(o){
+  var list=(o.stays||[]).slice();
+  if(o.stay&&o.stay!=="—"&&!list.some(function(s){return s.stay===o.stay;})){
+    list.unshift({start:o.startISO||o.start||"",end:list.length?list[0].start:(o.endISO||o.end||""),stay:o.stay});
+  }
+  return list;
+}
+/* Keep o.stay (used by legacy/simple displays and the missing-stay alert) in
+   sync with the first named stay in o.stays. */
+function syncOpStay(o){
+  var named=(o.stays||[]).filter(function(s){return s.stay&&s.stay!=="—";});
+  o.stay=named.length?named[0].stay:"—";
 }
 function collectOpStays(prefix){
   var box=document.getElementById(prefix+"_stays");if(!box)return [];
@@ -939,16 +955,14 @@ function collectOpStays(prefix){
 function stayExtra(s){var x=[];if(s.rooms!=null&&s.rooms!=="")x.push(s.rooms+" room"+(s.rooms==1?"":"s"));if(s.note)x.push(s.note);return x.length?" — "+x.join(" · "):"";}
 function opStaysSummaryHtml(o){
   if(!o.stays||!o.stays.length)return "";
-  var rows=[{start:o.start,end:o.stays[0].start,stay:o.stay}].concat(o.stays);
   return "<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Stays:</b>"+
-    rows.map(function(s,i){return "<div style='margin-top:4px'>Stay "+(i+1)+" ("+(dShort(s.start)||"—")+" → "+(dShort(s.end)||"—")+"): "+(s.stay&&s.stay!=="—"?s.stay:"<span style='color:var(--coral);font-weight:600'>not set</span>")+stayExtra(s)+"</div>";}).join("")+
+    o.stays.map(function(s,i){return "<div style='margin-top:4px'>Stay "+(i+1)+" ("+(dShort(s.start)||"—")+" → "+(dShort(s.end)||"—")+"): "+(s.stay&&s.stay!=="—"?s.stay:"<span style='color:var(--coral);font-weight:600'>not set</span>")+stayExtra(s)+"</div>";}).join("")+
   "</div>";
 }
-/* One-cell text for the Google Sheet's Stay column when there are extra stays. */
+/* One-cell text for the Google Sheet's Stay column. */
 function opStaySheetText(o){
   if(!o.stays||!o.stays.length)return o.stay||"";
-  var rows=[{start:o.start,end:o.stays[0].start,stay:o.stay}].concat(o.stays);
-  return rows.map(function(s,i){return "Stay "+(i+1)+" ("+(s.start||"—")+" to "+(s.end||"—")+"): "+(s.stay||"—")+stayExtra(s);}).join(" | ");
+  return o.stays.map(function(s,i){return "Stay "+(i+1)+" ("+(s.start||"—")+" to "+(s.end||"—")+"): "+(s.stay||"—")+stayExtra(s);}).join(" | ");
 }
 /* Read-only breakdown of a multi-leg tour's vehicle/driver changes, shown on
    the operation card. Nothing to show for the common single-driver case. */
@@ -2500,7 +2514,7 @@ function opCard(o){
     "<div class='op-date'>"+(o.tourId?"<span class='mono'>"+o.tourId+"</span> · ":"")+o.dateDisplay+" · "+o.pax+" pax</div>"+
     (poc?"<div style='font-size:12px;margin:4px 0'><b>POC:</b> "+poc+"</div>":"")+
     "<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'><span class='mono'>"+o.start+"</span> → <span class='mono'>"+o.end+"</span></div>"+
-    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",o.stay)+"</div>"+
+    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
     opLegsSummaryHtml(o)+
     opStaysSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
@@ -2583,9 +2597,7 @@ function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=ac
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='eo_drdate' value='"+(o.dropDate||"")+"'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='eo_drloc' value='"+(o.dropLoc||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair airport'></div>"+
   opLegsFieldHtml("eo",o.legs)+
-  "<div class='field full'><label>Stay</label><select class='input' id='eo_stay' onchange='eoStayPick()'>"+opStayOptions(o.stay)+"</select></div>"+
-  "<div class='field full' id='eo_staycustomwrap' style='display:"+((o.stay&&!stayKnown)?"block":"none")+"'><label>Custom stay / notes</label><input class='input' id='eo_staycustom' value='"+((o.stay&&!stayKnown)?o.stay.replace(/'/g,"&#39;"):"")+"'></div>"+
-  opStaysFieldHtml("eo",o.stays)+
+  opStaysFieldHtml("eo",opStaysForForm(o))+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='eo_remarks' style='min-height:70px'>"+(o.remarks||"")+"</textarea></div>"+
 "</div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
 function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=opDriverValue("eo");o.driverPhone=opDriverPhoneValue("eo",o.driver);o.guide=opGuideValue("eo")||o.guide;var _newStatus=document.getElementById("eo_status").value;var _statusChanged=(_newStatus!==o.status);o.status=_newStatus;
@@ -2602,10 +2614,8 @@ function saveEditOp(){const id=document.getElementById("modal").dataset.oid;cons
   });
   if(_statusChanged)clearDriverStatuses(o);
   o.stays=collectOpStays("eo");
+  syncOpStay(o);
   o.remarks=document.getElementById("eo_remarks").value;
-  var staySel=document.getElementById("eo_stay").value;
-  if(staySel==="custom"){o.stay=document.getElementById("eo_staycustom").value||"—";}
-  else{var acc=accommodations.find(function(a){return a.id===staySel;});o.stay=acc?acc.name:"—";ensureAccBookingForOp(o,staySel);}
   persistData();closeModal();renderDashOps();renderAccCalendar();renderAccommodation();}
 function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id);persistData();renderDashOps();}
 /* Quick status change straight from the operation card (Scheduled / In progress /
@@ -2633,19 +2643,14 @@ function openAddOp(){modalForm("New operation","Add operation","<div class='form
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='no_drdate'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='no_drloc' placeholder='e.g. Port Blair airport'></div>"+
   opLegsFieldHtml("no",[])+
-  "<div class='field full'><label>Stay</label><select class='input' id='no_stay' onchange='noStayPick()'>"+opStayOptionsAdd("")+"</select></div>"+
-  "<div class='field full' id='no_staycustomwrap' style='display:none'><label>Custom stay / notes</label><input class='input' id='no_staycustom' placeholder='Type a stay name'></div>"+
   opStaysFieldHtml("no",[])+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='no_remarks' style='min-height:70px' placeholder='Flight details, meal notes, etc.'></textarea></div>"+
 "</div>","saveNewOp","Add operation");}
 function saveNewOp(){
   var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";
-  var staySel=document.getElementById("no_stay").value;var stayName="—";
-  if(staySel==="custom")stayName=(document.getElementById("no_staycustom").value||"").trim()||"—";
-  else if(staySel){var acc=accommodations.find(function(a){return a.id===staySel;});stayName=acc?acc.name:"—";}
-  var op={id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),stays:collectOpStays("no"),remarks:document.getElementById("no_remarks").value||"",birding:"—",stay:stayName,status:"Scheduled"};
+  var op={id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),stays:collectOpStays("no"),remarks:document.getElementById("no_remarks").value||"",birding:"—",stay:"—",status:"Scheduled"};
+  syncOpStay(op);
   ops.push(op);
-  if(staySel&&staySel!=="custom")ensureAccBookingForOp(op,staySel);
   persistData();closeModal();renderDashOps();renderAccCalendar&&renderAccCalendar();renderAccommodation&&renderAccommodation();}
 function editVehicle(name){const v=vehicles.find(x=>x.name===name);if(!v)return;modalForm("Edit vehicle","Update vehicle","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='ev_name' value='"+v.name+"'></div><div class='field'><label>Reg. No.</label><input class='input' id='ev_reg' value='"+v.reg+"'></div><div class='field'><label>Type</label><input class='input' id='ev_type' value='"+v.type+"'></div><div class='field'><label>Capacity</label><input class='input mono' type='number' id='ev_cap' value='"+v.cap+"'></div><div class='field'><label>Driver</label><input class='input' id='ev_driver' value='"+v.driver+"'></div><div class='field'><label>Status</label><select class='input' id='ev_avail'><option "+(v.avail==="Available"?"selected":"")+">Available</option><option "+(v.avail==="On Tour"?"selected":"")+">On Tour</option><option "+(v.avail==="Maintenance"?"selected":"")+">Maintenance</option></select></div></div>","saveEditVehicle","Update");document.getElementById("modal").dataset.vname=name;}
 function saveEditVehicle(){const name=document.getElementById("modal").dataset.vname;const v=vehicles.find(x=>x.name===name);if(!v)return;v.name=document.getElementById("ev_name").value;v.reg=document.getElementById("ev_reg").value;v.type=document.getElementById("ev_type").value;v.cap=parseInt(document.getElementById("ev_cap").value)||0;v.driver=document.getElementById("ev_driver").value;v.avail=document.getElementById("ev_avail").value;v.adminLocked=true;persistData();closeModal();renderLog("Vehicles & Drivers");}

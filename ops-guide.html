@@ -149,15 +149,16 @@ function setOpFilter(f){_opFilter=f;renderList();}
 function opMatchesFilter(o,f){return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
 function pillClass(s){s=(s||"").toLowerCase();if(s==="completed")return "ok";if(s==="declined"||s==="cancelled")return "warn";if(s==="transferred")return "mid";return "";}
 /* A tour can sleep in more than one place — the guide travels the whole
-   tour, so show every stay with its dates. The primary Stay covers the tour
-   up to the first additional stay's check-in. */
-function allStaysText(o){
-  if(!o.stays||!o.stays.length)return (o.stay&&o.stay!=="—")?o.stay:"";
-  var rows=[{start:o.startISO||o.start,end:o.stays[0].start,stay:o.stay}].concat(o.stays);
-  return rows.filter(function(x){return x.stay&&x.stay!=="—";}).map(function(x){
+   tour, so show every stay with its dates. Every stay lives in o.stays now;
+   o.stay is only a legacy fallback for old operations. Returns one line per
+   stay so the card can list them left-aligned below the label. */
+function allStaysLines(o){
+  var rows=(o.stays||[]).filter(function(x){return x.stay&&x.stay!=="—";});
+  if(!rows.length&&o.stay&&o.stay!=="—")rows=[{stay:o.stay}];
+  return rows.map(function(x){
     var extra=[];if(x.rooms!=null&&x.rooms!=="")extra.push(x.rooms+" room"+(x.rooms==1?"":"s"));if(x.note)extra.push(x.note);
     return x.stay+((x.start||x.end)?" ("+dmy(x.start)+" – "+dmy(x.end)+")":"")+(extra.length?" — "+extra.join(" · "):"");
-  }).join(" · ");
+  });
 }
 /* Read-only breakdown of a multi-leg tour's vehicle/driver changes (e.g. one
    pair in South Andaman, a different pair once the group reaches Great
@@ -184,16 +185,18 @@ function renderList(){
       (o.tourId?"<div class='dates mono'>"+o.tourId+"</div>":"")+
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
       (o.pocName?"<div class='rows' style='margin-bottom:6px'>"+row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):"")+"</div>":"")+
-      "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Stay",allStaysText(o)||o.stay)+"</div>"+
+      "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
+      (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       opLegsSummaryHtml(o)+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
-        "<button onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
-        "<button onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
-        "<button onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
-        "<button onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
+        "<button class='"+(o.status==='In progress'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
+        "<button class='"+(o.status==='Completed'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
+        "<button class='"+(o.status==='Declined'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
+        "<button class='"+(o.status==='Transferred'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
       "</div>"+
+      ((o.status&&o.status!=='Scheduled')?"<button style='width:100%;margin-top:8px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--soft);font-weight:700;font-size:12.5px;cursor:pointer' onclick=\"setOpStatus('"+o.id+"','Scheduled')\">↺ Move back to Scheduled</button>":"")+
       "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
     "</div>";
   }).join(""):"<div class='empty'>No operations in this view.</div>");
