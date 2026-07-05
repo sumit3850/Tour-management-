@@ -114,6 +114,11 @@ var LS_SESSION="ie_gd_session_v1",LS_QUEUE="ie_gd_queue_v1";
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+/* navigator.onLine lies — many Android browsers report it false while the
+   phone clearly has signal. We NEVER block on it: always attempt the network
+   and let the actual result decide. _netOk (optimistically true until a
+   request truly fails) drives the "offline" banner, not navigator.onLine. */
+var _netOk=true;
 function isOnline(){return navigator.onLine!==false;}
 var syncQueue=lsGet(LS_QUEUE)||[];
 function saveSession(){if(myGuide)lsSet(LS_SESSION,{phone:myPhone,code:myCode,guide:myGuide,ops:allOps,vehicles:allVehicles,drivers:allDrivers,savedAt:Date.now()});}
@@ -121,18 +126,20 @@ function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
 function enqueue(rec){syncQueue.push(rec);saveQueue();}
 function updateNet(){
   var b=document.getElementById("netbar");if(!b)return;var pend=syncQueue.length;
-  if(!isOnline()){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
+  if(!_netOk){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
   if(pend){b.style.display="block";b.style.background="#e7f1fb";b.style.color="var(--blue)";b.innerHTML=pend+" change"+(pend>1?"s":"")+" waiting to sync · <span style='cursor:pointer;text-decoration:underline' onclick='syncNow()'>Sync now</span>";return;}
   b.style.display="none";
 }
 async function flushQueue(){
   ensureSb();
-  if(!sb||!isOnline()||!syncQueue.length)return;
-  var still=[];
-  for(var i=0;i<syncQueue.length;i++){var rec=syncQueue[i];try{var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});if(up&&up.error)still.push(rec);}catch(e){still.push(rec);}}
-  syncQueue=still;saveQueue();
+  if(!sb||!syncQueue.length)return;
+  var still=[],anyOk=false,anyFail=false;
+  for(var i=0;i<syncQueue.length;i++){var rec=syncQueue[i];try{var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});if(up&&up.error){still.push(rec);anyFail=true;}else anyOk=true;}catch(e){still.push(rec);anyFail=true;}}
+  syncQueue=still;
+  if(anyFail)_netOk=false;else if(anyOk)_netOk=true;
+  saveQueue();
 }
-async function syncNow(){await flushQueue();if(isOnline())backgroundRefresh();}
+async function syncNow(){await flushQueue();backgroundRefresh();}
 function showApp(){
   document.getElementById("gate").style.display="none";
   document.getElementById("logoutBtn").style.display="block";
@@ -141,17 +148,18 @@ function showApp(){
 }
 async function backgroundRefresh(){
   ensureSb();
-  if(!sb||!isOnline()||!myPhone||!myCode)return;
+  if(!sb||!myPhone||!myCode)return;
   await flushQueue();
   try{
     var res=await sb.rpc("guide_login",{p_phone:myPhone,p_code:myCode});
     if(res&&!res.error&&res.data&&!res.data.error){
+      _netOk=true;
       myGuide=res.data.guide;allOps=res.data.ops||[];
       allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
       allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
       saveSession();renderList();updateNet();
-    }
-  }catch(e){}
+    }else if(res&&res.error){_netOk=false;updateNet();}
+  }catch(e){_netOk=false;updateNet();}
 }
 function offlineRestore(phone,code){
   var s=lsGet(LS_SESSION);
@@ -161,13 +169,13 @@ function offlineRestore(phone,code){
   }
   return false;
 }
-window.addEventListener("online",function(){updateNet();syncNow();});
-window.addEventListener("offline",updateNet);
-document.addEventListener("visibilitychange",function(){saveSession();if(document.visibilityState==="visible"&&isOnline())syncNow();});
+window.addEventListener("online",function(){_netOk=true;updateNet();syncNow();});
+window.addEventListener("offline",function(){_netOk=false;updateNet();});
+document.addEventListener("visibilitychange",function(){saveSession();if(document.visibilityState==="visible")syncNow();});
 window.addEventListener("pagehide",saveSession);
 window.addEventListener("load",function(){
   var s=lsGet(LS_SESSION);
-  if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();if(isOnline())backgroundRefresh();}
+  if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();backgroundRefresh();}
   else updateNet();
 });
 
@@ -179,17 +187,22 @@ async function doLogin(){
   var btn=document.querySelector("#gate .btn");if(btn){btn.disabled=true;btn.textContent="Signing in…";}
   function done(){if(btn){btn.disabled=false;btn.textContent="View my operations";}}
   function fail(m){done();showErr(m);}
-  if(!isOnline()||!sb){if(offlineRestore(phone,code)){done();return;}return fail("You're offline and haven't signed in on this phone yet. Connect to the internet for your first sign-in.");}
+  /* Always ATTEMPT the real sign-in — never pre-block on navigator.onLine
+     (unreliable on Android). Fall back to the cached session only if the
+     network request itself fails. */
+  ensureSb();
+  if(!sb){if(offlineRestore(phone,code)){done();return;}return fail("Can't reach the sign-in service. Check your connection and try again.");}
   try{
     var res=await sb.rpc("guide_login",{p_phone:phone,p_code:code});
-    if(res.error){if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
-    if(!res.data||res.data.error){return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
+    if(res.error){_netOk=false;if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
+    if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
+    _netOk=true;
     myGuide=res.data.guide;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
-  }catch(e){if(offlineRestore(phone,code)){done();return;}fail("Couldn't sign you in. Please try again.");}
+  }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail("Couldn't reach the server. If you're offline, connect to the internet for your first sign-in, then try again.");}
 }
 function doLogout(){
   myGuide=null;myPhone="";myCode="";allOps=[];allVehicles=[];allDrivers=[];
