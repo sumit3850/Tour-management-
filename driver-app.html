@@ -93,7 +93,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v123</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v124</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -149,10 +149,23 @@ function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open("ie
 function idbSet(k,v){return idbOpen().then(function(db){if(!db)return;try{db.transaction("kv","readwrite").objectStore("kv").put(v,k);}catch(e){}});}
 function idbGet(k){return idbOpen().then(function(db){if(!db)return null;return new Promise(function(res){try{var g=db.transaction("kv","readonly").objectStore("kv").get(k);g.onsuccess=function(){res(g.result||null);};g.onerror=function(){res(null);};}catch(e){res(null);}});});}
 function idbDel(k){return idbOpen().then(function(db){if(!db)return;try{db.transaction("kv","readwrite").objectStore("kv").delete(k);}catch(e){}});}
-/* Write to both stores; read from localStorage first (sync) then IDB (async). */
-function durSet(k,v){lsSet(k,v);idbSet(k,v);}
-function durDel(k){lsDel(k);idbDel(k);}
-async function durGet(k){var v=lsGet(k);if(v)return v;try{v=await idbGet(k);if(v){lsSet(k,v);/* re-seed localStorage */return v;}}catch(e){}return null;}
+/* Cache API store — the MOST reliable option: it's the same storage the
+   service worker uses to make the app open offline, so if the app loads with
+   no signal on a phone, this store demonstrably persists there even when
+   localStorage/IndexedDB get cleared. */
+function cacheSet(k,v){try{return caches.open("ie_dur").then(function(c){return c.put("/__dur/"+encodeURIComponent(k),new Response(JSON.stringify(v),{headers:{"content-type":"application/json"}}));}).catch(function(){});}catch(e){return Promise.resolve();}}
+function cacheGet(k){try{return caches.open("ie_dur").then(function(c){return c.match("/__dur/"+encodeURIComponent(k));}).then(function(r){return r?r.json():null;}).catch(function(){return null;});}catch(e){return Promise.resolve(null);}}
+function cacheDel(k){try{return caches.open("ie_dur").then(function(c){return c.delete("/__dur/"+encodeURIComponent(k));}).catch(function(){});}catch(e){return Promise.resolve();}}
+/* Write to all three stores; read localStorage (sync) → IndexedDB → Cache API,
+   re-seeding the faster stores from whichever still has the data. */
+function durSet(k,v){lsSet(k,v);idbSet(k,v);cacheSet(k,v);}
+function durDel(k){lsDel(k);idbDel(k);cacheDel(k);}
+async function durGet(k){
+  var v=lsGet(k);if(v)return v;
+  try{v=await idbGet(k);if(v){lsSet(k,v);return v;}}catch(e){}
+  try{v=await cacheGet(k);if(v){lsSet(k,v);idbSet(k,v);return v;}}catch(e){}
+  return null;
+}
 /* navigator.onLine lies — many Android browsers report it false while the
    phone clearly has signal. So we NEVER block on it: we always attempt the
    network and let the actual result decide. _netOk tracks the last real
@@ -313,7 +326,7 @@ async function doLogin(){
     /* Confirm — after the durable write settles — whether the session actually
        reached the DURABLE store (IndexedDB), not just localStorage, so the
        driver knows if offline will really work. */
-    setTimeout(function(){idbGet(LS_SESSION).then(function(durable){
+    setTimeout(function(){Promise.all([idbGet(LS_SESSION),cacheGet(LS_SESSION)]).then(function(r){var durable=r[0]||r[1];
       if(durable)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
       else if(lsGet(LS_SESSION))showOk("✓ Signed in. Saved for this session, but this browser may not keep it after you close the app — for reliable offline use, install the app to your home screen and sign in from there.");
       else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
