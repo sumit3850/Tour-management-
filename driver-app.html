@@ -79,6 +79,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <button class="btn" id="loginBtn" onclick="doLogin()">Sign in</button>
     <div class="hint" style="text-align:center;margin-top:8px">First sign-in after a while can take a few seconds while the server wakes up.</div>
     <button class="install-btn" id="installBtn" onclick="installDriverApp()">📲 Install Driver App on this device</button>
+    <div id="diag" style="font-size:11px;color:var(--soft);text-align:center;margin-top:10px"></div>
   </div>
   <div id="app" style="display:none">
     <div class="tabs">
@@ -91,7 +92,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v120</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v121</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -244,13 +245,24 @@ if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist()
    Private/incognito windows and some in-app browsers silently drop it, which
    is the #1 reason an offline session "disappears" after signing in. */
 function storageWorks(){try{localStorage.setItem("ie_ck","1");var ok=localStorage.getItem("ie_ck")==="1";localStorage.removeItem("ie_ck");return ok;}catch(e){return false;}}
+/* Diagnostic line on the sign-in screen: shows whether a saved offline sign-in
+   actually exists on THIS device right now — so a driver seeing the gate can
+   tell at a glance whether their session survived (storage is fine) or was
+   discarded by the browser (private mode / in-app browser / a different app). */
+function updateDiag(){
+  var d=document.getElementById("diag");if(!d)return;
+  durGet(LS_SESSION).then(function(s){
+    if(s&&s.driver){d.innerHTML="✓ Offline sign-in saved on this device ("+(s.driver.name||"")+"). You can sign in offline.";d.style.color="var(--ok)";}
+    else{d.innerHTML="No offline sign-in saved on this device yet."+(storageWorks()?"":" ⚠ This browser is blocking storage.");d.style.color="var(--soft)";}
+  });
+}
 /* On open, restore the last session immediately so the app works offline, then
    always try to refresh in the background (the attempt sorts out connectivity). */
 window.addEventListener("load",async function(){
   var lv=document.getElementById("logView");if(lv)lv.addEventListener("input",saveDraft);
   var s=await durGet(LS_SESSION); /* localStorage first, then the durable IndexedDB copy */
   if(s&&s.driver){myDriver=s.driver;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;showApp();backgroundRefresh();}
-  else updateNet();
+  else{updateNet();updateDiag();}
 });
 
 async function doLogin(){
@@ -281,11 +293,13 @@ async function doLogin(){
     done();saveSession();showApp();flushQueue();
     loadSavedTrips();
     /* Confirm — after the durable write settles — whether the session actually
-       persisted on this device, so the driver KNOWS if offline will work. */
-    setTimeout(function(){durGet(LS_SESSION).then(function(saved){
-      if(saved)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
+       reached the DURABLE store (IndexedDB), not just localStorage, so the
+       driver knows if offline will really work. */
+    setTimeout(function(){idbGet(LS_SESSION).then(function(durable){
+      if(durable)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
+      else if(lsGet(LS_SESSION))showOk("✓ Signed in. Saved for this session, but this browser may not keep it after you close the app — for reliable offline use, install the app to your home screen and sign in from there.");
       else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
-    });},700);
+    });},800);
   }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error — decides
@@ -300,7 +314,7 @@ function doLogout(){
   document.getElementById("gate").style.display="block";
   document.getElementById("logoutBtn").style.display="none";
   document.getElementById("who").textContent="Sign in to log your trips";
-  showErr("");showOk("");updateNet();
+  showErr("");showOk("");updateNet();updateDiag();
   switchTab("trips");
 }
 /* Registration number for a vehicle name — used wherever a vehicle is shown, so a

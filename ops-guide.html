@@ -70,10 +70,11 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
     <label>Login code</label><input id="gateCode" inputmode="numeric" placeholder="4-digit code from Island Explorer">
     <button class="btn" onclick="doLogin()">View my operations</button>
     <button class="install-btn" id="installBtn" onclick="installGuideApp()">📲 Install Guide App on this device</button>
+    <div id="diag" style="font-size:11px;color:var(--soft);text-align:center;margin-top:10px"></div>
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v120</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v121</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -190,10 +191,17 @@ window.addEventListener("pagehide",saveSession);
    this), and a check for whether localStorage actually persists here. */
 if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist();}catch(e){}}
 function storageWorks(){try{localStorage.setItem("ie_ck","1");var ok=localStorage.getItem("ie_ck")==="1";localStorage.removeItem("ie_ck");return ok;}catch(e){return false;}}
+function updateDiag(){
+  var d=document.getElementById("diag");if(!d)return;
+  durGet(LS_SESSION).then(function(s){
+    if(s&&s.guide){d.innerHTML="✓ Offline sign-in saved on this device ("+(s.guide.name||"")+"). You can sign in offline.";d.style.color="var(--ok)";}
+    else{d.innerHTML="No offline sign-in saved on this device yet."+(storageWorks()?"":" ⚠ This browser is blocking storage.");d.style.color="var(--soft)";}
+  });
+}
 window.addEventListener("load",async function(){
   var s=await durGet(LS_SESSION);
   if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();backgroundRefresh();}
-  else updateNet();
+  else{updateNet();updateDiag();}
 });
 
 async function doLogin(){
@@ -222,10 +230,11 @@ async function doLogin(){
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
-    setTimeout(function(){durGet(LS_SESSION).then(function(saved){
-      if(saved)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
+    setTimeout(function(){idbGet(LS_SESSION).then(function(durable){
+      if(durable)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
+      else if(lsGet(LS_SESSION))showOk("✓ Signed in. Saved for this session, but this browser may not keep it after you close the app — for reliable offline use, install the app to your home screen and sign in from there.");
       else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
-    });},700);
+    });},800);
   }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error. */
@@ -239,7 +248,7 @@ function doLogout(){
   document.getElementById("logoutBtn").style.display="none";
   document.getElementById("list").style.display="none";
   document.getElementById("who").textContent="Sign in to see your operations";
-  showErr("");showOk("");updateNet();
+  showErr("");showOk("");updateNet();updateDiag();
 }
 
 function myOps(){return allOps.filter(function(o){return (o.guide||"").trim().toLowerCase()===myGuide.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
