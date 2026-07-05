@@ -66,6 +66,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   <div id="okbox" style="display:none;background:#e4f3ea;color:var(--ok);border:1px solid #b6e0c6;border-radius:12px;padding:14px;font-size:14px;margin-bottom:14px"></div>
   <div id="err" class="err" style="display:none"></div>
   <div class="card" id="gate">
+    <div id="ctxhint" style="display:none;background:#fff4e0;color:#7a5a00;border:1px solid #f0d9a8;border-radius:12px;padding:12px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.55"></div>
     <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered WhatsApp / phone number">
     <label>Login code</label><input id="gateCode" inputmode="numeric" placeholder="4-digit code from Island Explorer">
     <button class="btn" onclick="doLogin()">View my operations</button>
@@ -74,7 +75,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v121</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v122</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -198,10 +199,20 @@ function updateDiag(){
     else{d.innerHTML="No offline sign-in saved on this device yet."+(storageWorks()?"":" ⚠ This browser is blocking storage.");d.style.color="var(--soft)";}
   });
 }
+function isStandalone(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
+function isInAppBrowser(){return /WhatsApp|FBAN|FBAV|FB_IAB|Instagram|Line\/|Telegram/i.test(navigator.userAgent||"");}
+function showCtxHint(){
+  var h=document.getElementById("ctxhint");if(!h)return;
+  if(isStandalone()){h.style.display="none";return;}
+  h.style.display="block";
+  h.innerHTML=isInAppBrowser()
+    ? "⚠ <b>You've opened this inside a chat app's browser.</b> To use it offline, first install it: tap the menu (⋮) → <b>Open in Chrome/Browser</b>, then tap <b>Install Guide App</b> below, open it from your <b>home-screen icon</b>, and sign in there. A sign-in here won't be saved for offline."
+    : "📲 <b>To use this offline:</b> tap <b>Install Guide App</b> below (Add to Home Screen), then open the app from your <b>home-screen icon</b> and sign in there. Signing in in a temporary browser tab won't be saved for offline.";
+}
 window.addEventListener("load",async function(){
   var s=await durGet(LS_SESSION);
   if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();backgroundRefresh();}
-  else{updateNet();updateDiag();}
+  else{updateNet();updateDiag();showCtxHint();}
 });
 
 async function doLogin(){
