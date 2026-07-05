@@ -139,6 +139,12 @@ var LS_SESSION="ie_drv_session_v1",LS_QUEUE="ie_drv_queue_v1",LS_DRAFT="ie_drv_d
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+/* navigator.onLine lies — many Android browsers report it false while the
+   phone clearly has signal. So we NEVER block on it: we always attempt the
+   network and let the actual result decide. _netOk tracks the last real
+   outcome (optimistically true until a request truly fails), and that — not
+   navigator.onLine — drives the "offline" banner. */
+var _netOk=true;
 function isOnline(){return navigator.onLine!==false;}
 var syncQueue=lsGet(LS_QUEUE)||[];
 function saveSession(){if(myDriver)lsSet(LS_SESSION,{phone:myPhone,code:myCode,driver:myDriver,ops:allOps,vehicles:myVehicles,savedTrips:mySavedTrips,savedAt:Date.now()});}
@@ -146,23 +152,25 @@ function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
 function enqueue(rec){syncQueue.push(rec);saveQueue();}
 function updateNet(){
   var b=document.getElementById("netbar");if(!b)return;
-  var signedIn=!!myDriver,pend=syncQueue.length;
-  if(!isOnline()){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
+  var pend=syncQueue.length;
+  if(!_netOk){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
   if(pend){b.style.display="block";b.style.background="#e7f1fb";b.style.color="var(--blue)";b.innerHTML=pend+" change"+(pend>1?"s":"")+" waiting to sync · <span style='cursor:pointer;text-decoration:underline' onclick='syncNow()'>Sync now</span>";return;}
   b.style.display="none";
 }
 async function flushQueue(){
   ensureSb();
-  if(!sb||!isOnline()||!syncQueue.length)return;
-  var still=[];
+  if(!sb||!syncQueue.length)return;
+  var still=[],anyOk=false,anyFail=false;
   for(var i=0;i<syncQueue.length;i++){
     var rec=syncQueue[i];
-    try{var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});if(up&&up.error)still.push(rec);}
-    catch(e){still.push(rec);}
+    try{var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});if(up&&up.error){still.push(rec);anyFail=true;}else anyOk=true;}
+    catch(e){still.push(rec);anyFail=true;}
   }
-  syncQueue=still;saveQueue();
+  syncQueue=still;
+  if(anyFail)_netOk=false;else if(anyOk)_netOk=true;
+  saveQueue();
 }
-async function syncNow(){await flushQueue();if(isOnline())backgroundRefresh();}
+async function syncNow(){await flushQueue();backgroundRefresh();}
 function showApp(){
   document.getElementById("gate").style.display="none";
   document.getElementById("app").style.display="block";
@@ -175,17 +183,18 @@ function showApp(){
    focus after being idle. */
 async function backgroundRefresh(){
   ensureSb();
-  if(!sb||!isOnline()||!myPhone||!myCode)return;
+  if(!sb||!myPhone||!myCode)return;
   await flushQueue();
   try{
     var res=await sb.rpc("driver_login",{p_phone:myPhone,p_code:myCode});
     if(res&&!res.error&&res.data&&!res.data.error){
+      _netOk=true;
       myDriver=res.data.driver;allOps=res.data.ops||[];
       allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
       myVehicles=res.data.vehicles||[];
       saveSession();renderTrips();updateNet();
-    }
-  }catch(e){}
+    }else if(res&&res.error){_netOk=false;updateNet();}
+  }catch(e){_netOk=false;updateNet();}
   loadSavedTrips();
 }
 function offlineRestore(phone,code){
@@ -208,16 +217,19 @@ function restoreDraft(){
   Object.keys(d).forEach(function(id){var el=document.getElementById(id);if(el&&d[id]!=null&&d[id]!=="")el.value=d[id];});
   if(typeof onTourPick==="function")onTourPick();
 }
-window.addEventListener("online",function(){updateNet();syncNow();});
-window.addEventListener("offline",updateNet);
-document.addEventListener("visibilitychange",function(){saveSession();saveDraft();if(document.visibilityState==="visible"&&isOnline())syncNow();});
+/* The browser's online/offline events are only hints — treat 'online' as a
+   nudge to try syncing (the attempt itself decides _netOk) and 'offline' as a
+   soft signal, but always keep attempting network calls regardless. */
+window.addEventListener("online",function(){_netOk=true;updateNet();syncNow();});
+window.addEventListener("offline",function(){_netOk=false;updateNet();});
+document.addEventListener("visibilitychange",function(){saveSession();saveDraft();if(document.visibilityState==="visible")syncNow();});
 window.addEventListener("pagehide",function(){saveSession();saveDraft();});
 /* On open, restore the last session immediately so the app works offline, then
-   refresh in the background if there's a connection. */
+   always try to refresh in the background (the attempt sorts out connectivity). */
 window.addEventListener("load",function(){
   var lv=document.getElementById("logView");if(lv)lv.addEventListener("input",saveDraft);
   var s=lsGet(LS_SESSION);
-  if(s&&s.driver){myDriver=s.driver;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;showApp();if(isOnline())backgroundRefresh();}
+  if(s&&s.driver){myDriver=s.driver;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;showApp();backgroundRefresh();}
   else updateNet();
 });
 
@@ -229,20 +241,23 @@ async function doLogin(){
   var btn=document.getElementById("loginBtn");btn.disabled=true;var oldTxt=btn.textContent;btn.textContent="Signing in…";
   function done(){btn.disabled=false;btn.textContent=oldTxt;}
   function fail(m){done();showErr(m);}
-  /* Offline (or no Supabase client): fall back to the cached session for these
-     exact credentials — the driver can still see their ops and log offline. */
-  if(!isOnline()||!sb){if(offlineRestore(phone,code)){done();return;}return fail("You're offline and haven't signed in on this phone yet. Connect to the internet for your first sign-in.");}
+  /* Always ATTEMPT the real sign-in — never pre-block on navigator.onLine
+     (which is unreliable on Android). Only fall back to the cached session if
+     the network request itself fails. */
+  ensureSb();
+  if(!sb){if(offlineRestore(phone,code)){done();return;}return fail("Can't reach the sign-in service. Check your connection and try again.");}
   try{
     var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
-    if(res.error){if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
-    if(!res.data||res.data.error){return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
+    if(res.error){_netOk=false;if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
+    if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
+    _netOk=true;
     myDriver=res.data.driver;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     myVehicles=res.data.vehicles||[];
     done();saveSession();showApp();flushQueue();
     loadSavedTrips();
-  }catch(e){if(offlineRestore(phone,code)){done();return;}fail("Couldn't sign you in. Please try again.");}
+  }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail("Couldn't reach the server. If you're offline, connect to the internet for your first sign-in, then try again.");}
 }
 function doLogout(){
   myDriver=null;myPhone="";myCode="";allOps=[];myVehicles=[];mySavedTrips=null;_savedLoading=false;_tripFilter="Scheduled";
@@ -520,13 +535,14 @@ async function submitTrip(){
   var reg=document.getElementById("dl_reg").value.trim();
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
     data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
-  /* Queue the trip (flushed now if online, later if not), clear the draft and
-     the form. The trip shows in Saved Trips straight away via the queue. */
+  /* Queue the trip, clear the draft + form, then try to flush. The trip shows
+     in Saved Trips straight away via the queue; the message reflects whether
+     it actually reached the server. */
   enqueue(rec);lsDel(LS_DRAFT);saveSession();
-  showOk(isOnline()?"Trip saved — it will appear in Island Explorer's Activities Log shortly.":"Trip saved on your phone — it will sync to Island Explorer automatically when you're back online.");
   clearTrip();renderLogForm();
   await flushQueue();
-  if(isOnline()){mySavedTrips=null;loadSavedTrips(true);} /* refetch so the server copy replaces the local pending one */
+  if(_netOk){mySavedTrips=null;loadSavedTrips(true);showOk("Trip saved — it will appear in Island Explorer's Activities Log shortly.");}
+  else showOk("Trip saved on your phone — it will sync to Island Explorer automatically once the connection is back.");
   updateNet();
 }
 
@@ -534,8 +550,9 @@ async function submitTrip(){
 async function loadSavedTrips(force){
   if(_savedLoading)return;
   var el=document.getElementById("savedView");
-  /* Offline (or no client): just render whatever's cached + queued. */
-  if(!sb||!isOnline()){if(mySavedTrips===null)mySavedTrips=[];if(el.style.display!=="none")renderSavedTrips();return;}
+  ensureSb();
+  /* No client yet: render whatever's cached + queued. */
+  if(!sb){if(mySavedTrips===null)mySavedTrips=[];if(el.style.display!=="none")renderSavedTrips();return;}
   _savedLoading=true;
   if((force||mySavedTrips===null)&&el.style.display!=="none"&&!(mySavedTrips&&mySavedTrips.length))el.innerHTML="<div class='empty'>Loading your trips…</div>";
   try{
