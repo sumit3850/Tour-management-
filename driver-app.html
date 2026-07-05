@@ -80,7 +80,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <button class="btn" id="loginBtn" onclick="doLogin()">Sign in</button>
     <div class="hint" style="text-align:center;margin-top:8px">First sign-in after a while can take a few seconds while the server wakes up.</div>
     <button class="install-btn" id="installBtn" onclick="installDriverApp()">📲 Install Driver App on this device</button>
-    <button id="offlineBtn" style="display:none;width:100%;margin-top:12px;padding:13px;border:1px solid var(--forest);border-radius:12px;background:#fff;color:var(--forest);font-size:14px;font-weight:700;cursor:pointer" onclick="continueOffline()">Continue offline — log trips now, sync later</button>
+    <button id="offlineBtn" style="width:100%;margin-top:12px;padding:13px;border:1px solid var(--forest);border-radius:12px;background:#fff;color:var(--forest);font-size:14px;font-weight:700;cursor:pointer" onclick="continueOffline()">Offline entry — log trips without internet</button>
     <div id="diag" style="font-size:11px;color:var(--soft);text-align:center;margin-top:10px"></div>
   </div>
   <div id="app" style="display:none">
@@ -94,7 +94,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v126</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v127</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -571,38 +571,63 @@ function onVehInput(){
   var r=regForVeh(vf.value.trim());
   if(r)rf.value=r;
 }
+/* The tour to pre-select in the Log-trip form — the driver's operation whose
+   dates include today, else their first assigned one. Gives the vehicle/reg
+   to auto-fill. */
+function currentEntry(){
+  if(!myDriver||!myDriver.name)return null;
+  var es=myTripEntries();if(!es.length)return null;
+  var cur=es.find(function(e){var s=e.leg.start||"",en=e.leg.end||"";return s<=todayISO&&todayISO<=en;});
+  return cur||es[0];
+}
+function defaultVeh(){var e=currentEntry();if(e&&e.leg.veh)return {veh:e.leg.veh,reg:e.leg.reg||regForVeh(e.leg.veh)||""};if(myDriver&&myDriver.veh)return {veh:myDriver.veh,reg:regForVeh(myDriver.veh)||""};var v=(myVehicles||[])[0];return v?{veh:v.name,reg:v.reg||""}:{veh:"",reg:""};}
 function renderLogForm(){
   var el=document.getElementById("logView");
+  var e=currentEntry(),selTour=e?e.o.id:"",dv=defaultVeh();
   el.innerHTML="<div class='card'>"+
     "<div class='sec-h'>Log trip</div>"+
-    "<label>Tour</label><select id='dl_tour' onchange='onTourPick()'>"+tourOptionsHtml("")+"</select>"+
+    "<label>Tour</label><select id='dl_tour' onchange='onTourPick()'>"+tourOptionsHtml(selTour)+"</select>"+
     "<div class='hint'>Pick the tour this trip belongs to, “+ Add custom tour” for a one-off job, or leave it as “None / other” for an ad-hoc trip.</div>"+
     "<div id='dl_customwrap' style='display:none'><label>Custom tour name</label><input id='dl_customtour' placeholder='e.g. Private airport transfer'></div>"+
     "<label>Date</label><input type='date' id='dl_date' value='"+todayISO+"'>"+
-    "<label>Vehicle</label><input id='dl_veh' value='"+(myDriver.veh||"")+"' placeholder='e.g. Innova' oninput='onVehInput()'>"+
-    "<label>Reg. No.</label><input id='dl_reg' value='"+(regForVeh(myDriver.veh)||"")+"' placeholder='AN01 XXXXX'>"+
+    "<label>Vehicle</label><input id='dl_veh' value='"+dv.veh+"' placeholder='e.g. Innova' oninput='onVehInput()'>"+
+    "<label>Reg. No.</label><input id='dl_reg' value='"+dv.reg+"' placeholder='AN01 XXXXX'>"+
     "<label>Start time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_startt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_startt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>Start Now</button></div>"+
     "<label>End time</label><div style='display:flex;gap:8px;align-items:stretch'><input id='dl_endt' type='text' inputmode='numeric' placeholder='--:--' style='flex:1'><button type='button' onclick=\"stampNow('dl_endt')\" style='white-space:nowrap;padding:0 16px;border:none;border-radius:11px;background:var(--blue);color:#fff;font-weight:700;font-size:14px;cursor:pointer'>End Now</button></div>"+
     "<div class='row2'><div><label>Start km</label><input type='number' id='dl_startkm' placeholder='0'></div><div><label>End km</label><input type='number' id='dl_endkm' placeholder='0'></div></div>"+
     "<label>Location / route</label><input id='dl_loc' placeholder='e.g. Port Blair → Chidiya Tapu → Port Blair'>"+
-    "<button class='btn' id='dl_submit' onclick='submitTrip()'>Save trip</button>"+
-    "<button type='button' onclick='clearTrip()' style='width:100%;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--soft);font-size:14px;font-weight:700;cursor:pointer'>Clear &amp; start new</button>"+
+    "<button class='btn' id='dl_submit' onclick='submitTrip()'>"+(_editing?"Update trip":"Save trip")+"</button>"+
+    "<button type='button' onclick='clearTrip()' style='width:100%;margin-top:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--soft);font-size:14px;font-weight:700;cursor:pointer'>"+(_editing?"Cancel edit":"Clear &amp; start new")+"</button>"+
   "</div>";
 }
+var _editing=null; /* {kind:'pending',id} or {kind:'synced',trip} when editing a saved trip */
+/* Load an existing trip's values into the Log-trip form for editing. */
+function fillLogForm(t){
+  var op=t.tourCode?(allOps||[]).find(function(o){return o.tourId===t.tourCode;}):null;
+  var tf=document.getElementById("dl_tour");if(tf)tf.value=op?op.id:(t.tourCode?"custom":"");
+  onTourPick();
+  if(!op&&t.tourCode){var cw=document.getElementById("dl_customwrap");if(cw)cw.style.display="block";var ct=document.getElementById("dl_customtour");if(ct)ct.value=t.tourCode;}
+  var set=function(id,v){var el=document.getElementById(id);if(el)el.value=(v==null?"":v);};
+  set("dl_date",t.date||todayISO);set("dl_veh",t.veh||"");set("dl_reg",t.reg||regForVeh(t.veh)||"");
+  set("dl_startt",t.startT||"");set("dl_endt",t.endT||"");set("dl_startkm",t.startKm||"");set("dl_endkm",t.endKm||"");set("dl_loc",t.loc||"");
+  var sb2=document.getElementById("dl_submit");if(sb2)sb2.textContent="Update trip";
+}
+function editPending(id){var r=syncQueue.find(function(x){return x.id===id;});if(!r)return;_editing={kind:"pending",id:id};switchTab("log");fillLogForm(r.data);showOk("Editing your un-synced trip — change the details and tap Update trip.");}
+function editSaved(i){var t=(mySavedTrips||[])[i];if(!t)return;_editing={kind:"synced",trip:t};switchTab("log");fillLogForm(t);showOk("Editing this trip — change the details and tap Update trip.");}
 /* Wipe every field so the next trip can be entered from scratch. */
 function clearTrip(){
   ["dl_startt","dl_endt","dl_startkm","dl_endkm","dl_loc","dl_customtour"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
   var dt=document.getElementById("dl_date");if(dt)dt.value=todayISO;
   var tf=document.getElementById("dl_tour");if(tf)tf.value="";
   var cw=document.getElementById("dl_customwrap");if(cw)cw.style.display="none";
-  lsDel(LS_DRAFT);showErr("");showOk("");
+  _editing=null;lsDel(LS_DRAFT);showErr("");showOk("");renderLogForm();
 }
 /* Trips still waiting in the sync queue, shown in Saved Trips with a badge so
    the driver can see their offline entries were captured. */
 function pendingTripCards(){
   return syncQueue.filter(function(r){return r.type==="driver_trip_log";}).map(function(r){
     var d=r.data,total=Math.max((+d.endKm||0)-(+d.startKm||0),0);
-    return {id:r.id,fromSub:r.id,date:d.date,veh:d.veh,reg:d.reg,startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:total,loc:d.loc,time:d.time,startT:d.startT,endT:d.endT,tourCode:d.tourCode,_pending:true};
+    return {id:r.id,fromSub:r.id,date:d.date,veh:d.veh,reg:d.reg,startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:total,loc:d.loc,time:d.time,startT:d.startT,endT:d.endT,tourCode:d.tourCode,offline:!!d.offline,_pending:true};
   });
 }
 function removePendingTrip(id){
@@ -638,15 +663,26 @@ async function submitTrip(){
   }
   var reg=document.getElementById("dl_reg").value.trim();
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),
-    data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc,phone:myPhone}};
+    data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc,phone:myPhone,offline:!_netOk}};
+  /* If editing an existing trip, drop the old one first: a queued (un-synced)
+     trip is just replaced in the queue; a server-saved trip gets a delete
+     request queued alongside the new one. */
+  var wasEditing=_editing;
+  if(_editing){
+    if(_editing.kind==="pending"){syncQueue=syncQueue.filter(function(x){return x.id!==_editing.id;});}
+    else if(_editing.kind==="synced"){var ot=_editing.trip;
+      syncQueue.push({id:"S"+Date.now()+Math.floor(Math.random()*100000)+"d",type:"driver_trip_delete",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),data:{tripId:ot.id,fromSub:ot.fromSub,driver:myDriver.name||"",phone:myPhone}});
+      mySavedTrips=(mySavedTrips||[]).filter(function(x){return x.id!==ot.id;});}
+    _editing=null;
+  }
   /* Queue the trip, clear the draft + form, then try to flush. The trip shows
      in Saved Trips straight away via the queue; the message reflects whether
      it actually reached the server. */
   enqueue(rec);lsDel(LS_DRAFT);saveSession();
-  clearTrip();renderLogForm();
+  clearTrip();
   await flushQueue();
-  if(_netOk){mySavedTrips=null;loadSavedTrips(true);showOk("Trip saved — it will appear in Island Explorer's Activities Log shortly.");}
-  else showOk("Trip saved on your phone — it will sync to Island Explorer automatically once the connection is back.");
+  if(_netOk){mySavedTrips=null;loadSavedTrips(true);showOk(wasEditing?"Trip updated — syncing to Island Explorer.":"Trip saved — it will appear in Island Explorer's Activities Log shortly.");}
+  else showOk((wasEditing?"Trip updated":"Trip saved")+" on your phone — it will sync to Island Explorer automatically once the connection is back.");
   updateNet();
 }
 
@@ -682,22 +718,23 @@ function renderSavedTrips(){
   var list=mySavedTrips||[];
   var head="<div class='trip-actions' style='margin-bottom:14px'><button class='btn-sm btn-ghost' style='flex:1;padding:11px' onclick='loadSavedTrips(true)'>Refresh</button><button class='btn-sm' style='flex:1;padding:11px;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;cursor:pointer' onclick='exportTripsCSV()'>⬇ Download Excel (CSV)</button></div>";
   if(!pending.length&&!list.length){el.innerHTML=head+"<div class='empty'>No saved trips yet.</div>";return;}
+  var editBtn=function(onclick){return "<button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick=\""+onclick+"\">✎ Edit</button>";};
   var pendingHtml=pending.map(function(t){
     var reg=t.reg||regForVeh(t.veh);
     return "<div class='card' style='border:1px solid #f0d9a8'>"+
       "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:3px'><div class='dates mono' style='font-weight:600;color:var(--soft);font-size:12.5px'>"+(t.tourCode||"Ad-hoc trip")+"</div><span class='pill mid' style='font-size:10.5px'>⏳ waiting to sync</span></div>"+
       "<div style='font-size:16px;font-weight:700;color:var(--ink);margin-bottom:10px'>"+tourDateRangeForCode(t.tourCode,t.date)+"</div>"+
       "<div class='rows'>"+row("Trip date",dmy(t.date))+row("Vehicle",vehLabel(t.veh,reg))+row("Location",t.loc)+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Time",t.time)+"</div>"+
-      "<div class='trip-actions'><button class='btn-sm' style='flex:1;padding:10px;border:1px solid #f0c2bb;background:#fff;color:var(--err);border-radius:10px;font-weight:700;cursor:pointer' onclick=\"removePendingTrip('"+t.id+"')\">Remove</button></div>"+
+      "<div class='trip-actions'>"+editBtn("editPending('"+t.id+"')")+"<button class='btn-sm' style='flex:1;padding:10px;border:1px solid #f0c2bb;background:#fff;color:var(--err);border-radius:10px;font-weight:700;cursor:pointer' onclick=\"removePendingTrip('"+t.id+"')\">Remove</button></div>"+
     "</div>";
   }).join("");
   el.innerHTML=head+pendingHtml+list.map(function(t,i){
     var reg=t.reg||regForVeh(t.veh);
     return "<div class='card'>"+
-      "<div class='dates mono' style='font-weight:600;color:var(--soft);font-size:12.5px;margin-bottom:3px'>"+(t.tourCode||"Ad-hoc trip")+"</div>"+
+      "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:3px'><div class='dates mono' style='font-weight:600;color:var(--soft);font-size:12.5px'>"+(t.tourCode||"Ad-hoc trip")+"</div>"+(t.offline?"<span class='pill' style='background:#eee;color:var(--soft);font-size:10.5px'>📴 offline entry</span>":"")+"</div>"+
       "<div style='font-size:16px;font-weight:700;color:var(--ink);margin-bottom:10px'>"+tourDateRangeForCode(t.tourCode,t.date)+"</div>"+
       "<div class='rows'>"+row("Trip date",dmy(t.date))+row("Vehicle",vehLabel(t.veh,reg))+row("Location",t.loc)+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Time",t.time)+"</div>"+
-      "<div class='trip-actions'><button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick='shareTripWA("+i+")'>Share on WhatsApp</button><button class='btn-sm' style='flex:1;padding:10px;border:1px solid #f0c2bb;background:#fff;color:var(--err);border-radius:10px;font-weight:700;cursor:pointer' onclick='deleteSavedTrip("+i+")'>Delete</button></div>"+
+      "<div class='trip-actions' style='flex-wrap:wrap'>"+editBtn("editSaved("+i+")")+"<button class='btn-sm btn-ghost' style='flex:1;padding:10px' onclick='shareTripWA("+i+")'>Share</button><button class='btn-sm' style='flex:1;padding:10px;border:1px solid #f0c2bb;background:#fff;color:var(--err);border-radius:10px;font-weight:700;cursor:pointer' onclick='deleteSavedTrip("+i+")'>Delete</button></div>"+
     "</div>";
   }).join("");
 }
