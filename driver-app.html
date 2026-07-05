@@ -139,6 +139,18 @@ var LS_SESSION="ie_drv_session_v1",LS_QUEUE="ie_drv_queue_v1",LS_DRAFT="ie_drv_d
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+/* Durable backup: IndexedDB survives on several mobile browsers that clear
+   localStorage between sessions, so we mirror the session into both and read
+   whichever still has it. This is what lets a driver sign in once online and
+   then keep signing in offline afterwards. */
+function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open("ie_ops_db",1);r.onupgradeneeded=function(){try{r.result.createObjectStore("kv");}catch(e){}};r.onsuccess=function(){res(r.result);};r.onerror=function(){res(null);};}catch(e){res(null);}});}
+function idbSet(k,v){return idbOpen().then(function(db){if(!db)return;try{db.transaction("kv","readwrite").objectStore("kv").put(v,k);}catch(e){}});}
+function idbGet(k){return idbOpen().then(function(db){if(!db)return null;return new Promise(function(res){try{var g=db.transaction("kv","readonly").objectStore("kv").get(k);g.onsuccess=function(){res(g.result||null);};g.onerror=function(){res(null);};}catch(e){res(null);}});});}
+function idbDel(k){return idbOpen().then(function(db){if(!db)return;try{db.transaction("kv","readwrite").objectStore("kv").delete(k);}catch(e){}});}
+/* Write to both stores; read from localStorage first (sync) then IDB (async). */
+function durSet(k,v){lsSet(k,v);idbSet(k,v);}
+function durDel(k){lsDel(k);idbDel(k);}
+async function durGet(k){var v=lsGet(k);if(v)return v;try{v=await idbGet(k);if(v){lsSet(k,v);/* re-seed localStorage */return v;}}catch(e){}return null;}
 /* navigator.onLine lies — many Android browsers report it false while the
    phone clearly has signal. So we NEVER block on it: we always attempt the
    network and let the actual result decide. _netOk tracks the last real
@@ -147,7 +159,7 @@ function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 var _netOk=true;
 function isOnline(){return navigator.onLine!==false;}
 var syncQueue=lsGet(LS_QUEUE)||[];
-function saveSession(){if(myDriver)lsSet(LS_SESSION,{phone:myPhone,code:myCode,driver:myDriver,ops:allOps,vehicles:myVehicles,savedTrips:mySavedTrips,savedAt:Date.now()});}
+function saveSession(){if(myDriver)durSet(LS_SESSION,{phone:myPhone,code:myCode,driver:myDriver,ops:allOps,vehicles:myVehicles,savedTrips:mySavedTrips,savedAt:Date.now()});}
 function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
 function enqueue(rec){syncQueue.push(rec);saveQueue();}
 function updateNet(){
@@ -197,8 +209,8 @@ async function backgroundRefresh(){
   }catch(e){_netOk=false;updateNet();}
   loadSavedTrips();
 }
-function offlineRestore(phone,code){
-  var s=lsGet(LS_SESSION);
+async function offlineRestore(phone,code){
+  var s=await durGet(LS_SESSION);
   if(s&&s.driver&&String(s.phone)===String(phone)&&String(s.code)===String(code)){
     myDriver=s.driver;myPhone=phone;myCode=code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;
     showApp();return true;
@@ -234,9 +246,9 @@ if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist()
 function storageWorks(){try{localStorage.setItem("ie_ck","1");var ok=localStorage.getItem("ie_ck")==="1";localStorage.removeItem("ie_ck");return ok;}catch(e){return false;}}
 /* On open, restore the last session immediately so the app works offline, then
    always try to refresh in the background (the attempt sorts out connectivity). */
-window.addEventListener("load",function(){
+window.addEventListener("load",async function(){
   var lv=document.getElementById("logView");if(lv)lv.addEventListener("input",saveDraft);
-  var s=lsGet(LS_SESSION);
+  var s=await durGet(LS_SESSION); /* localStorage first, then the durable IndexedDB copy */
   if(s&&s.driver){myDriver=s.driver;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;showApp();backgroundRefresh();}
   else updateNet();
 });
@@ -254,10 +266,10 @@ async function doLogin(){
      the network request itself fails. */
   ensureSb();
   var OFFLINE_MSG="You appear to be offline, and this phone hasn't signed in yet. Connect to the internet once to sign in — after that the app works offline.";
-  if(!sb){if(offlineRestore(phone,code)){done();return;}return fail(OFFLINE_MSG);}
+  if(!sb){if(await offlineRestore(phone,code)){done();return;}return fail(OFFLINE_MSG);}
   try{
     var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
-    if(res.error){_netOk=false;if(offlineRestore(phone,code)){done();return;}
+    if(res.error){_netOk=false;if(await offlineRestore(phone,code)){done();return;}
       if(netLikeErr(res.error.message))return fail(OFFLINE_MSG);
       return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
     if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
@@ -271,14 +283,14 @@ async function doLogin(){
     /* Signed in fine, but if the session didn't actually persist, offline mode
        won't work later — tell the driver now, plainly, why. */
     if(!storageWorks()||!lsGet(LS_SESSION))showErr("Signed in — but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from there, and don't use a private/incognito window.");
-  }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
+  }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error — decides
    whether to show the friendly offline hint or the "check app setup" message. */
 function netLikeErr(m){m=String(m||"").toLowerCase();return m.indexOf("fetch")>-1||m.indexOf("network")>-1||m.indexOf("failed to")>-1||m.indexOf("load failed")>-1||m.indexOf("offline")>-1||m.indexOf("timeout")>-1;}
 function doLogout(){
   myDriver=null;myPhone="";myCode="";allOps=[];myVehicles=[];mySavedTrips=null;_savedLoading=false;_tripFilter="Scheduled";
-  lsDel(LS_SESSION);lsDel(LS_DRAFT); /* keep the sync queue — unsynced changes must survive logout */
+  durDel(LS_SESSION);lsDel(LS_DRAFT); /* keep the sync queue — unsynced changes must survive logout */
   document.getElementById("gatePhone").value="";
   document.getElementById("gateCode").value="";
   document.getElementById("app").style.display="none";
