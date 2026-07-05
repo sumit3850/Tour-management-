@@ -80,6 +80,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <button class="btn" id="loginBtn" onclick="doLogin()">Sign in</button>
     <div class="hint" style="text-align:center;margin-top:8px">First sign-in after a while can take a few seconds while the server wakes up.</div>
     <button class="install-btn" id="installBtn" onclick="installDriverApp()">📲 Install Driver App on this device</button>
+    <button id="offlineBtn" style="display:none;width:100%;margin-top:12px;padding:13px;border:1px solid var(--forest);border-radius:12px;background:#fff;color:var(--forest);font-size:14px;font-weight:700;cursor:pointer" onclick="continueOffline()">Continue offline — log trips now, sync later</button>
     <div id="diag" style="font-size:11px;color:var(--soft);text-align:center;margin-top:10px"></div>
   </div>
   <div id="app" style="display:none">
@@ -93,7 +94,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v124</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v125</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -202,7 +203,7 @@ function showApp(){
   document.getElementById("gate").style.display="none";
   document.getElementById("app").style.display="block";
   document.getElementById("logoutBtn").style.display="block";
-  document.getElementById("who").textContent="Welcome, "+((myDriver&&myDriver.name)||"");
+  document.getElementById("who").textContent=(myDriver&&myDriver.name)?("Welcome, "+myDriver.name):("Signed in offline · "+myPhone);
   renderTrips();renderLogForm();restoreDraft();updateNet();
 }
 /* Re-fetch fresh data (and flush any queued writes) without disturbing the
@@ -304,16 +305,19 @@ async function doLogin(){
   var btn=document.getElementById("loginBtn");btn.disabled=true;var oldTxt=btn.textContent;btn.textContent="Signing in…";
   function done(){btn.disabled=false;btn.textContent=oldTxt;}
   function fail(m){done();showErr(m);}
+  /* Network failure with nothing cached: don't dead-end — offer the guaranteed
+     offline path (log trips now, sync later) that needs no prior caching. */
+  function failOffline(m){done();showErr(m);var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="block";}
   /* Always ATTEMPT the real sign-in — never pre-block on navigator.onLine
      (which is unreliable on Android). Only fall back to the cached session if
      the network request itself fails. */
   ensureSb();
-  var OFFLINE_MSG="You appear to be offline, and this phone hasn't signed in yet. Connect to the internet once to sign in — after that the app works offline.";
-  if(!sb){if(await offlineRestore(phone,code)){done();return;}return fail(OFFLINE_MSG);}
+  var OFFLINE_MSG="You're offline. If you've signed in on this phone before, it should restore automatically — otherwise tap \"Continue offline\" below to log trips now; they'll sync when you're back online.";
+  if(!sb){if(await offlineRestore(phone,code)){done();return;}return failOffline(OFFLINE_MSG);}
   try{
     var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
     if(res.error){_netOk=false;if(await offlineRestore(phone,code)){done();return;}
-      if(netLikeErr(res.error.message))return fail(OFFLINE_MSG);
+      if(netLikeErr(res.error.message))return failOffline(OFFLINE_MSG);
       return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
     if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
     _netOk=true;
@@ -331,11 +335,28 @@ async function doLogin(){
       else if(lsGet(LS_SESSION))showOk("✓ Signed in. Saved for this session, but this browser may not keep it after you close the app — for reliable offline use, install the app to your home screen and sign in from there.");
       else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
     });},800);
-  }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
+  }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}failOffline(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error — decides
    whether to show the friendly offline hint or the "check app setup" message. */
 function netLikeErr(m){m=String(m||"").toLowerCase();return m.indexOf("fetch")>-1||m.indexOf("network")>-1||m.indexOf("failed to")>-1||m.indexOf("load failed")>-1||m.indexOf("offline")>-1||m.indexOf("timeout")>-1;}
+/* Guaranteed offline sign-in — needs NO prior online sign-in and NO surviving
+   storage. The driver enters their phone + code and can immediately log trips
+   (and update status for any cached ops); everything queues and syncs, tagged
+   with their phone so the console attributes it correctly. This is the path
+   that always works, whatever the phone does with storage. */
+function continueOffline(){
+  var phone=normPhone(document.getElementById("gatePhone").value);
+  var code=document.getElementById("gateCode").value.trim();
+  if(!phone){showErr("Enter your phone number first.");return;}
+  _netOk=false;myPhone=phone;myCode=code;
+  myDriver={name:"",phone:phone,code:code,offline:true};
+  allOps=allOps||[];myVehicles=myVehicles||[];
+  saveSession();
+  var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="none";
+  showApp();switchTab("log");
+  showOk("Signed in offline. Your assigned trips will appear once you're back online — you can log trips below right now and they'll sync automatically.");
+}
 function doLogout(){
   myDriver=null;myPhone="";myCode="";allOps=[];myVehicles=[];mySavedTrips=null;_savedLoading=false;_tripFilter="Scheduled";
   durDel(LS_SESSION);lsDel(LS_DRAFT); /* keep the sync queue — unsynced changes must survive logout */
@@ -344,8 +365,9 @@ function doLogout(){
   document.getElementById("app").style.display="none";
   document.getElementById("gate").style.display="block";
   document.getElementById("logoutBtn").style.display="none";
+  var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="none";
   document.getElementById("who").textContent="Sign in to log your trips";
-  showErr("");showOk("");updateNet();updateDiag();
+  showErr("");showOk("");updateNet();updateDiag();showCtxHint();
   switchTab("trips");
 }
 /* Registration number for a vehicle name — used wherever a vehicle is shown, so a
@@ -610,8 +632,8 @@ async function submitTrip(){
     tc=(mop&&mop.tourId)||"";
   }
   var reg=document.getElementById("dl_reg").value.trim();
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
-    data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),
+    data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc,phone:myPhone}};
   /* Queue the trip, clear the draft + form, then try to flush. The trip shows
      in Saved Trips straight away via the queue; the message reflects whether
      it actually reached the server. */
