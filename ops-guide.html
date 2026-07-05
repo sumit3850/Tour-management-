@@ -75,7 +75,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v123</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v124</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -126,9 +126,20 @@ function idbOpen(){return new Promise(function(res){try{var r=indexedDB.open("ie
 function idbSet(k,v){return idbOpen().then(function(db){if(!db)return;try{db.transaction("kv","readwrite").objectStore("kv").put(v,k);}catch(e){}});}
 function idbGet(k){return idbOpen().then(function(db){if(!db)return null;return new Promise(function(res){try{var g=db.transaction("kv","readonly").objectStore("kv").get(k);g.onsuccess=function(){res(g.result||null);};g.onerror=function(){res(null);};}catch(e){res(null);}});});}
 function idbDel(k){return idbOpen().then(function(db){if(!db)return;try{db.transaction("kv","readwrite").objectStore("kv").delete(k);}catch(e){}});}
-function durSet(k,v){lsSet(k,v);idbSet(k,v);}
-function durDel(k){lsDel(k);idbDel(k);}
-async function durGet(k){var v=lsGet(k);if(v)return v;try{v=await idbGet(k);if(v){lsSet(k,v);return v;}}catch(e){}return null;}
+/* Cache API store — the same storage the service worker uses to make the app
+   open offline, so it demonstrably persists on the device even when
+   localStorage/IndexedDB get cleared. */
+function cacheSet(k,v){try{return caches.open("ie_dur").then(function(c){return c.put("/__dur/"+encodeURIComponent(k),new Response(JSON.stringify(v),{headers:{"content-type":"application/json"}}));}).catch(function(){});}catch(e){return Promise.resolve();}}
+function cacheGet(k){try{return caches.open("ie_dur").then(function(c){return c.match("/__dur/"+encodeURIComponent(k));}).then(function(r){return r?r.json():null;}).catch(function(){return null;});}catch(e){return Promise.resolve(null);}}
+function cacheDel(k){try{return caches.open("ie_dur").then(function(c){return c.delete("/__dur/"+encodeURIComponent(k));}).catch(function(){});}catch(e){return Promise.resolve();}}
+function durSet(k,v){lsSet(k,v);idbSet(k,v);cacheSet(k,v);}
+function durDel(k){lsDel(k);idbDel(k);cacheDel(k);}
+async function durGet(k){
+  var v=lsGet(k);if(v)return v;
+  try{v=await idbGet(k);if(v){lsSet(k,v);return v;}}catch(e){}
+  try{v=await cacheGet(k);if(v){lsSet(k,v);idbSet(k,v);return v;}}catch(e){}
+  return null;
+}
 /* navigator.onLine lies — many Android browsers report it false while the
    phone clearly has signal. We NEVER block on it: always attempt the network
    and let the actual result decide. _netOk (optimistically true until a
@@ -245,7 +256,7 @@ async function doLogin(){
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
-    setTimeout(function(){idbGet(LS_SESSION).then(function(durable){
+    setTimeout(function(){Promise.all([idbGet(LS_SESSION),cacheGet(LS_SESSION)]).then(function(r){var durable=r[0]||r[1];
       if(durable)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
       else if(lsGet(LS_SESSION))showOk("✓ Signed in. Saved for this session, but this browser may not keep it after you close the app — for reliable offline use, install the app to your home screen and sign in from there.");
       else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");

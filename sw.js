@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v4";
+var CACHE = "ie-ops-v5";
 var SHELL = [
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "index.html",
   "manifest.json", "driver-manifest.json", "guide-manifest.json",
@@ -32,7 +32,9 @@ self.addEventListener("install", function(e){
 self.addEventListener("activate", function(e){
   e.waitUntil(
     caches.keys().then(function(keys){
-      return Promise.all(keys.filter(function(k){ return k !== CACHE; }).map(function(k){ return caches.delete(k); }));
+      /* Drop only OLD app-shell caches. Never touch "ie_dur" — that's the
+         driver/guide offline session store, which must survive SW updates. */
+      return Promise.all(keys.filter(function(k){ return k !== CACHE && k !== "ie_dur"; }).map(function(k){ return caches.delete(k); }));
     }).then(function(){ return self.clients.claim(); })
   );
 });
