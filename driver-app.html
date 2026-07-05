@@ -91,7 +91,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175</div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v120</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -280,9 +280,12 @@ async function doLogin(){
     myVehicles=res.data.vehicles||[];
     done();saveSession();showApp();flushQueue();
     loadSavedTrips();
-    /* Signed in fine, but if the session didn't actually persist, offline mode
-       won't work later — tell the driver now, plainly, why. */
-    if(!storageWorks()||!lsGet(LS_SESSION))showErr("Signed in — but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from there, and don't use a private/incognito window.");
+    /* Confirm — after the durable write settles — whether the session actually
+       persisted on this device, so the driver KNOWS if offline will work. */
+    setTimeout(function(){durGet(LS_SESSION).then(function(saved){
+      if(saved)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
+      else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
+    });},700);
   }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error — decides

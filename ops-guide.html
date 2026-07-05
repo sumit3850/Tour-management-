@@ -63,6 +63,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
     <h1 id="who">Sign in to see your operations</h1>
   </div>
   <div id="netbar" style="display:none;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:14px"></div>
+  <div id="okbox" style="display:none;background:#e4f3ea;color:var(--ok);border:1px solid #b6e0c6;border-radius:12px;padding:14px;font-size:14px;margin-bottom:14px"></div>
   <div id="err" class="err" style="display:none"></div>
   <div class="card" id="gate">
     <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered WhatsApp / phone number">
@@ -72,7 +73,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175</div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v120</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -100,6 +101,7 @@ function installGuideApp(){
 }
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
+function showOk(m){var b=document.getElementById("okbox");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
 function normPhone(p){return String(p||"").replace(/\D/g,"");}
@@ -195,7 +197,7 @@ window.addEventListener("load",async function(){
 });
 
 async function doLogin(){
-  showErr("");
+  showErr("");showOk("");
   var phone=normPhone(document.getElementById("gatePhone").value);
   var code=document.getElementById("gateCode").value.trim();
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
@@ -220,7 +222,10 @@ async function doLogin(){
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
-    if(!storageWorks()||!lsGet(LS_SESSION))showErr("Signed in — but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from there, and don't use a private/incognito window.");
+    setTimeout(function(){durGet(LS_SESSION).then(function(saved){
+      if(saved)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
+      else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
+    });},700);
   }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error. */
@@ -234,7 +239,7 @@ function doLogout(){
   document.getElementById("logoutBtn").style.display="none";
   document.getElementById("list").style.display="none";
   document.getElementById("who").textContent="Sign in to see your operations";
-  showErr("");updateNet();
+  showErr("");showOk("");updateNet();
 }
 
 function myOps(){return allOps.filter(function(o){return (o.guide||"").trim().toLowerCase()===myGuide.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
