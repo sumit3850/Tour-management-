@@ -224,6 +224,14 @@ window.addEventListener("online",function(){_netOk=true;updateNet();syncNow();})
 window.addEventListener("offline",function(){_netOk=false;updateNet();});
 document.addEventListener("visibilitychange",function(){saveSession();saveDraft();if(document.visibilityState==="visible")syncNow();});
 window.addEventListener("pagehide",function(){saveSession();saveDraft();});
+/* Ask the browser to keep our data instead of evicting it — installed apps
+   and engaged sites are usually granted this, which is what makes the offline
+   session survive between visits. */
+if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist();}catch(e){}}
+/* True only if localStorage actually persists a value on this device/browser.
+   Private/incognito windows and some in-app browsers silently drop it, which
+   is the #1 reason an offline session "disappears" after signing in. */
+function storageWorks(){try{localStorage.setItem("ie_ck","1");var ok=localStorage.getItem("ie_ck")==="1";localStorage.removeItem("ie_ck");return ok;}catch(e){return false;}}
 /* On open, restore the last session immediately so the app works offline, then
    always try to refresh in the background (the attempt sorts out connectivity). */
 window.addEventListener("load",function(){
@@ -260,6 +268,9 @@ async function doLogin(){
     myVehicles=res.data.vehicles||[];
     done();saveSession();showApp();flushQueue();
     loadSavedTrips();
+    /* Signed in fine, but if the session didn't actually persist, offline mode
+       won't work later — tell the driver now, plainly, why. */
+    if(!storageWorks()||!lsGet(LS_SESSION))showErr("Signed in — but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from there, and don't use a private/incognito window.");
   }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error — decides

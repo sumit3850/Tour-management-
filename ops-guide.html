@@ -173,6 +173,10 @@ window.addEventListener("online",function(){_netOk=true;updateNet();syncNow();})
 window.addEventListener("offline",function(){_netOk=false;updateNet();});
 document.addEventListener("visibilitychange",function(){saveSession();if(document.visibilityState==="visible")syncNow();});
 window.addEventListener("pagehide",saveSession);
+/* Ask the browser to keep our data instead of evicting it (installed apps get
+   this), and a check for whether localStorage actually persists here. */
+if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist();}catch(e){}}
+function storageWorks(){try{localStorage.setItem("ie_ck","1");var ok=localStorage.getItem("ie_ck")==="1";localStorage.removeItem("ie_ck");return ok;}catch(e){return false;}}
 window.addEventListener("load",function(){
   var s=lsGet(LS_SESSION);
   if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();backgroundRefresh();}
@@ -205,6 +209,7 @@ async function doLogin(){
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
+    if(!storageWorks()||!lsGet(LS_SESSION))showErr("Signed in — but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from there, and don't use a private/incognito window.");
   }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
 }
 /* A "network failure" (offline) vs a genuine backend/setup error. */
