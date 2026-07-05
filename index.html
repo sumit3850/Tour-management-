@@ -494,14 +494,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 126</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 127</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 126</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 127</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -832,8 +832,8 @@ function opLegsSheetText(o){
   return rows.map(function(l,i){return "Leg "+(i+1)+" ("+(l.start||"—")+" to "+(l.end||"—")+"): "+(l.veh||"—")+(l.reg?" "+l.reg:"")+" / "+(l.driver||"—")+(l.driverStatus?" ["+l.driverStatus+"]":"");}).join(" | ");
 }
 function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
-var DAILY_COLS=["Tour ID","Date","Vehicle","Reg. No.","Driver","Start km","End km","Total km","Location","Time"];
-function dailyActivitySheetRow(r){return {"Tour ID":tripTourCode(r),"Date":dOpt(r.date),"Vehicle":r.veh||"","Reg. No.":r.reg||"","Driver":r.driver||"","Start km":r.startKm||0,"End km":r.endKm||0,"Total km":r.totalKm||0,"Location":r.loc||"","Time":r.time||""};}
+var DAILY_COLS=["Tour ID","Date","Vehicle","Reg. No.","Driver","Start km","End km","Total km","Location","Time","Entry"];
+function dailyActivitySheetRow(r){return {"Tour ID":tripTourCode(r),"Date":dOpt(r.date),"Vehicle":r.veh||"","Reg. No.":r.reg||"","Driver":r.driver||"","Start km":r.startKm||0,"End km":r.endKm||0,"Total km":r.totalKm||0,"Location":r.loc||"","Time":r.time||"","Entry":r.offline?"Offline":"Online"};}
 var VEHICLE_COLS=["Vehicle","Reg. No.","Type","Seats","Driver","Login Code","Status"];
 function vehicleSheetRow(v){var dc=((drivers||[]).find(function(x){return x.name===v.driver;})||{}).code||"";return {"Vehicle":v.name||"","Reg. No.":v.reg||"","Type":v.type||"","Seats":v.cap||0,"Driver":v.driver||"","Login Code":dc,"Status":v.avail||""};}
 var DRIVER_COLS=["Driver","Phone","Code","Assigned Vehicle","Reg. No.","Licence","Licence Document","Address"];
@@ -2556,7 +2556,7 @@ function renderLog(t="Vehicles & Drivers"){
       kpi("Trips on record",tripLogs.length,"this device","","M9 11l3 3 8-8")+
     "</div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Tour</th><th>Date</th><th>Vehicle</th><th>Driver</th><th class='num'>Start km</th><th class='num'>End km</th><th class='num'>Total km</th><th>Location</th><th class='num'>Time</th><th></th></tr></thead><tbody>"+
-    (rows.map(r=>"<tr><td class='mono strong'>"+tripTourCode(r)+"</td><td class='strong'>"+dShort(r.date)+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='10' class='empty'>No trips logged yet.</td></tr>")+
+    (rows.map(r=>"<tr><td class='mono strong'>"+tripTourCode(r)+(r.offline?" <span class='pill plain' style='font-size:9.5px'>offline</span>":"")+"</td><td class='strong'>"+dShort(r.date)+"</td><td>"+r.veh+"</td><td>"+r.driver+"</td><td class='num mono'>"+r.startKm.toLocaleString("en-IN")+"</td><td class='num mono'>"+r.endKm.toLocaleString("en-IN")+"</td><td class='num mono' style='color:var(--sea);font-weight:600'>"+r.totalKm+"</td><td style='color:var(--ink-soft)'>"+r.loc+"</td><td class='num mono'>"+r.time+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='editTrip' data-arg='"+r.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteTrip' data-arg='"+r.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='10' class='empty'>No trips logged yet.</td></tr>")+
     "</tbody></table></div></div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-top:12px'>Synced from driver app. Saved on this device so entries persist between sessions.</p>";
   }else if(t==="External Guides"){
@@ -3251,7 +3251,7 @@ function applyDriverTripLogs(){
          back to the driver here so the trip is attributed correctly. */
       var drvName=s.name;
       if((!drvName||drvName==="")&&d.phone){var _dn=function(p){return String(p||"").replace(/\D/g,"");};var drv=(drivers||[]).find(function(x){return _dn(x.phone)===_dn(d.phone);});drvName=(drv&&drv.name)||("Phone "+d.phone);}
-      tripLogs.push({id:"TR"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,date:d.date||todayISO,veh:d.veh||"—",reg:d.reg||"",driver:drvName||"—",startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:Math.max((+d.endKm||0)-(+d.startKm||0),0),loc:d.loc||"—",time:d.time||"—",startT:d.startT||"",endT:d.endT||"",tourCode:d.tourCode||""});
+      tripLogs.push({id:"TR"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,date:d.date||todayISO,veh:d.veh||"—",reg:d.reg||"",driver:drvName||"—",startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:Math.max((+d.endKm||0)-(+d.startKm||0),0),loc:d.loc||"—",time:d.time||"—",startT:d.startT||"",endT:d.endT||"",tourCode:d.tourCode||"",offline:!!d.offline});
       changed=true;
     }
     markSubProcessed(s.id);
