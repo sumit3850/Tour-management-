@@ -494,14 +494,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 127</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 128</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 127</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 128</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -565,6 +565,22 @@ const CALC_ORDER=["T1","T3","T4","T2","T8","T9","T10"];
 const CALC_LABELS={T1:"5N · South Andaman",T3:"7N · South & Little Andaman",T4:"8N · South & Little Andaman",T2:"12N · Great Nicobar",T8:"03N · Narcondam Exp (A)",T9:"03N · Narcondam Exp (B)",T10:"03N · Narcondam Exp (C)"};
 var touristType="indian";
 var currentCalcTourId="";
+/* ===== Group Quotation generator state =====
+   A second, matrix-style quotation (distinct from the per-tour invoice-style one):
+   for a chosen tour it prices several group sizes side-by-side, toggled Indian vs
+   Foreign, with an automated deposit worked out from the booking lead-time tiers. */
+var gqTour="";
+var gqType="indian";                 /* "indian" | "foreign" */
+var gqSizes=[2,4,6,8];               /* editable group-size columns (default 2,4,6,8) */
+/* Deposit tiers straight from the Payment Terms sheet. `pct` is the default deposit
+   percentage used for the automated amount (editable in the UI); `label` is the range
+   as printed on the quotation. min/max = days-in-advance window for auto-detection. */
+var GQ_TIERS=[
+  {id:"early",  label:"20–30%", pct:25,  min:61, max:99999, text:"Booking 60+ days in advance"},
+  {id:"mid",    label:"30–40%", pct:35,  min:16, max:60,    text:"Booking 16–60 days in advance"},
+  {id:"late",   label:"100%",   pct:100, min:0,  max:15,    text:"Booking 15 days or less"}
+];
+var gqTierId="early";                /* currently selected deposit tier */
 let bookings=[];
 function bookingTotalCost(b){if(b.totalOverride!=null&&b.totalOverride!=="")return parseFloat(b.totalOverride)||0;var t=tours.find(function(x){return x.id===b.tour;});if(!t||!TOUR_COSTS[t.id])return 0;var costPP=TOUR_COSTS[t.id][b.country==="India"?"indian":"foreigner"];return costPP*b.party;}
 function bookingDeposit(b){return b.deposit||0;}
@@ -1491,7 +1507,7 @@ const NAV=[
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Tour Cost Calculator"],profit:["Sales & Ops","Profit Calculator"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Tour Cost Calculator"],profit:["Sales & Ops","Profit Calculator"],groupquote:["Sales & Ops","Group Quotation"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -1775,6 +1791,7 @@ function renderView(v){
   else if(v==="logistics"){logTab(_logTab);loadSubmissions(false);startSubPoll();}
   else if(v==="calc")calc();
   else if(v==="profit")renderProfitCalc();
+  else if(v==="groupquote")renderGroupQuote();
   else if(v==="dashboard")refreshDashboard();
 }
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
@@ -2164,7 +2181,7 @@ function deleteBooking(id){if(!confirm("Delete this booking?"))return;bookings=b
 /* ===== CALCULATOR ===== */
 /* Tab bar shared by the Cost Calculator and the Profit Calculator (which now lives
    as a sub-tab of Cost Calculator rather than its own sidebar item). */
-function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button></div>";}
+function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button></div>";}
 function viewCalc(){
   if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
   const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"' "+(k===currentCalcTourId?"selected":"")+">"+CALC_LABELS[k]+"</option>";}).join("");
@@ -2406,6 +2423,225 @@ function printQuotation() {
     <\/html>
   `);
   printWindow.document.close();
+}
+
+/* ===== GROUP QUOTATION GENERATOR =====
+   A matrix-style quotation: one tour priced across several group sizes at once,
+   toggled Indian vs Foreign, with an automated deposit from the lead-time tiers.
+   Kept fully separate from the invoice-style generateQuotation() above. */
+function viewGroupQuote(){
+  return "<section class='view' id='v-groupquote'>"+calcTabsBar('groupquote')+
+    "<div class='card card-pad' style='margin-bottom:16px'>"+
+      "<div class='eyebrow'>From your costing sheet</div><div class='h-sec' style='margin-bottom:14px'>Group-size quotation</div>"+
+      "<div class='cost-grid'>"+
+        "<div class='field full'><label>Tour</label><select class='input' id='gqTour' onchange='gqTour=this.value;renderGroupQuote()'></select></div>"+
+        "<div class='field'><label>Client type</label><div class='tourist-toggle' id='gqTypeToggle'>"+
+          "<button class='btn btn-sm' data-gqt='indian' onclick='setGqType(\"indian\")'>Indian</button>"+
+          "<button class='btn btn-sm' data-gqt='foreign' onclick='setGqType(\"foreign\")'>Foreign</button>"+
+        "</div></div>"+
+        "<div class='field'><label>Group sizes (comma separated)</label><input class='input mono' id='gqSizes' value='2, 4, 6, 8' placeholder='2, 4, 6, 8' onchange='gqReadSizes();renderGroupQuote()'></div>"+
+      "</div>"+
+      "<div class='cost-grid' style='margin-top:12px'>"+
+        "<div class='field'><label>Departure date (auto deposit)</label><input class='input' type='date' id='gqDeparture' onchange='gqAutoTier();renderGroupQuote()'></div>"+
+        "<div class='field'><label>Deposit tier</label><select class='input' id='gqTierSel' onchange='gqSetTier(this.value)'>"+
+          GQ_TIERS.map(function(t){return "<option value='"+t.id+"'>"+t.text+" ("+t.label+")</option>";}).join("")+
+        "</select></div>"+
+        "<div class='field'><label>Deposit %</label><input class='input mono' type='number' id='gqPct' min='0' max='100' oninput='renderGroupQuote()'></div>"+
+      "</div>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Prices come straight from your Birding Tour Expense Calculator. Add or remove group sizes to build the columns; set a departure date and the deposit tier is picked automatically.</p>"+
+    "</div>"+
+    "<div class='card' id='gqResult'></div>"+
+  "</section>";
+}
+function setGqType(t){gqType=(t==="foreign")?"foreign":"indian";renderGroupQuote();}
+function gqReadSizes(){
+  var el=document.getElementById("gqSizes");if(!el)return;
+  var arr=String(el.value).split(/[^0-9]+/).map(function(x){return parseInt(x,10);})
+    .filter(function(n){return n>=1&&n<=10;});
+  /* unique + sorted, cap at 6 columns so the table stays printable */
+  var seen={},out=[];arr.forEach(function(n){if(!seen[n]){seen[n]=1;out.push(n);}});
+  out.sort(function(a,b){return a-b;});
+  gqSizes=out.slice(0,6);
+  if(!gqSizes.length)gqSizes=[2,4,6,8];
+}
+function gqSetTier(id){
+  gqTierId=id;
+  var t=GQ_TIERS.find(function(x){return x.id===id;})||GQ_TIERS[0];
+  var p=document.getElementById("gqPct");if(p)p.value=t.pct;
+  renderGroupQuote();
+}
+function gqAutoTier(){
+  var el=document.getElementById("gqDeparture");if(!el||!el.value)return;
+  var dep=new Date(el.value+"T00:00:00");var now=new Date();now.setHours(0,0,0,0);
+  var days=Math.round((dep-now)/864e5);
+  var t=GQ_TIERS.find(function(x){return days>=x.min&&days<=x.max;})||GQ_TIERS[0];
+  gqTierId=t.id;
+  var sel=document.getElementById("gqTierSel");if(sel)sel.value=t.id;
+  var p=document.getElementById("gqPct");if(p)p.value=t.pct;
+}
+/* Gather the current selection into a tidy object the render + generate share. */
+function gqCollect(){
+  if(!gqTour)gqTour=CALC_ORDER[0];
+  var src=SHEET_DATA[gqTour];
+  var label=CALC_LABELS[gqTour]||(src?src.title:gqTour);
+  var title=(src&&src.title)||label;
+  var tier=GQ_TIERS.find(function(x){return x.id===gqTierId;})||GQ_TIERS[0];
+  var pctEl=document.getElementById("gqPct");
+  var pct=pctEl&&pctEl.value!==""?Math.max(0,Math.min(100,parseFloat(pctEl.value)||0)):tier.pct;
+  var depEl=document.getElementById("gqDeparture");
+  var rows=gqSizes.map(function(n){
+    var d=src&&src[gqType]?src[gqType][String(n)]:null;
+    return {size:n,d:d,total:d?d.total:null,perPerson:d?d.perPerson:null,deposit:d?Math.round(d.total*pct/100):null};
+  });
+  return {key:gqTour,label:label,title:title,type:gqType,rows:rows,tier:tier,pct:pct,
+    nights:(rows[0]&&rows[0].d?rows[0].d.nights:(src&&src[gqType]&&src[gqType]["1"]?src[gqType]["1"].nights:0)),
+    departure:depEl?depEl.value:""};
+}
+function renderGroupQuote(){
+  var r=document.getElementById("gqResult");if(!r)return;
+  /* keep the controls in sync with state (first render / after nav) */
+  var tourSel=document.getElementById("gqTour");
+  if(tourSel){
+    if(!gqTour)gqTour=CALC_ORDER[0];
+    if(!tourSel.options.length)tourSel.innerHTML=CALC_ORDER.map(function(k){return "<option value='"+k+"'>"+CALC_LABELS[k]+"</option>";}).join("");
+    tourSel.value=gqTour;
+  }
+  document.querySelectorAll("#gqTypeToggle .btn").forEach(function(b){
+    var on=b.getAttribute("data-gqt")===gqType;b.classList.toggle("btn-primary",on);b.classList.toggle("btn-ghost",!on);});
+  var tierSel=document.getElementById("gqTierSel");if(tierSel)tierSel.value=gqTierId;
+  var pctEl=document.getElementById("gqPct");
+  if(pctEl&&pctEl.value===""){var t0=GQ_TIERS.find(function(x){return x.id===gqTierId;})||GQ_TIERS[0];pctEl.value=t0.pct;}
+
+  var q=gqCollect();
+  var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px'>"+rw.size+" pax</th>";}).join("");
+  var perRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums'>"+(rw.perPerson!=null?fmt(rw.perPerson):"—")+"</td>";}).join("");
+  var totRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums'>"+(rw.total!=null?fmt(rw.total):"—")+"</td>";}).join("");
+  var depRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;color:var(--sea)'>"+(rw.deposit!=null?fmt(rw.deposit):"—")+"</td>";}).join("");
+  r.innerHTML="<div class='card-pad'>"+
+    "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px'>"+
+      "<div><div class='h-sec'>"+q.title+"</div><div style='font-size:12px;color:var(--ink-soft)'>"+q.nights+" nights · "+(q.type==="foreign"?"Foreign":"Indian")+" clients</div></div>"+
+      "<button class='btn btn-primary' onclick='generateGroupQuotation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/></svg>Generate quotation</button>"+
+    "</div>"+
+    "<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px;min-width:420px'>"+
+      "<thead><tr style='border-bottom:2px solid var(--line)'><th style='text-align:left;padding:10px 12px'>Group size</th>"+headCells+"</tr></thead>"+
+      "<tbody>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;color:var(--ink-soft)'>Price per person</td>"+perRow+"</tr>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;font-weight:600'>Total tour price</td>"+totRow+"</tr>"+
+        "<tr><td style='padding:10px 12px'>Deposit ("+q.pct+"%)</td>"+depRow+"</tr>"+
+      "</tbody>"+
+    "</table></div>"+
+    gqTermsCard(q)+
+  "</div>";
+}
+/* Payment Terms card, mirroring the attached screenshot; highlights the active tier. */
+function gqTermsCard(q){
+  var rows=GQ_TIERS.map(function(t){
+    var on=t.id===q.tier.id;
+    return "<div style='display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:8px;"+(on?"background:var(--surface-2);font-weight:600":"")+"'>"+
+      "<span>"+t.text+(on?" <span style=\"color:var(--sea);font-size:11px\">• selected</span>":"")+"</span><span style='color:var(--forest)'>"+t.label+" deposit</span></div>";
+  }).join("");
+  return "<div style='margin-top:16px;padding:14px;border:1px solid var(--line-soft);border-radius:10px'>"+
+    "<div style='font-weight:700;font-size:13px;margin-bottom:8px'>Payment Terms</div>"+rows+
+    "<div style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Deposit amounts above use "+q.pct+"% of the total tour price"+(q.departure?" · departure "+dmy(new Date(q.departure+"T00:00:00")):"")+".</div>"+
+  "</div>";
+}
+function generateGroupQuotation(){
+  var q=gqCollect();
+  var valid=q.rows.filter(function(rw){return rw.total!=null;});
+  if(!valid.length){alert("No costing data for this tour / client type. Pick another tour or add rates in the Cost Calculator.");return;}
+  var qid='IEO-GQ-'+Date.now().toString(36).toUpperCase();
+  var today=dmy(new Date());
+  var validUntil=dmy(new Date(Date.now()+14*864e5));
+  var logoUrl=(function(){try{return new URL('assets/logo.png',location.href).href;}catch(e){return 'assets/logo.png';}})();
+  var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db'>"+rw.size+" guests</th>";}).join("");
+  var cell=function(v){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums'>"+(v!=null?fmt(v):"—")+"</td>";};
+  var perRow=q.rows.map(function(rw){return cell(rw.perPerson);}).join("");
+  var totRow=q.rows.map(function(rw){return cell(rw.total);}).join("");
+  var depRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;color:#1f7a54;font-weight:600'>"+(rw.deposit!=null?fmt(rw.deposit):"—")+"</td>";}).join("");
+  var termRows=GQ_TIERS.map(function(t){
+    var on=t.id===q.tier.id;
+    return "<tr"+(on?" style='background:#eaf4ee;font-weight:700'":"")+"><td style='padding:9px 12px;border-bottom:1px solid #eef4f0'>"+t.text+"</td><td style='padding:9px 12px;border-bottom:1px solid #eef4f0;text-align:right;color:#15563c'>"+t.label+" deposit</td></tr>";
+  }).join("");
+  var html=
+    "<div class='modal-head'>"+
+      "<div><div class='eyebrow'>Group Quotation</div><div class='h-sec'>"+q.title+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+qid+" · "+today+"</div></div>"+
+      XBTN+
+    "</div>"+
+    "<div class='modal-body' style='padding:0'>"+
+      "<div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+
+        "<div style='text-align:center;border-bottom:2px solid #143a2e;padding-bottom:16px;margin-bottom:20px'>"+
+          "<img src='"+logoUrl+"' alt='Island Explorer Birding Tours' style='max-width:280px;max-height:120px;object-fit:contain;margin:0 auto 6px' onerror=\"if(this.src.indexOf('logo.png')>-1){this.src=this.src.replace('logo.png','logo.jpg');}else{this.style.display='none';}\">"+
+          "<div style='font-size:11px;color:#5a6b62;margin-top:6px'>Sumit Kumar · +91 99332 02175 · info@islandexplorer.in</div>"+
+        "</div>"+
+        "<div style='display:flex;justify-content:space-between;margin-bottom:18px;font-size:13px'>"+
+          "<div><div style='font-size:10px;color:#5a6b62;text-transform:uppercase;letter-spacing:.06em'>Quotation To</div><div style='font-weight:600;margin-top:2px'>Guest Name</div><div style='color:#5a6b62'>Country</div></div>"+
+          "<div style='text-align:right'><div><span style='color:#5a6b62'>Quotation #:</span> <b>"+qid+"</b></div><div><span style='color:#5a6b62'>Date:</span> "+today+"</div><div><span style='color:#5a6b62'>Valid Until:</span> "+validUntil+"</div></div>"+
+        "</div>"+
+        "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
+          "<div style='font-weight:700;font-size:15px;margin-bottom:6px;color:#15563c'>"+q.title+"</div>"+
+          "<div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+
+            "<div><span style='color:#5a6b62'>Duration:</span> <b>"+q.nights+" nights</b></div>"+
+            "<div><span style='color:#5a6b62'>Client type:</span> <b>"+(q.type==="foreign"?"Foreigner":"Indian")+"</b></div>"+
+            "<div><span style='color:#5a6b62'>Guide:</span> <b>Sumit Kumar</b></div>"+
+            (q.departure?"<div><span style='color:#5a6b62'>Departure:</span> <b>"+dmy(new Date(q.departure+"T00:00:00"))+"</b></div>":"")+
+          "</div>"+
+        "</div>"+
+        "<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:16px'>"+
+          "<thead><tr><th style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db'>Group size</th>"+headCells+"</tr></thead>"+
+          "<tbody>"+
+            "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>Price per person</td>"+perRow+"</tr>"+
+            "<tr style='background:#f5faf7'><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;font-weight:700'>Total tour price</td>"+totRow+"</tr>"+
+            "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0'>Deposit to confirm ("+q.pct+"%)</td>"+depRow+"</tr>"+
+          "</tbody>"+
+        "</table></div>"+
+        "<div style='font-size:12px;color:#5a6b62;margin-bottom:16px'><div style='font-weight:600;color:#20302b;margin-bottom:4px'>Includes:</div>Accommodation, private vehicle, expert guiding, ferry / ship tickets, forest permits & entry fees, meals as listed.</div>"+
+        "<table style='width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:16px'>"+
+          "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db'>Payment Terms</th></tr></thead>"+
+          "<tbody>"+termRows+"</tbody>"+
+        "</table>"+
+        "<div style='font-size:11px;color:#5a6b62;border-top:1px solid #e6efe9;padding-top:10px'>"+
+          "• Prices are in Indian Rupees (INR) · Subject to availability<br>"+
+          "• Balance due 30 days before departure<br>"+
+          "• Cancellation: Full refund 60+ days · 50% refund 30-60 days · No refund &lt;30 days<br>"+
+          "• All permits subject to Forest Department approval · Itinerary may change due to weather/sea conditions"+
+        "</div>"+
+        "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
+          "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>Island Explorer Birding Tours</div>"+
+          "<div style='font-size:11px;color:#5a6b62'>Port Blair · Andaman & Nicobar Islands · India</div>"+
+        "</div>"+
+      "</div>"+
+    "</div>"+
+    "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
+      "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
+      "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit quotation</button>"+
+      "<button class='btn btn-sea' onclick='shareGroupQuoteWhatsApp("+gqShareArg(q,qid)+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5a8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z'/></svg>WhatsApp</button>"+
+      "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z'/></svg>PDF / Print</button>"+
+    "</div>";
+  document.getElementById('modal').innerHTML=html;
+  openScrim();
+}
+/* Serialise the quote into a safe argument string for the WhatsApp handler. */
+function gqShareArg(q,qid){
+  var payload={qid:qid,title:q.title,type:q.type,pct:q.pct,nights:q.nights,
+    rows:q.rows.map(function(rw){return {size:rw.size,perPerson:rw.perPerson,total:rw.total,deposit:rw.deposit};})};
+  return "'"+encodeURIComponent(JSON.stringify(payload))+"'";
+}
+function shareGroupQuoteWhatsApp(enc){
+  var q;try{q=JSON.parse(decodeURIComponent(enc));}catch(e){return;}
+  var lines=q.rows.filter(function(rw){return rw.total!=null;}).map(function(rw){
+    return rw.size+' guests: '+fmt(rw.perPerson)+'/person · Total '+fmt(rw.total)+' · Deposit '+fmt(rw.deposit);
+  });
+  var text=encodeURIComponent(
+    '*Island Explorer Birding Tours*\n\n'+
+    'Quotation: '+q.qid+'\n'+
+    'Tour: '+q.title+'\n'+
+    'Duration: '+q.nights+' nights · '+(q.type==="foreign"?"Foreigner":"Indian")+' clients\n\n'+
+    '*Group prices:*\n'+lines.join('\n')+'\n\n'+
+    '*Includes:* Private vehicle, forest permits, lodge stay, meals, expert guiding\n\n'+
+    'To confirm: '+q.pct+'% deposit required\nValid for 14 days\n\n'+
+    'Contact: Sumit Kumar\n+91 99332 02175'
+  );
+  window.open('https://wa.me/?text='+text,'_blank');
 }
 function calcSelection(){
   var key=document.getElementById("calcCategory")?document.getElementById("calcCategory").value:currentCalcTourId;
@@ -4107,8 +4343,8 @@ function boot(keepView){
   ensureTourCodes();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewProfitCalc(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
-  renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderLog();renderCRM();renderCustomers();renderOperators();renderReservations();
+  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewProfitCalc(),viewGroupQuote(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
+  renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderLog();renderCRM();renderCustomers();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
     /* In-place rebuild: no navigation, no history reset — and visually silent.
        Suppress the .view fade-in (it replays on every innerHTML rebuild, which
@@ -4150,6 +4386,7 @@ function refreshUI(){
     else if(curView==="reservations"){renderReservations();renderGuides();}
     else if(curView==="logistics")renderLog(_logTab);
     else if(curView==="profit"&&typeof renderProfitCalc==="function")renderProfitCalc();
+    else if(curView==="groupquote"&&typeof renderGroupQuote==="function")renderGroupQuote();
     /* dashboard, calc, requests, settings: intentionally no visible refresh */
   }catch(e){}
   _sbApplying=wasApplying;
