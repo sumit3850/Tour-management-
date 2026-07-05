@@ -62,6 +62,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
     <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
     <h1 id="who">Sign in to see your operations</h1>
   </div>
+  <div id="netbar" style="display:none;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:14px"></div>
   <div id="err" class="err" style="display:none"></div>
   <div class="card" id="gate">
     <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered WhatsApp / phone number">
@@ -78,6 +79,7 @@ const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const presetGuide=(new URLSearchParams(location.search).get("guide")||"").trim();
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+function ensureSb(){if(!sb&&window.supabase){try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}}return sb;}
 var myGuide=null,myPhone="",myCode="",allOps=[],allVehicles=[],allDrivers=[];
 /* "Add to Home Screen" support — only shown on the sign-in screen, so this
    never gets confused with the main console app's own install prompt.
@@ -102,44 +104,102 @@ function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;va
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
 function normPhone(p){return String(p||"").replace(/\D/g,"");}
 
+/* ===== OFFLINE SUPPORT =====
+   The guide app must open and stay usable with no internet: the last
+   successful sign-in (guide + assigned ops) is cached, every status change is
+   queued locally and flushed to Island Explorer automatically when the
+   connection returns, and all of it lives in localStorage so leaving the app
+   idle for hours (or the phone discarding the tab) never loses anything. */
+var LS_SESSION="ie_gd_session_v1",LS_QUEUE="ie_gd_queue_v1";
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function isOnline(){return navigator.onLine!==false;}
+var syncQueue=lsGet(LS_QUEUE)||[];
+function saveSession(){if(myGuide)lsSet(LS_SESSION,{phone:myPhone,code:myCode,guide:myGuide,ops:allOps,vehicles:allVehicles,drivers:allDrivers,savedAt:Date.now()});}
+function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
+function enqueue(rec){syncQueue.push(rec);saveQueue();}
+function updateNet(){
+  var b=document.getElementById("netbar");if(!b)return;var pend=syncQueue.length;
+  if(!isOnline()){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
+  if(pend){b.style.display="block";b.style.background="#e7f1fb";b.style.color="var(--blue)";b.innerHTML=pend+" change"+(pend>1?"s":"")+" waiting to sync · <span style='cursor:pointer;text-decoration:underline' onclick='syncNow()'>Sync now</span>";return;}
+  b.style.display="none";
+}
+async function flushQueue(){
+  ensureSb();
+  if(!sb||!isOnline()||!syncQueue.length)return;
+  var still=[];
+  for(var i=0;i<syncQueue.length;i++){var rec=syncQueue[i];try{var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});if(up&&up.error)still.push(rec);}catch(e){still.push(rec);}}
+  syncQueue=still;saveQueue();
+}
+async function syncNow(){await flushQueue();if(isOnline())backgroundRefresh();}
+function showApp(){
+  document.getElementById("gate").style.display="none";
+  document.getElementById("logoutBtn").style.display="block";
+  document.getElementById("who").textContent="Operations for "+((myGuide&&myGuide.name)||"");
+  renderList();updateNet();
+}
+async function backgroundRefresh(){
+  ensureSb();
+  if(!sb||!isOnline()||!myPhone||!myCode)return;
+  await flushQueue();
+  try{
+    var res=await sb.rpc("guide_login",{p_phone:myPhone,p_code:myCode});
+    if(res&&!res.error&&res.data&&!res.data.error){
+      myGuide=res.data.guide;allOps=res.data.ops||[];
+      allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
+      allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
+      saveSession();renderList();updateNet();
+    }
+  }catch(e){}
+}
+function offlineRestore(phone,code){
+  var s=lsGet(LS_SESSION);
+  if(s&&s.guide&&String(s.phone)===String(phone)&&String(s.code)===String(code)){
+    myGuide=s.guide;myPhone=phone;myCode=code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];
+    showApp();return true;
+  }
+  return false;
+}
+window.addEventListener("online",function(){updateNet();syncNow();});
+window.addEventListener("offline",updateNet);
+document.addEventListener("visibilitychange",function(){saveSession();if(document.visibilityState==="visible"&&isOnline())syncNow();});
+window.addEventListener("pagehide",saveSession);
+window.addEventListener("load",function(){
+  var s=lsGet(LS_SESSION);
+  if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();if(isOnline())backgroundRefresh();}
+  else updateNet();
+});
+
 async function doLogin(){
   showErr("");
   var phone=normPhone(document.getElementById("gatePhone").value);
   var code=document.getElementById("gateCode").value.trim();
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
-  if(!sb){showErr("Service unavailable right now. Please try again shortly.");return;}
   var btn=document.querySelector("#gate .btn");if(btn){btn.disabled=true;btn.textContent="Signing in…";}
+  function done(){if(btn){btn.disabled=false;btn.textContent="View my operations";}}
+  function fail(m){done();showErr(m);}
+  if(!isOnline()||!sb){if(offlineRestore(phone,code)){done();return;}return fail("You're offline and haven't signed in on this phone yet. Connect to the internet for your first sign-in.");}
   try{
-    /* Server-side login check (RPC, security definer) — the guide/driver directory
-       and full ops table are never sent to the browser; only this guide's own
-       record and their own assigned ops come back. */
     var res=await sb.rpc("guide_login",{p_phone:phone,p_code:code});
-    /* Distinguish "the RPC itself failed" (setup problem — the security SQL hasn't
-       been run, or was run before this login existed) from "it ran fine but no
-       guide matched" (a real wrong phone/code), so a setup issue doesn't look
-       identical to a typo and go unnoticed. */
-    if(res.error){if(btn){btn.disabled=false;btn.textContent="View my operations";}showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
-    if(!res.data||res.data.error){if(btn){btn.disabled=false;btn.textContent="View my operations";}showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    if(res.error){if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
+    if(!res.data||res.data.error){return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
     myGuide=res.data.guide;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
-    /* legs must be chronological — the legs summary treats legs[0].start as where the primary segment ends */
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
-    allVehicles=res.data.vehicles||[];
-    allDrivers=res.data.drivers||[];
-    document.getElementById("gate").style.display="none";
-    document.getElementById("logoutBtn").style.display="block";
-    document.getElementById("who").textContent="Operations for "+myGuide.name;
-    renderList();
-  }catch(e){if(btn){btn.disabled=false;btn.textContent="View my operations";}showErr("Couldn't sign you in. Please try again.");}
+    allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
+    done();saveSession();showApp();flushQueue();
+  }catch(e){if(offlineRestore(phone,code)){done();return;}fail("Couldn't sign you in. Please try again.");}
 }
 function doLogout(){
   myGuide=null;myPhone="";myCode="";allOps=[];allVehicles=[];allDrivers=[];
+  lsDel(LS_SESSION); /* keep the sync queue — unsynced changes must survive logout */
   document.getElementById("gatePhone").value="";document.getElementById("gateCode").value="";
   document.getElementById("gate").style.display="block";
   document.getElementById("logoutBtn").style.display="none";
   document.getElementById("list").style.display="none";
   document.getElementById("who").textContent="Sign in to see your operations";
-  showErr("");
+  showErr("");updateNet();
 }
 
 function myOps(){return allOps.filter(function(o){return (o.guide||"").trim().toLowerCase()===myGuide.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
@@ -186,7 +246,7 @@ function renderList(){
       "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
       (o.pocName?"<div class='rows' style='margin-bottom:6px'>"+row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):"")+"</div>":"")+
       "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
-      (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
+      (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       opLegsSummaryHtml(o)+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
@@ -220,18 +280,15 @@ async function submitReason(opId){
 }
 async function setOpStatus(opId,status){await postStatus(opId,status,"");}
 async function postStatus(opId,status,reason){
-  if(!sb){showErr("Service unavailable right now.");return;}
   showErr("");
-  setBusy(opId,true,"Saving…");
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),
     data:{opId:opId,newStatus:status,reason:reason,guide:myGuide.name}};
-  try{
-    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
-    if(up.error){setBusy(opId,false);showErr("Could not update: "+up.error.message);return;}
-    var o=allOps.find(function(x){return x.id===opId;});
-    if(o){o.status=status;if(reason){o.guideFeedback=reason;o.guideFeedbackAt=rec.created_at;}}
-    renderList();
-  }catch(e){setBusy(opId,false);showErr("Network error. Please try again.");}
+  /* Apply locally first (instant + offline-safe), then queue — flushed now if
+     online, later if not. */
+  var o=allOps.find(function(x){return x.id===opId;});
+  if(o){o.status=status;if(reason){o.guideFeedback=reason;o.guideFeedbackAt=rec.created_at;}}
+  enqueue(rec);saveSession();renderList();
+  await flushQueue();updateNet();
 }
 </script>
 </body>
