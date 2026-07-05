@@ -94,7 +94,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v125</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v126</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -290,12 +290,17 @@ function showCtxHint(){
 }
 /* On open, restore the last session immediately so the app works offline, then
    always try to refresh in the background (the attempt sorts out connectivity). */
+function showOfflineBtn(){var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="block";}
 window.addEventListener("load",async function(){
   var lv=document.getElementById("logView");if(lv)lv.addEventListener("input",saveDraft);
   var s=await durGet(LS_SESSION); /* localStorage first, then the durable IndexedDB copy */
   if(s&&s.driver){myDriver=s.driver;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;showApp();backgroundRefresh();}
-  else{updateNet();updateDiag();showCtxHint();}
+  else{updateNet();updateDiag();showCtxHint();if(!isOnline())showOfflineBtn();}
 });
+/* The offline RPC can hang for a long time on a phone with no signal; cap it
+   so we fall through to the offline path quickly instead of stalling on
+   "Signing in…". */
+function rpcTimed(name,args,ms){return Promise.race([sb.rpc(name,args),new Promise(function(r){setTimeout(function(){r({error:{message:"timeout — no connection"}});},ms||7000);})]);}
 
 async function doLogin(){
   showErr("");
@@ -307,15 +312,15 @@ async function doLogin(){
   function fail(m){done();showErr(m);}
   /* Network failure with nothing cached: don't dead-end — offer the guaranteed
      offline path (log trips now, sync later) that needs no prior caching. */
-  function failOffline(m){done();showErr(m);var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="block";}
+  function failOffline(m){done();showErr(m);showOfflineBtn();}
   /* Always ATTEMPT the real sign-in — never pre-block on navigator.onLine
      (which is unreliable on Android). Only fall back to the cached session if
      the network request itself fails. */
   ensureSb();
-  var OFFLINE_MSG="You're offline. If you've signed in on this phone before, it should restore automatically — otherwise tap \"Continue offline\" below to log trips now; they'll sync when you're back online.";
+  var OFFLINE_MSG="Can't reach the internet. If you've signed in on this phone before it restores automatically — otherwise tap \"Continue offline\" below to log trips now; they'll sync when you're back online.";
   if(!sb){if(await offlineRestore(phone,code)){done();return;}return failOffline(OFFLINE_MSG);}
   try{
-    var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
+    var res=await rpcTimed("driver_login",{p_phone:phone,p_code:code},7000);
     if(res.error){_netOk=false;if(await offlineRestore(phone,code)){done();return;}
       if(netLikeErr(res.error.message))return failOffline(OFFLINE_MSG);
       return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
