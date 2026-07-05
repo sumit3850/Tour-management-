@@ -76,7 +76,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v125</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v126</span></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
@@ -225,11 +225,13 @@ function showCtxHint(){
     ? "⚠ <b>You've opened this inside a chat app's browser.</b> To use it offline, first install it: tap the menu (⋮) → <b>Open in Chrome/Browser</b>, then tap <b>Install Guide App</b> below, open it from your <b>home-screen icon</b>, and sign in there. A sign-in here won't be saved for offline."
     : "📲 <b>To use this offline:</b> tap <b>Install Guide App</b> below (Add to Home Screen), then open the app from your <b>home-screen icon</b> and sign in there. Signing in in a temporary browser tab won't be saved for offline.";
 }
+function showOfflineBtn(){var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="block";}
 window.addEventListener("load",async function(){
   var s=await durGet(LS_SESSION);
   if(s&&s.guide){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];showApp();backgroundRefresh();}
-  else{updateNet();updateDiag();showCtxHint();}
+  else{updateNet();updateDiag();showCtxHint();if(!isOnline())showOfflineBtn();}
 });
+function rpcTimed(name,args,ms){return Promise.race([sb.rpc(name,args),new Promise(function(r){setTimeout(function(){r({error:{message:"timeout — no connection"}});},ms||7000);})]);}
 
 async function doLogin(){
   showErr("");showOk("");
@@ -239,15 +241,15 @@ async function doLogin(){
   var btn=document.querySelector("#gate .btn");if(btn){btn.disabled=true;btn.textContent="Signing in…";}
   function done(){if(btn){btn.disabled=false;btn.textContent="View my operations";}}
   function fail(m){done();showErr(m);}
-  function failOffline(m){done();showErr(m);var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="block";}
+  function failOffline(m){done();showErr(m);showOfflineBtn();}
   /* Always ATTEMPT the real sign-in — never pre-block on navigator.onLine
      (unreliable on Android). Fall back to the cached session only if the
      network request itself fails. */
   ensureSb();
-  var OFFLINE_MSG="You're offline. If you've signed in on this phone before, it should restore automatically — otherwise tap \"Continue offline\" below.";
+  var OFFLINE_MSG="Can't reach the internet. If you've signed in on this phone before it restores automatically — otherwise tap \"Continue offline\" below.";
   if(!sb){if(await offlineRestore(phone,code)){done();return;}return failOffline(OFFLINE_MSG);}
   try{
-    var res=await sb.rpc("guide_login",{p_phone:phone,p_code:code});
+    var res=await rpcTimed("guide_login",{p_phone:phone,p_code:code},7000);
     if(res.error){_netOk=false;if(await offlineRestore(phone,code)){done();return;}
       if(netLikeErr(res.error.message))return failOffline(OFFLINE_MSG);
       return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
