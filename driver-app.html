@@ -70,6 +70,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="brandtext" style="display:none" class="brand">Island <span class="ex">Explorer</span></div>
     <h1 id="who">Sign in to log your trips</h1>
   </div>
+  <div id="netbar" style="display:none;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600;margin-bottom:14px"></div>
   <div id="err" class="err" style="display:none"></div>
   <div class="ok-box" id="okbox"></div>
   <div class="card" id="gate">
@@ -96,6 +97,10 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
+/* If supabase-js wasn't ready at first paint (slow/again-cached load), create
+   the client lazily the moment it becomes available — so a queued change can
+   still flush even if the very first init missed. */
+function ensureSb(){if(!sb&&window.supabase){try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}}return sb;}
 var myDriver=null,myPhone="",myCode="",allOps=[],myVehicles=[];
 var mySavedTrips=null,_savedLoading=false; /* null = not fetched yet */
 var todayISO=new Date().toISOString().slice(0,10);
@@ -123,46 +128,132 @@ function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;va
 function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
 function normPhone(p){return String(p||"").replace(/\D/g,"");}
 
+/* ===== OFFLINE SUPPORT =====
+   The app must open and stay usable with no internet. The last successful
+   sign-in (driver + assigned ops + saved trips) is cached; every status
+   change and trip log is queued locally and flushed to Island Explorer
+   automatically when the connection returns; and all of it — plus a draft of
+   the trip form being typed — lives in localStorage, so leaving the app idle
+   for hours (or the phone silently discarding the tab) never loses anything. */
+var LS_SESSION="ie_drv_session_v1",LS_QUEUE="ie_drv_queue_v1",LS_DRAFT="ie_drv_draft_v1";
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||"null");}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+function isOnline(){return navigator.onLine!==false;}
+var syncQueue=lsGet(LS_QUEUE)||[];
+function saveSession(){if(myDriver)lsSet(LS_SESSION,{phone:myPhone,code:myCode,driver:myDriver,ops:allOps,vehicles:myVehicles,savedTrips:mySavedTrips,savedAt:Date.now()});}
+function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
+function enqueue(rec){syncQueue.push(rec);saveQueue();}
+function updateNet(){
+  var b=document.getElementById("netbar");if(!b)return;
+  var signedIn=!!myDriver,pend=syncQueue.length;
+  if(!isOnline()){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
+  if(pend){b.style.display="block";b.style.background="#e7f1fb";b.style.color="var(--blue)";b.innerHTML=pend+" change"+(pend>1?"s":"")+" waiting to sync · <span style='cursor:pointer;text-decoration:underline' onclick='syncNow()'>Sync now</span>";return;}
+  b.style.display="none";
+}
+async function flushQueue(){
+  ensureSb();
+  if(!sb||!isOnline()||!syncQueue.length)return;
+  var still=[];
+  for(var i=0;i<syncQueue.length;i++){
+    var rec=syncQueue[i];
+    try{var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});if(up&&up.error)still.push(rec);}
+    catch(e){still.push(rec);}
+  }
+  syncQueue=still;saveQueue();
+}
+async function syncNow(){await flushQueue();if(isOnline())backgroundRefresh();}
+function showApp(){
+  document.getElementById("gate").style.display="none";
+  document.getElementById("app").style.display="block";
+  document.getElementById("logoutBtn").style.display="block";
+  document.getElementById("who").textContent="Welcome, "+((myDriver&&myDriver.name)||"");
+  renderTrips();renderLogForm();restoreDraft();updateNet();
+}
+/* Re-fetch fresh data (and flush any queued writes) without disturbing the
+   view — used on sign-in, when coming back online, and when the app regains
+   focus after being idle. */
+async function backgroundRefresh(){
+  ensureSb();
+  if(!sb||!isOnline()||!myPhone||!myCode)return;
+  await flushQueue();
+  try{
+    var res=await sb.rpc("driver_login",{p_phone:myPhone,p_code:myCode});
+    if(res&&!res.error&&res.data&&!res.data.error){
+      myDriver=res.data.driver;allOps=res.data.ops||[];
+      allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
+      myVehicles=res.data.vehicles||[];
+      saveSession();renderTrips();updateNet();
+    }
+  }catch(e){}
+  loadSavedTrips();
+}
+function offlineRestore(phone,code){
+  var s=lsGet(LS_SESSION);
+  if(s&&s.driver&&String(s.phone)===String(phone)&&String(s.code)===String(code)){
+    myDriver=s.driver;myPhone=phone;myCode=code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;
+    showApp();return true;
+  }
+  return false;
+}
+/* Persist / restore a half-finished trip-log form so a reload after hours idle
+   (or the OS discarding the tab) doesn't wipe what the driver already typed. */
+function saveDraft(){
+  var lv=document.getElementById("logView");if(!lv||lv.style.display==="none")return;
+  var d={};["dl_tour","dl_customtour","dl_date","dl_veh","dl_reg","dl_startt","dl_endt","dl_startkm","dl_endkm","dl_loc"].forEach(function(id){var el=document.getElementById(id);if(el)d[id]=el.value;});
+  lsSet(LS_DRAFT,d);
+}
+function restoreDraft(){
+  var d=lsGet(LS_DRAFT);if(!d)return;
+  Object.keys(d).forEach(function(id){var el=document.getElementById(id);if(el&&d[id]!=null&&d[id]!=="")el.value=d[id];});
+  if(typeof onTourPick==="function")onTourPick();
+}
+window.addEventListener("online",function(){updateNet();syncNow();});
+window.addEventListener("offline",updateNet);
+document.addEventListener("visibilitychange",function(){saveSession();saveDraft();if(document.visibilityState==="visible"&&isOnline())syncNow();});
+window.addEventListener("pagehide",function(){saveSession();saveDraft();});
+/* On open, restore the last session immediately so the app works offline, then
+   refresh in the background if there's a connection. */
+window.addEventListener("load",function(){
+  var lv=document.getElementById("logView");if(lv)lv.addEventListener("input",saveDraft);
+  var s=lsGet(LS_SESSION);
+  if(s&&s.driver){myDriver=s.driver;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];myVehicles=s.vehicles||[];mySavedTrips=s.savedTrips||null;showApp();if(isOnline())backgroundRefresh();}
+  else updateNet();
+});
+
 async function doLogin(){
   showErr("");
   var phone=normPhone(document.getElementById("gatePhone").value);
   var code=document.getElementById("gateCode").value.trim();
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
-  if(!sb){showErr("Service unavailable right now. Please try again shortly.");return;}
   var btn=document.getElementById("loginBtn");btn.disabled=true;var oldTxt=btn.textContent;btn.textContent="Signing in…";
+  function done(){btn.disabled=false;btn.textContent=oldTxt;}
+  function fail(m){done();showErr(m);}
+  /* Offline (or no Supabase client): fall back to the cached session for these
+     exact credentials — the driver can still see their ops and log offline. */
+  if(!isOnline()||!sb){if(offlineRestore(phone,code)){done();return;}return fail("You're offline and haven't signed in on this phone yet. Connect to the internet for your first sign-in.");}
   try{
-    /* Server-side login check (RPC, security definer) — the driver directory and
-       full ops table are never sent to the browser; only this driver's own record
-       and their own assigned ops come back. */
     var res=await sb.rpc("driver_login",{p_phone:phone,p_code:code});
-    /* Distinguish "the RPC itself failed" (setup problem — the security SQL hasn't
-       been run, or was run before this login existed) from "it ran fine but no
-       driver matched" (a real wrong phone/code), so a setup issue doesn't look
-       identical to a typo and go unnoticed. */
-    if(res.error){btn.disabled=false;btn.textContent=oldTxt;showErr("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");return;}
-    if(!res.data||res.data.error){btn.disabled=false;btn.textContent=oldTxt;showErr("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");return;}
+    if(res.error){if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
+    if(!res.data||res.data.error){return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
     myDriver=res.data.driver;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
-    /* legs must be chronological — myTripEntries treats legs[0].start as where the primary segment ends */
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     myVehicles=res.data.vehicles||[];
-    document.getElementById("gate").style.display="none";
-    document.getElementById("app").style.display="block";
-    document.getElementById("logoutBtn").style.display="block";
-    document.getElementById("who").textContent="Welcome, "+myDriver.name;
-    renderTrips();renderLogForm();
-    loadSavedTrips(); /* prefetch in the background — Saved Trips is ready by the time it's opened */
-  }catch(e){btn.disabled=false;btn.textContent=oldTxt;showErr("Couldn't sign you in. Please try again.");}
+    done();saveSession();showApp();flushQueue();
+    loadSavedTrips();
+  }catch(e){if(offlineRestore(phone,code)){done();return;}fail("Couldn't sign you in. Please try again.");}
 }
 function doLogout(){
   myDriver=null;myPhone="";myCode="";allOps=[];myVehicles=[];mySavedTrips=null;_savedLoading=false;_tripFilter="Scheduled";
+  lsDel(LS_SESSION);lsDel(LS_DRAFT); /* keep the sync queue — unsynced changes must survive logout */
   document.getElementById("gatePhone").value="";
   document.getElementById("gateCode").value="";
   document.getElementById("app").style.display="none";
   document.getElementById("gate").style.display="block";
   document.getElementById("logoutBtn").style.display="none";
   document.getElementById("who").textContent="Sign in to log your trips";
-  showErr("");showOk("");
+  showErr("");showOk("");updateNet();
   switchTab("trips");
 }
 /* Registration number for a vehicle name — used wherever a vehicle is shown, so a
@@ -270,7 +361,7 @@ function renderTrips(){
       "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(e.status)+"' id='statuspill_"+eid+"'>"+e.status+"</span></div>"+
       "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+"</div>"+
       "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
-      (function(){var lines=staysLinesForRange(o,lg.start,lg.end);if(!lines.length)return "";return "<div style='margin-top:8px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
+      (function(){var lines=staysLinesForRange(o,lg.start,lg.end);if(!lines.length)return "";return "<div style='margin-top:8px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
       (e.fb?"<div class='fb' style='display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Your note ("+dmy(e.fbAt)+"):</b> "+e.fb+"</div><button onclick=\"clearMyNote('"+eid+"','"+o.id+"','"+sk+"')\" style='flex-shrink:0;border:1px solid #e0c68a;background:#fff;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#7a5a00;cursor:pointer'>✕ Remove</button></div>":"")+
       "<div class='acts' id='acts_"+eid+"'>"+
@@ -315,25 +406,22 @@ async function clearMyNote(entryId,opId,segKey){
   await postOpStatus(entryId,opId,segKey,cur,"",true);
 }
 async function postOpStatus(entryId,opId,segKey,status,reason,clearFeedback){
-  if(!sb){showErr("Service unavailable right now.");return;}
   showErr("");
-  setBusy(entryId,true,"Saving…");
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
     data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,segKey:segKey||"primary",clearFeedback:!!clearFeedback}};
-  try{
-    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
-    if(up.error){setBusy(entryId,false);showErr("Could not update: "+up.error.message);return;}
-    var o=allOps.find(function(x){return x.id===opId;});
-    if(o){
-      /* Apply to THIS segment only — leg 1 completing must not move leg 3. */
-      var tgt=o;
-      if(segKey&&segKey!=="primary"){tgt=(o.legs||[]).find(function(x){return ((x.start||"")+"|"+(x.driver||""))===segKey;})||o;}
-      tgt.driverStatus=status;
-      if(reason){tgt.driverFeedback=reason;tgt.driverFeedbackAt=rec.created_at;}
-      else if(clearFeedback){tgt.driverFeedback="";tgt.driverFeedbackAt="";}
-    }
-    renderTrips();
-  }catch(e){setBusy(entryId,false);showErr("Network error. Please try again.");}
+  /* Apply locally first so the card moves instantly and offline works, then
+     queue the update — flushed now if online, later if not. Apply to THIS
+     segment only: leg 1 completing must not move leg 3. */
+  var o=allOps.find(function(x){return x.id===opId;});
+  if(o){
+    var tgt=o;
+    if(segKey&&segKey!=="primary"){tgt=(o.legs||[]).find(function(x){return ((x.start||"")+"|"+(x.driver||""))===segKey;})||o;}
+    tgt.driverStatus=status;
+    if(reason){tgt.driverFeedback=reason;tgt.driverFeedbackAt=rec.created_at;}
+    else if(clearFeedback){tgt.driverFeedback="";tgt.driverFeedbackAt="";}
+  }
+  enqueue(rec);saveSession();renderTrips();
+  await flushQueue();updateNet();
 }
 /* Jump to the log-trip tab with this operation's tour + vehicle pre-selected. */
 function startLogFor(opId){
@@ -388,7 +476,19 @@ function clearTrip(){
   var dt=document.getElementById("dl_date");if(dt)dt.value=todayISO;
   var tf=document.getElementById("dl_tour");if(tf)tf.value="";
   var cw=document.getElementById("dl_customwrap");if(cw)cw.style.display="none";
-  showErr("");showOk("");
+  lsDel(LS_DRAFT);showErr("");showOk("");
+}
+/* Trips still waiting in the sync queue, shown in Saved Trips with a badge so
+   the driver can see their offline entries were captured. */
+function pendingTripCards(){
+  return syncQueue.filter(function(r){return r.type==="driver_trip_log";}).map(function(r){
+    var d=r.data,total=Math.max((+d.endKm||0)-(+d.startKm||0),0);
+    return {id:r.id,fromSub:r.id,date:d.date,veh:d.veh,reg:d.reg,startKm:+d.startKm||0,endKm:+d.endKm||0,totalKm:total,loc:d.loc,time:d.time,startT:d.startT,endT:d.endT,tourCode:d.tourCode,_pending:true};
+  });
+}
+function removePendingTrip(id){
+  if(!confirm("Remove this un-synced trip?"))return;
+  syncQueue=syncQueue.filter(function(r){return r.id!==id;});saveQueue();saveSession();renderSavedTrips();
 }
 /* Stamp the current device time (HH:MM) — used by the Start Now / End Now buttons so
    the driver never has to fight the phone's analog clock picker. */
@@ -418,33 +518,34 @@ async function submitTrip(){
     tc=(mop&&mop.tourId)||"";
   }
   var reg=document.getElementById("dl_reg").value.trim();
-  var btn=document.getElementById("dl_submit");btn.disabled=true;btn.textContent="Saving…";
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
     data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc}};
-  try{
-    var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
-    btn.disabled=false;btn.textContent="Save trip";
-    if(up.error){showErr("Could not save: "+up.error.message);return;}
-    showOk("Trip saved — it will appear in Island Explorer's Activities Log shortly.");
-    mySavedTrips=null; /* force a refetch next time Saved Trips is opened */
-    renderLogForm();
-  }catch(e){btn.disabled=false;btn.textContent="Save trip";showErr("Network error. Please try again.");}
+  /* Queue the trip (flushed now if online, later if not), clear the draft and
+     the form. The trip shows in Saved Trips straight away via the queue. */
+  enqueue(rec);lsDel(LS_DRAFT);saveSession();
+  showOk(isOnline()?"Trip saved — it will appear in Island Explorer's Activities Log shortly.":"Trip saved on your phone — it will sync to Island Explorer automatically when you're back online.");
+  clearTrip();renderLogForm();
+  await flushQueue();
+  if(isOnline()){mySavedTrips=null;loadSavedTrips(true);} /* refetch so the server copy replaces the local pending one */
+  updateNet();
 }
 
 /* ===== SAVED TRIPS ===== */
 async function loadSavedTrips(force){
   if(_savedLoading)return;
-  _savedLoading=true;
   var el=document.getElementById("savedView");
-  if(!sb){_savedLoading=false;if(el.style.display!=="none")el.innerHTML="<div class='empty'>Service unavailable right now.</div>";return;}
-  if((force||mySavedTrips===null)&&el.style.display!=="none")el.innerHTML="<div class='empty'>Loading your trips…</div>";
+  /* Offline (or no client): just render whatever's cached + queued. */
+  if(!sb||!isOnline()){if(mySavedTrips===null)mySavedTrips=[];if(el.style.display!=="none")renderSavedTrips();return;}
+  _savedLoading=true;
+  if((force||mySavedTrips===null)&&el.style.display!=="none"&&!(mySavedTrips&&mySavedTrips.length))el.innerHTML="<div class='empty'>Loading your trips…</div>";
   try{
     var res=await sb.rpc("driver_trips",{p_phone:myPhone,p_code:myCode});
     _savedLoading=false;
-    if(res.error||!res.data||res.data.error){mySavedTrips=mySavedTrips||[];if(el.style.display!=="none")el.innerHTML="<div class='empty'>Couldn't load your saved trips right now.</div>";return;}
+    if(res.error||!res.data||res.data.error){mySavedTrips=mySavedTrips||[];if(document.getElementById("tab_saved").classList.contains("on"))renderSavedTrips();return;}
     mySavedTrips=(res.data.trips||[]).sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+    saveSession();
     if(document.getElementById("tab_saved").classList.contains("on"))renderSavedTrips();
-  }catch(e){_savedLoading=false;mySavedTrips=mySavedTrips||[];if(el.style.display!=="none")el.innerHTML="<div class='empty'>Network error loading your trips.</div>";}
+  }catch(e){_savedLoading=false;mySavedTrips=mySavedTrips||[];if(document.getElementById("tab_saved").classList.contains("on"))renderSavedTrips();}
 }
 /* The tour's own date range (e.g. "18/10/2026 – 24/10/2026"), looked up from this
    driver's assigned ops by tour code — falls back to the trip's own single date
@@ -456,10 +557,20 @@ function tourDateRangeForCode(tc,fallbackDate){
 }
 function renderSavedTrips(){
   var el=document.getElementById("savedView");
+  var pending=pendingTripCards();
   var list=mySavedTrips||[];
   var head="<div class='trip-actions' style='margin-bottom:14px'><button class='btn-sm btn-ghost' style='flex:1;padding:11px' onclick='loadSavedTrips(true)'>Refresh</button><button class='btn-sm' style='flex:1;padding:11px;border:none;border-radius:10px;background:var(--forest);color:#fff;font-weight:700;cursor:pointer' onclick='exportTripsCSV()'>⬇ Download Excel (CSV)</button></div>";
-  if(!list.length){el.innerHTML=head+"<div class='empty'>No saved trips yet.</div>";return;}
-  el.innerHTML=head+list.map(function(t,i){
+  if(!pending.length&&!list.length){el.innerHTML=head+"<div class='empty'>No saved trips yet.</div>";return;}
+  var pendingHtml=pending.map(function(t){
+    var reg=t.reg||regForVeh(t.veh);
+    return "<div class='card' style='border:1px solid #f0d9a8'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:3px'><div class='dates mono' style='font-weight:600;color:var(--soft);font-size:12.5px'>"+(t.tourCode||"Ad-hoc trip")+"</div><span class='pill mid' style='font-size:10.5px'>⏳ waiting to sync</span></div>"+
+      "<div style='font-size:16px;font-weight:700;color:var(--ink);margin-bottom:10px'>"+tourDateRangeForCode(t.tourCode,t.date)+"</div>"+
+      "<div class='rows'>"+row("Trip date",dmy(t.date))+row("Vehicle",vehLabel(t.veh,reg))+row("Location",t.loc)+row("Start km",t.startKm)+row("End km",t.endKm)+row("Total km",t.totalKm)+row("Time",t.time)+"</div>"+
+      "<div class='trip-actions'><button class='btn-sm' style='flex:1;padding:10px;border:1px solid #f0c2bb;background:#fff;color:var(--err);border-radius:10px;font-weight:700;cursor:pointer' onclick=\"removePendingTrip('"+t.id+"')\">Remove</button></div>"+
+    "</div>";
+  }).join("");
+  el.innerHTML=head+pendingHtml+list.map(function(t,i){
     var reg=t.reg||regForVeh(t.veh);
     return "<div class='card'>"+
       "<div class='dates mono' style='font-weight:600;color:var(--soft);font-size:12.5px;margin-bottom:3px'>"+(t.tourCode||"Ad-hoc trip")+"</div>"+
