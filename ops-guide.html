@@ -125,8 +125,8 @@ function saveSession(){if(myGuide)lsSet(LS_SESSION,{phone:myPhone,code:myCode,gu
 function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
 function enqueue(rec){syncQueue.push(rec);saveQueue();}
 function updateNet(){
-  var b=document.getElementById("netbar");if(!b)return;var pend=syncQueue.length;
-  if(!_netOk){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML="⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+".";return;}
+  var b=document.getElementById("netbar");if(!b)return;var pend=syncQueue.length,signedIn=!!myGuide;
+  if(!_netOk){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML=signedIn?("⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+"."):"⚡ Offline — connect to the internet to sign in.";return;}
   if(pend){b.style.display="block";b.style.background="#e7f1fb";b.style.color="var(--blue)";b.innerHTML=pend+" change"+(pend>1?"s":"")+" waiting to sync · <span style='cursor:pointer;text-decoration:underline' onclick='syncNow()'>Sync now</span>";return;}
   b.style.display="none";
 }
@@ -191,10 +191,13 @@ async function doLogin(){
      (unreliable on Android). Fall back to the cached session only if the
      network request itself fails. */
   ensureSb();
-  if(!sb){if(offlineRestore(phone,code)){done();return;}return fail("Can't reach the sign-in service. Check your connection and try again.");}
+  var OFFLINE_MSG="You appear to be offline, and this phone hasn't signed in yet. Connect to the internet once to sign in — after that the app works offline.";
+  if(!sb){if(offlineRestore(phone,code)){done();return;}return fail(OFFLINE_MSG);}
   try{
     var res=await sb.rpc("guide_login",{p_phone:phone,p_code:code});
-    if(res.error){_netOk=false;if(offlineRestore(phone,code)){done();return;}return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
+    if(res.error){_netOk=false;if(offlineRestore(phone,code)){done();return;}
+      if(netLikeErr(res.error.message))return fail(OFFLINE_MSG);
+      return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
     if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
     _netOk=true;
     myGuide=res.data.guide;myPhone=phone;myCode=code;
@@ -202,7 +205,10 @@ async function doLogin(){
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
-  }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail("Couldn't reach the server. If you're offline, connect to the internet for your first sign-in, then try again.");}
+  }catch(e){_netOk=false;if(offlineRestore(phone,code)){done();return;}fail(OFFLINE_MSG);}
+}
+/* A "network failure" (offline) vs a genuine backend/setup error. */
+function netLikeErr(m){m=String(m||"").toLowerCase();return m.indexOf("fetch")>-1||m.indexOf("network")>-1||m.indexOf("failed to")>-1||m.indexOf("load failed")>-1||m.indexOf("offline")>-1||m.indexOf("timeout")>-1;
 }
 function doLogout(){
   myGuide=null;myPhone="";myCode="";allOps=[];allVehicles=[];allDrivers=[];
