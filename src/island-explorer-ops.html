@@ -494,14 +494,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 130</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 131</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 130</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 131</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -599,6 +599,8 @@ let externalGuides=[];
 let quotationLog=[]; /* one record per generated quotation — for history + the per-record DB */
 let quoteSeq=0;      /* committed quotation counter. The NEXT number shown is quoteSeq+1;
                         it only advances (commit) when a quotation is SAVED. */
+let quoteSeqEpoch=0; /* bump QUOTE_SEQ_EPOCH to force a one-time restart of the counter */
+var QUOTE_SEQ_EPOCH=1;
 var qClient={name:"",country:"",address:"",gst:""};  /* client details typed in the module */
 var _curQuote=null;  /* the quotation currently open in the modal (for Save / edit) */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
@@ -636,7 +638,8 @@ const STORE=[
   {k:"reservations",arr:1,get:function(){return reservations;},set:function(v){reservations=v;}},
   {k:"externalGuides",arr:1,get:function(){return externalGuides;},set:function(v){externalGuides=v;}},
   {k:"quotationLog",arr:1,get:function(){return quotationLog;},set:function(v){quotationLog=v;}},
-  {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}}
+  {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
+  {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}}
 ];
 function collectStore(){var o={};STORE.forEach(function(s){o[s.k]=s.get();});return o;}
 /* Applying a real saved snapshot: any array collection missing from it becomes empty,
@@ -660,6 +663,9 @@ function applyStore(d){
     else if(snap&&s.arr&&s.k!=="operators")s.set([]);
   });
   ensureSheetDefaults();
+  /* One-time quotation-number restart: whenever the stored epoch is behind the code's
+     QUOTE_SEQ_EPOCH, reset the counter so the next quotation is Q-1. Idempotent. */
+  if((parseInt(quoteSeqEpoch,10)||0)<QUOTE_SEQ_EPOCH){quoteSeq=0;quoteSeqEpoch=QUOTE_SEQ_EPOCH;}
 }
 /* Guards the window between page load and the first cloud sync decision. The very
    first boot() call renders the UI from whatever is cached locally — and several
@@ -2240,16 +2246,14 @@ function quoteHeaderHTML(){
 /* "Quotation To" party block (left) + meta block (right). Guest name / country are
    enlarged; an editable Address line and GST No. line sit below; the meta block always
    shows a Departure row (blank when no date is chosen) plus a GST No. space. */
-function quoteMetaRow(qid,today,validUntil,departure,client){
+function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
   client=client||{};
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
   var name=esc(client.name)||"Guest Name";
-  var country=esc(client.country)||"Country";
   return "<div style='display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px'>"+
     "<div style='max-width:58%'>"+
-      "<div style='font-size:12px;color:#5a6b62;text-transform:uppercase;letter-spacing:.07em'>Quotation To</div>"+
-      "<div style='font-weight:700;font-size:20px;margin-top:3px;color:#16241d'>"+name+"</div>"+
-      "<div style='font-size:16px;color:#3a4a43;margin-top:1px'>"+country+"</div>"+
+      "<div style='font-size:11px;color:#5a6b62;text-transform:uppercase;letter-spacing:.07em'>Quotation To</div>"+
+      "<div style='font-weight:600;font-size:15px;margin-top:2px;color:#16241d'>"+name+"</div>"+
       "<div style='font-size:13px;color:#5a6b62;margin-top:6px'>Address: "+esc(client.address)+"</div>"+
       "<div style='font-size:13px;color:#5a6b62;margin-top:2px'>GST No.: "+esc(client.gst)+"</div>"+
     "</div>"+
@@ -2258,6 +2262,7 @@ function quoteMetaRow(qid,today,validUntil,departure,client){
       "<div><span style='color:#5a6b62'>Date:</span> "+today+"</div>"+
       "<div><span style='color:#5a6b62'>Valid Until:</span> "+validUntil+"</div>"+
       "<div><span style='color:#5a6b62'>Departure:</span> <b>"+(departure||"—")+"</b></div>"+
+      "<div><span style='color:#5a6b62'>Payment due:</span> <b>"+(dueDate||"")+"</b></div>"+
     "</div>"+
   "</div>";
 }
@@ -2292,7 +2297,7 @@ function generateQuotation(){
         </style>
         ${quoteHeaderHTML()}
 
-        ${quoteMetaRow(qid,today,validUntil,'',qClient)}
+        ${quoteMetaRow(qid,today,validUntil,'',qClient,'')}
 
         <div class="qcard" style="border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
           <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c">${tourName}</div>
@@ -2469,6 +2474,16 @@ function printQuotation() {
 function viewGroupQuote(){
   return "<section class='view' id='v-groupquote'>"+calcTabsBar('groupquote')+
     "<div class='card card-pad' style='margin-bottom:16px'>"+
+      "<div class='eyebrow'>Quotation To</div><div class='h-sec' style='margin-bottom:14px'>Client details</div>"+
+      "<div class='cost-grid'>"+
+        "<div class='field full'><label>Guest name</label><input class='input' id='qcName' placeholder='Guest Name' value='"+(qClient.name||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+        "<div class='field'><label>GST No.</label><input class='input' id='qcGst' placeholder='GST No.' value='"+(qClient.gst||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+      "</div>"+
+      "<div class='cost-grid' style='margin-top:8px'>"+
+        "<div class='field full'><label>Address</label><input class='input' id='qcAddress' placeholder='Address' value='"+(qClient.address||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+      "</div>"+
+    "</div>"+
+    "<div class='card card-pad' style='margin-bottom:16px'>"+
       "<div class='eyebrow'>From your costing sheet</div><div class='h-sec' style='margin-bottom:14px'>Group-size quotation</div>"+
       "<div class='cost-grid'>"+
         "<div class='field full'><label>Tour</label><select class='input' id='gqTour' onchange='gqTour=this.value;renderGroupQuote()'></select></div>"+
@@ -2485,16 +2500,7 @@ function viewGroupQuote(){
         "</select></div>"+
         "<div class='field'><label>Deposit %</label><input class='input mono' type='number' id='gqPct' min='0' max='100' oninput='renderGroupQuote()'></div>"+
       "</div>"+
-      "<div class='eyebrow' style='margin-top:18px'>Quotation To (client details)</div>"+
-      "<div class='cost-grid' style='margin-top:8px'>"+
-        "<div class='field'><label>Guest name</label><input class='input' id='qcName' placeholder='Guest Name' value='"+(qClient.name||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
-        "<div class='field'><label>Country</label><input class='input' id='qcCountry' placeholder='Country' value='"+(qClient.country||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
-      "</div>"+
-      "<div class='cost-grid' style='margin-top:8px'>"+
-        "<div class='field full'><label>Address</label><input class='input' id='qcAddress' placeholder='Address' value='"+(qClient.address||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
-        "<div class='field'><label>GST No.</label><input class='input' id='qcGst' placeholder='GST No.' value='"+(qClient.gst||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
-      "</div>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Prices come straight from your Birding Tour Expense Calculator. Client details above appear on the generated quotation. The quotation number only moves forward once you <b>Save</b> a quotation.</p>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Prices come straight from your Birding Tour Expense Calculator. Set a departure date and the payment-due date is 30 days before it. The quotation number only moves forward once you <b>Save</b> a quotation.</p>"+
     "</div>"+
     "<div class='card' id='gqResult'></div>"+
     "<div class='card' style='margin-top:16px'>"+
@@ -2567,6 +2573,7 @@ function renderGroupQuote(){
   var perRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums'>"+(rw.perPerson!=null?fmt(rw.perPerson):"—")+"</td>";}).join("");
   var totRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums'>"+(rw.total!=null?fmt(rw.total):"—")+"</td>";}).join("");
   var depRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;color:var(--sea)'>"+(rw.deposit!=null?fmt(rw.deposit):"—")+"</td>";}).join("");
+  var pendRowL=q.rows.map(function(rw){var pv=(rw.total!=null&&rw.deposit!=null)?rw.total-rw.deposit:null;return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;color:#b45309'>"+(pv!=null?fmt(pv):"—")+"</td>";}).join("");
   r.innerHTML="<div class='card-pad'>"+
     "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px'>"+
       "<div><div class='h-sec'>"+q.title+"</div><div style='font-size:12px;color:var(--ink-soft)'>"+q.nights+" nights · "+(q.type==="foreign"?"Foreign":"Indian")+" clients</div></div>"+
@@ -2577,7 +2584,8 @@ function renderGroupQuote(){
       "<tbody>"+
         "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;color:var(--ink-soft)'>Price per person</td>"+perRow+"</tr>"+
         "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;font-weight:600'>Total tour price</td>"+totRow+"</tr>"+
-        "<tr><td style='padding:10px 12px'>Deposit ("+q.pct+"%)</td>"+depRow+"</tr>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px'>Deposit ("+q.pct+"%)</td>"+depRow+"</tr>"+
+        "<tr><td style='padding:10px 12px'>Pending amount</td>"+pendRowL+"</tr>"+
       "</tbody>"+
     "</table></div>"+
     gqTermsCard(q)+
@@ -2604,12 +2612,15 @@ function generateGroupQuotation(){
   var today=dmy(new Date());
   var validUntil=dmy(new Date(Date.now()+14*864e5));
   var depText=q.departure?dmy(new Date(q.departure+"T00:00:00")):"";
+  /* Payment due = 30 days before departure (only when a departure date is set). */
+  var dueText=q.departure?dmy(new Date(new Date(q.departure+"T00:00:00").getTime()-30*864e5)):"";
   _curQuote={qid:qid,kind:"group",tour:q.key,title:q.title,clientType:(q.type==="foreign"?"Foreigner":"Indian"),client:JSON.parse(JSON.stringify(qClient)),date:today,validUntil:validUntil,departure:depText,savedId:null};
   var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db'>"+rw.size+" guests</th>";}).join("");
   var cell=function(v){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums'>"+(v!=null?fmt(v):"—")+"</td>";};
   var perRow=q.rows.map(function(rw){return cell(rw.perPerson);}).join("");
   var totRow=q.rows.map(function(rw){return cell(rw.total);}).join("");
   var depRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;color:#1f7a54;font-weight:600'>"+(rw.deposit!=null?fmt(rw.deposit):"—")+"</td>";}).join("");
+  var pendRow=q.rows.map(function(rw){var pv=(rw.total!=null&&rw.deposit!=null)?rw.total-rw.deposit:null;return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;color:#b45309'>"+(pv!=null?fmt(pv):"—")+"</td>";}).join("");
   var termRows=GQ_TIERS.map(function(t){
     var on=t.id===q.tier.id;
     return "<tr"+(on?" style='background:#eaf4ee;font-weight:700'":"")+"><td style='padding:9px 12px;border-bottom:1px solid #eef4f0'>"+t.text+"</td><td style='padding:9px 12px;border-bottom:1px solid #eef4f0;text-align:right;color:#15563c'>"+t.label+" deposit</td></tr>";
@@ -2622,7 +2633,7 @@ function generateGroupQuotation(){
     "<div class='modal-body' style='padding:0'>"+
       "<div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+
         quoteHeaderHTML()+
-        quoteMetaRow(qid,today,validUntil,depText,qClient)+
+        quoteMetaRow(qid,today,validUntil,depText,qClient,dueText)+
         "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
           "<div style='font-weight:700;font-size:15px;margin-bottom:6px;color:#15563c'>"+q.title+"</div>"+
           "<div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+
@@ -2638,6 +2649,7 @@ function generateGroupQuotation(){
             "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>Price per person</td>"+perRow+"</tr>"+
             "<tr style='background:#f5faf7'><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;font-weight:700'>Total tour price</td>"+totRow+"</tr>"+
             "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0'>Deposit to confirm ("+q.pct+"%)</td>"+depRow+"</tr>"+
+            "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0'>Pending amount"+(dueText?" (due "+dueText+")":"")+"</td>"+pendRow+"</tr>"+
           "</tbody>"+
         "</table></div>"+
         "<div style='font-size:12px;color:#5a6b62;margin-bottom:16px'><div style='font-weight:600;color:#20302b;margin-bottom:4px'>Includes:</div>Accommodation, private vehicle, expert guiding, ferry / ship tickets, forest permits & entry fees, meals as listed.</div>"+
@@ -2764,7 +2776,7 @@ function renderSavedQuotes(){
 /* Read the client-detail inputs in the module into the shared qClient state. */
 function gqReadClient(){
   var g=function(id){var e=document.getElementById(id);return e?e.value:"";};
-  qClient={name:g("qcName"),country:g("qcCountry"),address:g("qcAddress"),gst:g("qcGst")};
+  qClient={name:g("qcName"),country:"",address:g("qcAddress"),gst:g("qcGst")};
 }
 function calcSelection(){
   var key=document.getElementById("calcCategory")?document.getElementById("calcCategory").value:currentCalcTourId;
