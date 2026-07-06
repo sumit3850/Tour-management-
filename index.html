@@ -494,14 +494,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 129</span></div>
+    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 130</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 129</div></div>
+      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 130</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -597,7 +597,10 @@ let operators=[
 let reservations=[];
 let externalGuides=[];
 let quotationLog=[]; /* one record per generated quotation — for history + the per-record DB */
-let quoteSeq=0;      /* running quotation counter → IEBT/<year>/Q-1, Q-2, … (shared by both generators) */
+let quoteSeq=0;      /* committed quotation counter. The NEXT number shown is quoteSeq+1;
+                        it only advances (commit) when a quotation is SAVED. */
+var qClient={name:"",country:"",address:"",gst:""};  /* client details typed in the module */
+var _curQuote=null;  /* the quotation currently open in the modal (for Save / edit) */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
 let leads=[];
 const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
@@ -2218,12 +2221,11 @@ function catName(key){
   if(m)return m[1].trim()+" -"+m[2]+" Nights";
   return title;
 }
-/* Next sequential quotation number → IEBT/<year>/Q-<n>. Persists the counter. */
-function nextQuoteNo(){
-  quoteSeq=(parseInt(quoteSeq,10)||0)+1;
-  persistData();
+/* The NEXT quotation number WITHOUT consuming it → IEBT/<year>/Q-<n>. The number only
+   moves forward when a quotation is saved (see saveCurrentQuote). */
+function peekQuoteNo(){
   var yr=(new Date()).getFullYear();
-  return "IEBT/"+yr+"/Q-"+quoteSeq;
+  return "IEBT/"+yr+"/Q-"+((parseInt(quoteSeq,10)||0)+1);
 }
 /* Branded letterhead: logo + CIN + registered address + contact line. */
 function quoteHeaderHTML(){
@@ -2238,14 +2240,18 @@ function quoteHeaderHTML(){
 /* "Quotation To" party block (left) + meta block (right). Guest name / country are
    enlarged; an editable Address line and GST No. line sit below; the meta block always
    shows a Departure row (blank when no date is chosen) plus a GST No. space. */
-function quoteMetaRow(qid,today,validUntil,departure){
+function quoteMetaRow(qid,today,validUntil,departure,client){
+  client=client||{};
+  var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+  var name=esc(client.name)||"Guest Name";
+  var country=esc(client.country)||"Country";
   return "<div style='display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px'>"+
     "<div style='max-width:58%'>"+
       "<div style='font-size:12px;color:#5a6b62;text-transform:uppercase;letter-spacing:.07em'>Quotation To</div>"+
-      "<div style='font-weight:700;font-size:20px;margin-top:3px;color:#16241d'>Guest Name</div>"+
-      "<div style='font-size:16px;color:#3a4a43;margin-top:1px'>Country</div>"+
-      "<div style='font-size:13px;color:#5a6b62;margin-top:6px'>Address: </div>"+
-      "<div style='font-size:13px;color:#5a6b62;margin-top:2px'>GST No.: </div>"+
+      "<div style='font-weight:700;font-size:20px;margin-top:3px;color:#16241d'>"+name+"</div>"+
+      "<div style='font-size:16px;color:#3a4a43;margin-top:1px'>"+country+"</div>"+
+      "<div style='font-size:13px;color:#5a6b62;margin-top:6px'>Address: "+esc(client.address)+"</div>"+
+      "<div style='font-size:13px;color:#5a6b62;margin-top:2px'>GST No.: "+esc(client.gst)+"</div>"+
     "</div>"+
     "<div style='text-align:right'>"+
       "<div><span style='color:#5a6b62'>Quotation #:</span> <b>"+qid+"</b></div>"+
@@ -2262,13 +2268,12 @@ function generateQuotation(){
   const pax = sel.pax;
   const tourName = catName(sel.key);
   const clientType = sel.type==="foreign" ? "Foreigner" : "Indian";
-  const qid = nextQuoteNo();
+  const qid = peekQuoteNo();
   const today = dmy(new Date());
   const validUntil = dmy(new Date(Date.now() + 14*864e5));
   const row = (label,val)=>`<tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">${label}</td><td style="padding:8px 4px;text-align:right;font-variant-numeric:tabular-nums">${fmt(val||0)}</td></tr>`;
   const pricePerPerson = fmt(d.perPerson);
-  quotationLog.unshift({id:qid,qid:qid,tour:tourName,pax:pax,clientType:clientType,accommodation:d.accommodation,vehicle:d.vehicle,guide:d.guide,ship:d.ship,entry:d.entry,food:d.food,total:d.total,perPerson:d.perPerson,generatedAt:new Date().toISOString(),validUntil:validUntil});
-  persistData();
+  _curQuote={qid:qid,kind:"tour",tour:tourName,title:tourName,clientType:clientType,pax:pax,client:JSON.parse(JSON.stringify(qClient)),date:today,validUntil:validUntil,departure:"",savedId:null};
 
   const html = `
     <div class="modal-head">
@@ -2287,7 +2292,7 @@ function generateQuotation(){
         </style>
         ${quoteHeaderHTML()}
 
-        ${quoteMetaRow(qid,today,validUntil,'')}
+        ${quoteMetaRow(qid,today,validUntil,'',qClient)}
 
         <div class="qcard" style="border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px">
           <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c">${tourName}</div>
@@ -2330,7 +2335,7 @@ function generateQuotation(){
           \u2022 Prices are in Indian Rupees (INR) \u00b7 Subject to availability<br>
           \u2022 Cancellation: Full refund 60+ days \u00b7 50% refund 30-60 days \u00b7 No refund &lt;30 days<br>
           \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply<br>
-          \u2022 All permits subject to Forest Department approval \u00b7 Itinerary may change due to weather/sea conditions
+          \u2022 Itinerary may change due to weather/sea conditions
         </div>
 
         <div style="margin-top:20px;padding:14px;background:var(--surface-2);border-radius:10px;display:flex;align-items:center;gap:12px">
@@ -2340,13 +2345,14 @@ function generateQuotation(){
 
         <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e">
           <div style="font-family:'Calistoga',serif;font-size:16px;color:var(--forest)">Island Explorer Birding Tours</div>
-          <div style="font-size:11px;color:var(--ink-soft)">Port Blair \u00b7 Andaman & Nicobar Islands \u00b7 India</div>
+          <div style="font-size:11px;color:var(--ink-soft)">Sri Vijay Puram (Port Blair) \u00b7 Andaman & Nicobar Islands \u00b7 India</div>
         </div>
       </div>
     </div>
     <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
       <button class="btn btn-ghost" onclick="closeModal()">Close</button>
       <button class="btn btn-ghost" id="qEditBtn" onclick="toggleQuoteEdit()">Edit quotation</button>
+      <button class="btn btn-sea" id="qSaveBtn" onclick="saveCurrentQuote()">Save quotation</button>
       <button class="btn btn-sea" onclick="shareQuotationEmail('${qid}','${tourName}','${pricePerPerson}','${pax}')">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><path d="M4 4h16v16H4zM4 9l8 5 8-5"/></svg>
         Email
@@ -2479,9 +2485,22 @@ function viewGroupQuote(){
         "</select></div>"+
         "<div class='field'><label>Deposit %</label><input class='input mono' type='number' id='gqPct' min='0' max='100' oninput='renderGroupQuote()'></div>"+
       "</div>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Prices come straight from your Birding Tour Expense Calculator. Add or remove group sizes to build the columns; set a departure date and the deposit tier is picked automatically.</p>"+
+      "<div class='eyebrow' style='margin-top:18px'>Quotation To (client details)</div>"+
+      "<div class='cost-grid' style='margin-top:8px'>"+
+        "<div class='field'><label>Guest name</label><input class='input' id='qcName' placeholder='Guest Name' value='"+(qClient.name||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+        "<div class='field'><label>Country</label><input class='input' id='qcCountry' placeholder='Country' value='"+(qClient.country||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+      "</div>"+
+      "<div class='cost-grid' style='margin-top:8px'>"+
+        "<div class='field full'><label>Address</label><input class='input' id='qcAddress' placeholder='Address' value='"+(qClient.address||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+        "<div class='field'><label>GST No.</label><input class='input' id='qcGst' placeholder='GST No.' value='"+(qClient.gst||"").replace(/'/g,"&#39;")+"' oninput='gqReadClient()'></div>"+
+      "</div>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Prices come straight from your Birding Tour Expense Calculator. Client details above appear on the generated quotation. The quotation number only moves forward once you <b>Save</b> a quotation.</p>"+
     "</div>"+
     "<div class='card' id='gqResult'></div>"+
+    "<div class='card' style='margin-top:16px'>"+
+      "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Saved quotations</div><div class='h-sec' style='margin-bottom:6px'>Your quotation folder</div></div>"+
+      "<div id='savedQuotes'></div>"+
+    "</div>"+
   "</section>";
 }
 function setGqType(t){gqType=(t==="foreign")?"foreign":"indian";renderGroupQuote();}
@@ -2563,6 +2582,7 @@ function renderGroupQuote(){
     "</table></div>"+
     gqTermsCard(q)+
   "</div>";
+  renderSavedQuotes();
 }
 /* Payment Terms card, mirroring the attached screenshot; highlights the active tier. */
 function gqTermsCard(q){
@@ -2580,10 +2600,11 @@ function generateGroupQuotation(){
   var q=gqCollect();
   var valid=q.rows.filter(function(rw){return rw.total!=null;});
   if(!valid.length){alert("No costing data for this tour / client type. Pick another tour or add rates in the Cost Calculator.");return;}
-  var qid=nextQuoteNo();
+  var qid=peekQuoteNo();
   var today=dmy(new Date());
   var validUntil=dmy(new Date(Date.now()+14*864e5));
   var depText=q.departure?dmy(new Date(q.departure+"T00:00:00")):"";
+  _curQuote={qid:qid,kind:"group",tour:q.key,title:q.title,clientType:(q.type==="foreign"?"Foreigner":"Indian"),client:JSON.parse(JSON.stringify(qClient)),date:today,validUntil:validUntil,departure:depText,savedId:null};
   var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db'>"+rw.size+" guests</th>";}).join("");
   var cell=function(v){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums'>"+(v!=null?fmt(v):"—")+"</td>";};
   var perRow=q.rows.map(function(rw){return cell(rw.perPerson);}).join("");
@@ -2601,7 +2622,7 @@ function generateGroupQuotation(){
     "<div class='modal-body' style='padding:0'>"+
       "<div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+
         quoteHeaderHTML()+
-        quoteMetaRow(qid,today,validUntil,depText)+
+        quoteMetaRow(qid,today,validUntil,depText,qClient)+
         "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
           "<div style='font-weight:700;font-size:15px;margin-bottom:6px;color:#15563c'>"+q.title+"</div>"+
           "<div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>"+
@@ -2628,17 +2649,18 @@ function generateGroupQuotation(){
           "• Prices are in Indian Rupees (INR) · Subject to availability<br>"+
           "• Balance due 30 days before departure<br>"+
           "• Cancellation: Full refund 60+ days · 50% refund 30-60 days · No refund &lt;30 days<br>"+
-          "• All permits subject to Forest Department approval · Itinerary may change due to weather/sea conditions"+
+          "• Itinerary may change due to weather/sea conditions"+
         "</div>"+
         "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
           "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>Island Explorer Birding Tours</div>"+
-          "<div style='font-size:11px;color:#5a6b62'>Port Blair · Andaman & Nicobar Islands · India</div>"+
+          "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India</div>"+
         "</div>"+
       "</div>"+
     "</div>"+
     "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
       "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
       "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit quotation</button>"+
+      "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentQuote()'>Save quotation</button>"+
       "<button class='btn btn-sea' onclick='shareGroupQuoteWhatsApp("+gqShareArg(q,qid)+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5a8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z'/></svg>WhatsApp</button>"+
       "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z'/></svg>PDF / Print</button>"+
     "</div>";
@@ -2667,6 +2689,82 @@ function shareGroupQuoteWhatsApp(enc){
     'Contact: Sumit Kumar\n+91 99332 02175'
   );
   window.open('https://wa.me/?text='+text,'_blank');
+}
+
+/* ===== SAVED QUOTATIONS (the "folder") — save / open / edit / delete ===== */
+/* Save the quotation currently open in the modal. This is the ONLY thing that
+   advances the quotation number: a brand-new quotation commits quoteSeq+1; editing
+   an already-saved one just updates it in place. The whole rendered document
+   (#quotationBody) is stored so it can be re-opened, edited and printed exactly. */
+function saveCurrentQuote(){
+  if(!_curQuote){return;}
+  var body=document.getElementById("quotationBody");
+  var docHtml=body?body.innerHTML:"";
+  if(_curQuote.savedId){
+    /* updating an existing saved quotation — no number change */
+    var rec=quotationLog.find(function(x){return x.id===_curQuote.savedId;});
+    if(rec){rec.html=docHtml;rec.title=_curQuote.title;rec.updatedAt=new Date().toISOString();}
+  }else{
+    /* new quotation → consume the next number now */
+    quoteSeq=(parseInt(quoteSeq,10)||0)+1;
+    var id="Q"+quoteSeq+"-"+Date.now().toString(36);
+    quotationLog.unshift({
+      id:id, qid:_curQuote.qid, kind:_curQuote.kind, tour:_curQuote.title,
+      clientType:_curQuote.clientType, guest:(_curQuote.client&&_curQuote.client.name)||"",
+      date:_curQuote.date, validUntil:_curQuote.validUntil, departure:_curQuote.departure||"",
+      html:docHtml, savedAt:new Date().toISOString()
+    });
+    _curQuote.savedId=id;
+  }
+  persistData();
+  if(typeof renderSavedQuotes==="function")renderSavedQuotes();
+  var btn=document.getElementById("qSaveBtn");
+  if(btn){var old=btn.textContent;btn.textContent="Saved ✓";btn.classList.add("btn-primary");setTimeout(function(){btn.textContent="Saved";},1400);}
+}
+/* Open a saved quotation read-only (with share / print). */
+function openSavedQuote(id){
+  var rec=quotationLog.find(function(x){return x.id===id;});if(!rec)return;
+  _curQuote={qid:rec.qid,kind:rec.kind,title:rec.tour,clientType:rec.clientType,client:{},date:rec.date,validUntil:rec.validUntil,departure:rec.departure,savedId:rec.id};
+  var foot="<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
+    "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
+    "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit quotation</button>"+
+    "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentQuote()'>Save changes</button>"+
+    "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
+  "</div>";
+  document.getElementById('modal').innerHTML=
+    "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+rec.qid+" · "+rec.date+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+(rec.html||"")+"</div></div>"+
+    foot;
+  openScrim();
+}
+/* Edit = open it with editing already switched on. */
+function editSavedQuote(id){openSavedQuote(id);setTimeout(function(){var b=document.getElementById("quotationBody");if(b&&b.getAttribute("contenteditable")!=="true")toggleQuoteEdit();},60);}
+function deleteSavedQuote(id){
+  if(!confirm("Delete this saved quotation?"))return;
+  quotationLog=quotationLog.filter(function(x){return x.id!==id;});
+  persistData();renderSavedQuotes();
+}
+/* The saved-quotations folder rendered inside the Group Quotation module. */
+function renderSavedQuotes(){
+  var el=document.getElementById("savedQuotes");if(!el)return;
+  var list=(quotationLog||[]).filter(function(x){return x&&x.html;});
+  if(!list.length){el.innerHTML="<div style='padding:18px;text-align:center;color:var(--ink-soft);font-size:13px'>No saved quotations yet. Generate a quotation and press <b>Save quotation</b>.</div>";return;}
+  el.innerHTML=list.map(function(r){
+    return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
+      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+"</div>"+
+        "<div style='font-size:11px;color:var(--ink-soft)'>"+(r.guest?r.guest+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
+      "<div style='display:flex;gap:6px;flex-shrink:0'>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"openSavedQuote('"+r.id+"')\">Open</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"editSavedQuote('"+r.id+"')\">Edit</button>"+
+        "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteSavedQuote('"+r.id+"')\">Delete</button>"+
+      "</div>"+
+    "</div>";
+  }).join("");
+}
+/* Read the client-detail inputs in the module into the shared qClient state. */
+function gqReadClient(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:"";};
+  qClient={name:g("qcName"),country:g("qcCountry"),address:g("qcAddress"),gst:g("qcGst")};
 }
 function calcSelection(){
   var key=document.getElementById("calcCategory")?document.getElementById("calcCategory").value:currentCalcTourId;
