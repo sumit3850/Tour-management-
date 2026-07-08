@@ -4772,6 +4772,7 @@ function lgClearMsg(){["lgErr","lgOk"].forEach(function(i){var e=lgEl(i);if(e)e.
 function showLogin(){var ov=lgEl("loginOverlay");if(ov){ov.classList.add("show");setTimeout(function(){var f=lgEl("lg_email");if(f)f.focus();},80);}}
 function hideLogin(){var ov=lgEl("loginOverlay");if(ov)ov.classList.remove("show");}
 function applyUser(user){
+  try{window.__orgUserId=(user&&user.id)||window.__orgUserId;}catch(e){}
   var name=(user&&(user.user_metadata&&user.user_metadata.name))||(user&&user.email)||"Operator";
   var who=document.querySelector(".nav-foot .who");if(who)who.textContent=name;
   var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(user&&user.email)||"Signed in";
@@ -4810,6 +4811,10 @@ function loadOrgContext(){
     var org=res&&res.data;
     if(!org){showPendingApproval();return;}               /* signed in but no company yet */
     if(org.status!=="approved"){showPendingApproval();return;}
+    /* Freeze sync FIRST: no timestamp bumps and no auto-pushes while we switch
+       workspace — otherwise a render side-effect could stamp "just updated" or
+       push this transitional (empty) state into the company's cloud row. */
+    _sbReady=false;_syncBooting=true;_localDirty=false;
     /* Wipe any data cached locally from a previous session or company, so this
        company only ever sees its OWN cloud data — and stale data is never pushed
        up into their (empty) workspace. */
@@ -4843,6 +4848,10 @@ function initAuth(){
     }).catch(function(){showLogin();resolve(true);});
     cl.auth.onAuthStateChange(function(_e,session){
       if(session&&session.user){
+        /* A DIFFERENT user signing in on a page that already loaded a company
+           must get a clean boot — reload so nothing (workspace, data, brand)
+           can leak from the previous session. */
+        if(_orgLoaded&&window.__orgUserId&&window.__orgUserId!==session.user.id){location.reload();return;}
         applyUser(session.user);
         if(_authResolved&&!_orgLoaded)loadOrgContext(); /* signed in after boot -> load their org */
       }
@@ -4939,9 +4948,13 @@ function authForgot(){
 }
 /* bypass removed per request */
 function logout(){
+  /* Clear this company's locally-cached data and reload: the next sign-in must
+     start from a clean slate, never from the previous company's cache. */
+  try{localStorage.removeItem(DATA_KEY);localStorage.removeItem("ieo_updated");localStorage.removeItem("ieo_record_pending");localStorage.removeItem("ieo_sync_trips");}catch(e){}
   var cl=authClient();
-  if(cl)cl.auth.signOut().then(function(){showLogin();});
-  else showLogin();
+  var done=function(){location.reload();};
+  if(cl)cl.auth.signOut().then(done).catch(done);
+  else done();
 }
 /* If "remember me" was unchecked, end the session when the tab closes */
 window.addEventListener("beforeunload",function(){
