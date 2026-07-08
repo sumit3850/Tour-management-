@@ -40,23 +40,15 @@ the sign-in page (email-first).
 5. **Confirm it landed:** Supabase → Table Editor → `orgs` shows the new row
    (status `pending`, `logo_url` filled); Storage → `logos` has the image.
 
-## Approving a company (until the admin screen lands in Stage 2)
+## Approving a company — `admin.html`
 
-Supabase → SQL Editor:
+Open **`admin.html`** and sign in with a platform-admin account (the emails in
+the `saas_admins` table — seeded with `explorer3850@gmail.com`; add more with
+`insert into saas_admins(email) values ('other@you.com');`). You'll see every
+registered company with its logo and full details, and **Approve / Reject / Set
+pending** buttons. Non-admin accounts are refused.
 
-```sql
--- see who's waiting
-select company, email, phone, created_at from orgs where status = 'pending' order by created_at;
-
--- approve one
-update orgs set status = 'approved' where email = 'them@company.com';
-
--- (reject instead)
-update orgs set status = 'rejected' where email = 'them@company.com';
-```
-
-Once approved, the email-first login (Stage 2) will show their brand and let them
-in.
+(SQL still works too: `update orgs set status='approved' where email='…';`)
 
 ## Notes
 

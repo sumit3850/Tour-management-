@@ -47,11 +47,11 @@
 
   <form id="f" autocomplete="on">
     <div class="grid">
-      <div><label class="req">Your name</label><input id="username" required></div>
+      <div><label class="req">First name</label><input id="fname" required></div>
+      <div><label class="req">Last name</label><input id="lname" required></div>
       <div><label class="req">Company name</label><input id="company" required></div>
-      <div><label>CIN</label><input id="cin" placeholder="Company Identification No."></div>
-      <div><label class="req">Contact person</label><input id="contact" required></div>
-      <div><label class="req">Phone</label><input id="phone" required placeholder="+91 …"></div>
+      <div><label>Company CIN</label><input id="cin" placeholder="Company Identification No."></div>
+      <div><label class="req">Company phone no.</label><input id="phone" required placeholder="+91 …"></div>
       <div><label class="req">Email</label><input id="email" type="email" required placeholder="you@company.com"></div>
       <div><label class="req">Password</label><input id="pw" type="password" required minlength="6" placeholder="min 6 characters"></div>
       <div><label class="req">Confirm password</label><input id="pw2" type="password" required minlength="6"></div>
@@ -125,9 +125,10 @@ $("f").addEventListener("submit", async function(e){
     // 2) Create the auth user, passing the company profile as metadata. A
     //    server-side trigger creates the pending org + membership — no browser
     //    insert, so there is no RLS/session-timing race.
+    var fullName = ($("fname").value.trim()+" "+$("lname").value.trim()).trim();
     var up = await sb.auth.signUp({ email: email, password: pw, options: { data: {
-      username: $("username").value.trim(), company: $("company").value.trim(),
-      cin: $("cin").value.trim(), contact_person: $("contact").value.trim(),
+      username: fullName, company: $("company").value.trim(),
+      cin: $("cin").value.trim(), contact_person: fullName,
       phone: $("phone").value.trim(), website: $("website").value.trim(),
       address: $("address").value.trim(), domain: $("domain").value.trim(),
       logo_url: logoUrl

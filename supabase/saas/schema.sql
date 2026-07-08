@@ -187,6 +187,36 @@ begin
   end loop;
 end $$;
 
+-- ---- Owner / platform-admin approval ----------------------------------------
+-- Emails listed here can open admin.html to approve or reject companies.
+create table if not exists saas_admins (email text primary key);
+insert into saas_admins (email) values ('explorer3850@gmail.com') on conflict do nothing;
+alter table saas_admins enable row level security;  -- no policies: readable only via the definer functions below
+
+create or replace function public.is_saas_admin()
+returns boolean language sql security definer set search_path = public as $$
+  select exists(select 1 from saas_admins where lower(email) = lower(coalesce(auth.jwt()->>'email','')));
+$$;
+grant execute on function public.is_saas_admin() to authenticated;
+
+create or replace function public.admin_list_orgs()
+returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if not is_saas_admin() then return jsonb_build_object('error','not_admin'); end if;
+  return coalesce((select jsonb_agg(to_jsonb(o) order by o.created_at desc) from orgs o), '[]'::jsonb);
+end $$;
+grant execute on function public.admin_list_orgs() to authenticated;
+
+create or replace function public.admin_set_org_status(p_org uuid, p_status text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if not is_saas_admin() then return jsonb_build_object('error','not_admin'); end if;
+  if p_status not in ('approved','rejected','pending') then return jsonb_build_object('error','bad_status'); end if;
+  update orgs set status = p_status where id = p_org;
+  return jsonb_build_object('ok', true);
+end $$;
+grant execute on function public.admin_set_org_status(uuid, text) to authenticated;
+
 -- ---- Logo storage -----------------------------------------------------------
 insert into storage.buckets (id, name, public) values ('logos','logos', true)
   on conflict (id) do nothing;
