@@ -468,12 +468,13 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .lg-links a{color:var(--sea);font-weight:600}
 .lg-foot{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:16px}
 </style>
+<script src="../config.js"></script>
 </head>
 <body>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
-    <img src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:260px;max-height:96px;object-fit:contain;display:block;margin:0 0 18px" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('lg_textbrand');if(f)f.style.display='flex';}">
-    <div class="login-brand" id="lg_textbrand" style="display:none"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn">Island Explorer Birding Tours</div><div class="bs">Ops Console</div></div></div>
+    <img id="brandLoginLogo" src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:260px;max-height:96px;object-fit:contain;display:block;margin:0 0 18px" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('lg_textbrand');if(f)f.style.display='flex';}">
+    <div class="login-brand" id="lg_textbrand" style="display:none"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn" id="brandLoginName">Island Explorer Birding Tours</div><div class="bs">Ops Console</div></div></div>
     <h2 id="lgTitle">Sign in</h2>
     <p class="lg-sub" id="lgSub">Welcome back. Sign in to your console.</p>
     <div class="lg-err" id="lgErr"></div>
@@ -494,14 +495,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot">Island Explorer Birding Tours · Port Blair · <span id="lgBuild">build 134</span></div>
+    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 134</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 134</div></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 134</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -690,6 +691,7 @@ var _syncBooting=true;
    is exactly why deletions "came back" and additions "disappeared". */
 var _localDirty=false,_pushInFlight=false;
 function persistData(){
+  if(window.__DEMO__)return; /* demo sandbox: never write to disk or cloud — resets fresh each load */
   try{
     localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));
     if(!_syncBooting)localStorage.setItem("ieo_updated",new Date().toISOString());
@@ -1129,7 +1131,8 @@ const SB_CFG_KEY="ieo_supabase";
    key is browser-safe (public by design); it grants nothing on its own once
    docs/SECURE_ACCESS.md's RLS lockdown is applied — only a signed-in team
    account (Supabase Auth) can read/write the actual data. */
-const SB_DEFAULTS={url:"https://tbxzxfjumlnciczizols.supabase.co",key:"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss",ws:"island-explorer",auto:true};
+var __CFG_SB=(window.APP_CONFIG&&window.APP_CONFIG.supabase)||{};
+const SB_DEFAULTS={url:__CFG_SB.url||"https://tbxzxfjumlnciczizols.supabase.co",key:__CFG_SB.key||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss",ws:__CFG_SB.workspace||"island-explorer",auto:true};
 let _sb=null, _sbReady=false, _sbApplying=false, _sbPushTimer=null;
 function sbConfig(){
   try{var s=localStorage.getItem(SB_CFG_KEY);if(s){var c=JSON.parse(s);if(c&&c.url)return c;}}catch(e){}
@@ -2241,12 +2244,18 @@ function peekQuoteNo(){
 }
 /* Branded letterhead: logo + CIN + registered address + contact line. */
 function quoteHeaderHTML(){
-  var logoUrl=(function(){try{return new URL('assets/logo.png',location.href).href;}catch(e){return 'assets/logo.png';}})();
+  var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+  var company=B.company||"Island Explorer Birding Tours";
+  var cin=B.cin||"U79120AN2026PTC006196";
+  var address=B.address||"Sri Ram Nagar, Attam Pahad, Garacharma, Opp. Shiv Mandir, Sri Vijaya Puram, South Andaman, Andaman and Nicobar Islands - 744105, India";
+  var contact="Mob: "+(B.phone||"+91 9933202175")+"; Email: "+(B.email||"info@islandexplorer.in")+"; Web: "+(B.web||"www.islandexplorer.in");
+  var logoRel=B.logo||"assets/logo.png";
+  var logoUrl=(function(){try{return new URL(logoRel,location.href).href;}catch(e){return logoRel;}})();
   return "<div style='text-align:center;border-bottom:2px solid #143a2e;padding-bottom:14px;margin-bottom:20px'>"+
-    "<img src='"+logoUrl+"' alt='Island Explorer Birding Tours' style='max-width:300px;max-height:130px;object-fit:contain;margin:0 auto 6px' onerror=\"if(this.src.indexOf('logo.png')>-1){this.src=this.src.replace('logo.png','logo.jpg');}else{this.style.display='none';}\">"+
-    "<div style='color:#c0622a;font-weight:600;font-size:12.5px;margin-top:6px;letter-spacing:.02em'>CIN: U79120AN2026PTC006196</div>"+
-    "<div style='font-size:12.5px;color:#3a4a43;margin-top:4px;line-height:1.55'>Sri Ram Nagar, Attam Pahad, Garacharma, Opp. Shiv Mandir,<br>Sri Vijaya Puram, South Andaman, Andaman and Nicobar Islands - 744105, India</div>"+
-    "<div style='font-size:12.5px;color:#3a4a43;margin-top:3px'>Mob: +91 9933202175; Email: info@islandexplorer.in; Web: www.islandexplorer.in</div>"+
+    "<img src='"+logoUrl+"' alt='"+company+"' style='max-width:300px;max-height:130px;object-fit:contain;margin:0 auto 6px' onerror=\"if(this.src.indexOf('logo.png')>-1){this.src=this.src.replace('logo.png','logo.jpg');}else{this.style.display='none';}\">"+
+    "<div style='color:#c0622a;font-weight:600;font-size:12.5px;margin-top:6px;letter-spacing:.02em'>CIN: "+cin+"</div>"+
+    "<div style='font-size:12.5px;color:#3a4a43;margin-top:4px;line-height:1.55'>"+address+"</div>"+
+    "<div style='font-size:12.5px;color:#3a4a43;margin-top:3px'>"+contact+"</div>"+
   "</div>";
 }
 /* "Quotation To" party block (left) + meta block (right). Guest name / country are
@@ -4659,8 +4668,78 @@ async function refreshCurrentView(){
   boot(true);
   if(btn)btn.classList.remove("spinning");
 }
-boot();
-initAuth().then(function(canSync){if(canSync)cloudInit();});
+/* ===== Brand from config.js (single-file white-labeling) ===== */
+function applyBrand(){
+  try{
+    var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+    if(!B.company)return;
+    var set=function(id,txt){var e=document.getElementById(id);if(e&&txt)e.textContent=txt;};
+    set('brandSideName',B.company);set('brandLoginName',B.company);set('brandFootName',B.company);
+    var lg=document.getElementById('brandLoginLogo');if(lg&&B.logo){lg.src=B.logo;lg.alt=B.company;}
+    try{document.title=B.company+" · Ops Console";}catch(e){}
+  }catch(e){}
+}
+/* ===== DEMO SANDBOX (open with ?demo=1) — for sales demos ============
+   Seeds realistic sample data, skips the login and cloud entirely, and never
+   writes to disk, so a prospect can click around freely and every reload
+   starts fresh. Never touches a real installation's saved data. */
+function __isDemo(){try{return /[?&]demo=1/.test(location.search);}catch(e){return false;}}
+function __seedDemo(){
+  var now=new Date().toISOString();
+  applyStore({
+    tours:[
+     {id:"T1001",name:"Great Nicobar Endemic Birding Tour",cat:"nicobar",start:"2026-07-12",end:"2026-07-24",cap:6,status:"open",guide:"Sumit Kumar",guideAlloted:"",sessionType:"Full day",pickup:"Port Blair",startLoc:"Port Blair",stay:"Wild Grass Resort",tourCost:624800,tourDeposit:156200,due:"2026-06-27"},
+     {id:"T1002",name:"South Andaman Endemic Birding Tour",cat:"southandaman",start:"2026-07-18",end:"2026-07-23",cap:8,status:"open",guide:"Sumit Kumar",guideAlloted:"Vikram Shet",sessionType:"Full day",pickup:"Sri Vijaya Puram",startLoc:"Port Blair",stay:"Sea Princess",tourCost:236800,tourDeposit:118400,due:"2026-07-03"},
+     {id:"T1003",name:"Narcondam Expedition (A)",cat:"narcondam",start:"2026-08-02",end:"2026-08-05",cap:4,status:"open",guide:"Sumit Kumar",guideAlloted:"",sessionType:"Full day",pickup:"Port Blair",startLoc:"Port Blair",stay:"—",tourCost:180000,tourDeposit:45000,due:"2026-07-18"}
+    ],
+    bookings:[
+     {id:"B1",bookingDate:"12 Jun",tour:"T1001",customTour:"",guest:"Dr. Sarah Mitchell",members:"Sarah, James, Elena, Tom",party:4,country:"United Kingdom",email:"sarah@ukbirders.org",phone:"9876500001",status:"confirmed",pay:"Bank transfer",deposit:156200,notes:"Vegetarian meals x2",start:"2026-07-12",end:"2026-07-24",totalOverride:624800},
+     {id:"B2",bookingDate:"20 Jun",tour:"T1002",customTour:"",guest:"Rahul Verma",members:"Rahul, Priya",party:2,country:"India",email:"rahul.v@gmail.com",phone:"9898989898",status:"confirmed",pay:"UPI",deposit:42100,notes:"",start:"2026-07-18",end:"2026-07-23",totalOverride:84200},
+     {id:"B3",bookingDate:"01 Jul",tour:"T1003",customTour:"",guest:"Hannah Berg",members:"Hannah, Lukas",party:2,country:"Germany",email:"hberg@web.de",phone:"49170000001",status:"pending",pay:"Card",deposit:0,notes:"Waiting for permit",start:"2026-08-02",end:"2026-08-05"}
+    ],
+    vehicles:[{name:"Innova Crysta",reg:"AN01 P9577",type:"SUV",cap:6,driver:"Abdul Siyab",avail:"On Tour"},{name:"Tempo Traveller",reg:"AN01 T2210",type:"Van",cap:12,driver:"Manoj Roy",avail:"Available"}],
+    drivers:[{name:"Abdul Siyab",phone:"9531815647",code:"8100",license:"AN-0420110012",veh:"Innova Crysta"},{name:"Manoj Roy",phone:"9531800022",code:"4432",license:"AN-0420150044",veh:"Tempo Traveller"}],
+    externalGuides:[{name:"Vikram Shet",phone:"9797979797",gid:"G-02",email:"vikram@birds.in"}],
+    ops:[
+     {id:"O1",fromTour:"T1001",tour:"Great Nicobar Endemic Birding Tour",tourId:"IEBT-26-014",tourName:"Great Nicobar Endemic Birding Tour",date:"2026-07-12",dateDisplay:"12 Jul",start:"12 Jul",end:"24 Jul",startISO:"2026-07-12",endISO:"2026-07-24",clients:"Dr. Sarah Mitchell +3",pax:4,veh:"Innova Crysta",reg:"AN01 P9577",driver:"Abdul Siyab",driverPhone:"9531815647",guide:"Sumit Kumar",pickupDate:"2026-07-12",pickupLoc:"Port Blair jetty 05:30",pickup:"Port Blair jetty 05:30",dropDate:"2026-07-24",dropLoc:"Veer Savarkar Airport",legs:[],stays:[{stay:"Wild Grass Resort",start:"2026-07-12",end:"2026-07-15"},{stay:"Campbell Bay Forest Rest House",start:"2026-07-15",end:"2026-07-22"}],remarks:"Ship tickets confirmed. Carry scope.",birding:"—",stay:"Wild Grass Resort",status:"Scheduled"},
+     {id:"O2",fromTour:"T1002",tour:"South Andaman Endemic Birding Tour",tourId:"IEBT-26-015",tourName:"South Andaman Endemic Birding Tour",date:"2026-07-18",dateDisplay:"18 Jul",start:"18 Jul",end:"23 Jul",startISO:"2026-07-18",endISO:"2026-07-23",clients:"Rahul Verma +1",pax:2,veh:"Tempo Traveller",reg:"AN01 T2210",driver:"Manoj Roy",driverPhone:"9531800022",guide:"Vikram Shet",pickupDate:"2026-07-18",pickupLoc:"Sri Vijaya Puram 04:45",pickup:"Sri Vijaya Puram 04:45",dropDate:"2026-07-23",dropLoc:"Airport",legs:[],stays:[{stay:"Sea Princess Beach Resort",start:"2026-07-18",end:"2026-07-23"}],remarks:"",birding:"—",stay:"Sea Princess",status:"Scheduled"}
+    ],
+    leads:[
+     {id:"L1",name:"Emily Chen",stage:"New",country:"Singapore",phone:"6591234567",email:"emily@x.com",interest:"Great Nicobar",pax:2,notes:"From Instagram",date:"2026-07-01"},
+     {id:"L2",name:"Piotr Nowak",stage:"Proposal",country:"Poland",phone:"48601000200",email:"piotr@x.pl",interest:"South Andaman 5N",pax:3,notes:"Sent quote Q-2",date:"2026-06-28"},
+     {id:"L3",name:"Meera Iyer",stage:"Confirmed",country:"India",phone:"9812345678",email:"meera@x.in",interest:"Narcondam Expedition",pax:2,notes:"Deposit paid",date:"2026-06-20"}
+    ],
+    customers:[{name:"Dr. Sarah Mitchell",country:"United Kingdom",phone:"9876500001",email:"sarah@ukbirders.org",trips:1},{name:"Rahul Verma",country:"India",phone:"9898989898",email:"rahul.v@gmail.com",trips:2}],
+    quotationLog:[
+     {id:"Qd2",qid:"IEBT/2026/Q-1",kind:"group",tour:"Great Nicobar Endemic Birding Tour -12 Nights",clientType:"Indian",guest:"Meera Iyer",date:"28/06/2026",validUntil:"12/07/2026",departure:"02/08/2026",html:"<div style='padding:30px;font-weight:600'>Saved quotation document</div>",savedAt:now},
+     {id:"Qd1",qid:"IEBT/2026/Q-2",kind:"group",tour:"South Andaman Endemic Birding Tour -5 Nights",clientType:"Foreigner",guest:"Piotr Nowak",date:"04/07/2026",validUntil:"18/07/2026",departure:"",html:"<div style='padding:30px;font-weight:600'>Saved quotation document</div>",savedAt:now}
+    ],
+    quoteSeq:2,
+    sheetChangeLog:[{ts:now,tour:"T2",tourName:"Great Nicobar Endemic Birding Tour",type:"Foreign"}]
+  });
+  if(typeof enrichAllOps==="function")try{enrichAllOps();}catch(e){}
+}
+function __demoRibbon(){
+  try{
+    if(document.getElementById('__demoRibbon'))return;
+    var r=document.createElement('div');r.id='__demoRibbon';
+    r.textContent='LIVE DEMO — sample data · changes are not saved';
+    r.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#c0622a;color:#fff;font:600 12px/1.4 Arial,sans-serif;text-align:center;padding:6px 10px;letter-spacing:.03em;box-shadow:0 -2px 12px rgba(0,0,0,.25)';
+    document.body.appendChild(r);
+  }catch(e){}
+}
+if(__isDemo()){
+  window.__DEMO__=true;
+  try{__seedDemo();}catch(e){}
+  boot();
+  applyBrand();
+  if(typeof hideLogin==="function")hideLogin();
+  __demoRibbon();
+}else{
+  boot();
+  applyBrand();
+  initAuth().then(function(canSync){if(canSync)cloudInit();});
+}
 
 /* ===== AUTHENTICATION (Supabase email/password) ===== */
 var _authMode="signin"; /* signin | signup */
