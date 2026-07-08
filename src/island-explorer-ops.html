@@ -1135,7 +1135,16 @@ var __CFG_SB=(window.APP_CONFIG&&window.APP_CONFIG.supabase)||{};
 const SB_DEFAULTS={url:__CFG_SB.url||"https://tbxzxfjumlnciczizols.supabase.co",key:__CFG_SB.key||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss",ws:__CFG_SB.workspace||"island-explorer",auto:true};
 let _sb=null, _sbReady=false, _sbApplying=false, _sbPushTimer=null;
 function sbConfig(){
-  try{var s=localStorage.getItem(SB_CFG_KEY);if(s){var c=JSON.parse(s);if(c&&c.url)return c;}}catch(e){}
+  try{var s=localStorage.getItem(SB_CFG_KEY);if(s){var c=JSON.parse(s);if(c&&c.url){
+    /* SaaS: the backend project is fixed by config.js. A device that once saved a
+       different project (e.g. one that has since been deleted) would otherwise
+       keep calling a dead server ("Failed to fetch") forever — heal it: always
+       take url+key from the shipped defaults, keep only the workspace. */
+    if(c.url!==SB_DEFAULTS.url||c.key!==SB_DEFAULTS.key){
+      c.url=SB_DEFAULTS.url;c.key=SB_DEFAULTS.key;_sb=null;
+      try{localStorage.setItem(SB_CFG_KEY,JSON.stringify(c));}catch(e){}
+    }
+    return c;}}}catch(e){}
   return SB_DEFAULTS;
 }
 function sbClient(){
