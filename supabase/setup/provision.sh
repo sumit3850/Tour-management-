@@ -22,7 +22,8 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 
-# Workspace name: 1st arg, else read from config.js (APP_CONFIG.supabase.workspace).
+# Workspace name: pass it explicitly as the 1st arg (recommended — config.js is
+# multi-tenant). With no arg, falls back to the FIRST tenant's workspace in config.js.
 WS="${1:-}"
 if [ -z "$WS" ] && [ -f "$ROOT/config.js" ]; then
   WS="$(grep -oE 'workspace:[[:space:]]*"[^"]+"' "$ROOT/config.js" | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
