@@ -48,12 +48,13 @@ begin
 end $$;
 
 -- ============================================================================
--- 3) OPTIONAL — migrate the old Island Explorer data into this workspace.
---    a) In the OLD project (tbxzxfjumlnciczizols) SQL editor, run:
---         select data from workspaces where id = 'island-explorer';
---       and copy the whole JSON result.
---    b) Back in THIS project, paste it between the $json$ markers and run:
+-- 3) DATA — when running on tbxzxfjumlnciczizols (the original project), the
+--    'island-explorer' row in workspaces already holds all the real data, so
+--    there is nothing to migrate: signing in shows it immediately.
 --
+--    Only if seeding a DIFFERENT project, copy the data across:
+--    a) source project:  select data from workspaces where id = 'island-explorer';
+--    b) target project:
 -- insert into workspaces (id, data, updated_at)
 -- values ('island-explorer', $json$ PASTE_THE_JSON_HERE $json$::jsonb, now())
 -- on conflict (id) do update set data = excluded.data, updated_at = now();

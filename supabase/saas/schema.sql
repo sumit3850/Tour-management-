@@ -163,6 +163,30 @@ create policy "public can submit forms" on workspaces for insert to anon
   with check (id like 'sub\_%' escape '\');
 grant select, insert, update, delete on table workspaces to authenticated;
 
+-- ---- Consolidating on a project that was previously single-company ----------
+-- docs/SECURE_ACCESS.md's "team full access" policy on workspaces let EVERY
+-- signed-in user read every workspace row — correct for one company, a data
+-- leak under many. Remove it; the org-scoped policy above replaces it.
+drop policy if exists "team full access" on workspaces;
+
+-- The per-record ieo_* tables (if present) are not workspace-scoped, so direct
+-- client access would mix data across companies. Deny client access entirely —
+-- the driver/guide login RPCs still read them internally (security definer),
+-- and the console automatically falls back to the workspace-scoped blob sync.
+do $$
+declare t text;
+begin
+  foreach t in array array['ieo_tours','ieo_bookings','ieo_customers','ieo_accommodations',
+    'ieo_acc_bookings','ieo_leads','ieo_vehicles','ieo_drivers','ieo_ops','ieo_external_guides',
+    'ieo_reservations','ieo_operators','ieo_quotation_log','ieo_trip_logs'] loop
+    if to_regclass('public.'||t) is not null then
+      execute format('alter table %I enable row level security', t);
+      execute format('drop policy if exists "team full access" on %I', t);
+      execute format('revoke all on table %I from anon, authenticated', t);
+    end if;
+  end loop;
+end $$;
+
 -- ---- Logo storage -----------------------------------------------------------
 insert into storage.buckets (id, name, public) values ('logos','logos', true)
   on conflict (id) do nothing;
