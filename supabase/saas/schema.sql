@@ -62,6 +62,33 @@ drop policy if exists "create own membership" on org_members;
 create policy "create own membership" on org_members for insert to authenticated
   with check (user_id = auth.uid());
 
+-- ---- Auto-create the org when a user signs up -------------------------------
+-- The signup page passes the company profile as user metadata; this trigger
+-- creates the pending org + membership server-side at user-creation time. This
+-- is race-free (no client insert, no session-timing dependency, no reliance on
+-- email confirmation) — it always runs as the definer and bypasses RLS.
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare md jsonb; ws text; oid uuid;
+begin
+  md := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  if coalesce(md->>'company','') = '' then return new; end if;      -- non-company signups: ignore
+  ws := trim(both '-' from regexp_replace(lower(md->>'company'), '[^a-z0-9]+', '-', 'g'));
+  if ws = '' then ws := 'org'; end if;
+  ws := left(ws, 40) || '-' || substr(md5(new.id::text), 1, 4);
+  insert into orgs (workspace, company, username, cin, contact_person, phone, email,
+                    website, address, domain, logo_url, status, owner_id)
+    values (ws, md->>'company', md->>'username', md->>'cin', md->>'contact_person',
+            md->>'phone', new.email, md->>'website', md->>'address', md->>'domain',
+            md->>'logo_url', 'pending', new.id)
+    returning id into oid;
+  insert into org_members (org_id, user_id, role) values (oid, new.id, 'owner');
+  return new;
+end; $$;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function public.handle_new_user();
+
 -- ---- Email-first login branding (safe pre-login lookup) ---------------------
 -- Given a typed email, returns ONLY the public brand bits of that email's
 -- APPROVED org — so the login page can show the company's logo + name before
