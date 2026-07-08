@@ -10,8 +10,8 @@
    ========================================================================== */
 window.APP_CONFIG = {
   supabase: {
-    url:       "https://ikuzliljkcjdglfzdaqd.supabase.co",
-    key:       "sb_publishable_P9dMhqOzgTqbQSwerx7LwQ_0M6-8_3w",
+    url:       "https://tbxzxfjumlnciczizols.supabase.co",
+    key:       "sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss",
     workspace: "default"
   },
   brand: {

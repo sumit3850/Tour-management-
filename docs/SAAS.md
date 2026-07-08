@@ -32,7 +32,8 @@ the sign-in page (email-first).
 2. **Turn off email confirmation** (for the simple flow): Authentication →
    Providers → Email → **Confirm email = off**. (Approval is your real gate.)
 3. **Point `signup.html` at the project.** The `SAAS` block near the bottom of
-   `signup.html` is already set to `ikuzliljkcjdglfzdaqd.supabase.co` — change it
+   `signup.html` (and `config.js`) is set to `tbxzxfjumlnciczizols.supabase.co`
+   — the same project that already holds the Island Explorer data — change it
    only if you use a different SaaS project.
 4. **Deploy** (push to main) and open `/signup.html`. Register a test company,
    attach a logo → you should see "pending approval."
