@@ -71,6 +71,17 @@ create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare md jsonb; ws text; oid uuid;
 begin
+  -- If an org was pre-created for this email (e.g. seeded/migrated by the owner)
+  -- and has no owner yet, CLAIM it instead of creating a duplicate: link the new
+  -- user as owner and keep the pre-filled company profile as-is.
+  select id into oid from orgs where lower(email) = lower(new.email) and owner_id is null limit 1;
+  if oid is not null then
+    update orgs set owner_id = new.id where id = oid;
+    insert into org_members (org_id, user_id, role) values (oid, new.id, 'owner')
+      on conflict do nothing;
+    return new;
+  end if;
+
   md := coalesce(new.raw_user_meta_data, '{}'::jsonb);
   if coalesce(md->>'company','') = '' then return new; end if;      -- non-company signups: ignore
   ws := trim(both '-' from regexp_replace(lower(md->>'company'), '[^a-z0-9]+', '-', 'g'));
