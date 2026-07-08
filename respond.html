@@ -52,10 +52,11 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div class="foot">Sumit Kumar · +91 99332 02175 · info@islandexplorer.in</div>
 </div>
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
-const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const rid=new URLSearchParams(location.search).get("rid")||"";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display="block";}

@@ -95,10 +95,11 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
   </div>
 </div>
 <div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v127</span></div>
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SB_URL="https://tbxzxfjumlnciczizols.supabase.co";
-const SB_KEY="sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
 /* If supabase-js wasn't ready at first paint (slow/again-cached load), create
    the client lazily the moment it becomes available — so a queued change can
