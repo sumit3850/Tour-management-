@@ -4788,10 +4788,17 @@ function loadOrgContext(){
     var org=res&&res.data;
     if(!org){showPendingApproval();return;}               /* signed in but no company yet */
     if(org.status!=="approved"){showPendingApproval();return;}
+    /* Wipe any data cached locally from a previous session or company, so this
+       company only ever sees its OWN cloud data — and stale data is never pushed
+       up into their (empty) workspace. */
+    try{localStorage.removeItem(DATA_KEY);localStorage.removeItem("ieo_updated");localStorage.removeItem("ieo_record_pending");localStorage.removeItem("ieo_sync_trips");}catch(e){}
+    try{STORE.forEach(function(s){if(s.arr)s.set([]);});}catch(e){}
+    try{_lastKnownCloudTotal=0;_localDirty=false;_perRecordActive=false;}catch(e){}
     try{var cfg=sbConfig();cfg.ws=org.workspace;localStorage.setItem(SB_CFG_KEY,JSON.stringify(cfg));}catch(e){}
     if(org.brand){window.APP_CONFIG.brand=Object.assign({},window.APP_CONFIG.brand||{},org.brand);if(typeof applyBrand==="function")applyBrand();}
     _orgLoaded=true;hideLogin();
-    _sbReady=false;if(typeof cloudInit==="function")cloudInit();  /* load THIS company's data */
+    try{if(typeof boot==="function")boot(true);}catch(e){}         /* render empty immediately */
+    _sbReady=false;if(typeof cloudInit==="function")cloudInit();  /* then load THIS company's data */
   }).catch(function(){hideLogin();});
 }
 /* Auth and data sync used to be two unconnected systems: the login screen was just
