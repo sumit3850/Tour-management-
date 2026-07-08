@@ -1,0 +1,53 @@
+name: Deploy to Cloudflare Pages
+
+# Production deploy on every push to main; a preview deployment (its own URL)
+# for each pull request. Use EITHER this workflow OR Cloudflare's built-in Git
+# integration — not both, or you'll deploy twice.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   CLOUDFLARE_API_TOKEN   - a token with the "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID  - your Cloudflare account id (Pages -> right sidebar)
+# Create the Pages project once first (dashboard "Direct Upload", or:
+#   npx wrangler pages project create island-explorer-ops).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Never let two deploys of the same ref overlap.
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write   # lets wrangler post the preview URL on the PR
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Skips cleanly (green, not red) until the two Cloudflare secrets are set,
+    # so adding this workflow doesn't fail before you've configured it.
+    env:
+      HAS_CF: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cloudflare secrets not set — skipping deploy
+        if: env.HAS_CF != 'true'
+        run: echo "Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in repo secrets to enable deploys. See docs/DEPLOY_CLOUDFLARE.md."
+
+      - name: Deploy to Cloudflare Pages
+        if: env.HAS_CF == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # project name + output dir come from wrangler.toml. --branch controls
+          # production vs preview: "main" is the production branch, anything else
+          # is a preview deployment with its own URL.
+          command: pages deploy --branch=${{ github.head_ref || github.ref_name }}
