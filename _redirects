@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects. Friendly aliases for the field apps so staff can be
+# given short links (query strings like ?guide=… are preserved). Optional — the
+# real .html URLs the app generates keep working.
+/driver   /driver-app.html   302
+/guide    /ops-guide.html    302
