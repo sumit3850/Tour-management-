@@ -71,10 +71,11 @@ Test any client on any URL with `?t=their-key` (e.g. `index.html?t=their-key`).
 The client opens the app on their own domain, which must serve this same
 deployment:
 
-- **Recommended host:** a platform that supports **many custom domains on one
-  site** — Cloudflare Pages, Netlify, or Vercel. Add each client's domain (or a
-  subdomain like `app.theircompany.in`) as a custom domain on the one project,
-  and point their DNS (CNAME) at it.
+- **Recommended host:** Cloudflare Pages — supports **many custom domains on one
+  site**. Add each client's domain (or a subdomain like `app.theircompany.in`)
+  as a custom domain on the one project and point their DNS (CNAME) at it.
+  Full step-by-step in **`docs/DEPLOY_CLOUDFLARE.md`**. (Netlify / Vercel work
+  the same way.)
 - **Subdomain-only, simplest:** give every client a subdomain of one domain you
   own — `theircompany.ops.yourbrand.app` — via a wildcard DNS record.
 - **GitHub Pages caveat:** GitHub Pages allows only **one** custom domain per

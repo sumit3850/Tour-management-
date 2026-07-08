@@ -1,0 +1,6 @@
+# Cloudflare Pages project config. The app is fully static (no build step), so
+# the build output is the repo root. Used by `wrangler pages deploy` and CI; the
+# dashboard Git integration reads the same output dir.
+name = "island-explorer-ops"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "."

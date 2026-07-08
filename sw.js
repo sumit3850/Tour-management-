@@ -11,8 +11,9 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v5";
+var CACHE = "ie-ops-v6";
 var SHELL = [
+  "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "index.html",
   "manifest.json", "driver-manifest.json", "guide-manifest.json",
   "assets/logo.png", "assets/logo.jpg", "assets/icon.svg", "assets/icon-192.png", "assets/icon-512.png",
@@ -56,6 +57,20 @@ self.addEventListener("fetch", function(e){
       }).catch(function(){
         return caches.match(req).then(function(m){ return m || caches.match("driver-app.html"); });
       })
+    );
+    return;
+  }
+
+  /* config.js (the tenant registry) is network-first like navigations, so a
+     branding/tenant/key change reaches online clients immediately; it still
+     falls back to the cached copy offline so the field apps keep working. */
+  if (url.pathname.split("/").pop() === "config.js") {
+    e.respondWith(
+      fetch(req).then(function(res){
+        var copy = res.clone();
+        caches.open(CACHE).then(function(c){ c.put(req, copy); });
+        return res;
+      }).catch(function(){ return caches.match(req); })
     );
     return;
   }
