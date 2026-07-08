@@ -14,13 +14,26 @@ Each client must have their **own Supabase project** so their bookings, guests
 and payments never mix with another operator's.
 
 1. Create a new Supabase project for the client.
-2. Recreate the schema: the tables used by the app (`workspaces`, per-record
-   tables, plus the `driver_login` / `guide_login` RPCs and the
-   `import-rates` edge function under `supabase/functions/`). Keep a schema
-   export so this is one step, not a hand-rebuild.
-3. Apply the RLS lockdown described in `docs/SECURE_ACCESS.md` so only a
-   signed-in team account can read/write.
-4. Copy the project **URL** and the **publishable (anon) key**.
+2. Copy the project **URL** and **publishable (anon) key** into `config.js`
+   (see step 2 below), and set the client's `workspace` name there.
+3. **Provision the whole schema with one command** — `supabase/setup/provision.sh`
+   builds every table, the RLS lockdown, and the login RPCs (bound to this
+   client's workspace name) from the docs, and applies them:
+
+   ```bash
+   # generates supabase/setup/build/setup.sql to paste into the SQL editor…
+   ./supabase/setup/provision.sh
+   # …or apply directly (connection string: Supabase -> Settings -> Database):
+   SUPABASE_DB_URL='postgresql://postgres:PW@HOST:5432/postgres' \
+     ./supabase/setup/provision.sh
+   ```
+
+   (Also deploy the `import-rates` edge function under `supabase/functions/` if
+   the client will bulk-import a rate sheet.) See `supabase/setup/README.md`.
+4. Create the team's login(s) in **Supabase → Authentication → Users**. The RLS
+   lockdown means only signed-in team users can read/write; the public
+   registration/response pages still work (anon may submit forms + call the
+   login RPCs).
 
 > The anon/publishable key is browser-safe and is meant to ship in `config.js`.
 > **Never** put the Supabase `service_role` key in any of these files.
