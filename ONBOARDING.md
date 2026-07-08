@@ -9,6 +9,9 @@ the **domain** they open the app on.
 Adding a client is: **one config block + one command + one DNS entry.** No new
 repo, no separate copy of the app.
 
+> **First time? Do the hands-on practice run:** `docs/FIRST_CLIENT_WALKTHROUGH.md`
+> walks the whole loop end-to-end with a free throwaway Supabase project (~20 min).
+
 ---
 
 ## 1. Give them their own backend (data isolation)
