@@ -60,6 +60,28 @@ npx wrangler pages deploy . --project-name island-explorer-ops
 
 Useful for a manual/preview deploy without going through Git.
 
+## Alternative: deploy via GitHub Actions (`.github/workflows/deploy.yml`)
+
+Instead of Cloudflare's built-in Git integration you can let GitHub Actions push
+each deploy — you get build logs and a **preview URL commented on every PR**.
+Use **one or the other, not both** (or you'll deploy twice — disconnect the
+dashboard Git integration if you switch to the Action).
+
+Set-up:
+1. Create the Pages project once (dashboard **Direct Upload**, or
+   `npx wrangler pages project create island-explorer-ops`).
+2. Add two repo secrets under **Settings → Secrets and variables → Actions**:
+   - `CLOUDFLARE_API_TOKEN` — a token with the **Cloudflare Pages: Edit** permission
+     (My Profile → API Tokens → Create Token).
+   - `CLOUDFLARE_ACCOUNT_ID` — from the Pages/Workers page right sidebar.
+3. Push to `main` → the workflow runs `wrangler pages deploy` (project name and
+   output dir come from `wrangler.toml`) → production. Open a PR → it deploys a
+   **preview** with its own URL, posted back on the PR.
+
+The workflow deploys `--branch=main` as production and any other branch as a
+preview, so `?t=<tenant>` previews of a client are easy to share before their
+DNS is live.
+
 ## Note on GitHub Pages
 
 GitHub Pages allows only one custom domain per repo, so it can't host multiple
