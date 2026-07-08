@@ -4755,6 +4755,45 @@ function applyUser(user){
   var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(user&&user.email)||"Signed in";
   var av=document.querySelector(".nav-foot .av");if(av)av.textContent=String(name).split(/[ @.]/).filter(Boolean).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
 }
+/* ===== SaaS: show each company its own login + console =======================
+   Email-first: typing an approved company's email on the sign-in screen shows
+   their logo + name. After sign-in, the console scopes to that company's own
+   workspace (isolated data) and applies their branding. All fail open: if the
+   SaaS functions aren't present, the console behaves exactly as before. */
+function lgSetBrand(b){try{
+  if(b&&b.company){var n=lgEl("brandLoginName");if(n)n.textContent=b.company;var s=document.getElementById("brandSideName");if(s)s.textContent=b.company;var f=document.getElementById("brandFootName");if(f)f.textContent=b.company;}
+  if(b&&b.logo){var lg=lgEl("brandLoginLogo");if(lg){lg.src=b.logo;lg.style.display="block";var tb=document.getElementById("lg_textbrand");if(tb)tb.style.display="none";}}
+}catch(e){}}
+function lgEmailBrand(){
+  var cl=authClient();if(!cl)return;
+  var email=(((lgEl("lg_email")||{}).value)||"").trim();
+  if(email.indexOf("@")<1)return;
+  try{cl.rpc("brand_for_email",{p_email:email}).then(function(r){var b=r&&r.data;if(b)lgSetBrand(b);}).catch(function(){});}catch(e){}
+}
+function showPendingApproval(){
+  hideLogin();
+  if(document.getElementById("__pending"))return;
+  var d=document.createElement("div");d.id="__pending";
+  d.style.cssText="position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;background:radial-gradient(1100px 700px at 30% 20%,#1d4d3b,#0a201a);color:#eaf5ef;font-family:Arial,sans-serif;text-align:center;padding:24px";
+  d.innerHTML="<div style='max-width:440px'><div style='font-size:44px'>⏳</div><h2 style='margin:10px 0 8px'>Account pending approval</h2><p style='color:#bcd9c9;line-height:1.6'>Thanks for registering. Your company account is awaiting approval — you'll be able to sign in and see your console as soon as it's activated.</p><button id='__poff' style='margin-top:18px;padding:11px 20px;border:0;border-radius:10px;background:#fff;color:#12332a;font-weight:700;cursor:pointer'>Sign out</button></div>";
+  document.body.appendChild(d);
+  var b=document.getElementById("__poff");if(b)b.onclick=function(){var c=authClient();if(c)c.auth.signOut();location.reload();};
+}
+var _orgLoaded=false;
+function loadOrgContext(){
+  var cl=authClient();if(!cl){hideLogin();return;}
+  var r;try{r=cl.rpc("my_org");}catch(e){hideLogin();return;}
+  r.then(function(res){
+    if(res&&res.error){hideLogin();return;}              /* my_org() not installed -> behave as before */
+    var org=res&&res.data;
+    if(!org){showPendingApproval();return;}               /* signed in but no company yet */
+    if(org.status!=="approved"){showPendingApproval();return;}
+    try{var cfg=sbConfig();cfg.ws=org.workspace;localStorage.setItem(SB_CFG_KEY,JSON.stringify(cfg));}catch(e){}
+    if(org.brand){window.APP_CONFIG.brand=Object.assign({},window.APP_CONFIG.brand||{},org.brand);if(typeof applyBrand==="function")applyBrand();}
+    _orgLoaded=true;hideLogin();
+    _sbReady=false;if(typeof cloudInit==="function")cloudInit();  /* load THIS company's data */
+  }).catch(function(){hideLogin();});
+}
 /* Auth and data sync used to be two unconnected systems: the login screen was just
    a visual overlay, and the cloud data loaded regardless of whether you'd actually
    signed in. Now cloud sync WAITS for a confirmed sign-in — the shared workspace
@@ -4767,15 +4806,16 @@ function initAuth(){
   return new Promise(function(resolve){
     var cl=authClient();
     if(!cl){hideLogin();resolve(true);return;}
+    var _le=lgEl("lg_email");if(_le&&!_le._brandHooked){_le._brandHooked=1;_le.addEventListener("blur",lgEmailBrand);}
     cl.auth.getSession().then(function(res){
       var s=res&&res.data&&res.data.session;
-      if(s&&s.user){applyUser(s.user);hideLogin();resolve(true);}
+      if(s&&s.user){applyUser(s.user);loadOrgContext();resolve(false);}
       else{showLogin();resolve(false);}
     }).catch(function(){showLogin();resolve(true);});
     cl.auth.onAuthStateChange(function(_e,session){
       if(session&&session.user){
-        applyUser(session.user);hideLogin();
-        if(_authResolved&&!_sbReady)cloudInit(); /* signed in after boot -> sync now */
+        applyUser(session.user);
+        if(_authResolved&&!_orgLoaded)loadOrgContext(); /* signed in after boot -> load their org */
       }
     });
   }).then(function(canSync){_authResolved=true;return canSync;});
