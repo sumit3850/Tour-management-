@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Island Explorer Ops</title>
+<title>Ops Console</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <meta name="theme-color" content="#143a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Island Explorer">
+<meta name="apple-mobile-web-app-title" content="Ops Console">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -2236,11 +2236,24 @@ function catName(key){
   if(m)return m[1].trim()+" -"+m[2]+" Nights";
   return title;
 }
-/* The NEXT quotation number WITHOUT consuming it → IEBT/<year>/Q-<n>. The number only
-   moves forward when a quotation is saved (see saveCurrentQuote). */
+/* Quotation-number prefix from the signed-in company's name: initials of each
+   word (Island Explorer Birding Tours -> IEBT), or the first four letters for a
+   single-word name (ABCD-1 -> ABCD). */
+function quotePrefix(){
+  try{
+    var name=((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"").trim();
+    if(!name)return "Q";
+    var words=name.replace(/[^A-Za-z0-9 ]/g," ").split(/\s+/).filter(Boolean);
+    var initials=words.map(function(w){return w.charAt(0);}).join("").toUpperCase();
+    if(initials.length>=3)return initials.slice(0,5);
+    return (name.replace(/[^A-Za-z0-9]/g,"").slice(0,4).toUpperCase())||"Q";
+  }catch(e){return "Q";}
+}
+/* The NEXT quotation number WITHOUT consuming it → <PREFIX>/<year>/Q-<n>. The
+   number only moves forward when a quotation is saved (see saveCurrentQuote). */
 function peekQuoteNo(){
   var yr=(new Date()).getFullYear();
-  return "IEBT/"+yr+"/Q-"+((parseInt(quoteSeq,10)||0)+1);
+  return quotePrefix()+"/"+yr+"/Q-"+((parseInt(quoteSeq,10)||0)+1);
 }
 /* Branded letterhead: logo + CIN + registered address + contact line. */
 function quoteHeaderHTML(){
@@ -2456,7 +2469,7 @@ function printQuotation() {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Quotation - Island Explorer</title>
+      <title>Quotation - ${(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Ops Console"}</title>
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap');
@@ -4676,7 +4689,7 @@ function applyBrand(){
     var set=function(id,txt){var e=document.getElementById(id);if(e&&txt)e.textContent=txt;};
     set('brandSideName',B.company);set('brandLoginName',B.company);set('brandFootName',B.company);
     var lg=document.getElementById('brandLoginLogo');if(lg&&B.logo){lg.src=B.logo;lg.alt=B.company;}
-    try{document.title=B.company+" · Ops Console";}catch(e){}
+    try{var _tg=B.tagline||"Ops Console";document.title=(B.company&&B.company!==_tg)?(B.company+" · "+_tg):_tg;}catch(e){}
   }catch(e){}
 }
 /* ===== DEMO SANDBOX (open with ?demo=1) — for sales demos ============
