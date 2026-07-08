@@ -1,7 +1,7 @@
 {
-  "name": "Island Explorer Birding Tours — Ops Console",
-  "short_name": "Island Explorer",
-  "description": "Tour, booking, guide and logistics console for Island Explorer Birding Tours.",
+  "name": "Ops Console",
+  "short_name": "Ops Console",
+  "description": "Tour, booking, guide and logistics operations console.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
