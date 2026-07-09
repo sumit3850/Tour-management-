@@ -56,10 +56,14 @@ svg{display:block}
 .nav-item:hover{background:rgba(25,118,210,0.08);color:var(--ink)}
 .nav-item.active{background:rgba(25,118,210,0.15);color:var(--ink)}
 .nav-item.active svg{stroke:var(--sea)}
-.nav-foot{padding:14px 18px;border-top:1px solid rgba(25,118,210,0.12);display:flex;align-items:center;gap:11px}
-.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:13px}
-.nav-foot .who{font-size:13px;color:var(--ink);font-weight:600}
-.nav-foot .role{font-size:11px;color:#6a8fa8}
+.nav-foot{padding:14px 16px;border-top:1px solid rgba(25,118,210,0.12);display:flex;align-items:center;gap:11px}
+.nav-foot .av{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0}
+.nav-foot .who{font-size:13.5px;color:var(--ink);font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-foot .role{font-size:11px;color:#6a8fa8;line-height:1.3;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-foot .iconbtn{flex-shrink:0;width:34px;height:34px;margin-left:6px;display:grid;place-items:center;color:#6a8fa8;border:1px solid rgba(25,118,210,0.18);border-radius:9px;background:transparent;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.nav-foot .iconbtn svg{width:17px;height:17px;stroke:currentColor}
+.nav-foot .iconbtn:hover{background:var(--coral-soft);color:var(--coral);border-color:var(--coral-soft)}
+.build-badge{display:inline-block;font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:.03em;color:#0a6ed1;background:var(--sea-soft);border:1px solid rgba(10,110,209,0.28);border-radius:5px;padding:1px 6px;margin-top:4px}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{position:sticky;top:0;z-index:30;background:rgba(246,242,233,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 28px;display:flex;align-items:center;gap:14px}
@@ -520,17 +524,17 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 139</span></div>
+    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 140</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 139</div></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 140</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
-    <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+    <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
   </aside>
   <div class="scrim-side" id="scrimSide" onclick="toggleNav(false)"></div>
   <div class="main">
@@ -4946,12 +4950,26 @@ function lgMsg(box,msg){var e=lgEl(box==="ok"?"lgOk":"lgErr"),o=lgEl(box==="ok"?
 function lgClearMsg(){["lgErr","lgOk"].forEach(function(i){var e=lgEl(i);if(e)e.classList.remove("show");});}
 function showLogin(){var ov=lgEl("loginOverlay");if(ov){ov.classList.add("show");setTimeout(function(){var f=lgEl("lg_email");if(f)f.focus();},80);}}
 function hideLogin(){var ov=lgEl("loginOverlay");if(ov)ov.classList.remove("show");}
+/* The person's display name — from the signup metadata (username / contact
+   person / name), then the org's contact person (loaded via my_org), else the
+   email's local part. Never the raw email, so the sidebar shows a real name. */
+function userDisplayName(user){
+  var m=(user&&user.user_metadata)||{};
+  var b=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+  var n=(m.username||m.name||m.full_name||m.contact_person||b.contactPerson||"").toString().trim();
+  if(n)return n;
+  var e=(user&&user.email)||"";
+  return e?e.split("@")[0]:"Operator";
+}
 function applyUser(user){
-  try{window.__orgUserId=(user&&user.id)||window.__orgUserId;}catch(e){}
-  var name=(user&&(user.user_metadata&&user.user_metadata.name))||(user&&user.email)||"Operator";
+  try{if(user)window.__authUser=user;window.__orgUserId=(user&&user.id)||window.__orgUserId;}catch(e){}
+  var u=user||window.__authUser;
+  var name=userDisplayName(u);
   var who=document.querySelector(".nav-foot .who");if(who)who.textContent=name;
-  var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(user&&user.email)||"Signed in";
-  var av=document.querySelector(".nav-foot .av");if(av)av.textContent=String(name).split(/[ @.]/).filter(Boolean).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
+  /* email on the smaller line below the name */
+  var role=document.querySelector(".nav-foot .role");if(role)role.textContent=(u&&u.email)||"Signed in";
+  /* avatar initials from the NAME (not the email) */
+  var av=document.querySelector(".nav-foot .av");if(av)av.textContent=String(name).split(/[ .]/).filter(Boolean).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase()||"U";
 }
 /* ===== SaaS: show each company its own login + console =======================
    Email-first: typing an approved company's email on the sign-in screen shows
@@ -5009,6 +5027,9 @@ function loadOrgContext(){
     try{_lastKnownCloudTotal=0;_localDirty=false;_perRecordActive=false;}catch(e){}
     try{var cfg=sbConfig();cfg.ws=org.workspace;localStorage.setItem(SB_CFG_KEY,JSON.stringify(cfg));}catch(e){}
     if(org.brand){window.APP_CONFIG.brand=Object.assign({},window.APP_CONFIG.brand||{},org.brand);if(typeof applyBrand==="function")applyBrand();}
+    /* Re-apply the user name now that the org's contact person is loaded, so the
+       sidebar shows the real name even when the auth account has no name metadata. */
+    if(window.__authUser)applyUser(window.__authUser);
     _orgLoaded=true;hideLogin();
     try{if(typeof boot==="function")boot(true);}catch(e){}         /* render empty immediately */
     _sbReady=false;
