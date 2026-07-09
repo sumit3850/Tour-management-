@@ -520,14 +520,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 136</span></div>
+    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 137</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 136</div></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 137</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -610,7 +610,16 @@ var GQ_TIERS=[
 ];
 var gqTierId="early";                /* currently selected deposit tier */
 let bookings=[];
-function bookingTotalCost(b){if(b.totalOverride!=null&&b.totalOverride!=="")return parseFloat(b.totalOverride)||0;var t=tours.find(function(x){return x.id===b.tour;});if(!t||!TOUR_COSTS[t.id])return 0;var costPP=TOUR_COSTS[t.id][b.country==="India"?"indian":"foreigner"];return costPP*b.party;}
+function bookingTotalCost(b){
+  if(b.totalOverride!=null&&b.totalOverride!=="")return parseFloat(b.totalOverride)||0;
+  var t=tours.find(function(x){return x.id===b.tour;});
+  if(t&&TOUR_COSTS[t.id]){var costPP=TOUR_COSTS[t.id][b.country==="India"?"indian":"foreigner"];return costPP*b.party;}
+  /* Fall back to the tour's own "Total tour cost" (set on the tour form) so a
+     booking, its customer, and the tour card all reflect that figure without
+     needing a per-booking override or a Paid status. */
+  if(t&&(parseFloat(t.tourCost)||0)>0)return parseFloat(t.tourCost)||0;
+  return 0;
+}
 function bookingDeposit(b){return b.deposit||0;}
 function bookingPending(b){return Math.max(bookingTotalCost(b)-bookingDeposit(b),0);}
 function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
@@ -4009,7 +4018,15 @@ function ensureAccBookingForOp(o,accId){
 }
 /* ===== PROFIT CALCULATOR — per-tour revenue, expenses by category, profit ===== */
 var PROFIT_EXP_FIELDS=[["accom","Accommodation"],["travel","Travel and Logistics"],["food","Food"],["entry","Entry tickets"],["ship","Ship tickets"],["guide","External guide charges"],["referral","Referral amount"]];
-function tourRevenue(t){return t?bookings.filter(function(b){return b.tour===t.id;}).reduce(function(s,b){return s+bookingTotalCost(b);},0):0;}
+/* The tour's own "Total tour cost" (entered on the tour form) is authoritative
+   when set — return it directly so it can't be double-counted across bookings.
+   Otherwise sum the per-booking totals as before. */
+function tourRevenue(t){
+  if(!t)return 0;
+  var tc=parseFloat(t.tourCost)||0;
+  if(tc>0)return tc;
+  return bookings.filter(function(b){return b.tour===t.id;}).reduce(function(s,b){return s+bookingTotalCost(b);},0);
+}
 function tourExpTotal(t){var e=(t&&t.profitExp)||{};return PROFIT_EXP_FIELDS.reduce(function(s,f){return s+(+e[f[0]]||0);},0);}
 function tourProfit(t){return tourRevenue(t)-tourExpTotal(t);}
 var PROFIT_COLS=["Tour ID","Tour","Total Tour Cost"].concat(PROFIT_EXP_FIELDS.map(function(f){return f[1];})).concat(["Total Expenses","Profit"]);
