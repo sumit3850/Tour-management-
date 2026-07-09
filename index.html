@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 149</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 150</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 149</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 150</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2077,14 +2077,14 @@ const NAV=[
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["operations","Operations","M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h4"],
   ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
-  ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
+  ["calc","Cost Calculator & Invoice","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Tour Cost Calculator"],profit:["Sales & Ops","Profit Calculator"],groupquote:["Sales & Ops","Group Quotation"],costsheet:["Sales & Ops","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Cost Calculator & Invoice"],profit:["Sales & Ops","Profit Calculator"],groupquote:["Sales & Ops","Group Quotation"],costsheet:["Sales & Ops","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -2366,7 +2366,7 @@ function renderView(v){
   else if(v==="reservations"){renderReservations();renderGuides();loadSubmissions(false);startSubPoll();}
   else if(v==="settings")refreshSettings();
   else if(v==="logistics"){logTab(_logTab);loadSubmissions(false);startSubPoll();}
-  else if(v==="calc")calc();
+  else if(v==="calc"){calc();renderSavedInvoices();}
   else if(v==="profit")renderProfitCalc();
   else if(v==="groupquote")renderGroupQuote();
   else if(v==="costsheet")renderCostSheet();
@@ -2779,7 +2779,7 @@ function deleteBooking(id){
 /* ===== CALCULATOR ===== */
 /* Tab bar shared by the Cost Calculator and the Profit Calculator (which now lives
    as a sub-tab of Cost Calculator rather than its own sidebar item). */
-function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button></div>";}
+function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator &amp; Invoice</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button></div>";}
 function viewCalc(){
   if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
   const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"' "+(k===currentCalcTourId?"selected":"")+">"+CALC_LABELS[k]+"</option>";}).join("");
@@ -2795,7 +2795,12 @@ function viewCalc(){
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Rates come straight from your Birding Tour Expense Calculator. Pick a tour, group size and client type to see the full breakdown and per-person cost.</p>"+
     "</div>"+
     "<div class='card result' id='calcResult'></div>"+
-  "</div></section>";
+  "</div>"+
+  "<div class='card' style='margin-top:16px'>"+
+    "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Invoices</div><div class='h-sec' style='margin-bottom:6px'>Your invoice folder</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Pick a tour, group size and client type above, press <b>Invoice</b>, then <b>Save invoice</b>. Saved invoices appear here and in the workbook's Invoice tab.</p></div>"+
+    "<div id='savedInvoices'></div>"+
+  "</div>"+
+  "</section>";
 }
 function setTouristType(type){
   touristType=(type==="foreigner")?"foreigner":"indian";
@@ -2833,13 +2838,30 @@ function peekQuoteNo(){
   var yr=(new Date()).getFullYear();
   return quotePrefix()+"/"+yr+"/Q-"+((parseInt(quoteSeq,10)||0)+1);
 }
+/* Public-facing company email for letterheads / documents. The brand's stored
+   email is the OWNER'S LOGIN email (from my_org) — often a personal gmail — which
+   should never appear on a customer document. So prefer an explicit contact email,
+   else derive info@<website-domain> when the stored email is a personal address (or
+   blank), else fall back. The login/owner email itself is never changed. */
+function brandContactEmail(){
+  var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+  if(B.contactEmail)return B.contactEmail;
+  var e=String(B.email||"").trim();
+  var web=String(B.web||"").trim();
+  var personal=/@(gmail|yahoo|outlook|hotmail|live|proton|protonmail|icloud|rediffmail)\./i.test(e);
+  if((!e||personal)&&web){
+    var host=web.replace(/^https?:\/\//i,"").replace(/^www\./i,"").replace(/\/.*$/,"").trim();
+    if(host)return "info@"+host;
+  }
+  return e||"info@islandexplorer.in";
+}
 /* Branded letterhead: logo + CIN + registered address + contact line. */
 function quoteHeaderHTML(){
   var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
   var company=B.company||"Island Explorer Birding Tours";
   var cin=B.cin||"U79120AN2026PTC006196";
   var address=B.address||"Sri Ram Nagar, Attam Pahad, Garacharma, Opp. Shiv Mandir, Sri Vijaya Puram, South Andaman, Andaman and Nicobar Islands - 744105, India";
-  var contact="Mob: "+(B.phone||"+91 9933202175")+"; Email: "+(B.email||"info@islandexplorer.in")+"; Web: "+(B.web||"www.islandexplorer.in");
+  var contact="Mob: "+(B.phone||"+91 9933202175")+"; Email: "+brandContactEmail()+"; Web: "+(B.web||"www.islandexplorer.in");
   var logoRel=B.logo||"assets/logo.png";
   var logoUrl=(function(){try{return new URL(logoRel,location.href).href;}catch(e){return logoRel;}})();
   return "<div style='text-align:center;border-bottom:2px solid #143a2e;padding-bottom:14px;margin-bottom:20px'>"+
@@ -3209,10 +3231,6 @@ function viewGroupQuote(){
       "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Saved quotations</div><div class='h-sec' style='margin-bottom:6px'>Your quotation folder</div></div>"+
       "<div id='savedQuotes'></div>"+
     "</div>"+
-    "<div class='card' style='margin-top:16px'>"+
-      "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Saved invoices</div><div class='h-sec' style='margin-bottom:6px'>Your invoice folder</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Generate an invoice from the <b>Cost Calculator</b> (the <b>Invoice</b> button), then <b>Save</b> it — it appears here and in the workbook's Invoice tab.</p></div>"+
-      "<div id='savedInvoices'></div>"+
-    "</div>"+
   "</section>";
 }
 function setGqType(t){gqType=(t==="foreign")?"foreign":"indian";renderGroupQuote();}
@@ -3300,7 +3318,6 @@ function renderGroupQuote(){
     gqTermsCard(q)+
   "</div>";
   renderSavedQuotes();
-  renderSavedInvoices();
 }
 /* Payment Terms card, mirroring the attached screenshot; highlights the active tier. */
 function gqTermsCard(q){
