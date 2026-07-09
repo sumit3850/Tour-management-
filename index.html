@@ -2268,7 +2268,16 @@ function ebRecalc(){
   var dep=parseFloat(depEl.value)||0;
   penEl.value=Math.max(total-dep,0);
 }
-function deleteBooking(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>b.id!==id);renderBookings();renderTours();renderCalendar();}
+function deleteBooking(id){
+  if(!confirm("Delete this booking?"))return;
+  var b=bookings.find(function(x){return x.id===id;});
+  /* If this booking was auto-created from a guest submission, retire that
+     submission too — otherwise auto-processing regenerates the booking on the
+     next sync. The guest's details remain in the Customer record. */
+  if(b&&b.fromSub)retireSourceSub(b.fromSub);
+  bookings=bookings.filter(function(x){return x.id!==id;});
+  persistData();renderBookings();renderTours();renderCalendar();
+}
 
 /* ===== CALCULATOR ===== */
 /* Tab bar shared by the Cost Calculator and the Profit Calculator (which now lives
@@ -3545,10 +3554,22 @@ function viewCustomerDetail(name){
   document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>Customer</span><h2 style='font-size:20px;margin-top:4px;font-weight:700'>"+c.name+"</h2></div>"+XBTN+"</div><div class='modal-body'>"+html+"</div><div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button><button class='btn btn-primary' onclick=\"closeModal();editCustomer('"+c.name.replace(/'/g,"\\'")+"')\">Edit</button></div>";
   openScrim();
 }
+/* Resolve which tour a public submission refers to — by explicit id first (the
+   "Share tour form" link carries &tid -> data.tourId), then tour code, then the
+   tour name/label the guest saw, tolerant of case/whitespace. Returns null only
+   when the submission carries no resolvable tour (a generic interest form). A
+   correct match is what links the booking to the right tour card. */
+function subTour(s){
+  var d=(s&&s.data)||{};
+  var norm=function(v){return (v||"").toString().trim().toLowerCase();};
+  return (d.tourId&&tours.find(function(x){return String(x.id)===String(d.tourId);}))
+      || (d.tourCode&&tours.find(function(x){return tourCode(x)===d.tourCode;}))
+      || (s&&s.tour&&tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour||tourLabel(x)===s.tour;}))
+      || (s&&s.tour&&tours.find(function(x){return norm(x.name)===norm(s.tour)||norm(tourLabel(x))===norm(s.tour);}))
+      || null;
+}
 function makeBookingFromSub(s){
-  var t=null;
-  if(s.data&&s.data.tourId)t=tours.find(function(x){return x.id===s.data.tourId;});
-  if(!t&&s.tour)t=tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour;});
+  var t=subTour(s);
   /* avoid duplicate booking: match the source submission first, then guest+tour+start */
   var dup=bookings.find(function(b){return b.fromSub&&b.fromSub===s.id;})||
           bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
@@ -3588,15 +3609,25 @@ function autoProcessSubmissions(){
       if(s.status!=="booked"){s.status="booked";saveSubmissionRow(s);changed=true;}
       markSubProcessed(s.id);return;
     }
-    /* one-time conversions for the rest */
-    if(s.status==="booked"||s.status==="lead-added")return;
-    if(subProcessed(s.id))return;
-    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);}
+    /* Guest-detail (client) and interest submissions convert into records. This is
+       keyed on whether the RECORD still exists — not just a one-shot "booked" flag —
+       so a booking/customer/lead lost to a past sync wipe is REGENERATED instead of
+       being stranded behind a status that survived the wipe in the (separate)
+       submission row. Every branch is idempotent (it no-ops when the record is
+       already there), so re-running on each sync is safe and can't double-count.
+       Deleting the record retires its submission (see deleteBooking /
+       retireSourceSub), so this never resurrects a deliberate delete. */
+    if(s.type==="client"){
+      if(!bookings.some(function(b){return b.fromSub===s.id;})){makeBookingFromSub(s);changed=true;}
+      if(s.status!=="booked"){s.status="booked";saveSubmissionRow(s);changed=true;}
+      markSubProcessed(s.id);
+    }
     else if(s.type==="interest"){
-      addOrUpdateCustomer(s);
-      if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
-        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
-      s.status="lead-added";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
+      if(!findCustomer(s.name,s.email,s.phone)){addOrUpdateCustomer(s);changed=true;}
+      if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");})){
+        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});changed=true;}
+      if(s.status!=="lead-added"){s.status="lead-added";saveSubmissionRow(s);changed=true;}
+      markSubProcessed(s.id);
     }
   });
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();if(document.getElementById("guideBody"))renderGuides();if(document.getElementById("logBody"))renderLog(_logTab);persistData();}
