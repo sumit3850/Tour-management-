@@ -3,42 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Company approvals · Ops Console</title>
+<title>Company approvals · Operation Console</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--forest:#12332a;--sea:#2f7dd1;--ink:#1b2a24;--soft:#5a6b63;--line:#e2e8e4;--surface:#fff}
+  :root{--ink:#1b2a4a;--ink-soft:#5a6a86;--sea:#0a6ed1;--sea-soft:#e7f1fb;--line:#e2e8f1;--surface:#fff;--coral:#ed232a}
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:var(--ink);
-       background:radial-gradient(1100px 700px at 20% -10%,#1d4d3b 0%,#12332a 45%,#0a201a 100%);min-height:100vh;padding:28px 16px}
-  .wrap{max-width:980px;margin:0 auto}
-  .card{background:var(--surface);border-radius:16px;box-shadow:0 30px 70px rgba(0,0,0,.35);padding:24px 26px;margin-bottom:18px}
-  h1{margin:0 0 4px;font-size:21px}
-  .sub{color:var(--soft);font-size:13.5px;margin:0 0 6px}
-  label{display:block;font-size:12.5px;font-weight:600;color:var(--soft);margin:10px 0 5px}
-  input{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:14px}
-  .btn{padding:10px 16px;border:0;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer}
-  .btn-primary{background:var(--forest);color:#fff;width:100%;margin-top:14px;padding:12px}
-  .btn-ok{background:#1c7a45;color:#fff}
-  .btn-no{background:#fdeceb;color:#b23b32;border:1px solid #f4c7c2}
-  .btn-ghost{background:#eef3f0;color:var(--ink)}
-  .msg{padding:10px 13px;border-radius:9px;font-size:13px;display:none;margin-top:10px}
-  .msg.err{display:block;background:#fdeceb;color:#b23b32}
-  .row{display:flex;gap:14px;align-items:flex-start;border:1.5px solid var(--line);border-radius:13px;padding:14px;margin-top:12px}
-  .logo{width:58px;height:58px;border-radius:10px;background:#f4f8f6 center/contain no-repeat;border:1px solid var(--line);flex-shrink:0}
-  .meta{flex:1;min-width:0;font-size:13px;color:var(--soft);line-height:1.55}
-  .meta b{color:var(--ink);font-size:15px}
-  .pill{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:700;margin-left:8px;vertical-align:2px}
-  .pill.pending{background:#fff3e0;color:#b26a00}.pill.approved{background:#e9f6ee;color:#1c7a45}.pill.rejected{background:#fdeceb;color:#b23b32}
-  .acts{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-  .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-  .empty{color:var(--soft);font-size:13.5px;padding:18px 4px}
+  body{margin:0;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:var(--ink);min-height:100dvh;padding:32px 16px;overflow-x:hidden;
+       background:radial-gradient(1100px 620px at 100% -8%,rgba(10,110,209,.08),transparent 60%),radial-gradient(900px 520px at -8% 108%,rgba(16,127,77,.06),transparent 55%),linear-gradient(180deg,#f1f5fc 0%,#e9eef7 100%)}
+  .wrap{max-width:1000px;margin:0 auto}
+  .brandbar{display:flex;align-items:center;gap:12px;margin:0 auto 18px;max-width:1000px}
+  .brandbar img{height:40px;width:auto}
+  .brandbar .wm{font-family:'Calistoga',Georgia,serif;font-size:19px;color:var(--ink)}
+  .card{background:var(--surface);border:1px solid rgba(20,40,80,.06);border-radius:20px;box-shadow:0 24px 60px -30px rgba(20,40,80,.35);padding:26px 28px;margin-bottom:18px}
+  h1{margin:0 0 4px;font-size:22px;font-weight:800;letter-spacing:-.01em}
+  .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 6px}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:12px 0 5px}
+  input{width:100%;max-width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:#fbfdff;font-family:inherit;color:var(--ink)}
+  input:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(10,110,209,.12);background:#fff}
+  .btn{padding:10px 16px;border:0;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .12s,box-shadow .15s,background .15s}
+  .btn:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(180deg,#0f7bdc,#0a6ed1);color:#fff;width:100%;margin-top:16px;padding:13px;box-shadow:0 10px 22px -12px rgba(10,110,209,.7)}
+  .btn-ok{background:#e5f6ec;color:#1b7f4d;border:1px solid #b9e6ca}
+  .btn-ok:hover{background:#d7f0e0}
+  .btn-no{background:#fde4e5;color:#b23b32;border:1px solid #f4c7c2}
+  .btn-del{background:#fff;color:var(--coral);border:1px solid #f4c7c2}
+  .btn-del:hover{background:#fde4e5}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:rgba(20,40,80,.2)}
+  .msg{padding:10px 13px;border-radius:10px;font-size:13px;display:none;margin-top:10px}
+  .msg.err{display:block;background:#fde4e5;color:#b23b32;border:1px solid #f4c7c2}
+  .row{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:12px;background:#fbfdff;transition:box-shadow .15s}
+  .row:hover{box-shadow:0 14px 34px -24px rgba(20,40,80,.4)}
+  .logo{width:60px;height:60px;border-radius:12px;background:#fff center/contain no-repeat;border:1px solid var(--line);flex-shrink:0}
+  .meta{flex:1;min-width:0;font-size:13px;color:var(--ink-soft);line-height:1.6}
+  .meta b{color:var(--ink);font-size:15.5px;font-weight:700}
+  .pill{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700;margin-left:8px;vertical-align:2px;text-transform:capitalize}
+  .pill.pending{background:#fdf0d2;color:#8a5a00}.pill.approved{background:#e5f6ec;color:#1b7f4d}.pill.rejected{background:#fde4e5;color:#b23b32}
+  .acts{display:flex;flex-direction:column;gap:8px;flex-shrink:0;width:132px}
+  .acts .btn{width:100%}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .empty{color:var(--ink-soft);font-size:13.5px;padding:22px 4px;text-align:center}
+  @media(max-width:600px){.row{flex-wrap:wrap}.acts{width:100%;flex-direction:row;flex-wrap:wrap}.acts .btn{width:auto;flex:1;min-width:90px}}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="brandbar"><img src="assets/favicon.png" alt="logo"><span class="wm">Operation Console</span></div>
+
   <div class="card" id="loginCard">
     <h1>Company approvals</h1>
-    <p class="sub">Platform owner sign-in. Approve or reject registered companies.</p>
-    <div class="msg err" id="lerr"></div>
+    <p class="sub">Platform owner sign-in. Approve, reject or remove registered companies.</p>
+    <div class="msg" id="lerr"></div>
     <label>Email</label><input id="aemail" type="email" autocomplete="username">
     <label>Password</label><input id="apw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
     <button class="btn btn-primary" onclick="adminLogin()">Sign in</button>
@@ -52,7 +71,7 @@
         <button class="btn btn-ghost" onclick="adminOut()">Sign out</button>
       </div>
     </div>
-    <div class="msg err" id="err"></div>
+    <div class="msg" id="err"></div>
     <div id="rows"></div>
   </div>
 </div>
@@ -64,7 +83,7 @@ var C=(window.APP_CONFIG&&window.APP_CONFIG.supabase)||{};
 var sb=null;try{sb=window.supabase.createClient(C.url,C.key);}catch(e){}
 var $=function(id){return document.getElementById(id);};
 function esc(s){var d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
-function showErr(id,m){var e=$(id);e.textContent=m;e.style.display='block';setTimeout(function(){e.style.display='none';},6000);}
+function showErr(id,m){var e=$(id);e.className='msg err';e.textContent=m;setTimeout(function(){e.className='msg';},7000);}
 
 async function adminLogin(){
   if(!sb){showErr('lerr','Cannot reach the server.');return;}
@@ -86,7 +105,7 @@ async function loadOrgs(){
   var h='';
   orgs.forEach(function(o){
     h+='<div class="row">'
-      +'<div class="logo" style="background-image:url('+(o.logo_url?esc(o.logo_url):'assets/logo.png')+')"></div>'
+      +'<div class="logo" style="background-image:url('+(o.logo_url?esc(o.logo_url):'assets/favicon.png')+')"></div>'
       +'<div class="meta"><b>'+esc(o.company)+'</b><span class="pill '+esc(o.status)+'">'+esc(o.status)+'</span><br>'
       +esc(o.contact_person||o.username||'')+' · '+esc(o.email)+' · '+esc(o.phone||'—')+'<br>'
       +'CIN: '+esc(o.cin||'—')+(o.website?' · '+esc(o.website):'')+(o.domain?' · '+esc(o.domain):'')+'<br>'
@@ -95,6 +114,7 @@ async function loadOrgs(){
       +(o.status!=='approved'?'<button class="btn btn-ok" onclick="setStatus(\''+o.id+'\',\'approved\')">Approve</button>':'')
       +(o.status!=='rejected'?'<button class="btn btn-no" onclick="setStatus(\''+o.id+'\',\'rejected\')">Reject</button>':'')
       +(o.status!=='pending'?'<button class="btn btn-ghost" onclick="setStatus(\''+o.id+'\',\'pending\')">Set pending</button>':'')
+      +'<button class="btn btn-del" onclick="deleteOrg(\''+o.id+'\',\''+esc((o.company||'').replace(/\\/g,"").replace(/\x27/g,"\\x27"))+'\')">Delete</button>'
       +'</div></div>';
   });
   $('rows').innerHTML=h||'<div class="empty">No companies registered yet.</div>';
@@ -102,6 +122,17 @@ async function loadOrgs(){
 async function setStatus(id,st){
   var r=await sb.rpc('admin_set_org_status',{p_org:id,p_status:st});
   if(r.error||(r.data&&r.data.error)){showErr('err',(r.error&&r.error.message)||r.data.error);return;}
+  loadOrgs();
+}
+async function deleteOrg(id,name){
+  if(!confirm('Delete "'+name+'"?\n\nThis permanently removes the company, its console data and its inbox submissions. The account’s email stays in Auth (remove it in the Supabase dashboard if needed). This cannot be undone.'))return;
+  var r=await sb.rpc('admin_delete_org',{p_org:id});
+  if(r.error){
+    var m=r.error.message||'';
+    if(/function|does not exist|not find/i.test(m)) m='Delete needs the admin_delete_org function. Run supabase/saas/schema.sql once in the SQL editor, then try again.';
+    showErr('err',m);return;
+  }
+  if(r.data&&r.data.error){showErr('err',r.data.error==='not_admin'?'Not authorised.':r.data.error);return;}
   loadOrgs();
 }
 async function adminOut(){await sb.auth.signOut();location.reload();}

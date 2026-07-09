@@ -217,6 +217,24 @@ begin
 end $$;
 grant execute on function public.admin_set_org_status(uuid, text) to authenticated;
 
+-- Delete a company entirely: the org (cascades its memberships) + its workspace
+-- data blob + any submissions tagged to it. The Auth user is left in place — remove
+-- it in Authentication > Users if you also want to free the email. Irreversible.
+create or replace function public.admin_delete_org(p_org uuid)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare ws text;
+begin
+  if not is_saas_admin() then return jsonb_build_object('error','not_admin'); end if;
+  select workspace into ws from orgs where id = p_org;
+  if ws is null then return jsonb_build_object('error','not_found'); end if;
+  delete from workspaces where id = ws;                                   -- the company's data
+  delete from workspaces where id like 'sub\_%' escape '\'                -- its inbox submissions
+    and coalesce(data->>'workspace','island-explorer') = ws;
+  delete from orgs where id = p_org;                                      -- cascades org_members
+  return jsonb_build_object('ok', true, 'workspace', ws);
+end $$;
+grant execute on function public.admin_delete_org(uuid) to authenticated;
+
 -- ---- Logo storage -----------------------------------------------------------
 insert into storage.buckets (id, name, public) values ('logos','logos', true)
   on conflict (id) do nothing;
