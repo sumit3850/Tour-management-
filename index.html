@@ -4899,7 +4899,21 @@ function loadOrgContext(){
     if(org.brand){window.APP_CONFIG.brand=Object.assign({},window.APP_CONFIG.brand||{},org.brand);if(typeof applyBrand==="function")applyBrand();}
     _orgLoaded=true;hideLogin();
     try{if(typeof boot==="function")boot(true);}catch(e){}         /* render empty immediately */
-    _sbReady=false;if(typeof cloudInit==="function")cloudInit();  /* then load THIS company's data */
+    _sbReady=false;
+    if(typeof cloudInit==="function"){
+      var ci=cloudInit();                                          /* then load THIS company's data */
+      /* refreshUI() (called by the pull inside cloudInit) intentionally does NOT
+         redraw the dashboard/requests/settings views, so the background poll never
+         flashes them. But right after sign-in the user is SITTING on the dashboard
+         while its data arrives — without this it would stay showing the empty
+         post-wipe render until a manual refresh. Force one full redraw of the
+         landing view once the initial load settles. */
+      if(ci&&ci.then)ci.then(function(){
+        var wa=_sbApplying;_sbApplying=true;
+        try{if(curView==="dashboard"&&typeof refreshDashboard==="function")refreshDashboard();else refreshUI();}catch(e){}
+        _sbApplying=wa;
+      });
+    }
   }).catch(function(){hideLogin();});
 }
 /* Auth and data sync used to be two unconnected systems: the login screen was just
