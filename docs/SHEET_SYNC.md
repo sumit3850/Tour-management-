@@ -125,13 +125,25 @@ function doPost(e){
   // --- Mirror mode: replace the whole tab with the console's current list ----
   // The app sends every row it currently has (bookings = POC rows only), so the tab
   // exactly matches the console: deletions disappear, edits update, old rows are wiped.
+  // The whole tab is then formatted to the standard house style (Arial 10, a bold,
+  // centred, frozen header row, and auto-fitted columns) so every user's sheet looks
+  // identical regardless of which tab or how many rows.
   if (body.mode === "replace") {
     var rHeader = body.header || [];
     var rRows = body.rows || [];
     sheet.clear();
     var out = [rHeader];
     rRows.forEach(function(r){ out.push(rHeader.map(function(h){ return r[h] != null ? r[h] : ""; })); });
-    if (rHeader.length) sheet.getRange(1, 1, out.length, rHeader.length).setValues(out);
+    if (rHeader.length) {
+      var rng = sheet.getRange(1, 1, out.length, rHeader.length);
+      rng.setValues(out);
+      // House style — matches IEBT_Live_Data.xlsx
+      rng.setFontFamily("Arial").setFontSize(10).setVerticalAlignment("middle");
+      var head = sheet.getRange(1, 1, 1, rHeader.length);
+      head.setFontWeight("bold").setHorizontalAlignment("center");
+      sheet.setFrozenRows(1);
+      sheet.autoResizeColumns(1, rHeader.length);
+    }
     return ContentService.createTextOutput("ok-replace " + rRows.length);
   }
 
@@ -181,21 +193,56 @@ function doPost(e){
 
 > **Already deployed the older script?** Replace it with the code above, then
 > **Deploy → Manage deployments → ✎ Edit → Version: New version → Deploy** (re-using
-> the same URL). This version **re-orders the columns automatically** on the next push
-> (matching by column name, so no data is lost) — you do **not** need to delete the
-> tab. After re-deploying, click **Push all now** once and the tabs match the app:
+> the same URL). This version **re-orders the columns automatically** and **formats
+> each tab** (Arial 10, a bold, centred, frozen header row, auto-fitted columns) on the
+> next push — you do **not** need to delete the tab. After re-deploying, click **Push
+> all now** once and every tab is rebuilt to the standard layout below.
 >
-> - **`Booking`**: Booking ID · BookingDate · Point of Contact (POC) · Tour ID · Tour ·
->   Tour Start_Date · Tour End_Date · Member (s) · Party Size · Country · Email · Phone ·
->   status · Total Tour Cost · Deposit · Pending Amount · Due Date · Payment Status ·
->   Additional Notes
-> - **`Customer Database`**: Client ID · Type · Client Name (Full name) · Tour ID · Tour Category ·
->   Tour Start_Date · Tour End_Date · Phone / WhatsApp · Email · Nationality · Date of
->   birth · Gender · ID type · ID / passport number · Arrival date & flight · Departure
->   date & flight · Dietary needs · Room preference · Emergency contact name · Emergency
->   contact phone · Medical notes / mobility · Upload documents link
+> **The workbook has 12 tabs, in this order** (rows are ordered newest-tour-first —
+> T3, T2, T1 — for every tour-based tab):
 >
-> (If you'd rather start clean, deleting the tab before pushing also works.)
+> 1. **`Booking`** — Booking ID · Tour ID · Tour · BookingDate · Point of Contact (POC) ·
+>    Tour Start_Date · Tour End_Date · Member (s) · Party Size · Country · Email · Phone ·
+>    Status · Total Tour Cost · Deposit · Pending Amount · Due Date · Payment Status ·
+>    Additional Notes
+> 2. **`Accommodations`** — Booking ID · Tour ID · Tour · Guest (POC) · Guide · Property
+>    Name · Rooms · Guests · Check-in · Check-out · No. of Nights · Status
+> 3. **`Customer DB`** — Client ID · Type · Client Name (Full name) · Tour ID · Tour
+>    Category · Tour Start_Date · Tour End_Date · Phone / WhatsApp · Email · Address ·
+>    Nationality · Date of birth · Gender · ID type · ID / passport number · Arrival
+>    Flight and time · Departure Flight and time · Dietary needs · Room preference ·
+>    Emergency contact name · Emergency contact phone · Medical notes / mobility ·
+>    Upload documents link
+> 4. **`Operations`** — Tour ID · Tour · Date · Start · End · Pax · POC · POC Phone ·
+>    Vehicle · Reg. No. · Driver · Driver No. · Guide · Guide ID · Guide phone · Pickup
+>    Date · Pickup Location · Drop Date · Drop Location · Stay · Legs · Status · Remarks ·
+>    Guide/Driver Feedback
+> 5. **`Guide_Roster`** — Tour ID · Tour · Tour Start_Date · Tour End_Date · Tour Leader ·
+>    External Guides · Pax · Capacity · Status · Session Type · Total Guide Fee
+> 6. **`Quotation Log`** — Quotation # · Quotation To · Address · GST No. · Tour · Start
+>    Date · End Date · Total No. of Participants · Total Tour price · Cost per person ·
+>    Deposit to confirm (%) · Pending amount
+> 7. **`Invoice`** — Invoice # · Invoice To · Address · GST No. · Tour · Start Date · End
+>    Date · Total No. of Participants · Accommodation · Travel and Logistics · Food ·
+>    Entry tickets · Ship tickets · Guide Fee · Referral amount · Total Amount
+> 8. **`Activities Log`** — Tour ID · Date · Vehicle · Reg. No. · Driver · Start km ·
+>    End km · Total km · Location · Time · Total Amount (Paid) · Entry
+> 9. **`Profit`** — Tour ID · Tour · Total Tour Cost · Accommodation · Travel and
+>    Logistics · Food · Entry tickets · Ship tickets · External guide · Referral amount ·
+>    Total Expenses · Profit
+> 10. **`Guides`** — Guide ID · Name · Expertise · Phone · Email · Login Code · ID Number ·
+>     ID Document · Address
+> 11. **`Drivers`** — Driver · Phone · Code · Assigned Vehicle · Reg. No. · Licence ·
+>     Licence Document · Address
+> 12. **`Vehicles`** — Vehicle · Reg. No. · Type · Seats · Driver · Login Code · Status
+>
+> Earlier builds used the tab names `Customer Database`, `Roster`, `Logistics &
+> Operations`, `Profit Calculator`, `Accommodation Bookings` and `External Guides`;
+> the app now renames them (and deletes the old tabs) automatically on the next push.
+> Prefer the same layout offline? Use **Settings → Download workbook (.xlsx)** — it
+> produces this exact workbook from your live data.
+>
+> (If you'd rather start clean, deleting the tabs before pushing also works.)
 
 ### 2. Deploy
 **Deploy → New deployment → type: Web app** → Execute as **Me** → Who has access **Anyone** → **Deploy** → copy the **web-app URL** (`https://script.google.com/macros/s/…/exec`).
