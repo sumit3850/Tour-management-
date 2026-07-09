@@ -728,6 +728,37 @@ function tripTourCode(r){
 }
 function localUpdated(){try{return localStorage.getItem("ieo_updated")||"";}catch(e){return "";}}
 function setLocalUpdated(ts){try{localStorage.setItem("ieo_updated",ts||new Date().toISOString());}catch(e){}}
+/* Before any flow clears this device's local data (login/logout company switch),
+   stash it in a backup slot first — a wipe must never destroy the only remaining
+   copy. The slot keeps whichever copy holds MORE data, so a later wipe of an
+   already-empty state can't overwrite a valuable earlier backup. Each backup is
+   tagged with the workspace it belonged to, so it can only be restored into that
+   same company. Restore via Settings -> Sync status -> "Restore local backup". */
+function stashLocalData(reason){
+  try{
+    var d=localStorage.getItem(DATA_KEY);if(!d)return;
+    var prev=null;try{prev=JSON.parse(localStorage.getItem("ieo_data_backup")||"null");}catch(e){}
+    if(prev&&prev.data&&prev.data.length>d.length)return;
+    var payload=JSON.stringify({at:new Date().toISOString(),reason:reason||"",ws:(sbConfig().ws||""),updated:localUpdated(),trips:(localStorage.getItem("ieo_sync_trips")||""),data:d});
+    try{localStorage.setItem("ieo_data_backup",payload);}
+    catch(q){ /* quota: drop the (smaller) old backup and retry once */
+      try{localStorage.removeItem("ieo_data_backup");localStorage.setItem("ieo_data_backup",payload);}catch(e2){}
+    }
+  }catch(e){}
+}
+function localBackupInfo(){try{var b=JSON.parse(localStorage.getItem("ieo_data_backup")||"null");if(b&&b.data)return b;}catch(e){}return null;}
+function restoreLocalBackup(){
+  var b=localBackupInfo();if(!b){alert("No local backup found on this device.");return;}
+  var curWs=sbConfig().ws||"";
+  if(b.ws&&curWs&&b.ws!==curWs){alert("This backup belongs to workspace \""+b.ws+"\", but you are signed in to \""+curWs+"\". Sign in to that company to restore it.");return;}
+  if(!confirm("Restore the local backup saved "+(b.at?new Date(b.at).toLocaleString():"earlier")+"? It replaces what this device currently shows and then syncs up to the cloud workspace you're signed in to."))return;
+  try{
+    applyStore(JSON.parse(b.data));
+    if(b.trips){try{tripLogs=JSON.parse(b.trips)||[];localStorage.setItem("ieo_sync_trips",b.trips);}catch(e){}}
+    persistData();boot(true);
+    alert("Backup restored. It will sync to the cloud automatically.");
+  }catch(e){alert("Could not restore this backup: "+(e.message||e));}
+}
 (function loadData(){
   try{var s=localStorage.getItem(DATA_KEY);if(s)applyStore(JSON.parse(s));}catch(e){}
 })();
@@ -1214,7 +1245,8 @@ function forceFullResync(){
    damaging false positive than the rare true "wipe" scenario it exists to catch. The
    real fix for that scenario is the boot-timestamp fix above; this is only a last-resort
    backstop now, not the primary defense. */
-function totalRecordCount(){return (tours.length||0)+(bookings.length||0)+(customers.length||0)+(accBookings.length||0)+(ops.length||0)+(leads.length||0)+(externalGuides.length||0);}
+function countDataset(d){var n=0;STORE.forEach(function(s){if(s.arr&&d[s.k]&&d[s.k].length)n+=d[s.k].length;});return n+((d.trips&&d.trips.length)||0);}
+function totalRecordCount(){return countDataset(sbCollect());}
 var _lastKnownCloudTotal=0;
 async function cloudPush(silent){
   var c=sbConfig(),cl=sbClient();
@@ -1231,7 +1263,7 @@ async function cloudPush(silent){
     if(res.error)throw res.error;
     setLocalUpdated(ts);
     _lastKnownCloudTotal=totalRecordCount();
-    if(!_perRecordActive)_localDirty=false; /* blob mode: this push carried the change up */
+    if(!_perRecordActive){_localDirty=false;try{localStorage.removeItem("ieo_record_pending");}catch(e){}} /* blob mode: this push carried the change up */
     if(!silent)sbStatus("Pushed to cloud ✓ "+new Date().toLocaleTimeString(),"ok");
   }catch(e){if(!silent)sbStatus("Push failed: "+(e.message||e),"err");}
 }
@@ -1248,7 +1280,7 @@ async function cloudPull(silent){
     if(res.error)throw res.error;
     if(!res.data){if(!silent)sbStatus("Nothing saved in the cloud yet — Push from one device first.","");return "empty";}
     var cd=res.data.data||{};
-    _lastKnownCloudTotal=(cd.tours||[]).length+(cd.bookings||[]).length+(cd.customers||[]).length+(cd.accBookings||[]).length+(cd.ops||[]).length+(cd.leads||[]).length+(cd.externalGuides||[]).length;
+    _lastKnownCloudTotal=countDataset(cd);
     var cloudTs=res.data.updated_at||"",localTs=localUpdated();
     /* On auto-sync (silent), only overwrite local if the cloud copy is genuinely newer —
        this stops stale cloud data from wiping out your latest local changes/deletions.
@@ -1264,6 +1296,22 @@ async function cloudPull(silent){
     if(!silent)sbStatus("Pulled from cloud ✓ "+new Date().toLocaleTimeString(),"ok");
     return "applied";
   }catch(e){_sbApplying=false;if(!silent)sbStatus("Pull failed: "+(e.message||e),"err");return "failed";}
+}
+/* Shown when a signed-in workspace has NO cloud data and this device has none
+   either. For a brand-new company that's normal; for an established one it means
+   the login resolved to the wrong/empty workspace — recoverable, as long as the
+   user doesn't start re-entering records on top. */
+function cloudEmptyNotice(ws){
+  if(window.__DEMO__)return;
+  sbStatus("Cloud workspace \""+ws+"\" has no saved data yet.","err");
+  if(document.getElementById("__cloudEmpty"))return;
+  var d=document.createElement("div");d.id="__cloudEmpty";
+  d.style.cssText="position:fixed;left:12px;right:12px;bottom:12px;z-index:2147482000;background:#fff8e6;border:1px solid #e8cf8a;color:#6b5200;border-radius:12px;padding:12px 44px 12px 14px;font-size:13px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.18)";
+  d.innerHTML="<b>No cloud data found for workspace \""+ws+"\".</b> New account? You can start adding records. "+
+    "But if this account should already have tours and bookings, don't re-enter them — the data is almost certainly recoverable: "+
+    "run <b>supabase/saas/recover-data.sql</b> in the Supabase SQL editor (see docs/RECOVERY.md), then reload this page."+
+    "<button onclick='this.parentNode.remove()' style='position:absolute;top:6px;right:8px;border:0;background:none;font-size:18px;color:inherit;cursor:pointer'>×</button>";
+  document.body.appendChild(d);
 }
 function cloudAutoPush(){
   if(_sbApplying||!_sbReady)return;
@@ -1298,8 +1346,17 @@ async function cloudInit(){
     /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
        copy) and 'kept-local' (this device's copy was genuinely newer) both make a
        follow-up push safe/expected. 'failed' must NOT push — with no reliable read of
-       the cloud, pushing here is exactly how a stale local copy overwrites good data. */
-    if(result==="applied"||result==="kept-local"||result==="empty")await cloudPush(true);
+       the cloud, pushing here is exactly how a stale local copy overwrites good data.
+       'empty' pushes ONLY when this device actually has records: pushing an empty
+       dataset into an empty-looking workspace used to CREATE an empty cloud row —
+       which then loaded as "the newest data" on every later login, permanently
+       masking a wrong-workspace or RLS mix-up behind a fresh empty row. If both
+       sides are empty there is nothing to sync; tell the user instead. */
+    if(result==="applied"||result==="kept-local")await cloudPush(true);
+    else if(result==="empty"){
+      if(totalRecordCount()>0)await cloudPush(true);
+      else cloudEmptyNotice(c.ws||"default");
+    }
     if(_perRecordActive)pushAllRecords();
   }else{
     _syncBooting=false;
@@ -1329,13 +1386,15 @@ async function cloudResync(){
      guest details, etc.) in the background, on every view — not only the Inbox. */
   if(typeof loadSubmissions==="function")try{loadSubmissions(false);}catch(e){}
 }
-/* Upload every pending local change now (both sync layers), then clear the dirty flags. */
+/* Upload every pending local change now (both sync layers). The dirty flags are
+   cleared by cloudPush/pushAllRecords themselves — and only on actual success —
+   so a failed flush leaves the edit marked as still-pending instead of dropping it. */
 function flushLocal(){
   clearTimeout(_sbPushTimer);clearTimeout(_recPushTimer);
   _pushInFlight=true;
   var jobs=[cloudPush(true)];
   if(_perRecordActive)jobs.push(pushAllRecords());
-  Promise.all(jobs).then(function(){_pushInFlight=false;_localDirty=false;}).catch(function(){_pushInFlight=false;});
+  Promise.all(jobs).then(function(){_pushInFlight=false;}).catch(function(){_pushInFlight=false;});
 }
 document.addEventListener("visibilitychange",function(){if(!document.hidden)cloudResync();});
 window.addEventListener("focus",cloudResync);
@@ -1362,8 +1421,8 @@ function recStoreEntry(key){
   return STORE.find(function(s){return s.k===key;});
 }
 async function pushRecordsForKey(key){
-  var cl=sbClient();if(!cl)return;
-  var entry=recStoreEntry(key);if(!entry)return;
+  var cl=sbClient();if(!cl)return false;
+  var entry=recStoreEntry(key);if(!entry)return false;
   var items=entry.get()||[];
   var prev=_lastRecordSnapshot[key]||{};
   var seen={},upserts=[];
@@ -1379,10 +1438,14 @@ async function pushRecordsForKey(key){
     if(deletedIds.length){var r2=await cl.from(recTable(key)).delete().in("id",deletedIds);if(r2.error)throw r2.error;}
     var snap={};items.forEach(function(item){var id=recId(key,item);if(id)snap[id]=JSON.stringify(item);});
     _lastRecordSnapshot[key]=snap;
-  }catch(e){/* table likely doesn't exist yet — per-record sync just stays inactive */}
+    return true;
+  }catch(e){return false;/* table missing or access revoked — per-record sync stays inactive */}
 }
 var _recordKeys=PER_RECORD_KEYS.concat(["tripLogs"]);
-function pushAllRecords(){return Promise.all(_recordKeys.map(pushRecordsForKey)).then(function(){_localDirty=false;try{localStorage.removeItem("ieo_record_pending");}catch(e){}});}
+/* Only clear the "unpushed edit" flags when every table push actually succeeded —
+   clearing them after silent failures made cloudInit believe nothing was pending
+   and let the next pull overwrite the unpushed edit. */
+function pushAllRecords(){return Promise.all(_recordKeys.map(pushRecordsForKey)).then(function(rs){if(rs.every(Boolean)){_localDirty=false;try{localStorage.removeItem("ieo_record_pending");}catch(e){}}});}
 var _recPushTimer=null;
 function scheduleRecordPush(){if(!_perRecordActive||_sbApplying)return;clearTimeout(_recPushTimer);_recPushTimer=setTimeout(pushAllRecords,1500);}
 async function fetchRecordsForKey(key){
@@ -2205,7 +2268,16 @@ function ebRecalc(){
   var dep=parseFloat(depEl.value)||0;
   penEl.value=Math.max(total-dep,0);
 }
-function deleteBooking(id){if(!confirm("Delete this booking?"))return;bookings=bookings.filter(b=>b.id!==id);renderBookings();renderTours();renderCalendar();}
+function deleteBooking(id){
+  if(!confirm("Delete this booking?"))return;
+  var b=bookings.find(function(x){return x.id===id;});
+  /* If this booking was auto-created from a guest submission, retire that
+     submission too — otherwise auto-processing regenerates the booking on the
+     next sync. The guest's details remain in the Customer record. */
+  if(b&&b.fromSub)retireSourceSub(b.fromSub);
+  bookings=bookings.filter(function(x){return x.id!==id;});
+  persistData();renderBookings();renderTours();renderCalendar();
+}
 
 /* ===== CALCULATOR ===== */
 /* Tab bar shared by the Cost Calculator and the Profit Calculator (which now lives
@@ -3229,7 +3301,13 @@ function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filt
 
 /* ===== REQUESTS / PUBLIC FORMS ===== */
 var _submissions=[];
-function formLink(type){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"register.html?type="+type;}
+/* Public form links carry the company's workspace so each submission lands in
+   the right company's inbox (the row itself is written by an anonymous visitor
+   who has no other way to know which tenant the form belongs to). The shipped
+   pre-login placeholder "default" is never a real org workspace — submissions
+   tagged with it would be readable by nobody — so it maps to island-explorer. */
+function wsTag(){var w="";try{w=sbConfig().ws||"";}catch(e){}return (w&&w!=="default")?w:"island-explorer";}
+function formLink(type){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"register.html?type="+type+"&ws="+encodeURIComponent(wsTag());}
 /* Guide ops link — signed in with phone + a personal login code, so only that guide
    sees their own operations and can update status from their phone. The phone/code
    are shown to YOU here for reference, but never included in the shared message —
@@ -3319,6 +3397,13 @@ function loadSubmissions(force){
     cl.from("workspaces").select("id,data").like("id","sub_%"),
     cl.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle()
   ]).then(function(r){
+    /* An RLS/permission failure used to be silently coerced to an empty inbox —
+       indistinguishable from "no submissions yet". Surface it instead. */
+    var err=(r[0]&&r[0].error)||(r[1]&&r[1].error);
+    if(err){
+      if(body)body.innerHTML="<div class='empty'>Couldn't load submissions ("+String(err.message||err.code||"permission denied").replace(/</g,"&lt;")+"). If this started after the SaaS migration, run supabase/saas/recover-data.sql once in the Supabase SQL editor.</div>";
+      return;
+    }
     var rows=(r[0]&&r[0].data)||[];
     var list=rows.map(function(row){var o=Object.assign({},row.data);o._rowid=row.id;return o;});
     var legacy=(r[1]&&r[1].data&&r[1].data.data&&r[1].data.data.list)||[];
@@ -3469,10 +3554,22 @@ function viewCustomerDetail(name){
   document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>Customer</span><h2 style='font-size:20px;margin-top:4px;font-weight:700'>"+c.name+"</h2></div>"+XBTN+"</div><div class='modal-body'>"+html+"</div><div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button><button class='btn btn-primary' onclick=\"closeModal();editCustomer('"+c.name.replace(/'/g,"\\'")+"')\">Edit</button></div>";
   openScrim();
 }
+/* Resolve which tour a public submission refers to — by explicit id first (the
+   "Share tour form" link carries &tid -> data.tourId), then tour code, then the
+   tour name/label the guest saw, tolerant of case/whitespace. Returns null only
+   when the submission carries no resolvable tour (a generic interest form). A
+   correct match is what links the booking to the right tour card. */
+function subTour(s){
+  var d=(s&&s.data)||{};
+  var norm=function(v){return (v||"").toString().trim().toLowerCase();};
+  return (d.tourId&&tours.find(function(x){return String(x.id)===String(d.tourId);}))
+      || (d.tourCode&&tours.find(function(x){return tourCode(x)===d.tourCode;}))
+      || (s&&s.tour&&tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour||tourLabel(x)===s.tour;}))
+      || (s&&s.tour&&tours.find(function(x){return norm(x.name)===norm(s.tour)||norm(tourLabel(x))===norm(s.tour);}))
+      || null;
+}
 function makeBookingFromSub(s){
-  var t=null;
-  if(s.data&&s.data.tourId)t=tours.find(function(x){return x.id===s.data.tourId;});
-  if(!t&&s.tour)t=tours.find(function(x){return shortName(x)===s.tour||x.name===s.tour;});
+  var t=subTour(s);
   /* avoid duplicate booking: match the source submission first, then guest+tour+start */
   var dup=bookings.find(function(b){return b.fromSub&&b.fromSub===s.id;})||
           bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
@@ -3512,15 +3609,25 @@ function autoProcessSubmissions(){
       if(s.status!=="booked"){s.status="booked";saveSubmissionRow(s);changed=true;}
       markSubProcessed(s.id);return;
     }
-    /* one-time conversions for the rest */
-    if(s.status==="booked"||s.status==="lead-added")return;
-    if(subProcessed(s.id))return;
-    if(s.type==="client"){makeBookingFromSub(s);s.status="booked";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);}
+    /* Guest-detail (client) and interest submissions convert into records. This is
+       keyed on whether the RECORD still exists — not just a one-shot "booked" flag —
+       so a booking/customer/lead lost to a past sync wipe is REGENERATED instead of
+       being stranded behind a status that survived the wipe in the (separate)
+       submission row. Every branch is idempotent (it no-ops when the record is
+       already there), so re-running on each sync is safe and can't double-count.
+       Deleting the record retires its submission (see deleteBooking /
+       retireSourceSub), so this never resurrects a deliberate delete. */
+    if(s.type==="client"){
+      if(!bookings.some(function(b){return b.fromSub===s.id;})){makeBookingFromSub(s);changed=true;}
+      if(s.status!=="booked"){s.status="booked";saveSubmissionRow(s);changed=true;}
+      markSubProcessed(s.id);
+    }
     else if(s.type==="interest"){
-      addOrUpdateCustomer(s);
-      if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");}))
-        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
-      s.status="lead-added";markSubProcessed(s.id);changed=true;saveSubmissionRow(s);
+      if(!findCustomer(s.name,s.email,s.phone)){addOrUpdateCustomer(s);changed=true;}
+      if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");})){
+        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});changed=true;}
+      if(s.status!=="lead-added"){s.status="lead-added";saveSubmissionRow(s);changed=true;}
+      markSubProcessed(s.id);
     }
   });
   if(changed){renderBookings();renderTours();renderCalendar();renderCustomers();renderCRM();if(document.getElementById("guideBody"))renderGuides();if(document.getElementById("logBody"))renderLog(_logTab);persistData();}
@@ -3670,7 +3777,7 @@ function opGuidePick(prefix){var sel=document.getElementById(prefix+"_guide");va
 function opGuideValue(prefix){var sel=document.getElementById(prefix+"_guide");if(!sel)return "";if(sel.value==="custom"){var c=document.getElementById(prefix+"_guidecustom");return (c&&c.value.trim())||"";}return sel.value;}
 function rsGuidePick(){var s=document.getElementById("rs_guide");var by=document.getElementById("rs_by");if(s&&by&&!by.value)by.value=s.value;}
 function etGuidePick(){var sel=document.getElementById("et_guideAlloted");if(!sel)return;var g=externalGuides.find(function(x){return x.name===sel.value;});if(!g)return;var ph=document.getElementById("et_guidephone"),em=document.getElementById("et_guideemail");if(ph)ph.value=g.phone||ph.value;if(em)em.value=g.email||em.value;}
-function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"respond.html?rid="+rid;}
+function respondLink(rid){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"respond.html?rid="+rid+"&ws="+encodeURIComponent(wsTag());}
 function shareReservation(id,via){
   var r=reservations.find(function(x){return x.id===id;});if(!r)return;
   var dates=dShort(r.date)+(r.endDate?" – "+dShort(r.endDate):"");
@@ -4204,6 +4311,7 @@ function viewSettings(){
     "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
       (mismatch?"<button class='btn btn-primary btn-sm' onclick='resetToSharedDefault()'>Reset to shared default</button>":"")+
       "<button class='btn btn-sea btn-sm' onclick='forceFullResync()'>Force full re-sync ↓</button>"+
+      (function(){var b=localBackupInfo();return (b&&(!b.ws||b.ws===(sbc.ws||"")))?"<button class='btn btn-ghost btn-sm' onclick='restoreLocalBackup()'>Restore local backup ("+new Date(b.at).toLocaleDateString()+")</button>":"";})()+
       "<span class='sb-status' id='diagStatus'></span>"+
     "</div>"+
   "</div>";
@@ -4223,9 +4331,8 @@ function viewSettings(){
       "<button class='btn btn-ghost btn-sm' onclick='cloudPull()'>Pull from cloud ↓</button>"+
       "<span class='sb-status' id='sbStatus'></span>"+
     "</div>"+
-    "<details style='margin-top:14px'><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
-      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;overflow:auto;margin-top:8px;white-space:pre-wrap'>-- Run this ONCE in the Supabase SQL editor.\n-- Simplest fix for 'new row violates row-level security policy'.\ncreate table if not exists workspaces (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table workspaces disable row level security;\ngrant all on table workspaces to anon, authenticated;</pre>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Heads-up: the anon key is public. Anyone with your URL, key and workspace name can read/write this data — pick a hard-to-guess workspace name, or add Supabase Auth later for stricter access.</p>"+
+    "<details style='margin-top:14px'><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Backend setup notes</summary>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:8px'>The shared SaaS backend is already set up (tables, per-company isolation and sign-in policies) by <code>supabase/saas/schema.sql</code> in the repo. Data problems after a migration? Run <code>supabase/saas/recover-data.sql</code> once in the Supabase SQL editor — it repairs account linkage, restores the data blob and re-opens the inbox. Never disable row level security on the shared project: it would let every company read every other company's data.</p>"+
     "</details>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
@@ -4235,18 +4342,11 @@ function viewSettings(){
       "<button class='btn btn-sea btn-sm' onclick='pushAllRecords();alert(\"Pushed every record to its own table.\")'>Push all records ↑</button>"+
       "<button class='btn btn-ghost btn-sm' onclick='pullAllRecords().then(function(ok){_perRecordActive=ok;if(ok){boot(true);alert(\"Pulled — per-record sync is active.\");}else{alert(\"Tables not found yet — run the SQL below in Supabase first.\");}})'>Pull all records ↓</button>"+
     "</div>"+
-    "<details><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Show one-time table setup SQL</summary>"+
-      "<pre class='mono' style='background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;margin-top:8px;white-space:pre-wrap'>"+perRecordSetupSQL()+"</pre>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'>Full copy also kept in <code>docs/DATABASE_SCHEMA.md</code> in the repo.</p>"+
+    "<details><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Why is there no setup SQL here?</summary>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:8px'>On the shared SaaS backend the per-record tables are locked down (no direct browser access) because they aren't separated per company — the console uses the workspace-scoped sync above instead, which is fully isolated. The old permissive setup SQL was removed from here so it can't accidentally be run on the shared project.</p>"+
     "</details>"+
   "</div>"+
   "</section>";
-}
-function perRecordSetupSQL(){
-  return "-- Run this ONCE in the Supabase SQL editor. Creates one table per collection,\n"+
-"-- each row = one record (id/name as primary key). Same permissive setup as the\n"+
-"-- existing 'workspaces' table, so it works with the publishable key already in the app.\n"+
-_recordKeys.map(function(k){return "create table if not exists "+recTable(k)+" (\n  id text primary key,\n  data jsonb,\n  updated_at timestamptz default now()\n);\nalter table "+recTable(k)+" disable row level security;\ngrant all on table "+recTable(k)+" to anon, authenticated;\n";}).join("\n");
 }
 var ROLE_ACCESS={Admin:"All modules",Operator:"Tours, Bookings, Logistics",Guide:"Ops board (view)",Sales:"CRM, Bookings"};
 /* The sync-status diagnostics (record count, last-synced time, workspace mismatch
@@ -4817,35 +4917,59 @@ function loadOrgContext(){
     _sbReady=false;_syncBooting=true;_localDirty=false;
     /* Wipe any data cached locally from a previous session or company, so this
        company only ever sees its OWN cloud data — and stale data is never pushed
-       up into their (empty) workspace. */
+       up into their (empty) workspace. Stash a backup first: this wipe must never
+       be able to destroy the last surviving copy of a company's data. tripLogs is
+       not in STORE and must be cleared explicitly, or the previous company's
+       trips would count as "local data" and get pushed into this workspace. */
+    stashLocalData("login");
     try{localStorage.removeItem(DATA_KEY);localStorage.removeItem("ieo_updated");localStorage.removeItem("ieo_record_pending");localStorage.removeItem("ieo_sync_trips");}catch(e){}
     try{STORE.forEach(function(s){if(s.arr)s.set([]);});}catch(e){}
+    try{tripLogs=[];}catch(e){}
     try{_lastKnownCloudTotal=0;_localDirty=false;_perRecordActive=false;}catch(e){}
     try{var cfg=sbConfig();cfg.ws=org.workspace;localStorage.setItem(SB_CFG_KEY,JSON.stringify(cfg));}catch(e){}
     if(org.brand){window.APP_CONFIG.brand=Object.assign({},window.APP_CONFIG.brand||{},org.brand);if(typeof applyBrand==="function")applyBrand();}
     _orgLoaded=true;hideLogin();
     try{if(typeof boot==="function")boot(true);}catch(e){}         /* render empty immediately */
-    _sbReady=false;if(typeof cloudInit==="function")cloudInit();  /* then load THIS company's data */
+    _sbReady=false;
+    if(typeof cloudInit==="function"){
+      var ci=cloudInit();                                          /* then load THIS company's data */
+      /* refreshUI() (called by the pull inside cloudInit) intentionally does NOT
+         redraw the dashboard/requests/settings views, so the background poll never
+         flashes them. But right after sign-in the user is SITTING on the dashboard
+         while its data arrives — without this it would stay showing the empty
+         post-wipe render until a manual refresh. Force one full redraw of the
+         landing view once the initial load settles. */
+      if(ci&&ci.then)ci.then(function(){
+        var wa=_sbApplying;_sbApplying=true;
+        try{if(curView==="dashboard"&&typeof refreshDashboard==="function")refreshDashboard();else refreshUI();}catch(e){}
+        _sbApplying=wa;
+      });
+    }
   }).catch(function(){hideLogin();});
 }
 /* Auth and data sync used to be two unconnected systems: the login screen was just
    a visual overlay, and the cloud data loaded regardless of whether you'd actually
    signed in. Now cloud sync WAITS for a confirmed sign-in — the shared workspace
-   only loads once you're an authenticated user, and starts the moment you sign in
-   if you weren't already. (If Supabase Auth itself isn't configured/reachable at
-   all, this still fails open and syncs anyway, so a broken auth setup can't lock
-   you out of your own data.) */
+   only loads once you're an authenticated user (via loadOrgContext -> my_org).
+
+   SaaS isolation note: this is a MULTI-TENANT backend, so we must NEVER sync to a
+   saved workspace without a confirmed session. The old code "failed open" (synced
+   with whatever workspace was last saved) when the auth client was missing or
+   getSession threw — on a shared backend that means loading the previous device's
+   / another company's workspace with no sign-in. Both of those paths now fail
+   CLOSED: show the login screen and do not sync. A real signed-in session that
+   was merely slow to resolve still lands via onAuthStateChange moments later. */
 var _authResolved=false;
 function initAuth(){
   return new Promise(function(resolve){
     var cl=authClient();
-    if(!cl){hideLogin();resolve(true);return;}
+    if(!cl){hideLogin();resolve(false);return;}   /* Supabase lib didn't load -> local-only, but never sync to a saved workspace unauthenticated */
     var _le=lgEl("lg_email");if(_le&&!_le._brandHooked){_le._brandHooked=1;_le.addEventListener("blur",lgEmailBrand);}
     cl.auth.getSession().then(function(res){
       var s=res&&res.data&&res.data.session;
       if(s&&s.user){applyUser(s.user);loadOrgContext();resolve(false);}
       else{showLogin();resolve(false);}
-    }).catch(function(){showLogin();resolve(true);});
+    }).catch(function(){showLogin();resolve(false);});  /* couldn't confirm a session -> don't sync to a saved workspace */
     cl.auth.onAuthStateChange(function(_e,session){
       if(session&&session.user){
         /* A DIFFERENT user signing in on a page that already loaded a company
@@ -4949,7 +5073,9 @@ function authForgot(){
 /* bypass removed per request */
 function logout(){
   /* Clear this company's locally-cached data and reload: the next sign-in must
-     start from a clean slate, never from the previous company's cache. */
+     start from a clean slate, never from the previous company's cache. Stash a
+     backup first so a logout can never destroy the last copy of the data. */
+  stashLocalData("logout");
   try{localStorage.removeItem(DATA_KEY);localStorage.removeItem("ieo_updated");localStorage.removeItem("ieo_record_pending");localStorage.removeItem("ieo_sync_trips");}catch(e){}
   var cl=authClient();
   var done=function(){location.reload();};

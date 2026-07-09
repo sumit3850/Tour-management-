@@ -58,7 +58,25 @@ Deno.serve(async () => {
 
     // Load the current workspace blob so we can map rows to tour ids by name.
     const { data: ws } = await sb.from("workspaces").select("data").eq("id", WORKSPACE_ID).maybeSingle();
+
+    // Safety guard: this function runs on a schedule and rewrites the WHOLE blob
+    // with updated_at=now(). If the workspace row is missing or its record
+    // collections are empty (e.g. it was wiped, or the id is wrong), writing here
+    // would (a) create/keep an empty row and (b) stamp it as the newest copy every
+    // run — which is exactly what defeats timestamp-based recovery of real data.
+    // So refuse to write unless the row already holds real records; only rates for
+    // an established, non-empty workspace are ever merged back.
     const blob: Record<string, any> = (ws && ws.data) ? ws.data : {};
+    const arr = (k: string) => (Array.isArray(blob[k]) ? blob[k].length : 0);
+    const recordCount = arr("tours") + arr("bookings") + arr("customers") + arr("accBookings") +
+      arr("leads") + arr("ops") + arr("reservations");
+    if (!ws || recordCount === 0) {
+      return new Response(JSON.stringify({
+        ok: false, skipped: true, workspace: WORKSPACE_ID,
+        reason: !ws ? "workspace row not found — not creating it" : "workspace has no records — refusing to overwrite/re-stamp a possibly-wiped blob",
+      }), { headers: { "content-type": "application/json" } });
+    }
+
     const tours: any[] = Array.isArray(blob.tours) ? blob.tours : [];
     const tourCosts: Record<string, { indian: number; foreigner: number }> = blob.tourCosts ?? {};
 
@@ -83,12 +101,18 @@ Deno.serve(async () => {
       count++;
     }
 
+    // Nothing matched from the sheet — don't rewrite the blob (and don't bump
+    // updated_at, which could make devices skip pulling their own newer edits).
+    if (count === 0) {
+      return new Response(JSON.stringify({ ok: true, skipped: true, workspace: WORKSPACE_ID, updated: 0, reason: "no matching rate rows in the sheet" }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
+
     blob.tourCosts = tourCosts;
-    const { error } = await sb.from("workspaces").upsert({
-      id: WORKSPACE_ID,
-      data: blob,
-      updated_at: new Date().toISOString(),
-    });
+    // Update only the data column; leave updated_at to the row default so a rates
+    // refresh doesn't masquerade as a full-dataset edit newer than a device's work.
+    const { error } = await sb.from("workspaces").update({ data: blob }).eq("id", WORKSPACE_ID);
     if (error) throw error;
 
     return new Response(JSON.stringify({ ok: true, workspace: WORKSPACE_ID, updated: count }), {

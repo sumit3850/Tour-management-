@@ -5,6 +5,12 @@ One deployment, one Supabase project, one URL. Companies **sign up themselves**,
 **own isolated data**. On return, they see their **own logo + company name** on
 the sign-in page (email-first).
 
+> **Data looks missing after migrating?** (no tours, empty inbox) — run
+> `supabase/saas/recover-data.sql` once in the SQL editor and read
+> `docs/RECOVERY.md`. It repairs the account↔org linkage, restores the data
+> blob from the best surviving source, and re-opens the submissions inbox
+> with per-company policies.
+
 ## The flow
 
 1. A company opens **`signup.html`** and registers (name, company, CIN, contact,
