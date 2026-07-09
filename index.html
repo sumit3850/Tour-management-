@@ -137,6 +137,30 @@ td{vertical-align:middle}
 .tour-col .tour-card:last-child{margin-bottom:0}
 .tour-card .dt-range{font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.15}
 .tour-card .code-tag{display:inline-block;margin-top:4px;font-size:12px;font-weight:600;color:#0c5760;background:var(--sea-soft);border-radius:999px;padding:2px 10px}
+/* Redesigned tour card */
+.tour-card .tc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.tour-card .tc-id{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#0c5760;background:var(--sea-soft);border:1px solid var(--sea);border-radius:6px;padding:1px 7px;letter-spacing:.02em}
+.tour-card .tc-when{font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.tour-card .tc-when.soon{color:#0c5760;background:var(--sea-soft)}
+.tour-card .tc-when.live{color:#1b7f4d;background:#e5f6ec}
+.tour-card .tc-when.done{color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line)}
+.tour-card .tc-name{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25}
+.tour-card .tc-dates{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--ink);margin-top:7px}
+.tour-card .tc-dates svg{width:14px;height:14px;color:var(--ink-soft);flex:none}
+.tour-card .tc-nights{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:0 6px;margin-left:auto}
+.tour-card .tc-cap{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-soft);margin-top:13px}
+.tour-card .tc-cap b{color:var(--ink);font-size:15px}
+.tour-card .tc-cap .tc-full{color:var(--coral);font-weight:700}
+.tour-card .tc-bar{height:7px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:6px}
+.tour-card .tc-bar span{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--sea),#37a0ac)}
+.tour-card .tc-bar.warn span{background:linear-gradient(90deg,#e8843c,var(--coral))}
+.tour-card .tc-metarow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tour-card .tc-chip{font-size:11.5px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.tour-card .tc-guests{font-size:12px;color:var(--ink);margin-top:11px;line-height:1.45}
+.tour-card .tc-guests span{display:inline-block;text-transform:uppercase;font-size:10px;letter-spacing:.05em;font-weight:700;color:var(--ink-soft);margin-right:6px}
+.tour-card .tc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line-soft)}
+.tour-card .tc-foot .pills{display:flex;gap:6px;flex-wrap:wrap}
+.tour-card .tc-pct{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--ink-soft);white-space:nowrap}
 .rate-card{background:var(--sea-soft);border:1px solid var(--sea);border-radius:12px;padding:12px 14px;margin-bottom:14px}
 .rate-card-h{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--sea);font-weight:700;margin-bottom:6px}
 .calc-sub{font-size:12.5px;color:var(--ink-soft);margin:-4px 0 14px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
@@ -1536,6 +1560,31 @@ const status=t=>booked(t.id)>=t.cap?(t.status==="completed"?"completed":"full"):
 const durNights=t=>Math.round((new Date(t.end)-new Date(t.start))/864e5);
 function pad2(n){return (n<10?"0":"")+n;}
 const dShort=s=>{if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;return pad2(d.getDate())+"/"+pad2(d.getMonth()+1)+"/"+d.getFullYear();};
+/* Clean, human date formats for the tour cards. dNice -> "18 Oct 2026";
+   dRangeNice collapses a range intelligently: "18 – 24 Oct 2026" (same month),
+   "28 Oct – 3 Nov 2026" (same year), or the full spread across a year boundary. */
+const MON_S=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function dNice(s){if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;return d.getDate()+" "+MON_S[d.getMonth()]+" "+d.getFullYear();}
+function dRangeNice(a,b){
+  if(!a)return "—";
+  var da=new Date(a),db=b?new Date(b):null;
+  if(isNaN(da))return dShort(a)+(b?" – "+dShort(b):"");
+  if(!db||isNaN(db))return dNice(a);
+  var sameY=da.getFullYear()===db.getFullYear(),sameM=sameY&&da.getMonth()===db.getMonth();
+  if(sameM)return da.getDate()+" – "+db.getDate()+" "+MON_S[db.getMonth()]+" "+db.getFullYear();
+  if(sameY)return da.getDate()+" "+MON_S[da.getMonth()]+" – "+db.getDate()+" "+MON_S[db.getMonth()]+" "+db.getFullYear();
+  return da.getDate()+" "+MON_S[da.getMonth()]+" "+da.getFullYear()+" – "+db.getDate()+" "+MON_S[db.getMonth()]+" "+db.getFullYear();
+}
+/* A live status/countdown chip for a tour: Completed / Ongoing / a departure
+   countdown ("in 12 days", "Tomorrow", "Departs today") / Ended. */
+function tourWhenLabel(t){
+  if(status(t)==="completed")return {label:"Completed",cls:"done"};
+  var today=new Date(todayISO),st=new Date(t.start),en=new Date(t.end);
+  if(!isNaN(st)&&!isNaN(en)&&st<=today&&today<=en)return {label:"Ongoing",cls:"live"};
+  if(!isNaN(st)&&st>today){var d=Math.round((st-today)/864e5);return {label:d<=0?"Departs today":(d===1?"Tomorrow":"in "+d+" days"),cls:"soon"};}
+  if(!isNaN(en)&&en<today)return {label:"Ended",cls:"done"};
+  return {label:"",cls:""};
+}
 const dmy=dShort;
 const tourColor=id=>TOURCOLORS[Math.abs(tours.findIndex(t=>t.id===id))%TOURCOLORS.length];
 const accColor=i=>TOURCOLORS[Math.abs(i)%TOURCOLORS.length];
@@ -2103,16 +2152,27 @@ function viewTours(){
   "</section>";
 }
 function tourCard(t){
-  const b=booked(t.id),pct=Math.round(b/t.cap*100),s=status(t);
-  var gNames=bookings.filter(function(x){return x.tour===t.id;}).map(function(x){return x.guest;}).join(", ");
+  const cap=t.cap||0,b=booked(t.id),pct=cap?Math.min(Math.round(b/cap*100),100):0;
+  const left=Math.max(cap-b,0);
+  var gArr=bookings.filter(function(x){return x.tour===t.id;}).map(function(x){return x.guest;}).filter(Boolean);
+  var when=tourWhenLabel(t);
+  var rev=(typeof tourRevenue==="function")?tourRevenue(t):0;
+  var nm=(t.name||"").replace(/'/g,"&#39;");
+  var CAL="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><rect x='3' y='4' width='18' height='18' rx='2'/><path d='M16 2v4M8 2v4M3 10h18'/></svg>";
   return "<div class='card tour-card' data-action='openTour' data-arg='"+t.id+"'>"+
     "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
-    "<div class='dt-range'>"+dShort(t.start)+" – "+dShort(t.end)+"</div>"+
-    "<div class='code-tag' title='"+t.name+"'>"+shortName(t)+"</div>"+
-    "<div class='capline'><span><b>"+b+"</b> / "+t.cap+" booked</span><span>"+(t.cap-b)+" seats left</span></div>"+
-    "<div class='bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
-    (gNames?"<div class='guests'>Guests: "+gNames+"</div>":"")+
-    "<div class='foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+"</span><span class='mono' style='font-size:13px;color:var(--ink-soft)'>"+pct+"% full</span></div>"+
+    "<div class='tc-top'><span class='tc-id' title='Tour ID'>"+tourCode(t)+"</span>"+(when.label?"<span class='tc-when "+when.cls+"'>"+when.label+"</span>":"")+"</div>"+
+    "<div class='tc-name' title='"+nm+"'>"+shortName(t)+"</div>"+
+    "<div class='tc-dates'>"+CAL+"<span>"+dRangeNice(t.start,t.end)+"</span><span class='tc-nights'>"+durNights(t)+"N</span></div>"+
+    "<div class='tc-cap'><span><b>"+b+"</b> / "+cap+" booked</span><span class='"+(left===0&&cap>0?"tc-full":"")+"'>"+left+" seat"+(left===1?"":"s")+" left</span></div>"+
+    "<div class='tc-bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
+    "<div class='tc-metarow'>"+
+      (rev>0?"<span class='tc-chip' title='Booked revenue'>"+fmt(rev)+"</span>":"")+
+      (t.guide?"<span class='tc-chip' title='Guide'>"+String(t.guide).replace(/'/g,"&#39;")+"</span>":"")+
+      "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+
+    "</div>"+
+    (gArr.length?"<div class='tc-guests'><span>Guests</span>"+gArr.join(", ")+"</div>":"")+
+    "<div class='tc-foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+"</span><span class='tc-pct'>"+pct+"% full</span></div>"+
   "</div>";
 }
 function renderTours(filter=curTab){
