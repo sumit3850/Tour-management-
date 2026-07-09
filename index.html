@@ -145,8 +145,8 @@ td{vertical-align:middle}
 .tour-card .tc-when.live{color:#1b7f4d;background:#e5f6ec}
 .tour-card .tc-when.done{color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line)}
 .tour-card .tc-name{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.25}
-.tour-card .tc-dates{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--ink);margin-top:7px}
-.tour-card .tc-dates svg{width:14px;height:14px;color:var(--ink-soft);flex:none}
+.tour-card .tc-dates{display:flex;align-items:center;gap:8px;font-size:16.5px;font-weight:700;color:var(--ink);letter-spacing:-.01em;margin-top:8px}
+.tour-card .tc-dates svg{width:16px;height:16px;color:var(--sea);flex:none}
 .tour-card .tc-nights{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:5px;padding:0 6px;margin-left:auto}
 .tour-card .tc-cap{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--ink-soft);margin-top:13px}
 .tour-card .tc-cap b{color:var(--ink);font-size:15px}
@@ -156,6 +156,7 @@ td{vertical-align:middle}
 .tour-card .tc-bar.warn span{background:linear-gradient(90deg,#e8843c,var(--coral))}
 .tour-card .tc-metarow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .tour-card .tc-chip{font-size:11.5px;font-weight:600;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.tour-card .tc-rev{color:#0c5760;background:var(--sea-soft);border-color:var(--sea);font-weight:700}
 .tour-card .tc-guests{font-size:12px;color:var(--ink);margin-top:11px;line-height:1.45}
 .tour-card .tc-guests span{display:inline-block;text-transform:uppercase;font-size:10px;letter-spacing:.05em;font-weight:700;color:var(--ink-soft);margin-right:6px}
 .tour-card .tc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line-soft)}
@@ -519,14 +520,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 135</span></div>
+    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 136</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 135</div></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 136</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2167,7 +2168,7 @@ function tourCard(t){
     "<div class='tc-cap'><span><b>"+b+"</b> / "+cap+" booked</span><span class='"+(left===0&&cap>0?"tc-full":"")+"'>"+left+" seat"+(left===1?"":"s")+" left</span></div>"+
     "<div class='tc-bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     "<div class='tc-metarow'>"+
-      (rev>0?"<span class='tc-chip' title='Booked revenue'>"+fmt(rev)+"</span>":"")+
+      "<span class='tc-chip tc-rev' title='Booked revenue (set per-person rates in the Cost Calculator)'>"+fmt(rev)+"</span>"+
       (t.guide?"<span class='tc-chip' title='Guide'>"+String(t.guide).replace(/'/g,"&#39;")+"</span>":"")+
       "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+
     "</div>"+
