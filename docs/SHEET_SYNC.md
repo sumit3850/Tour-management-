@@ -110,8 +110,43 @@ function doPost(e){
   if (!e || !e.postData || !e.postData.contents) {
     return ContentService.createTextOutput("ready — send data from the app, don't press Run here.");
   }
-  var body = JSON.parse(e.postData.contents);          // {kind, mode, header, rows} or {kind, row, keyField}
+  var body = JSON.parse(e.postData.contents);          // {mode:"workbook", tabs:[...]}  (or legacy {kind,mode,...})
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // --- Workbook mode: rebuild the ENTIRE workbook in one shot (recommended) ------
+  // The app sends all 12 tabs at once, in the exact reference order. We create/replace
+  // each one, order it (1..N), format it (Arial 10, bold centred frozen header,
+  // auto-fit), and then DELETE every other tab. Result: exactly these tabs, in this
+  // order, every push — no duplicates, no stale/renamed tabs, no ordering races.
+  if (body.mode === "workbook") {
+    var tabs = body.tabs || [];
+    var keep = {};
+    tabs.forEach(function(t, i){
+      keep[t.name] = true;
+      var sh = ss.getSheetByName(t.name) || ss.insertSheet(t.name);
+      var header = t.header || [];
+      var rows = t.rows || [];
+      sh.clear();
+      var out = [header];
+      rows.forEach(function(r){ out.push(header.map(function(h){ return r[h] != null ? r[h] : ""; })); });
+      if (header.length) {
+        var rng = sh.getRange(1, 1, out.length, header.length);
+        rng.setValues(out);
+        rng.setFontFamily("Arial").setFontSize(10).setVerticalAlignment("middle");
+        sh.getRange(1, 1, 1, header.length).setFontWeight("bold").setHorizontalAlignment("center");
+        sh.setFrozenRows(1);
+        sh.autoResizeColumns(1, header.length);
+      }
+      ss.setActiveSheet(sh);
+      ss.moveActiveSheet(i + 1);                        // put it in the reference position
+    });
+    // Remove any tab that isn't one of the canonical tabs (old names, duplicates,
+    // hand-made tabs). Never delete the last remaining sheet — Sheets requires one.
+    ss.getSheets().forEach(function(sh){
+      if (!keep[sh.getName()] && ss.getSheets().length > 1) ss.deleteSheet(sh);
+    });
+    return ContentService.createTextOutput("ok-workbook " + tabs.length);
+  }
 
   // --- Delete mode: remove a tab the app no longer uses (e.g. old Referral tabs) ---
   if (body.mode === "delete") {
@@ -195,11 +230,13 @@ function doPost(e){
 
 > **Already deployed the older script?** Replace it with the code above, then
 > **Deploy → Manage deployments → ✎ Edit → Version: New version → Deploy** (re-using
-> the same URL). This version **re-orders the columns automatically**, **orders the
-> tabs** to match the reference workbook, and **formats each tab** (Arial 10, a bold,
-> centred, frozen header row, auto-fitted columns) on the next push — you do **not**
-> need to delete the tab. After re-deploying, click **Push all now** once and every tab
-> is rebuilt, and laid out, in the standard order below.
+> the same URL). This version rebuilds the **whole workbook in one request**: it
+> creates/replaces exactly the 12 canonical tabs, **orders them** to match the
+> reference workbook, **formats each** (Arial 10, a bold, centred, frozen header row,
+> auto-fitted columns), and **deletes every other tab** — so any leftover/duplicate or
+> hand-renamed tabs are removed automatically. **You must redeploy a New version for
+> this to take effect.** After re-deploying, click **Push all now** once and the sheet
+> ends up with exactly these 12 tabs, in this order:
 >
 > **The workbook has 12 tabs, in this order** (rows are ordered newest-tour-first —
 > T3, T2, T1 — for every tour-based tab):
