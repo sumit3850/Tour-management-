@@ -144,6 +144,8 @@ function doPost(e){
       sheet.setFrozenRows(1);
       sheet.autoResizeColumns(1, rHeader.length);
     }
+    // Lay the tabs out in the reference order the app sends (1-based index).
+    if (body.index) { ss.setActiveSheet(sheet); ss.moveActiveSheet(body.index); }
     return ContentService.createTextOutput("ok-replace " + rRows.length);
   }
 
@@ -193,10 +195,11 @@ function doPost(e){
 
 > **Already deployed the older script?** Replace it with the code above, then
 > **Deploy → Manage deployments → ✎ Edit → Version: New version → Deploy** (re-using
-> the same URL). This version **re-orders the columns automatically** and **formats
-> each tab** (Arial 10, a bold, centred, frozen header row, auto-fitted columns) on the
-> next push — you do **not** need to delete the tab. After re-deploying, click **Push
-> all now** once and every tab is rebuilt to the standard layout below.
+> the same URL). This version **re-orders the columns automatically**, **orders the
+> tabs** to match the reference workbook, and **formats each tab** (Arial 10, a bold,
+> centred, frozen header row, auto-fitted columns) on the next push — you do **not**
+> need to delete the tab. After re-deploying, click **Push all now** once and every tab
+> is rebuilt, and laid out, in the standard order below.
 >
 > **The workbook has 12 tabs, in this order** (rows are ordered newest-tour-first —
 > T3, T2, T1 — for every tour-based tab):
