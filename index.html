@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Ops Console">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   /* HDFC-style banking palette: navy blue + red accent on a light-grey canvas */
@@ -474,14 +474,42 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .legend .lg .lg-acts .edit-btn,.legend .lg .lg-acts .del-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;padding:0}
 .legend .lg .lg-acts .del-btn{color:var(--coral)}
 @media(max-width:600px){.acc-cal-grid .cell{min-height:58px;padding:5px}}
-.login-overlay{position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#1f5f4c,#102b22);display:none;align-items:center;justify-content:center;padding:20px}
+.login-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:stretch;justify-content:flex-end;overflow:hidden;background:linear-gradient(120deg,#eef4fc 0%,#f7fafe 46%,#e8f1fb 100%)}
 .login-overlay.show{display:flex}
-.login-card{width:100%;max-width:380px;background:var(--surface);border-radius:20px;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);padding:28px 26px}
-.login-brand{display:flex;align-items:center;gap:11px;margin-bottom:20px}
-.login-brand .mk{width:44px;height:44px;border-radius:12px;background:linear-gradient(150deg,#1976d2,#143a2e);display:grid;place-items:center}
-.login-brand .bn{font-family:'Calistoga',serif;font-size:18px;color:var(--ink)}
-.login-brand .bs{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
-.login-card h2{font-size:19px;margin-bottom:4px}
+/* soft, slowly-drifting light blobs for a dynamic (but calm) backdrop */
+.login-overlay::before,.login-overlay::after{content:"";position:absolute;border-radius:50%;filter:blur(64px);opacity:.55;z-index:0;pointer-events:none}
+.login-overlay::before{width:540px;height:540px;left:-140px;top:-160px;background:radial-gradient(circle,#bcd8f7,transparent 70%);animation:lgFloat1 20s ease-in-out infinite}
+.login-overlay::after{width:480px;height:480px;left:20%;bottom:-180px;background:radial-gradient(circle,#cfe8dc,transparent 70%);animation:lgFloat2 26s ease-in-out infinite}
+@keyframes lgFloat1{0%,100%{transform:translate(0,0)}50%{transform:translate(46px,34px)}}
+@keyframes lgFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(-34px,-44px)}}
+@media (prefers-reduced-motion:reduce){.login-overlay::before,.login-overlay::after{animation:none}}
+.login-hero{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:56px clamp(32px,5vw,84px);max-width:760px}
+.login-hero .lh-brand{display:flex;align-items:center;gap:12px;min-height:48px}
+.login-hero .lh-logo{height:46px;width:auto;max-width:200px;object-fit:contain;object-position:left center}
+.login-hero .lh-textbrand .bn{font-family:'Calistoga',Georgia,serif;font-size:20px;color:var(--ink);line-height:1.05}
+.login-hero .lh-textbrand .bs{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-top:2px}
+.login-hero .lh-eyebrow{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sea);margin-bottom:12px}
+.login-hero h1{font-family:'Geist',sans-serif;font-weight:800;font-size:clamp(30px,4.2vw,52px);line-height:1.04;letter-spacing:-.025em;color:var(--ink)}
+.login-hero h1 .accent{color:var(--sea)}
+.login-hero .lh-sub{font-size:clamp(15px,1.35vw,18px);line-height:1.6;color:var(--ink-soft);max-width:540px}
+.login-hero .lh-feats{display:flex;flex-direction:column;gap:11px;margin-top:2px}
+.login-hero .lh-feat{display:flex;align-items:center;gap:12px;font-size:14.5px;font-weight:600;color:var(--ink)}
+.login-hero .lh-feat svg{width:20px;height:20px;color:#1b7f4d;flex:none}
+.login-hero .lh-dev{margin-top:12px;padding-top:18px;border-top:1px solid rgba(27,42,74,.12);font-size:12.5px;color:var(--ink-soft);line-height:1.7;max-width:540px}
+.login-hero .lh-dev b{color:var(--ink);font-weight:700}
+.login-hero .lh-dev a{color:var(--sea);font-weight:600}
+.login-card-wrap{position:relative;z-index:1;flex:none;width:min(46%,540px);display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 70px -30px rgba(20,40,80,.35);padding:32px 30px}
+.login-card h2{font-size:22px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+@media (max-width:900px){
+  .login-overlay{flex-direction:column;justify-content:flex-start;align-items:stretch;overflow:auto}
+  .login-hero{flex:none;max-width:none;justify-content:flex-start;padding:36px 26px 6px;gap:16px}
+  .login-hero .lh-sub,.login-hero .lh-feats{display:none}
+  .login-hero .lh-dev{margin-top:6px;padding-top:12px}
+  .login-hero h1{font-size:27px}
+  .login-card-wrap{width:100%;padding:18px 22px 42px}
+  .login-card{max-width:460px;margin:0 auto}
+}
 .login-card .lg-sub{font-size:13px;color:var(--ink-soft);margin-bottom:16px}
 .login-card label{display:block;font-size:12px;font-weight:600;margin:12px 0 5px}
 .login-card input{width:100%;font-size:16px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
@@ -501,37 +529,55 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 </head>
 <body>
 <div class="login-overlay" id="loginOverlay">
-  <div class="login-card">
-    <img id="brandLoginLogo" src="assets/logo.png" alt="Island Explorer Birding Tours" style="max-width:260px;max-height:96px;object-fit:contain;display:block;margin:0 0 18px" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('lg_textbrand');if(f)f.style.display='flex';}">
-    <div class="login-brand" id="lg_textbrand" style="display:none"><span class="mk"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M6 11V6h4M18 11V6h-4M10 8h4"/></svg></span><div><div class="bn" id="brandLoginName">Island Explorer Birding Tours</div><div class="bs">Ops Console</div></div></div>
-    <h2 id="lgTitle">Sign in</h2>
-    <p class="lg-sub" id="lgSub">Welcome back. Sign in to your console.</p>
-    <div class="lg-err" id="lgErr"></div>
-    <div class="lg-ok" id="lgOk"></div>
-    <label>Email</label>
-    <input id="lg_email" type="email" placeholder="you@email.com" autocomplete="username">
-    <div id="lg_pwwrap">
-      <label>Password</label>
-      <input id="lg_pw" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')authPrimary()">
+  <div class="login-hero">
+    <div class="lh-brand">
+      <img id="brandLoginLogo" src="assets/logo.png" alt="Island Explorer Birding Tours" class="lh-logo" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';var f=document.getElementById('lg_textbrand');if(f)f.style.display='block';}">
+      <div class="lh-textbrand" id="lg_textbrand" style="display:none"><div class="bn" id="brandLoginName">Island Explorer Birding Tours</div><div class="bs">Ops Console</div></div>
     </div>
-    <label class="lg-check" id="lg_rememberwrap"><input type="checkbox" id="lg_remember" checked> Remember me on this device</label>
-    <button class="lg-btn" id="lgBtn" onclick="authPrimary()">Sign in</button>
-    <div class="lg-links">
-      <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
-      <a href="signup.html" id="lgToggle">Create new account</a>
+    <div>
+      <div class="lh-eyebrow">Tour operations, simplified</div>
+      <h1>Fewer spreadsheets.<br><span class="accent">Zero double-bookings.</span><br>Happier guests.</h1>
     </div>
-    <button id="lgInstallBtn" style="display:flex;align-items:center;gap:7px;width:fit-content;margin:14px auto 0;padding:9px 15px;background:var(--surface);color:var(--forest);border:1.5px solid var(--forest);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer" onclick="installApp()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
-    </button>
-    <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 140</span></div>
+    <p class="lh-sub">Run your whole operation from one calm command centre — departures, bookings, payments, guides, drivers and logistics, always in sync across every device.</p>
+    <div class="lh-feats">
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Every tour, booking &amp; payment in one place</div>
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Enquiries turn into bookings &amp; guests automatically</div>
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Guides &amp; drivers get their own mobile apps</div>
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Works offline &amp; syncs the moment you're back online</div>
+    </div>
+    <div class="lh-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
+  </div>
+  <div class="login-card-wrap">
+    <div class="login-card">
+      <h2 id="lgTitle">Sign in</h2>
+      <p class="lg-sub" id="lgSub">Welcome back. Sign in to your console.</p>
+      <div class="lg-err" id="lgErr"></div>
+      <div class="lg-ok" id="lgOk"></div>
+      <label>Email</label>
+      <input id="lg_email" type="email" placeholder="you@email.com" autocomplete="username">
+      <div id="lg_pwwrap">
+        <label>Password</label>
+        <input id="lg_pw" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')authPrimary()">
+      </div>
+      <label class="lg-check" id="lg_rememberwrap"><input type="checkbox" id="lg_remember" checked> Remember me on this device</label>
+      <button class="lg-btn" id="lgBtn" onclick="authPrimary()">Sign in</button>
+      <div class="lg-links">
+        <a href="#" id="lgForgot" onclick="authForgot();return false">Forgot password?</a>
+        <a href="signup.html" id="lgToggle">Create new account</a>
+      </div>
+      <button id="lgInstallBtn" style="display:flex;align-items:center;gap:7px;width:fit-content;margin:14px auto 0;padding:9px 15px;background:var(--surface);color:var(--forest);border:1.5px solid var(--forest);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer" onclick="installApp()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
+      </button>
+      <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 141</span></div>
+    </div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 140</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 141</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
