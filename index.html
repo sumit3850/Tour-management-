@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 152</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 153</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 152</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 153</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2516,20 +2516,35 @@ function upcomingDepartures(){
 function qaTile(label,icon,onclick){return "<button class='qa-tile' onclick=\""+onclick+"\"><span class='qa-ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg></span><span class='qa-lbl'>"+label+"</span></button>";}
 var payFrom="",payTo="";
 function firstBookingDate(){var ds=bookings.map(function(b){return b.start;}).filter(Boolean).sort();return ds.length?ds[0]:"";}
+/* Payment roll-up is TOUR-driven: Net Tour Cost = Σ every tour's Total tour cost,
+   Deposit = Σ every tour's deposit, Pending = Σ every tour's pending — straight from
+   the Tours section, so editing a tour's figures updates these live. Tours with no
+   booking still count. Deposit per tour = the tour's own Deposit, or (if not set) its
+   POC booking's deposit. Custom/unlinked bookings (no tour) are added on top. */
 function paymentStats(){
-  var from=payFrom||firstBookingDate(),to=payTo||"";
+  var from=payFrom||firstTourOrBookingDate(),to=payTo||"";
   var dep=0,pend=0,tot=0,val=0;
-  /* one row per tour (POC) + custom bookings, so the tour total isn't counted once
-     per participant */
-  billableBookings().forEach(function(b){
-    var d=b.start||"";
-    if(from&&d&&d<from)return;
-    if(to&&d&&d>to)return;
-    var p=bookingPending(b),total=bookingTotalCost(b),paid=Math.max(total-p,0);
-    tot+=paid;val+=total;
-    if(p>0){dep+=bookingDeposit(b);pend+=p;}
+  var inRange=function(d){if(from&&d&&d<from)return false;if(to&&d&&d>to)return false;return true;};
+  (tours||[]).forEach(function(t){
+    if(!inRange(t.start||""))return;
+    var cost=tourRevenue(t);
+    var poc=t.pocId&&bookings.find(function(x){return x.id===t.pocId;});
+    var deposit=(parseFloat(t.tourDeposit)||0)>0?(parseFloat(t.tourDeposit)||0):(poc?bookingDeposit(poc):0);
+    var pending=Math.max(cost-deposit,0);
+    val+=cost;dep+=deposit;pend+=pending;tot+=Math.max(cost-pending,0);
+  });
+  /* custom / unlinked bookings (no tour) still contribute */
+  (bookings||[]).forEach(function(b){
+    if(b.tour)return;
+    if(!inRange(b.start||""))return;
+    var cost=bookingTotalCost(b),pending=bookingPending(b);
+    val+=cost;dep+=bookingDeposit(b);pend+=pending;tot+=Math.max(cost-pending,0);
   });
   return {dep:dep,pend:pend,tot:tot,val:val,from:from};
+}
+function firstTourOrBookingDate(){
+  var ds=(tours||[]).map(function(t){return t.start;}).concat((bookings||[]).map(function(b){return b.start;})).filter(Boolean).sort();
+  return ds.length?ds[0]:"";
 }
 function setPayFilter(){var f=document.getElementById("payFrom"),t=document.getElementById("payTo");payFrom=f?f.value:"";payTo=t?t.value:"";renderPayments();}
 function payThisMonth(){var d=new Date();var p=function(n){return (n<10?"0":"")+n;};payFrom=d.getFullYear()+"-"+p(d.getMonth()+1)+"-01";payTo=d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(new Date(d.getFullYear(),d.getMonth()+1,0).getDate());renderPayments();}
@@ -2545,9 +2560,9 @@ function renderPayments(){
         "<button class='btn btn-ghost btn-sm' onclick='payClear()'>Clear</button></div>"+
     "</div>"+
     "<div class='kpis' style='margin-top:10px'>"+
-      kpi("Deposit / advance received",fmt(s.dep),"from part-paid bookings","","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
-      kpi("Pending payments",fmt(s.pend),"still to collect",s.pend>0?"down":"up","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
-      kpi("Total Booking Value",fmt(s.val),"across bookings","up","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
+      kpi("Deposit / advance received",fmt(s.dep),"across all tours","","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
+      kpi("Pending payments",fmt(s.pend),"still to collect · all tours",s.pend>0?"down":"up","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
+      kpi("Net Tour Cost",fmt(s.val),"sum of all Total tour cost","up","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
     "</div></div>";
 }
 function viewDashboard(){
@@ -2789,7 +2804,9 @@ function saveEditBooking(){
   b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
   b.notes=document.getElementById("eb_notes").value;
   syncBookingCustomers(b);
-  closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(b);
+  closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();
+  if(typeof renderPayments==="function")renderPayments();
+  pushBooking(b);
 }
 function ebRecalc(){
   var totalEl=document.getElementById("eb_total"),depEl=document.getElementById("eb_deposit"),penEl=document.getElementById("eb_pending");
@@ -5225,6 +5242,7 @@ function saveTour(){
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
   opFromTour(nt); /* mirror into Operations so driver/guide can be assigned */
   closeModal();renderTours();renderCalendar();
+  if(typeof renderPayments==="function")renderPayments();
   alert("Tour created. Tour ID: "+tourCode(nt));
 }
 function ntPend(){var c=parseFloat((document.getElementById("nt_cost")||{}).value)||0,d=parseFloat((document.getElementById("nt_deposit")||{}).value)||0,p=document.getElementById("nt_pending");if(p)p.value=Math.max(c-d,0);}
@@ -5287,6 +5305,7 @@ function saveEditTour(){
   bookings.filter(function(b){return b.tour===t.id;}).forEach(syncBookingCustomers);
   renderAccCalendar();renderAccommodation();
   closeModal();renderTours();renderCalendar();renderBookings();renderCustomers();
+  if(typeof renderPayments==="function")renderPayments();
 }
 /* Once the tour is fully paid (pending = 0) and its due date has passed, mark every
    booking on that tour "Fully Paid" so the Bookings section reflects it automatically. */
