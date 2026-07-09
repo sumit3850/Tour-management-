@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v24"; /* v24: company contact email, invoice folder under Cost Calculator & Invoice */
+var CACHE = "ie-ops-v25"; /* v25: deposit inherits tour deposit; payment roll-ups count each tour once */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "index.html",
