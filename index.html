@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 150</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 151</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 150</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 151</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -777,7 +777,15 @@ function bookingTotalCost(b){
   if(t&&(parseFloat(t.tourCost)||0)>0)return parseFloat(t.tourCost)||0;
   return 0;
 }
-function bookingDeposit(b){return b.deposit||0;}
+/* A booking's own deposit wins; otherwise inherit the tour's "Deposit" (entered on
+   the tour form) — mirroring how bookingTotalCost inherits the tour's total — so the
+   figures filled in the Tours section flow through to the booking and customer. */
+function bookingDeposit(b){
+  if(b.deposit)return parseFloat(b.deposit)||0;
+  var t=tours.find(function(x){return x.id===b.tour;});
+  if(t&&(parseFloat(t.tourDeposit)||0)>0)return parseFloat(t.tourDeposit)||0;
+  return 0;
+}
 function bookingPending(b){return Math.max(bookingTotalCost(b)-bookingDeposit(b),0);}
 function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
 function bookingPaymentStatus(b){var pend=bookingPending(b);if(pend<=0)return"Fully Paid";if(bookingDeposit(b)>0)return"Partial";return"Unpaid";}
@@ -2380,7 +2388,23 @@ function closeModal(){document.getElementById("scrim").classList.remove("show");
 /* ===== DASHBOARD ===== */
 /* ===== automation helpers ===== */
 function overlaps(s1,e1,s2,e2){if(!s1||!e1||!s2||!e2)return false;return s1<=e2&&s2<=e1;}
-function pendingBookings(){return bookings.filter(function(b){return bookingPending(b)>0;});}
+/* One representative booking per tour (its POC — or the first booking if no POC is
+   set) plus every custom/unlinked booking. Money roll-ups iterate THIS list so a
+   tour's cost/deposit — which the POC booking carries in FULL — is counted once, not
+   once per participant. (Summing every booking double-counts the tour total.) */
+function billableBookings(){
+  var out=[],seen={};
+  (bookings||[]).forEach(function(b){
+    if(!b.tour){out.push(b);return;}
+    if(seen[b.tour])return;
+    seen[b.tour]=true;
+    var t=(tours||[]).find(function(x){return x.id===b.tour;});
+    var rep=(t&&t.pocId&&bookings.find(function(x){return x.id===t.pocId;}))||bookings.find(function(x){return x.tour===b.tour;});
+    if(rep)out.push(rep);
+  });
+  return out;
+}
+function pendingBookings(){return billableBookings().filter(function(b){return bookingPending(b)>0;});}
 function waShare(text,phone){var n=String(phone||"").replace(/\D/g,"");window.open("https://wa.me/"+n+"?text="+encodeURIComponent(text),"_blank");}
 function mailSend(to,subject,body){window.open("mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body),"_blank");}
 function paymentMsg(b){var t=tours.find(function(x){return x.id===b.tour;});return "Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(bookingPending(b))+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+").\n\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175 · info@islandexplorer.in";}
@@ -2487,7 +2511,9 @@ function firstBookingDate(){var ds=bookings.map(function(b){return b.start;}).fi
 function paymentStats(){
   var from=payFrom||firstBookingDate(),to=payTo||"";
   var dep=0,pend=0,tot=0,val=0;
-  bookings.forEach(function(b){
+  /* one row per tour (POC) + custom bookings, so the tour total isn't counted once
+     per participant */
+  billableBookings().forEach(function(b){
     var d=b.start||"";
     if(from&&d&&d<from)return;
     if(to&&d&&d>to)return;
