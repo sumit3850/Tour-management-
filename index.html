@@ -520,14 +520,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 138</span></div>
+    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 139</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 138</div></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 139</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4374,24 +4374,19 @@ function viewSettings(){
     "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><button class='btn btn-primary btn-sm' onclick='saveSheetHook()'>Save</button><button class='btn btn-sea btn-sm' onclick='pushAllToSheet()'>Push all now</button><button class='btn btn-ghost btn-sm' onclick='openSheet()'>Open Google Sheet</button></div>"+
   "</div>"+
   (function(){
-    var mismatch=(sbc.url&&sbc.url!==SB_DEFAULTS.url)||(sbc.ws&&sbc.ws!==SB_DEFAULTS.ws);
     return "<div class='card card-pad' style='margin-top:16px'>"+
-    "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Sync status <span class='pill "+(mismatch?"full":"completed")+"'>"+(mismatch?"Custom config":"Using shared default")+"</span></div>"+
-    "<p style='font-size:12px;color:var(--ink-soft);margin-bottom:10px'>Data sync now starts only once you're signed in — every authorized login shares the same one workspace below, so signing in on any device is what connects it to your team's data.</p>"+
-    (mismatch?"<div style='background:#fbe7e4;border:1px solid #f0c2bb;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12.5px;color:var(--coral)'><b>This device is pointed at a different Project URL or workspace than the built-in default.</b> If your other devices are on the default, this device will never see their changes (and vice versa) — that alone explains additions/deletions not appearing elsewhere. Tap <b>Reset to shared default</b> below unless you deliberately set up your own Supabase project on every device.</div>":"")+
+    "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Sync status <span class='pill completed'>Your workspace</span></div>"+
+    "<p style='font-size:12px;color:var(--ink-soft);margin-bottom:10px'>Your company's data lives in its own private workspace (below) and loads automatically when you sign in — on any device. <b>Only your company can read it:</b> access is enforced by the database, so no other company can ever see or change your data, and you can't see theirs.</p>"+
     "<div class='rows' style='display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;margin-bottom:14px'>"+
       "<span style='color:var(--ink-soft)'>Signed in as</span><b id='diagUser'>"+((document.querySelector(".nav-foot .role")||{}).textContent||"Not signed in")+"</b>"+
-      "<span style='color:var(--ink-soft)'>Workspace</span><b class='mono' id='diagWs'>"+(sbc.ws||"default")+"</b>"+
-      "<span style='color:var(--ink-soft)'>Project</span><b class='mono' id='diagUrl' style='word-break:break-all'>"+(sbc.url||"—")+"</b>"+
+      "<span style='color:var(--ink-soft)'>Your workspace</span><b class='mono' id='diagWs'>"+(sbc.ws||"default")+"</b>"+
       "<span style='color:var(--ink-soft)'>Auto-sync</span><b id='diagAuto'>"+(sbc.auto?"On":"Off")+"</b>"+
       "<span style='color:var(--ink-soft)'>Records on this device</span><b class='mono' id='diagCount'>"+totalRecordCount()+"</b>"+
       "<span style='color:var(--ink-soft)'>Last synced (this device)</span><b id='diagLast'>"+(localUpdated()?dShort(localUpdated())+" "+new Date(localUpdated()).toLocaleTimeString():"never")+"</b>"+
-      "<span style='color:var(--ink-soft)'>Per-record database</span><b id='diagPerRec'>"+(_perRecordActive?"Active":"Not set up")+"</b>"+
     "</div>"+
     "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
-      (mismatch?"<button class='btn btn-primary btn-sm' onclick='resetToSharedDefault()'>Reset to shared default</button>":"")+
       "<button class='btn btn-sea btn-sm' onclick='forceFullResync()'>Force full re-sync ↓</button>"+
-      (function(){var b=localBackupInfo();return (b&&(!b.ws||b.ws===(sbc.ws||"")))?"<button class='btn btn-ghost btn-sm' onclick='restoreLocalBackup()'>Restore local backup ("+new Date(b.at).toLocaleDateString()+")</button>":"";})()+
+      (function(){var b=localBackupInfo();return (b&&b.ws===(sbc.ws||""))?"<button class='btn btn-ghost btn-sm' onclick='restoreLocalBackup()'>Restore local backup ("+new Date(b.at).toLocaleDateString()+")</button>":"";})()+
       "<span class='sb-status' id='diagStatus'></span>"+
     "</div>"+
   "</div>";
@@ -5002,6 +4997,12 @@ function loadOrgContext(){
        not in STORE and must be cleared explicitly, or the previous company's
        trips would count as "local data" and get pushed into this workspace. */
     stashLocalData("login");
+    /* When signing in as a DIFFERENT company, also clear this device's Google
+       Sheet webhook + view URL — they're stored per-device (not in the synced
+       blob), so without this a new company would keep pushing its bookings into
+       the previous company's Google Sheet. Same company re-login keeps them. */
+    var _prevWs="";try{_prevWs=sbConfig().ws||"";}catch(e){}
+    if(_prevWs!==org.workspace){try{localStorage.removeItem("ieo_sheethook");localStorage.removeItem("ieo_sheetview");}catch(e){}}
     try{localStorage.removeItem(DATA_KEY);localStorage.removeItem("ieo_updated");localStorage.removeItem("ieo_record_pending");localStorage.removeItem("ieo_sync_trips");}catch(e){}
     try{STORE.forEach(function(s){if(s.arr)s.set([]);});}catch(e){}
     try{tripLogs=[];}catch(e){}
