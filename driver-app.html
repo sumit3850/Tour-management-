@@ -527,7 +527,8 @@ async function clearMyNote(entryId,opId,segKey){
 }
 async function postOpStatus(entryId,opId,segKey,status,reason,clearFeedback){
   showErr("");
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
+  /* workspace matches the driver_login RPC, which serves the island-explorer data */
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),workspace:"island-explorer",
     data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,segKey:segKey||"primary",clearFeedback:!!clearFeedback}};
   /* Apply locally first so the card moves instantly and offline works, then
      queue the update — flushed now if online, later if not. Apply to THIS
@@ -663,7 +664,7 @@ async function submitTrip(){
     tc=(mop&&mop.tourId)||"";
   }
   var reg=document.getElementById("dl_reg").value.trim();
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_log",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),workspace:"island-explorer",
     data:{date:date,veh:veh,reg:reg,startKm:sKm,endKm:eKm,loc:document.getElementById("dl_loc").value,startT:sT,endT:eT,time:time,tourCode:tc,phone:myPhone,offline:!_netOk}};
   /* If editing an existing trip, drop the old one first: a queued (un-synced)
      trip is just replaced in the queue; a server-saved trip gets a delete
@@ -672,7 +673,7 @@ async function submitTrip(){
   if(_editing){
     if(_editing.kind==="pending"){syncQueue=syncQueue.filter(function(x){return x.id!==_editing.id;});}
     else if(_editing.kind==="synced"){var ot=_editing.trip;
-      syncQueue.push({id:"S"+Date.now()+Math.floor(Math.random()*100000)+"d",type:"driver_trip_delete",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),data:{tripId:ot.id,fromSub:ot.fromSub,driver:myDriver.name||"",phone:myPhone}});
+      syncQueue.push({id:"S"+Date.now()+Math.floor(Math.random()*100000)+"d",type:"driver_trip_delete",status:"new",name:myDriver.name||"",created_at:new Date().toISOString(),workspace:"island-explorer",data:{tripId:ot.id,fromSub:ot.fromSub,driver:myDriver.name||"",phone:myPhone}});
       mySavedTrips=(mySavedTrips||[]).filter(function(x){return x.id!==ot.id;});}
     _editing=null;
   }
@@ -746,7 +747,7 @@ async function deleteSavedTrip(i){
   var t=(mySavedTrips||[])[i];if(!t)return;
   if(!confirm("Delete this trip log?"))return;
   if(!sb){showErr("Service unavailable right now.");return;}
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_delete",status:"new",name:myDriver.name,created_at:new Date().toISOString(),
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"driver_trip_delete",status:"new",name:myDriver.name,created_at:new Date().toISOString(),workspace:"island-explorer",
     data:{tripId:t.id,fromSub:t.fromSub,driver:myDriver.name}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});

@@ -84,6 +84,9 @@ const TOURS=["5N- South Andaman","7N- South & Little And.","8N- South & Little A
 
 const params=new URLSearchParams(location.search);
 const type=(params.get("type")||"interest").toLowerCase();
+/* Which company's inbox this submission belongs to — carried in the share link.
+   Links generated before workspace tagging existed default to island-explorer. */
+const WORKSPACE=params.get("ws")||"island-explorer";
 const presetTour=params.get("tour")||"";
 const presetTourCode=params.get("tcode")||"";
 const presetStart=params.get("start")||"";
@@ -266,6 +269,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     setProgress(96,"Saving…");
     rec.id="S"+Date.now()+Math.floor(Math.random()*100000);
     rec.created_at=new Date().toISOString();
+    rec.workspace=WORKSPACE;
     /* One row per submission — no read-modify-write, so concurrent multi-user submissions never clash */
     var res=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     if(res.error){btn.disabled=false;btn.textContent="Submit";showErr("Could not submit: "+res.error.message);setProgress(0,"");return;}

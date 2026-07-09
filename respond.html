@@ -58,6 +58,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
 const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const rid=new URLSearchParams(location.search).get("rid")||"";
+const WORKSPACE=new URLSearchParams(location.search).get("ws")||"island-explorer";
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display="block";}
 function dmy(s){if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
@@ -91,7 +92,7 @@ async function submitResp(){
   document.getElementById("err").style.display="none";
   if(!chosen){showErr("Please choose a response (In review / Accept / Decline).");return;}
   var by=(document.getElementById("gname")||{}).value||"";
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"reservation_response",status:"new",name:by,created_at:new Date().toISOString(),data:{rid:rid,response:chosen,by:by}};
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"reservation_response",status:"new",name:by,created_at:new Date().toISOString(),workspace:WORKSPACE,data:{rid:rid,response:chosen,by:by}};
   try{
     var up=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
     if(up.error){showErr("Could not send: "+up.error.message);return;}

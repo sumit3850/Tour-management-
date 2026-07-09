@@ -377,7 +377,8 @@ async function submitReason(opId){
 async function setOpStatus(opId,status){await postStatus(opId,status,"");}
 async function postStatus(opId,status,reason){
   showErr("");
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),
+  /* workspace matches the guide_login RPC, which serves the island-explorer data */
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),workspace:"island-explorer",
     data:{opId:opId,newStatus:status,reason:reason,guide:myGuide.name}};
   /* Apply locally first (instant + offline-safe), then queue — flushed now if
      online, later if not. */
