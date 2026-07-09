@@ -495,14 +495,14 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
     </button>
     <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 134</span></div>
+    <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 135</span></div>
   </div>
 </div>
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 134</div></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><div class="sub" id="sideBuild" style="margin-top:2px;font-size:10px;opacity:.7">build 135</div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner · Lead Guide</div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out" style="width:34px;height:34px;flex-shrink:0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4933,17 +4933,21 @@ function loadOrgContext(){
     _sbReady=false;
     if(typeof cloudInit==="function"){
       var ci=cloudInit();                                          /* then load THIS company's data */
-      /* refreshUI() (called by the pull inside cloudInit) intentionally does NOT
-         redraw the dashboard/requests/settings views, so the background poll never
-         flashes them. But right after sign-in the user is SITTING on the dashboard
-         while its data arrives — without this it would stay showing the empty
-         post-wipe render until a manual refresh. Force one full redraw of the
-         landing view once the initial load settles. */
-      if(ci&&ci.then)ci.then(function(){
-        var wa=_sbApplying;_sbApplying=true;
-        try{if(curView==="dashboard"&&typeof refreshDashboard==="function")refreshDashboard();else refreshUI();}catch(e){}
-        _sbApplying=wa;
-      });
+      /* The initial post-wipe boot(true) above renders every view EMPTY, and the
+         refreshUI() that the pull triggers intentionally skips the dashboard/
+         requests/settings views (so the 45s poll never flashes them) AND only
+         re-renders the one current view. So right after sign-in the data lands in
+         memory but the screen keeps showing the empty render until a manual
+         reload. Once the initial load settles, do ONE full re-render of every view
+         (exactly what the in-app ⟳ does) so the dashboard and whatever page the
+         user opens are populated without any manual refresh. Guarded by
+         _sbApplying so the render's persistData side-effect can't trigger a push. */
+      var _did=false;
+      var paint=function(){if(_did)return;_did=true;var wa=_sbApplying;_sbApplying=true;try{if(typeof boot==="function")boot(true);}catch(e){}_sbApplying=wa;};
+      if(ci&&ci.then)ci.then(paint);
+      /* Fallback: never leave the screen empty even if the pull hangs or the
+         promise never settles — repaint from whatever loaded within 4s. */
+      setTimeout(paint,4000);
     }
   }).catch(function(){hideLogin();});
 }
