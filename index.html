@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 151</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 152</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 151</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 152</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -787,6 +787,14 @@ function bookingDeposit(b){
   return 0;
 }
 function bookingPending(b){return Math.max(bookingTotalCost(b)-bookingDeposit(b),0);}
+/* The booking's own due date wins; otherwise inherit the tour's "Due date" (entered
+   on the tour form) — same inheritance as total & deposit, so the Tours figures flow
+   through to the booking, customer and sheet. Returns "" when neither is set. */
+function bookingDueDate(b){
+  if(b&&b.lastPendingDate)return b.lastPendingDate;
+  var t=tours.find(function(x){return x.id===(b&&b.tour);});
+  return (t&&t.due)||"";
+}
 function bookingLastPendingDate(b){return b.lastPendingDate||"—";}
 function bookingPaymentStatus(b){var pend=bookingPending(b);if(pend<=0)return"Fully Paid";if(bookingDeposit(b)>0)return"Partial";return"Unpaid";}
 function bookingPaymentStatusClass(b){var s=bookingPaymentStatus(b);return s==="Fully Paid"?"completed":s==="Partial"?"open":"full";}
@@ -1039,7 +1047,7 @@ function bookingSheetRow(b){
   row["Total Tour Cost"]=bookingTotalCost(b);
   row["Deposit"]=bookingDeposit(b);
   row["Pending Amount"]=bookingPending(b);
-  row["Due Date"]=dOpt(b.lastPendingDate);
+  row["Due Date"]=dOpt(bookingDueDate(b));
   row["Payment Status"]=bookingPaymentStatus(b);
   row["Additional Notes"]=b.notes||"";
   return row;
@@ -2710,7 +2718,7 @@ function renderBookings(){
      team members who submitted forms stay in the Customer Database but drop off the
      bookings list (their names are listed under the POC instead). */
   var rows=bookings.filter(function(x){if(!x.tour)return true;var t=tours.find(function(y){return y.id===x.tour;});if(!t||!t.pocId)return true;return x.id===t.pocId;});
-  b.innerHTML=rows.map(x=>{const t=tours.find(y=>y.id===x.tour);const lp=x.lastPendingDate?dShort(x.lastPendingDate):"—";
+  b.innerHTML=rows.map(x=>{const t=tours.find(y=>y.id===x.tour);const _due=bookingDueDate(x);const lp=_due?dShort(_due):"—";
     var names=[];if(x.members)names=names.concat(String(x.members).split(/[,\n]/));
     if(t&&t.pocId===x.id)names=names.concat(bookings.filter(function(o){return o.tour===x.tour&&o.id!==x.id;}).map(function(o){return o.guest;}));
     names=names.map(function(s){return (s||"").trim();}).filter(Boolean);
@@ -4270,7 +4278,14 @@ function viewCustomerDetail(name){
   var c=customers.find(function(x){return x.name===name;});if(!c)return;
   var d=c.details||{};
   var rel=bookings.filter(function(b){return (b.guest||"").toLowerCase()===name.toLowerCase();});
-  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours],["Payment status",c.pay],["Preferences",c.pref]];
+  /* Financials for this customer's tour — read from the tour's POC booking (which
+     carries the whole-tour figures) so the Total/Deposit/Pending/Due entered on the
+     Tours section show here too, not just on the booking. */
+  var cTour=d.tourId?tours.find(function(x){return x.id===d.tourId;}):((rel[0]&&rel[0].tour)?tours.find(function(x){return x.id===rel[0].tour;}):null);
+  var finB=(cTour&&cTour.pocId)?bookings.find(function(x){return x.id===cTour.pocId;}):(rel[0]||null);
+  var finRows=[];
+  if(finB){var _tc=bookingTotalCost(finB);if(_tc>0){var _dd=bookingDueDate(finB);finRows=[["Tour total cost",fmt(_tc)],["Deposit / advance",fmt(bookingDeposit(finB))],["Pending amount",fmt(bookingPending(finB))],["Payment due date",_dd?dShort(_dd):""]];}}
+  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
   var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div style='font-weight:600;font-size:14px'>"+r[1]+"</div></div>";}).join("");
   if(d.documents&&d.documents.length)html+="<div class='field full'><label>Documents</label><div>"+d.documents.map(function(doc){var u=(typeof doc==="string")?doc:doc.url;var nm=(typeof doc==="string")?"file":(doc.name||"file");return u?"<a href='"+u+"' target='_blank' style='color:var(--sea);margin-right:10px'>"+nm+"</a>":nm;}).join("")+"</div></div>";
   html+="<div class='field full'><label>Bookings</label><div style='font-size:13px'>"+(rel.length?rel.map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return (t?tourLabel(t):(b.customTour||"—"))+" · "+dShort(b.start)+" · "+fmt(bookingTotalCost(b));}).join("<br>"):"—")+"</div></div>";
