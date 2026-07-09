@@ -4919,21 +4919,26 @@ function loadOrgContext(){
 /* Auth and data sync used to be two unconnected systems: the login screen was just
    a visual overlay, and the cloud data loaded regardless of whether you'd actually
    signed in. Now cloud sync WAITS for a confirmed sign-in — the shared workspace
-   only loads once you're an authenticated user, and starts the moment you sign in
-   if you weren't already. (If Supabase Auth itself isn't configured/reachable at
-   all, this still fails open and syncs anyway, so a broken auth setup can't lock
-   you out of your own data.) */
+   only loads once you're an authenticated user (via loadOrgContext -> my_org).
+
+   SaaS isolation note: this is a MULTI-TENANT backend, so we must NEVER sync to a
+   saved workspace without a confirmed session. The old code "failed open" (synced
+   with whatever workspace was last saved) when the auth client was missing or
+   getSession threw — on a shared backend that means loading the previous device's
+   / another company's workspace with no sign-in. Both of those paths now fail
+   CLOSED: show the login screen and do not sync. A real signed-in session that
+   was merely slow to resolve still lands via onAuthStateChange moments later. */
 var _authResolved=false;
 function initAuth(){
   return new Promise(function(resolve){
     var cl=authClient();
-    if(!cl){hideLogin();resolve(true);return;}
+    if(!cl){hideLogin();resolve(false);return;}   /* Supabase lib didn't load -> local-only, but never sync to a saved workspace unauthenticated */
     var _le=lgEl("lg_email");if(_le&&!_le._brandHooked){_le._brandHooked=1;_le.addEventListener("blur",lgEmailBrand);}
     cl.auth.getSession().then(function(res){
       var s=res&&res.data&&res.data.session;
       if(s&&s.user){applyUser(s.user);loadOrgContext();resolve(false);}
       else{showLogin();resolve(false);}
-    }).catch(function(){showLogin();resolve(true);});
+    }).catch(function(){showLogin();resolve(false);});  /* couldn't confirm a session -> don't sync to a saved workspace */
     cl.auth.onAuthStateChange(function(_e,session){
       if(session&&session.user){
         /* A DIFFERENT user signing in on a page that already loaded a company
