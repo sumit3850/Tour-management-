@@ -202,6 +202,18 @@ Deno.serve(async (req) => {
           .like("id", "sub_%").contains("data", { data: { extMsgId: m.ext_id } } as any).limit(1);
         if (dup && dup.length) { skipped++; continue; }
       }
+      // Capture filter: when the owner set "only listed contacts", accept a
+      // message only if its sender email/number is on the allow list.
+      if (src.allow_mode === "list") {
+        const emails: string[] = (src.email_allow ?? []).map((s: string) => s.toLowerCase());
+        const nums: string[] = (src.wa_allow ?? []).map((s: string) => String(s).replace(/\D/g, ""));
+        const senderEmail = (m.from_handle.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) || [])[0]?.toLowerCase() || "";
+        const senderNum = m.from_handle.replace(/\D/g, "");
+        const allowed = (m.channel === "email")
+          ? (senderEmail && emails.includes(senderEmail))
+          : (senderNum && nums.some((n) => n && (senderNum === n || senderNum.endsWith(n) || n.endsWith(senderNum))));
+        if (!allowed) { skipped++; continue; }
+      }
       const lead = await extract(m);
       if (!lead.is_lead) { skipped++; continue; }
 

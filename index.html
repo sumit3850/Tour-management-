@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 156</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 157</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 156</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 157</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4024,18 +4024,77 @@ function openAddDriver(){modalForm("New driver","Add driver","<div class='form-g
 function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").value||"—",phone:document.getElementById("nd_phone").value||"—",code:document.getElementById("nd_code").value.trim(),license:document.getElementById("nd_license").value||"",veh:document.getElementById("nd_veh").value||"—"});closeModal();renderLog("Vehicles & Drivers");}
 
 /* ===== CRM ===== */
+function leadSrcIcon(src){return src==="WhatsApp"?"💬":(src==="Email"?"✉":"🔗");}
 function viewCRM(){
   const conv=Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100);
   return "<section class='view' id='v-crm'>"+
     "<div class='section-head'><div><div class='eyebrow'>Pipeline · "+conv+"% conversion</div><div class='h-sec'>"+leads.length+" leads</div></div><button class='btn btn-primary' onclick='openAddLead()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Lead</button></div>"+
+    "<div class='card card-pad' id='leadFilterCard' style='margin-bottom:14px'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
+        "<div><div class='eyebrow'>Auto-capture</div><div class='h-sec' style='font-size:15px'>Email &amp; WhatsApp sources <span class='pill' id='lf_state' style='font-size:11px'>…</span></div></div>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"document.getElementById('lf_body').style.display=(document.getElementById('lf_body').style.display==='none'?'block':'none')\">Show / hide</button>"+
+      "</div>"+
+      "<div id='lf_body' style='display:none;margin-top:10px'>"+
+        "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;max-width:720px'>Leads captured from email &amp; WhatsApp land in <b>New</b> automatically. Choose whether to capture from <b>anyone</b>, or <b>only</b> from the addresses/numbers you list below — everything else is ignored. (Needs the lead-intake backend deployed — see docs/LEAD_INTAKE.md.)</p>"+
+        "<div class='field'><label>Capture mode</label><div class='tourist-toggle' id='lf_modeToggle'>"+
+          "<button class='btn btn-sm' id='lf_all' onclick=\"setLeadMode('all')\">From anyone</button>"+
+          "<button class='btn btn-sm' id='lf_list' onclick=\"setLeadMode('list')\">Only listed contacts</button>"+
+        "</div></div>"+
+        "<div class='cost-grid' id='lf_lists' style='margin-top:8px'>"+
+          "<div class='field'><label>Allowed email addresses <span style='color:var(--ink-soft);font-weight:400'>(one per line)</span></label><textarea class='input' id='lf_emails' style='min-height:80px' placeholder='asha@example.com&#10;bookings@partner.com'></textarea></div>"+
+          "<div class='field'><label>Allowed WhatsApp numbers <span style='color:var(--ink-soft);font-weight:400'>(one per line, with country code)</span></label><textarea class='input mono' id='lf_numbers' style='min-height:80px' placeholder='919812345678&#10;4915234262580'></textarea></div>"+
+        "</div>"+
+        "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='saveLeadFilter()'>Save capture settings</button>"+
+      "</div>"+
+    "</div>"+
     "<div class='kanban' id='kanban'></div>"+
   "</section>";
+}
+/* ===== Lead capture filter (which emails / WhatsApp numbers to accept) ===== */
+var _lfLoaded=false;
+function setLeadMode(m){
+  if(_leadSource)_leadSource.allow_mode=m;
+  var on=m==="list";
+  var a=document.getElementById("lf_all"),l=document.getElementById("lf_list");
+  if(a){a.classList.toggle("btn-primary",!on);a.classList.toggle("btn-ghost",on);}
+  if(l){l.classList.toggle("btn-primary",on);l.classList.toggle("btn-ghost",!on);}
+  var lists=document.getElementById("lf_lists");if(lists)lists.style.opacity=on?"1":".5";
+}
+function fillLeadFilter(){
+  var s=_leadSource||{};
+  var em=document.getElementById("lf_emails"),nu=document.getElementById("lf_numbers");
+  if(em&&document.activeElement!==em)em.value=(s.email_allow||[]).join("\n");
+  if(nu&&document.activeElement!==nu)nu.value=(s.wa_allow||[]).join("\n");
+  setLeadMode(s.allow_mode||"all");
+  var st=document.getElementById("lf_state");
+  if(st){if(!s.token){st.textContent="Not set up";st.className="pill open";}
+    else{st.textContent=(s.allow_mode==="list")?"Listed only":"Open";st.className="pill "+(s.allow_mode==="list"?"completed":"plain");}}
+}
+function loadLeadFilter(){
+  if(!document.getElementById("lf_emails"))return;
+  if(_leadSource){fillLeadFilter();return;}
+  var cl=sbClient();if(!cl)return;
+  if(_lfLoaded)return;_lfLoaded=true;
+  try{cl.rpc("my_lead_source").then(function(r){if(r&&r.data&&!r.data.error){_leadSource=r.data;fillLeadFilter();}}).catch(function(){});}catch(e){}
+}
+function saveLeadFilter(){
+  var cl=sbClient();if(!cl){alert("Not connected.");return;}
+  var mode=(_leadSource&&_leadSource.allow_mode)||"all";
+  var emails=((document.getElementById("lf_emails")||{}).value||"").split(/[\n,;]+/).map(function(x){return x.trim().toLowerCase();}).filter(Boolean);
+  var nums=((document.getElementById("lf_numbers")||{}).value||"").split(/[\n,;]+/).map(function(x){return x.replace(/[^\d]/g,"");}).filter(Boolean);
+  cl.rpc("set_lead_source",{p_allow_mode:mode,p_email_allow:emails,p_wa_allow:nums}).then(function(r){
+    if(r&&r.data&&!r.data.error){_leadSource=Object.assign({},_leadSource,{allow_mode:mode,email_allow:emails,wa_allow:nums});fillLeadFilter();alert("Saved. "+(mode==="list"?("Capturing only from "+emails.length+" email(s) and "+nums.length+" number(s)."):"Capturing leads from anyone."));}
+    else{alert("Could not save — is lead-intake.sql deployed?");}
+  });
 }
 function renderCRM(){
   const k=document.getElementById("kanban");if(!k)return;
   k.innerHTML=STAGES.map(([key,label])=>{const items=leads.filter(l=>l.stage===key);
     return "<div class='kcol'><h4>"+label+"<span class='ct'>"+items.length+"</span></h4>"+(items.map(l=>{const idx=STAGES.findIndex(s=>s[0]===l.stage);const prev=idx>0?STAGES[idx-1]:null,next=idx<STAGES.length-1?STAGES[idx+1]:null;
-      return "<div class='lead'><div class='ln'>"+l.name+"</div><div class='lc'>"+l.country+" · "+l.src+"</div><div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='"+l.id+","+prev[0]+"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='"+l.id+","+next[0]+"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
+      var contact=l.email||l.phone||"";
+      var srcline="<div class='lc'>"+l.country+" · "+l.src+"</div>"+(contact?"<div class='lc' style='color:var(--sea);font-size:11px'>"+leadSrcIcon(l.src)+" "+contact+"</div>":"");
+      return "<div class='lead'><div class='ln'>"+l.name+"</div>"+srcline+"<div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='"+l.id+","+prev[0]+"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='"+l.id+","+next[0]+"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
+  if(typeof loadLeadFilter==="function")loadLeadFilter();
   persistData();
 }
 function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}

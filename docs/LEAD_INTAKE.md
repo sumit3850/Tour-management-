@@ -97,10 +97,14 @@ Compliant options:
 
 ## 5. Use it
 
-Leads arrive in **Leads Pipeline → New** with an Email/WhatsApp source and the
-original message, de-duplicated. Manage everything in **Settings → Lead capture**:
-copy the addresses, **Pause/Resume** capture, or **Rotate token** to instantly
-revoke the old address + webhook.
+Leads arrive in **Leads Pipeline → New** with an **Email/WhatsApp source badge and
+the sender's address/number shown on the card**, de-duplicated. Manage the addresses
+in **Settings → Lead capture** (copy, Pause/Resume, Rotate token).
+
+**Capture filter (Leads tab → "Email & WhatsApp sources"):** choose **From anyone**
+(default) or **Only listed contacts** and paste the exact emails / WhatsApp numbers to
+accept. In "list" mode the Edge Function drops any message whose sender isn't on the
+list, so leads are only created from the contacts you trust.
 
 ---
 
