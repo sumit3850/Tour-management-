@@ -170,17 +170,32 @@ Deno.serve(async (req) => {
       if (!(await validSignature(src.wa_app_secret || "", raw, req.headers.get("x-hub-signature-256"))))
         return J({ ok: false, error: "bad signature" }, 403);
       const payload = JSON.parse(raw || "{}");
-      for (const entry of payload.entry ?? []) {
-        for (const ch of entry.changes ?? []) {
-          const v = ch.value ?? {};
-          const names: Record<string, string> = {};
-          for (const c of v.contacts ?? []) names[c.wa_id] = c.profile?.name ?? "";
-          for (const mm of v.messages ?? []) {
-            const text = mm.text?.body ?? mm.button?.text ?? mm.interactive?.list_reply?.title ?? "";
-            if (!text) continue;
-            msgs.push({ channel, from_name: names[mm.from] ?? "", from_handle: mm.from ?? "",
-              subject: "", body: text, ext_id: mm.id });
+      if (Array.isArray(payload.entry)) {
+        // Meta WhatsApp Cloud API webhook shape.
+        for (const entry of payload.entry) {
+          for (const ch of entry.changes ?? []) {
+            const v = ch.value ?? {};
+            const names: Record<string, string> = {};
+            for (const c of v.contacts ?? []) names[c.wa_id] = c.profile?.name ?? "";
+            for (const mm of v.messages ?? []) {
+              const text = mm.text?.body ?? mm.button?.text ?? mm.interactive?.list_reply?.title ?? "";
+              if (!text) continue;
+              msgs.push({ channel, from_name: names[mm.from] ?? "", from_handle: mm.from ?? "",
+                subject: "", body: text, ext_id: mm.id });
+            }
           }
+        }
+      } else {
+        // Simple/direct shape — for n8n, WAHA, Evolution API, Twilio, or any custom
+        // connector: {from, name?, text, id?}. Nested WAHA payloads (payload.body)
+        // are supported too. The URL token gates access (no Meta signature here).
+        const p = payload.payload ?? payload;
+        const text = p.text ?? p.body ?? p.message ?? p.Body ?? "";
+        const from = p.from ?? p.phone ?? p.From ?? "";
+        if (text && from) {
+          msgs.push({ channel, from_name: p.name ?? p.notifyName ?? p._data?.notifyName ?? "",
+            from_handle: String(from).replace(/^whatsapp:/i, "").replace(/@.*$/, "").trim(),
+            subject: "", body: String(text), ext_id: p.id ?? p.ext_id ?? p.messageId ?? "" });
         }
       }
     } else {

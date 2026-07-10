@@ -19,6 +19,12 @@ lead (stage **New**) with a **source badge** (Email / WhatsApp), de-duplicated
 against existing customers/leads. The existing inbox RLS keeps each tenant's leads
 private.
 
+> **Prefer a no-code collector?** You can point **n8n** at this same function instead
+> of the Cloudflare Worker / Meta webhook — including reading your **existing WhatsApp
+> number** via a QR scan (no Meta migration). See **docs/N8N_LEADS.md** and the
+> ready-made workflows in **`n8n/`**. The function accepts a simple
+> `{from, name, text}` WhatsApp payload for exactly this.
+
 ---
 
 ## What you deploy (once)
