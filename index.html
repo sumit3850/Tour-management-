@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 155</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 156</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 155</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 156</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4218,9 +4218,22 @@ function replySub(id,via){
   var msg="Hello "+(s.name||"")+",\n\nThank you for reaching out to Island Explorer Birding Tours regarding "+(s.tour||"our tours")+". ";
   if(via==="email"){mailSend(s.email,"Island Explorer Birding Tours",msg);}else{waShare(msg,s.phone);}
 }
+/* A submission's origin, as a lead "source" label. Email/WhatsApp auto-captured
+   leads carry their channel; web-form submissions stay "Web form". */
+function subSourceLabel(s){
+  var v=(s&&(s.source||(s.data&&s.data.source))||"").toLowerCase();
+  if(v==="whatsapp")return "WhatsApp";
+  if(v==="email")return "Email";
+  return "Web form";
+}
+function leadFromSub(s){
+  return {id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",
+    phone:s.phone||"",email:s.email||"",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",
+    notes:(s.data&&s.data.message)||"",stage:"New",src:subSourceLabel(s)};
+}
 function convertToLead(id){
   var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
-  leads.unshift({id:"L"+Date.now(),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});
+  leads.unshift(leadFromSub(s));
   renderCRM();setSubStatus(id,"added",true);persistData();
   alert((s.name||"Lead")+" added to the CRM pipeline (New).");
 }
@@ -4381,7 +4394,7 @@ function autoProcessSubmissions(){
     else if(s.type==="interest"){
       if(!findCustomer(s.name,s.email,s.phone)){addOrUpdateCustomer(s);changed=true;}
       if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");})){
-        leads.unshift({id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",stage:"New",src:"Web form"});changed=true;}
+        leads.unshift(leadFromSub(s));changed=true;}
       if(s.status!=="lead-added"){s.status="lead-added";saveSubmissionRow(s);changed=true;}
       markSubProcessed(s.id);
     }
@@ -5109,6 +5122,16 @@ function viewSettings(){
     "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-sea btn-sm' onclick='resyncAllTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15'/></svg>Re-sync all tours now</button></div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Lead capture <span class='pill' id='ls_state' style='font-size:11px'>…</span></div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Auto-capture leads from <b>email</b> and <b>WhatsApp Business</b> straight into your Leads Pipeline. Each channel is scoped to your company by a private token — it can only ever create a lead, never read your data. Setup steps are in <b>docs/LEAD_INTAKE.md</b>. (Requires the lead-intake function + <code>lead-intake.sql</code> deployed once.)</p>"+
+    "<div class='field'><label>Your email-ingest domain <span style='color:var(--ink-soft);font-weight:400'>(the domain your Cloudflare Email Worker runs on)</span></label><input class='input' id='ls_domain' placeholder='ingest.yourdomain.com' onchange='saveIngestDomain()'></div>"+
+    "<div class='field'><label>Forward inquiry emails to</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_email' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_email')\">Copy</button></div><p style='font-size:11.5px;color:var(--ink-soft);margin-top:4px'>Add one forwarding rule in Gmail / Outlook / any mailbox that sends inquiries here — no password needed.</p></div>"+
+    "<div class='field'><label>WhatsApp Business webhook URL (Meta Cloud API)</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_wa' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_wa')\">Copy</button></div></div>"+
+    "<div class='field'><label>WhatsApp webhook Verify token</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_verify' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_verify')\">Copy</button></div></div>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px'><button class='btn btn-ghost btn-sm' onclick='toggleLeadCapture()' id='ls_toggle'>…</button><button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='rotateLeadToken()'>Rotate token</button></div>"+
+    "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Personal WhatsApp can't be auto-read (no official API) — long-press a chat → <b>Forward → email</b> it to the address above, or use the free WhatsApp Business app. Rotating the token instantly revokes the old address/webhook.</p>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Paste a Google Apps Script <b>web-app URL</b> below. New bookings &amp; customers are then pushed to your Sheet automatically. Setup steps are in docs/SHEET_SYNC.md.</p>"+
     "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHook())+"'></div>"+
@@ -5175,6 +5198,7 @@ function refreshSettings(){
   el.outerHTML=viewSettings();
   var ne=document.getElementById("v-settings");if(ne&&wasActive)ne.classList.add("active");
   renderOperators();
+  if(typeof loadLeadSources==="function")loadLeadSources();
 }
 function renderOperators(){
   var b=document.getElementById("opBody");if(!b)return;
@@ -5389,6 +5413,44 @@ function resyncAllTours(){
   alert("Re-synced "+tours.length+" tour(s) across Operations, Bookings, Customers, Accommodation and Reservations.");
 }
 
+/* ===== Lead capture (email + WhatsApp) settings card ===== */
+var _leadSource=null;
+function ingestDomain(){try{return localStorage.getItem("ieo_ingest_domain")||"";}catch(e){return "";}}
+function saveIngestDomain(){var v=(document.getElementById("ls_domain")||{}).value||"";v=v.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"");try{localStorage.setItem("ieo_ingest_domain",v);}catch(e){}renderLeadSourceFields();}
+function functionsBase(){try{var u=(sbConfig()&&sbConfig().url)||"";return u?u.replace(/\/$/,"")+"/functions/v1/lead-intake":"";}catch(e){return "";}}
+function copyLS(id){var el=document.getElementById(id);if(!el)return;el.select();try{navigator.clipboard.writeText(el.value);}catch(e){try{document.execCommand("copy");}catch(_){}}var b=event&&event.target;if(b){var t=b.textContent;b.textContent="Copied ✓";setTimeout(function(){b.textContent=t;},1200);}}
+function renderLeadSourceFields(){
+  var dom=ingestDomain();
+  var domEl=document.getElementById("ls_domain");if(domEl&&!domEl.value&&dom)domEl.value=dom;
+  var tok=_leadSource&&_leadSource.token;
+  var emailEl=document.getElementById("ls_email");
+  if(emailEl)emailEl.value=(tok&&dom)?("leads-"+tok+"@"+dom):(tok?"(set your ingest domain above)":"—");
+  var waEl=document.getElementById("ls_wa");
+  if(waEl)waEl.value=tok&&functionsBase()?(functionsBase()+"?channel=whatsapp&t="+tok):"—";
+  var vEl=document.getElementById("ls_verify");if(vEl)vEl.value=(_leadSource&&_leadSource.wa_verify)||"—";
+  var st=document.getElementById("ls_state");
+  if(st){var on=_leadSource&&_leadSource.enabled;st.textContent=_leadSource?(on?"On":"Paused"):"Not set up";st.className="pill "+(on?"completed":"open");}
+  var tg=document.getElementById("ls_toggle");if(tg)tg.textContent=(_leadSource&&_leadSource.enabled)?"Pause capture":"Resume capture";
+}
+function loadLeadSources(){
+  if(!document.getElementById("ls_email"))return;
+  renderLeadSourceFields();
+  var cl=sbClient();if(!cl){return;}
+  try{cl.rpc("my_lead_source").then(function(r){
+    if(r&&r.data&&!r.data.error){_leadSource=r.data;renderLeadSourceFields();}
+    else{var st=document.getElementById("ls_state");if(st){st.textContent="Run lead-intake.sql";st.className="pill full";}}
+  }).catch(function(){});}catch(e){}
+}
+function rotateLeadToken(){
+  if(!confirm("Rotate the ingest token?\n\nThe current email address and WhatsApp webhook stop working immediately — you'll need to update your forwarding rule / Meta webhook with the new ones."))return;
+  var cl=sbClient();if(!cl)return;
+  cl.rpc("rotate_lead_source_token").then(function(r){if(r&&r.data&&r.data.token){_leadSource=Object.assign({},_leadSource,{token:r.data.token,wa_verify:r.data.wa_verify});renderLeadSourceFields();alert("Token rotated. Update your forwarding rule and WhatsApp webhook with the new address/URL.");}else{alert("Could not rotate — is lead-intake.sql deployed?");}});
+}
+function toggleLeadCapture(){
+  var cl=sbClient();if(!cl||!_leadSource)return;
+  var next=!_leadSource.enabled;
+  cl.rpc("set_lead_source",{p_enabled:next}).then(function(r){if(r&&r.data){_leadSource.enabled=r.data.enabled;renderLeadSourceFields();}});
+}
 function tourOptionLabel(t){var y=t.start?new Date(t.start).getFullYear():"";return "["+tourCode(t)+"] "+shortName(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+(y?", "+y:"")+")";}
 function openAddBooking(tourId){
   const tOpts="<option value=''>— Custom tour (none) —</option>"+tours.map(t=>"<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+tourOptionLabel(t)+"</option>").join("");
