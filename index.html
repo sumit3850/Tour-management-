@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 154</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 155</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 154</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 155</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5104,6 +5104,11 @@ function viewSettings(){
     "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-primary btn-sm' id='wbDlBtn' onclick='downloadWorkbookXlsx()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download workbook (.xlsx)</button></div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Maintenance</div><div class='h-sec' style='margin-bottom:6px'>Re-sync tours</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Push every tour's current details (dates, name, guide, pickup, pax) out to its linked <b>Operation, Bookings, Customers, Accommodation and Reservation</b>. New edits already cascade automatically — use this once to refresh any records that were created before that. Vehicles, drivers and other operation-only details are kept.</p>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-sea btn-sm' onclick='resyncAllTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15'/></svg>Re-sync all tours now</button></div>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Paste a Google Apps Script <b>web-app URL</b> below. New bookings &amp; customers are then pushed to your Sheet automatically. Setup steps are in docs/SHEET_SYNC.md.</p>"+
     "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHook())+"'></div>"+
@@ -5367,6 +5372,21 @@ function cascadeTourEdit(t){
   syncTourToReservation(t);
   syncTourPaymentToBookings(t);
   (bookings||[]).filter(function(b){return b.tour===t.id;}).forEach(syncBookingCustomers);
+}
+/* One-shot maintenance: push EVERY tour's current values out to its linked
+   Operation, Bookings, Customers, Accommodation and Reservation. Cleans up any
+   records that went stale before per-edit cascading existed. */
+function resyncAllTours(){
+  if(!(tours&&tours.length)){alert("No tours to sync yet.");return;}
+  if(!confirm("Re-sync all "+tours.length+" tour(s) to their Operations, Bookings, Customers, Accommodation and Reservations?\n\nThis updates linked dates, names, guide and pickup from each tour. Vehicles, drivers and other operation-only details are kept."))return;
+  tours.forEach(function(t){cascadeTourEdit(t);});
+  persistData();
+  renderTours();renderCalendar();renderBookings();renderCustomers();renderAccommodation();renderAccCalendar();
+  if(typeof renderOperations==="function")renderOperations();
+  if(typeof renderDashOps==="function")renderDashOps();
+  if(typeof renderReservations==="function")renderReservations();
+  if(typeof renderPayments==="function")renderPayments();
+  alert("Re-synced "+tours.length+" tour(s) across Operations, Bookings, Customers, Accommodation and Reservations.");
 }
 
 function tourOptionLabel(t){var y=t.start?new Date(t.start).getFullYear():"";return "["+tourCode(t)+"] "+shortName(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+(y?", "+y:"")+")";}
