@@ -25,9 +25,16 @@ create table if not exists lead_sources (
   wa_verify      text not null default encode(gen_random_bytes(12), 'hex'), -- WhatsApp webhook verify token
   wa_app_secret  text,                                               -- optional Meta app secret (for HMAC verify)
   enabled        boolean not null default true,
+  allow_mode     text not null default 'all',                        -- 'all' = anyone; 'list' = only allowed contacts
+  email_allow    text[] not null default '{}',                       -- allowed sender emails (lowercased)
+  wa_allow       text[] not null default '{}',                       -- allowed WhatsApp numbers (digits only)
   created_at     timestamptz default now(),
   updated_at     timestamptz default now()
 );
+-- Add the filter columns if an earlier version of this table already exists.
+alter table lead_sources add column if not exists allow_mode  text   not null default 'all';
+alter table lead_sources add column if not exists email_allow text[] not null default '{}';
+alter table lead_sources add column if not exists wa_allow    text[] not null default '{}';
 alter table lead_sources enable row level security;
 -- No policies: the table is reachable ONLY via the security-definer RPCs below and
 -- the service-role Edge Function. Clients (anon/authenticated) get nothing directly.
@@ -59,7 +66,10 @@ begin
   end if;
   return jsonb_build_object('workspace', rec.workspace, 'token', rec.token,
                             'wa_verify', rec.wa_verify, 'enabled', rec.enabled,
-                            'has_secret', rec.wa_app_secret is not null);
+                            'has_secret', rec.wa_app_secret is not null,
+                            'allow_mode', rec.allow_mode,
+                            'email_allow', to_jsonb(rec.email_allow),
+                            'wa_allow', to_jsonb(rec.wa_allow));
 end; $$;
 grant execute on function public.my_lead_source() to authenticated;
 
@@ -80,24 +90,35 @@ begin
 end; $$;
 grant execute on function public.rotate_lead_source_token() to authenticated;
 
--- Enable/disable ingestion and (optionally) store the Meta app secret for HMAC
--- signature verification of WhatsApp webhooks. Owner-only.
-create or replace function public.set_lead_source(p_enabled boolean default null, p_wa_app_secret text default null)
+-- Enable/disable ingestion, set the capture filter (which emails/numbers to
+-- accept), and optionally store the Meta app secret for HMAC verification.
+-- Every parameter is optional; pass only what you're changing. Owner-only.
+create or replace function public.set_lead_source(
+  p_enabled boolean default null, p_wa_app_secret text default null,
+  p_allow_mode text default null, p_email_allow text[] default null, p_wa_allow text[] default null)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare ws text; rec lead_sources%rowtype;
 begin
   ws := public.my_workspace_slug();
   if ws is null then return jsonb_build_object('error','no_workspace'); end if;
+  if p_allow_mode is not null and p_allow_mode not in ('all','list') then
+    return jsonb_build_object('error','bad_mode'); end if;
   insert into lead_sources (workspace) values (ws) on conflict (workspace) do nothing;
   update lead_sources
      set enabled = coalesce(p_enabled, enabled),
          wa_app_secret = coalesce(nullif(p_wa_app_secret,''), wa_app_secret),
+         allow_mode = coalesce(p_allow_mode, allow_mode),
+         email_allow = coalesce(p_email_allow, email_allow),
+         wa_allow = coalesce(p_wa_allow, wa_allow),
          updated_at = now()
    where workspace = ws
    returning * into rec;
-  return jsonb_build_object('enabled', rec.enabled, 'has_secret', rec.wa_app_secret is not null);
+  return jsonb_build_object('enabled', rec.enabled, 'has_secret', rec.wa_app_secret is not null,
+                            'allow_mode', rec.allow_mode,
+                            'email_allow', to_jsonb(rec.email_allow),
+                            'wa_allow', to_jsonb(rec.wa_allow));
 end; $$;
-grant execute on function public.set_lead_source(boolean, text) to authenticated;
+grant execute on function public.set_lead_source(boolean, text, text, text[], text[]) to authenticated;
 
 -- The Edge Function calls this with the SERVICE ROLE to resolve a token → tenant.
 -- (Service role bypasses RLS; this function keeps the lookup + enabled/approved
@@ -112,7 +133,10 @@ begin
   select exists(select 1 from orgs where workspace = rec.workspace and status = 'approved') into ok;
   if not ok then return null; end if;   -- only approved orgs receive leads
   return jsonb_build_object('workspace', rec.workspace, 'wa_verify', rec.wa_verify,
-                            'wa_app_secret', rec.wa_app_secret);
+                            'wa_app_secret', rec.wa_app_secret,
+                            'allow_mode', rec.allow_mode,
+                            'email_allow', to_jsonb(rec.email_allow),
+                            'wa_allow', to_jsonb(rec.wa_allow));
 end; $$;
 -- Only the service role (Edge Function) may resolve tokens; no client grant.
 revoke execute on function public.resolve_lead_source(text) from public, anon, authenticated;
