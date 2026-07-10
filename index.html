@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 153</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 154</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 153</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 154</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5300,11 +5300,14 @@ function saveEditTour(){
   t.tourCost=parseFloat(document.getElementById("et_cost").value)||0;
   t.tourDeposit=parseFloat(document.getElementById("et_deposit").value)||0;
   t.due=document.getElementById("et_due").value||"";
-  syncTourPaymentToBookings(t);
-  /* cascade the tour's payment change onto every booking's customer + members */
-  bookings.filter(function(b){return b.tour===t.id;}).forEach(syncBookingCustomers);
+  /* push every edit (dates, name, guide, pax, pickup, payment) out to the linked
+     Operation, Bookings, Customers, Accommodation and Reservation */
+  cascadeTourEdit(t);
   renderAccCalendar();renderAccommodation();
   closeModal();renderTours();renderCalendar();renderBookings();renderCustomers();
+  if(typeof renderOperations==="function")renderOperations();
+  if(typeof renderDashOps==="function")renderDashOps();
+  if(typeof renderReservations==="function")renderReservations();
   if(typeof renderPayments==="function")renderPayments();
 }
 /* Once the tour is fully paid (pending = 0) and its due date has passed, mark every
@@ -5318,6 +5321,52 @@ function syncTourPaymentToBookings(t){
     b.pay=pay;
     if(pay==="Paid"){b.totalOverride=(b.totalOverride!=null&&b.totalOverride!=="")?b.totalOverride:t.tourCost;b.deposit=bookingTotalCost(b);}
   });
+}
+/* ===== One place that pushes a tour's edits out to everything linked to it =====
+   The tour is the single source of truth; Operations, Bookings, Customers,
+   Accommodation and the Reservation each keep a COPY of some tour fields (dates,
+   name, guide, pax, pickup) so they can be edited independently. When the tour
+   changes, re-sync those copies — while preserving fields that belong to the other
+   record (a driver/vehicle on the op, a room count on the stay, etc.). */
+function syncTourToOps(t){
+  if(!t)return;
+  var o=(ops||[]).find(function(x){return x.fromTour===t.id;});
+  if(!o){opFromTour(t);return;}                 /* no op yet → create it */
+  /* tour-owned fields — always mirror from the tour */
+  o.tourId=tourCode(t);o.tour=tourLabel(t);
+  o.dateDisplay=dShort(t.start);o.date=dShort(t.start);
+  o.start=dShort(t.start);o.end=dShort(t.end);
+  o.startISO=t.start||"";o.endISO=t.end||"";
+  o.pax=booked(t.id);
+  o.guide=t.guide||t.guideAlloted||o.guide||"—";
+  o.pickupDate=t.start||"";o.dropDate=t.end||"";
+  o.pickupLoc=t.pickup||o.pickupLoc||"—";o.pickup=o.pickupLoc||"—";
+  o.birding=t.startLoc||o.birding||"—";
+  if(!o.stays||!o.stays.length)o.stay=t.stay||o.stay;
+  /* veh, reg, driver, driverPhone, legs, stays, remarks, status, feedback are the
+     operation's own — left untouched. enrichOp() refreshes gid/phones from the dirs. */
+}
+function syncTourToReservation(t){
+  if(!t)return;
+  var r=(reservations||[]).find(function(x){return x.fromTour===t.id;});
+  if(!r)return;
+  var f=feeFor(t);
+  r.tour=tourLabel(t);r.date=t.start||r.date;r.endDate=t.end||r.endDate;
+  r.location=t.pickup||t.startLoc||r.location;
+  if(f&&f.leadTotal!=null)r.guideFee=f.leadTotal;
+  if(t.guideAlloted)r.guideName=t.guideAlloted;
+}
+/* Push a tour's edits to every linked record + re-render the affected views. */
+function cascadeTourEdit(t){
+  if(!t)return;
+  /* bookings follow the tour's dates (customers then pick the fresh dates up) */
+  (bookings||[]).filter(function(b){return b.tour===t.id;}).forEach(function(b){b.start=t.start;b.end=t.end;});
+  /* accommodation booking(s) for this tour follow its dates + headcount */
+  (accBookings||[]).filter(function(a){return a.tourId===t.id;}).forEach(function(a){a.checkIn=t.start||a.checkIn;a.checkOut=t.end||a.checkOut;a.guests=booked(t.id)||a.guests;a.tour=tourLabel(t);});
+  syncTourToOps(t);
+  syncTourToReservation(t);
+  syncTourPaymentToBookings(t);
+  (bookings||[]).filter(function(b){return b.tour===t.id;}).forEach(syncBookingCustomers);
 }
 
 function tourOptionLabel(t){var y=t.start?new Date(t.start).getFullYear():"";return "["+tourCode(t)+"] "+shortName(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+(y?", "+y:"")+")";}
