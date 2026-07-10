@@ -93,6 +93,9 @@ grant execute on function public.rotate_lead_source_token() to authenticated;
 -- Enable/disable ingestion, set the capture filter (which emails/numbers to
 -- accept), and optionally store the Meta app secret for HMAC verification.
 -- Every parameter is optional; pass only what you're changing. Owner-only.
+-- Drop the earlier 2-arg signature so re-running this file doesn't leave two
+-- overloads (which would make a p_enabled-only call ambiguous in PostgREST).
+drop function if exists public.set_lead_source(boolean, text);
 create or replace function public.set_lead_source(
   p_enabled boolean default null, p_wa_app_secret text default null,
   p_allow_mode text default null, p_email_allow text[] default null, p_wa_allow text[] default null)
