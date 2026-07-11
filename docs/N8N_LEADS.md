@@ -12,8 +12,10 @@ Email (IMAP/Gmail)  ─┐   n8n            HTTP POST      lead-intake
 WhatsApp (WAHA/QR)  ─┴─►  trigger  ────────────────►   Edge Function  ──► CRM lead
 ```
 
-Ready-to-import workflows live in **`n8n/email-to-leads.json`** and
-**`n8n/whatsapp-to-leads.json`**.
+Ready-to-import workflows live in **`n8n/email-to-leads.json`**,
+**`n8n/whatsapp-to-leads.json`** and **`n8n/facebook-instagram-to-leads.json`** —
+one agent, four channels (Email · WhatsApp · Facebook · Instagram), each POSTing
+your token-scoped `lead-intake` endpoint so leads stay isolated to your workspace.
 
 ---
 
@@ -73,6 +75,22 @@ The workflow forwards WAHA's message payload as-is; the function understands WAH
 shape (`payload.body`, `payload.notifyName`, `payload.from`). For **Evolution API**
 or another provider, just make the HTTP node send `{ "from": "...", "name": "...",
 "text": "..." }` mapped from that provider's fields.
+
+## Facebook / Instagram → Leads
+1. **Import from File** → `n8n/facebook-instagram-to-leads.json`.
+2. Open **Facebook Lead Ads Trigger** → connect your Facebook account → select
+   your **Page** and **lead form**. Instagram lead forms attached to that Page
+   arrive through the same trigger.
+3. In **POST to lead-intake**, replace **YOUR_TOKEN** with your token and set the
+   URL's `channel=` to `facebook` (or `instagram` for the Instagram endpoint —
+   copy either from **Settings → Lead capture**).
+4. Toggle it **Active**.
+
+The Lead Ads trigger emits clean fields (`full_name`, `email`, `phone_number`);
+the workflow forwards them and the function builds the lead. Comment/DM capture
+(Messenger/Instagram DMs) works the same way — use a Facebook/Instagram trigger
+that emits the sender and text, and POST `{name,email,phone,text}` with
+`channel=messenger` or `channel=instagram`.
 
 ---
 

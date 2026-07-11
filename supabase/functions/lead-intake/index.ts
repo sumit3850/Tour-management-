@@ -30,7 +30,7 @@ const CORS = {
 const J = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...CORS } });
 
-type Msg = { channel: "email" | "whatsapp"; from_name: string; from_handle: string; subject: string; body: string; ext_id?: string };
+type Msg = { channel: string; from_name: string; from_handle: string; subject: string; body: string; ext_id?: string };
 type Lead = {
   is_lead: boolean; reason?: string; confidence?: string;
   name: string | null; email: string | null; phone: string | null; country: string | null;
@@ -170,7 +170,8 @@ Deno.serve(async (req) => {
 
     if (req.method !== "POST") return J({ ok: true, note: "lead-intake is live" });
 
-    const channel = (url.searchParams.get("channel") || "email") as "email" | "whatsapp";
+    // email | whatsapp | facebook | instagram | messenger | any custom label
+    const channel = (url.searchParams.get("channel") || "email").toLowerCase();
     const raw = await req.text();
 
     const msgs: Msg[] = [];
@@ -206,7 +207,7 @@ Deno.serve(async (req) => {
             subject: "", body: String(text), ext_id: p.id ?? p.ext_id ?? p.messageId ?? "" });
         }
       }
-    } else {
+    } else if (channel === "email") {
       // Email: the CF worker may POST JSON {from,subject,body} or the raw MIME.
       let e: { from?: string; subject?: string; body?: string; raw?: string; ext_id?: string } = {};
       try { e = JSON.parse(raw); } catch (_) { e = { raw }; }
@@ -215,6 +216,27 @@ Deno.serve(async (req) => {
       const fromAddr = (parsed.from.match(/<([^>]+)>/) || [])[1] || parsed.from;
       msgs.push({ channel, from_name: fromName, from_handle: fromAddr,
         subject: parsed.subject, body: parsed.body, ext_id: e.ext_id });
+    } else {
+      // Structured lead from a form or social channel — Facebook / Instagram Lead
+      // Ads, Messenger DMs, or any custom connector. n8n's Facebook Lead Ads node
+      // hands over clean fields, so accept them directly:
+      //   {name?, full_name?, email?, phone?/phone_number?, text?/message?, tour?, country?, party?, id?}
+      let p: any = {}; try { p = JSON.parse(raw || "{}"); } catch (_) { p = {}; }
+      p = p.payload ?? p;
+      const nm = p.name ?? p.full_name ?? p.fullName ?? p.first_name ?? "";
+      const email = String(p.email ?? p.Email ?? "").trim();
+      const phone = String(p.phone ?? p.phone_number ?? p.Phone ?? p.whatsapp ?? "").trim();
+      const msg = p.text ?? p.message ?? p.enquiry ?? p.body ?? p.comment ?? "";
+      // Fold the structured fields into the body so the extractor keeps them.
+      const bodyParts = [msg, nm && ("Name: " + nm), phone && ("Phone: " + phone),
+        p.tour && ("Tour: " + p.tour), p.country && ("Country: " + p.country),
+        p.party && ("Party: " + p.party)].filter(Boolean).join("\n");
+      const handle = email || phone || p.from || "";
+      if (bodyParts || handle) {
+        msgs.push({ channel, from_name: nm, from_handle: String(handle),
+          subject: "", body: bodyParts || ("New enquiry via " + channel),
+          ext_id: p.id ?? p.lead_id ?? p.ext_id ?? "" });
+      }
     }
 
     let created = 0, skipped = 0;
@@ -230,12 +252,13 @@ Deno.serve(async (req) => {
       if (src.allow_mode === "list") {
         const emails: string[] = (src.email_allow ?? []).map((s: string) => s.toLowerCase());
         const nums: string[] = (src.wa_allow ?? []).map((s: string) => String(s).replace(/\D/g, ""));
-        const senderEmail = (m.from_handle.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) || [])[0]?.toLowerCase() || "";
-        const senderNum = m.from_handle.replace(/\D/g, "");
-        const allowed = (m.channel === "email")
-          ? (senderEmail && emails.includes(senderEmail))
-          : (senderNum && nums.some((n) => n && (senderNum === n || senderNum.endsWith(n) || n.endsWith(senderNum))));
-        if (!allowed) { skipped++; continue; }
+        // match on email OR number, so the filter works for every channel
+        const hay = m.from_handle + " " + m.body;
+        const senderEmail = (hay.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) || [])[0]?.toLowerCase() || "";
+        const senderNum = (hay.match(/\+?\d[\d ()\-]{7,}\d/) || [])[0]?.replace(/\D/g, "") || m.from_handle.replace(/\D/g, "");
+        const emailOk = senderEmail && emails.includes(senderEmail);
+        const numOk = senderNum && nums.some((n) => n && (senderNum === n || senderNum.endsWith(n) || n.endsWith(senderNum)));
+        if (!emailOk && !numOk) { skipped++; continue; }
       }
       const lead = await extract(m);
       if (!lead.is_lead) { skipped++; continue; }
