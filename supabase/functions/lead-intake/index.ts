@@ -20,8 +20,15 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 
+// Allow browser calls (the console's "Send test lead" button, or a future in-app
+// integration). The URL token still gates access; server callers ignore CORS.
+const CORS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-headers": "content-type, x-hub-signature-256",
+  "access-control-allow-methods": "POST, GET, OPTIONS",
+};
 const J = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+  new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", ...CORS } });
 
 type Msg = { channel: "email" | "whatsapp"; from_name: string; from_handle: string; subject: string; body: string; ext_id?: string };
 type Lead = {
@@ -142,6 +149,7 @@ function emailText(raw: string): { subject: string; from: string; body: string }
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
+    if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
     const token = url.searchParams.get("t") || "";
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
