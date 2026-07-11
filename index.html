@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 161</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 162</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 161</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 162</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4024,7 +4024,7 @@ function openAddDriver(){modalForm("New driver","Add driver","<div class='form-g
 function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").value||"—",phone:document.getElementById("nd_phone").value||"—",code:document.getElementById("nd_code").value.trim(),license:document.getElementById("nd_license").value||"",veh:document.getElementById("nd_veh").value||"—"});closeModal();renderLog("Vehicles & Drivers");}
 
 /* ===== CRM ===== */
-function leadSrcIcon(src){return src==="WhatsApp"?"💬":(src==="Email"?"✉":"🔗");}
+function leadSrcIcon(src){return src==="WhatsApp"?"💬":(src==="Email"?"✉":(src==="Facebook"?"📘":(src==="Instagram"?"📸":(src==="Messenger"?"💬":"🔗"))));}
 /* Paste any enquiry text (WhatsApp/email) and turn it into a lead — a light local
    parse for phone / email / party size, no backend needed. Works even before the
    auto-capture pipeline is deployed. */
@@ -4316,6 +4316,9 @@ function subSourceLabel(s){
   var v=(s&&(s.source||(s.data&&s.data.source))||"").toLowerCase();
   if(v==="whatsapp")return "WhatsApp";
   if(v==="email")return "Email";
+  if(v==="facebook")return "Facebook";
+  if(v==="instagram")return "Instagram";
+  if(v==="messenger")return "Messenger";
   return "Web form";
 }
 function leadFromSub(s){
@@ -5215,11 +5218,13 @@ function viewSettings(){
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Lead capture <span class='pill' id='ls_state' style='font-size:11px'>…</span></div>"+
-    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Auto-capture leads from <b>email</b> and <b>WhatsApp Business</b> straight into your Leads Pipeline. Each channel is scoped to your company by a private token — it can only ever create a lead, never read your data. Setup steps are in <b>docs/LEAD_INTAKE.md</b>. (Requires the lead-intake function + <code>lead-intake.sql</code> deployed once.)</p>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Auto-capture leads from <b>email</b>, <b>WhatsApp</b>, <b>Facebook</b> &amp; <b>Instagram</b> straight into your Leads Pipeline. Connect each channel in n8n and point it at the matching endpoint below — every endpoint is scoped to your company by a private token, so a lead can only ever be created in <b>your</b> workspace and no other company can see it. Setup: <b>docs/LEAD_INTAKE.md</b>. (Requires the lead-intake function + <code>lead-intake.sql</code> deployed once.)</p>"+
     "<div class='field'><label>Your email-ingest domain <span style='color:var(--ink-soft);font-weight:400'>(the domain your Cloudflare Email Worker runs on)</span></label><input class='input' id='ls_domain' placeholder='ingest.yourdomain.com' onchange='saveIngestDomain()'></div>"+
     "<div class='field'><label>Forward inquiry emails to</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_email' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_email')\">Copy</button></div><p style='font-size:11.5px;color:var(--ink-soft);margin-top:4px'>Add one forwarding rule in Gmail / Outlook / any mailbox that sends inquiries here — no password needed.</p></div>"+
     "<div class='field'><label>WhatsApp Business webhook URL (Meta Cloud API)</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_wa' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_wa')\">Copy</button></div></div>"+
     "<div class='field'><label>WhatsApp webhook Verify token</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_verify' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_verify')\">Copy</button></div></div>"+
+    "<div class='field'><label>Facebook Lead Ads endpoint <span style='color:var(--ink-soft);font-weight:400'>(use in your n8n Facebook trigger → HTTP)</span></label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_fb' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_fb')\">Copy</button></div></div>"+
+    "<div class='field'><label>Instagram endpoint</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_ig' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_ig')\">Copy</button></div></div>"+
     "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px'><button class='btn btn-sea btn-sm' onclick='testLeadCapture()'>Send test lead</button><button class='btn btn-ghost btn-sm' onclick='toggleLeadCapture()' id='ls_toggle'>…</button><button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='rotateLeadToken()'>Rotate token</button></div>"+
     "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Personal WhatsApp can't be auto-read (no official API) — long-press a chat → <b>Forward → email</b> it to the address above, or use the free WhatsApp Business app. Rotating the token instantly revokes the old address/webhook.</p>"+
   "</div>"+
@@ -5517,9 +5522,12 @@ function renderLeadSourceFields(){
   var tok=_leadSource&&_leadSource.token;
   var emailEl=document.getElementById("ls_email");
   if(emailEl)emailEl.value=(tok&&dom)?("leads-"+tok+"@"+dom):(tok?"(set your ingest domain above)":"—");
+  var base=functionsBase();
   var waEl=document.getElementById("ls_wa");
-  if(waEl)waEl.value=tok&&functionsBase()?(functionsBase()+"?channel=whatsapp&t="+tok):"—";
+  if(waEl)waEl.value=tok&&base?(base+"?channel=whatsapp&t="+tok):"—";
   var vEl=document.getElementById("ls_verify");if(vEl)vEl.value=(_leadSource&&_leadSource.wa_verify)||"—";
+  var fbEl=document.getElementById("ls_fb");if(fbEl)fbEl.value=tok&&base?(base+"?channel=facebook&t="+tok):"—";
+  var igEl=document.getElementById("ls_ig");if(igEl)igEl.value=tok&&base?(base+"?channel=instagram&t="+tok):"—";
   var st=document.getElementById("ls_state");
   if(st){var on=_leadSource&&_leadSource.enabled;st.textContent=_leadSource?(on?"On":"Paused"):"Not set up";st.className="pill "+(on?"completed":"open");}
   var tg=document.getElementById("ls_toggle");if(tg)tg.textContent=(_leadSource&&_leadSource.enabled)?"Pause capture":"Resume capture";
