@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 160</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 161</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 160</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 161</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4025,10 +4025,43 @@ function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").v
 
 /* ===== CRM ===== */
 function leadSrcIcon(src){return src==="WhatsApp"?"💬":(src==="Email"?"✉":"🔗");}
+/* Paste any enquiry text (WhatsApp/email) and turn it into a lead — a light local
+   parse for phone / email / party size, no backend needed. Works even before the
+   auto-capture pipeline is deployed. */
+function captureFromText(){
+  var text=((document.getElementById("qc_text")||{}).value||"").trim();
+  if(!text){alert("Paste the message text first.");return;}
+  var from=((document.getElementById("qc_from")||{}).value||"").trim();
+  var nm=((document.getElementById("qc_name")||{}).value||"").trim();
+  var email=(text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)||[])[0]||(/@/.test(from)?from:"");
+  var phone=(from&&!/@/.test(from))?from.replace(/[^\d+]/g,""):(((text.match(/\+?\d[\d ()\-]{7,}\d/)||[])[0]||"").replace(/[()\-\s]/g,""));
+  var party=((text.match(/(\d+)\s*(?:pax|people|persons?|adults?|guests?|travell?ers?)/i)||[])[1])
+          ||((text.match(/(?:pax|people|group|persons?|guests?)[:\s]*0*(\d+)/i)||[])[1])||"";
+  var nights=((text.match(/(\d+)\s*(?:nights?|N\b)/i)||[])[1])||"";
+  var isEmail=/@/.test(from||email);
+  var name=nm||((from&&!/@/.test(from)&&!/^\+?\d/.test(from))?from:(email?email.split("@")[0]:"WhatsApp lead"));
+  var noteBits=[];if(party)noteBits.push(party+" pax");if(nights)noteBits.push(nights+" nights");
+  var notes=(noteBits.length?noteBits.join(" · ")+" — ":"")+text.replace(/\s+/g," ").trim().slice(0,280);
+  leads.unshift({id:"L"+Date.now(),name:name,country:"—",phone:phone||"",email:email||"",tour:"",date:"—",
+    notes:notes,stage:"New",src:isEmail?"Email":"WhatsApp"});
+  ["qc_text","qc_from","qc_name"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
+  renderCRM();persistData();
+  alert("✓ Lead added to New"+(party?(" ("+party+" pax)"):"")+". Open it to add the tour and dates.");
+}
 function viewCRM(){
   const conv=Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100);
   return "<section class='view' id='v-crm'>"+
     "<div class='section-head'><div><div class='eyebrow'>Pipeline · "+conv+"% conversion</div><div class='h-sec'>"+leads.length+" leads</div></div><button class='btn btn-primary' onclick='openAddLead()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Lead</button></div>"+
+    "<div class='card card-pad' style='margin-bottom:14px'>"+
+      "<div class='eyebrow'>Quick capture</div><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Paste a WhatsApp / email message → lead</div>"+
+      "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;max-width:720px'>Got an enquiry on WhatsApp (or anywhere)? Paste it here and it's turned into a lead in <b>New</b> — no setup needed. (For hands-off email auto-capture, use Settings → Lead capture.)</p>"+
+      "<div class='form-grid'>"+
+        "<div class='field'><label>Sender phone / email <span style='color:var(--ink-soft);font-weight:400'>(optional)</span></label><input class='input' id='qc_from' placeholder='e.g. 919812345678 or name@email.com'></div>"+
+        "<div class='field'><label>Contact name <span style='color:var(--ink-soft);font-weight:400'>(optional)</span></label><input class='input' id='qc_name' placeholder='If you know it'></div>"+
+        "<div class='field full'><label>Message</label><textarea class='input' id='qc_text' style='min-height:76px' placeholder='Paste the WhatsApp / email text here…'></textarea></div>"+
+      "</div>"+
+      "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='captureFromText()'>Capture as lead</button>"+
+    "</div>"+
     "<div class='card card-pad' id='leadFilterCard' style='margin-bottom:14px'>"+
       "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
         "<div><div class='eyebrow'>Auto-capture</div><div class='h-sec' style='font-size:15px'>Email &amp; WhatsApp sources <span class='pill' id='lf_state' style='font-size:11px'>…</span></div></div>"+
