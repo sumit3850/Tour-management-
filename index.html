@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 163</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 164</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 163</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 164</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4019,6 +4019,20 @@ function retireSourceSub(fromSub){
   _submissions=(_submissions||[]).filter(function(x){return x.id!==fromSub;});
   var cl=sbClient();if(cl)cl.from("workspaces").delete().eq("id","sub_"+fromSub).then(function(){});
 }
+/* The auto lead-intake (email/WhatsApp/Facebook/Instagram) was removed, but the
+   channel-sourced "interest" submissions it created still sit in the inbox and
+   would keep regenerating their leads on every sync — so a deleted test/intake
+   lead kept coming back. Retire those leftovers once so their leads can be
+   deleted for good. Legit web-form submissions carry no channel source, so
+   they're never touched. */
+function purgeChannelLeadSubs(){
+  var chans=["email","whatsapp","facebook","instagram","messenger"];
+  (_submissions||[]).slice().forEach(function(s){
+    if(!s||s.type!=="interest")return;
+    var src=((s.source||(s.data&&s.data.source)||"")+"").toLowerCase();
+    if(chans.indexOf(src)!==-1)retireSourceSub(s.id);
+  });
+}
 function deleteDriver(name){if(!confirm("Delete "+name+"?"))return;var d=drivers.find(function(x){return x.name===name;});if(d)retireSourceSub(d.fromSub);drivers=drivers.filter(d=>d.name!==name);renderLog("Vehicles & Drivers");}
 function openAddDriver(){modalForm("New driver","Add driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nd_name' placeholder='Full name'></div><div class='field'><label>Phone</label><input class='input' id='nd_phone' placeholder='+91 ...'></div><div class='field'><label>Login code</label><input class='input mono' id='nd_code' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Driver licence no.</label><input class='input' id='nd_license' placeholder='Licence no.'></div><div class='field'><label>Assigned vehicle</label><select class='input' id='nd_veh'>"+vehicleSelectOptions("")+"</select></div></div>","saveNewDriver","Add driver");}
 function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").value||"—",phone:document.getElementById("nd_phone").value||"—",code:document.getElementById("nd_code").value.trim(),license:document.getElementById("nd_license").value||"",veh:document.getElementById("nd_veh").value||"—"});closeModal();renderLog("Vehicles & Drivers");}
@@ -4049,7 +4063,26 @@ function dashRefresh(){var p=(typeof cloudPull==="function")?cloudPull(true):nul
 var _subPoll=null;
 function startSubPoll(){stopSubPoll();_subPoll=setInterval(function(){if(curView==="requests"||curView==="reservations"||curView==="logistics")loadSubmissions(false);else stopSubPoll();},5000);}
 function stopSubPoll(){if(_subPoll){clearInterval(_subPoll);_subPoll=null;}}
-function deleteLead(id){if(!confirm("Delete this lead?"))return;leads=leads.filter(l=>l.id!==id);renderCRM();persistData();if(document.getElementById("v-dashboard"))refreshDashboard();}
+function deleteLead(id){
+  if(!confirm("Delete this lead?"))return;
+  var l=leads.find(function(x){return x.id===id;});
+  if(l){
+    /* Retire the submission that spawned this lead, otherwise the self-healing
+       re-affirm regenerates it on the next sync. New leads carry fromSub; older
+       ones are matched back by email, or name+tour. */
+    var subId=l.fromSub;
+    if(!subId){
+      var em=(l.email||"").toLowerCase().trim(),nm=(l.name||"").toLowerCase().trim();
+      var mt=(_submissions||[]).find(function(s){return s&&s.type==="interest"&&(
+        (em&&(s.email||"").toLowerCase().trim()===em)||
+        (nm&&(s.name||"").toLowerCase().trim()===nm&&(s.tour||"—")===(l.tour||"—")));});
+      if(mt)subId=mt.id;
+    }
+    if(subId)retireSourceSub(subId);
+  }
+  leads=leads.filter(function(x){return x.id!==id;});
+  renderCRM();persistData();if(document.getElementById("v-dashboard"))refreshDashboard();
+}
 
 /* ===== REQUESTS / PUBLIC FORMS ===== */
 var _submissions=[];
@@ -4227,7 +4260,7 @@ function subSourceLabel(s){ return "Web form"; }
 function leadFromSub(s){
   return {id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",
     phone:s.phone||"",email:s.email||"",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",
-    notes:(s.data&&s.data.message)||"",stage:"New",src:subSourceLabel(s)};
+    notes:(s.data&&s.data.message)||"",stage:"New",src:subSourceLabel(s),fromSub:s.id};
 }
 function convertToLead(id){
   var s=_submissions.find(function(x){return x.id===id;});if(!s)return;
@@ -4359,6 +4392,7 @@ function convertToBooking(id){
    Idempotent via status, and the snapshot-clear stops phantom sample data. */
 function autoProcessSubmissions(){
   var changed=false;
+  purgeChannelLeadSubs();
   (_submissions||[]).forEach(function(s){
     if(s.type==="reservation_response"||s.type==="op_status_update"||s.type==="driver_trip_log")return;
     /* Driver & guide registrations: RE-AFFIRM the directory record on every pass
