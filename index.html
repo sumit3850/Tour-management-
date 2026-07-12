@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 164</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 165</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 164</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 165</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4019,19 +4019,28 @@ function retireSourceSub(fromSub){
   _submissions=(_submissions||[]).filter(function(x){return x.id!==fromSub;});
   var cl=sbClient();if(cl)cl.from("workspaces").delete().eq("id","sub_"+fromSub).then(function(){});
 }
-/* The auto lead-intake (email/WhatsApp/Facebook/Instagram) was removed, but the
-   channel-sourced "interest" submissions it created still sit in the inbox and
-   would keep regenerating their leads on every sync — so a deleted test/intake
-   lead kept coming back. Retire those leftovers once so their leads can be
-   deleted for good. Legit web-form submissions carry no channel source, so
-   they're never touched. */
+/* The auto lead-intake (email/WhatsApp/Facebook/Instagram) was removed. Two kinds
+   of leftovers must be swept so they can't regenerate or linger:
+   1) channel-sourced "interest" submissions still in the inbox (they'd re-create
+      their lead on every sync), and
+   2) the leads those submissions already produced, which stay in the pipeline as
+      orphans once the submission is retired.
+   Both are identified by a channel origin. Manually-added leads are stamped
+   `manual` (see saveLead) and web-form submissions carry no channel source, so
+   neither is ever touched. Runs every sync; idempotent once swept. */
 function purgeChannelLeadSubs(){
   var chans=["email","whatsapp","facebook","instagram","messenger"];
+  var chanLabel={Email:1,WhatsApp:1,Facebook:1,Instagram:1,Messenger:1};
+  var changed=false;
   (_submissions||[]).slice().forEach(function(s){
     if(!s||s.type!=="interest")return;
     var src=((s.source||(s.data&&s.data.source)||"")+"").toLowerCase();
-    if(chans.indexOf(src)!==-1)retireSourceSub(s.id);
+    if(chans.indexOf(src)!==-1){retireSourceSub(s.id);changed=true;}
   });
+  var before=(leads||[]).length;
+  leads=(leads||[]).filter(function(l){return !(l&&chanLabel[l.src]&&!l.manual);});
+  if(leads.length!==before)changed=true;
+  return changed;
 }
 function deleteDriver(name){if(!confirm("Delete "+name+"?"))return;var d=drivers.find(function(x){return x.name===name;});if(d)retireSourceSub(d.fromSub);drivers=drivers.filter(d=>d.name!==name);renderLog("Vehicles & Drivers");}
 function openAddDriver(){modalForm("New driver","Add driver","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nd_name' placeholder='Full name'></div><div class='field'><label>Phone</label><input class='input' id='nd_phone' placeholder='+91 ...'></div><div class='field'><label>Login code</label><input class='input mono' id='nd_code' value='"+String(Math.floor(1000+Math.random()*9000))+"'></div><div class='field'><label>Driver licence no.</label><input class='input' id='nd_license' placeholder='Licence no.'></div><div class='field'><label>Assigned vehicle</label><select class='input' id='nd_veh'>"+vehicleSelectOptions("")+"</select></div></div>","saveNewDriver","Add driver");}
@@ -4392,7 +4401,7 @@ function convertToBooking(id){
    Idempotent via status, and the snapshot-clear stops phantom sample data. */
 function autoProcessSubmissions(){
   var changed=false;
-  purgeChannelLeadSubs();
+  if(purgeChannelLeadSubs())changed=true;
   (_submissions||[]).forEach(function(s){
     if(s.type==="reservation_response"||s.type==="op_status_update"||s.type==="driver_trip_log")return;
     /* Driver & guide registrations: RE-AFFIRM the directory record on every pass
@@ -5499,7 +5508,7 @@ function saveLead(){
   if(!name){alert("Enter a name.");return;}
   leads.push({id:"L"+Date.now(),name,country:document.getElementById("nl_country").value||"—",
     tour:document.getElementById("nl_tour").value||"—",date:document.getElementById("nl_date").value||"—",
-    stage:document.getElementById("nl_stage").value,src:document.getElementById("nl_src").value});
+    stage:document.getElementById("nl_stage").value,src:document.getElementById("nl_src").value,manual:true});
   closeModal();renderCRM();
 }
 
