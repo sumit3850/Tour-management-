@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 165</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 166</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 165</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 166</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -818,6 +818,10 @@ let invoiceLog=[];   /* one record per generated invoice — mirrors quotationLo
 let invoiceSeq=0;    /* committed invoice counter (advances only when an invoice is SAVED) */
 var _curInvoice=null;/* the invoice currently open in the modal (for Save / edit) */
 let sheetChangeLog=[]; /* audit log of Cost Sheet saves */
+/* Payments & GST config (per workspace): drives the GST break-up on invoices,
+   the Pay-now links, and the payment-reminder messages. */
+let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:""};
+let auditLog=[]; /* who did what, when — rendered in Settings → Activity log */
 var csTour="",csType="indian"; /* Cost Sheet editor selection */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
 let leads=[];
@@ -859,8 +863,18 @@ const STORE=[
   {k:"profitLogs",arr:1,get:function(){return profitLogs;},set:function(v){profitLogs=v;}},
   {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
-  {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}}
+  {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
+  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:""},v);}},
+  {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}}
 ];
+/* One line per meaningful action. Capped so the blob never bloats. */
+function audit(cat,action,detail){
+  try{
+    var who=(document.querySelector(".nav-foot .who")||{}).textContent||"user";
+    auditLog.unshift({at:new Date().toISOString(),who:who,cat:cat,action:action,detail:String(detail||"").slice(0,140)});
+    if(auditLog.length>400)auditLog.length=400;
+  }catch(e){}
+}
 function collectStore(){var o={};STORE.forEach(function(s){o[s.k]=s.get();});return o;}
 /* Applying a real saved snapshot: any array collection missing from it becomes empty,
    so the hard-coded sample data never lingers / reappears once you've saved your own data. */
@@ -2085,6 +2099,7 @@ function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='l
 const NAV=[
   ["group","Overview"],
   ["dashboard","Dashboard","M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"],
+  ["analytics","Analytics","M3 3v18h18M7 14l4-4 3 3 5-6"],
   ["group","Sales & Ops"],
   ["tours","Tours","M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"],
   ["requests","Inbox","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
@@ -2099,7 +2114,7 @@ const NAV=[
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
-const TITLES={dashboard:["Overview","Dashboard"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
+const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
   accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Cost Calculator & Invoice"],profit:["Sales & Ops","Profit Calculator"],groupquote:["Sales & Ops","Group Quotation"],costsheet:["Sales & Ops","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
@@ -2387,6 +2402,7 @@ function renderView(v){
   else if(v==="groupquote")renderGroupQuote();
   else if(v==="costsheet")renderCostSheet();
   else if(v==="dashboard")refreshDashboard();
+  else if(v==="analytics")renderAnalytics();
 }
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
 function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
@@ -2415,7 +2431,19 @@ function billableBookings(){
 function pendingBookings(){return billableBookings().filter(function(b){return bookingPending(b)>0;});}
 function waShare(text,phone){var n=String(phone||"").replace(/\D/g,"");window.open("https://wa.me/"+n+"?text="+encodeURIComponent(text),"_blank");}
 function mailSend(to,subject,body){window.open("mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body),"_blank");}
-function paymentMsg(b){var t=tours.find(function(x){return x.id===b.tour;});return "Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(bookingPending(b))+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+").\n\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175 · info@islandexplorer.in";}
+/* "Pay now" lines for reminders/invoices, built from Settings → Payments & GST.
+   Empty string when nothing is configured, so messages stay clean. */
+function payLinkLines(amount){
+  var out=[];
+  if(payCfg.upi)out.push("Pay by UPI: "+payCfg.upi+(amount>0?" (₹"+amount.toLocaleString("en-IN")+")":""));
+  if(payCfg.payPage)out.push("Pay online: "+payCfg.payPage);
+  return out.length?"\n"+out.join("\n")+"\n":"";
+}
+function paymentMsg(b){
+  var t=tours.find(function(x){return x.id===b.tour;});
+  var due=bookingDueDate(b);var pend=bookingPending(b);
+  return "Hello "+b.guest+",\n\nA gentle reminder from Island Explorer Birding Tours: an amount of "+fmt(pend)+" is still pending for your tour "+(t?shortName(t):"")+" ("+dShort(b.start)+" – "+dShort(b.end)+")."+(due?"\nDue date: "+dShort(due)+".":"")+"\n"+payLinkLines(pend)+"\nKindly arrange the balance at your convenience. Thank you!\n\nSumit Kumar · +91 99332 02175 · info@islandexplorer.in";
+}
 function guestMsg(b){return "Hello "+b.guest+", please complete your guest details here so we can finalise your booking and travel arrangements:\n"+formLink("client");}
 function paymentReminder(id){var b=bookings.find(function(x){return x.id===id;});if(b)waShare(paymentMsg(b),b.phone);}
 function paymentReminderEmail(id){var b=bookings.find(function(x){return x.id===id;});if(!b)return;if(!b.email){alert("No email on this booking. Add one in the booking editor.");return;}mailSend(b.email,"Pending payment · Island Explorer Birding Tours",paymentMsg(b));}
@@ -2626,6 +2654,75 @@ function viewDashboard(){
   "</section>";
 }
 
+/* ===== ANALYTICS — business insight built from data already in the console:
+   revenue by month & by tour, collected vs pending, the lead funnel, quotation
+   conversion and guide utilization. Pure client-side; no new storage. ===== */
+function viewAnalytics(){return "<section class='view' id='v-analytics'><div id='anaBody'></div></section>";}
+function renderAnalytics(){
+  var el=document.getElementById("anaBody");if(!el)return;
+  var s=paymentStats();
+  /* revenue by month (tour start month), last 12 months + future */
+  var byMonth={},byTour=[];
+  (tours||[]).forEach(function(t){
+    var rev=tourRevenue(t);if(!t.start)return;
+    var k=t.start.slice(0,7);byMonth[k]=(byMonth[k]||0)+rev;
+    byTour.push({n:shortName(t),code:tourCode(t),rev:rev,start:t.start});
+  });
+  var months=Object.keys(byMonth).sort();
+  if(months.length>14)months=months.slice(-14);
+  var maxM=Math.max.apply(null,months.map(function(k){return byMonth[k];}).concat([1]));
+  var monthLabel=function(k){var d=new Date(k+"-01T00:00:00");return d.toLocaleDateString("en-GB",{month:"short"})+" '"+String(d.getFullYear()).slice(2);};
+  var revChart=months.length?"<div class='chart'>"+months.map(function(k){var v=byMonth[k];return "<div class='col'><div class='stk' style='height:"+Math.max(Math.round(v/maxM*100),3)+"%'></div><div class='cl'>"+monthLabel(k)+"<br><b class='mono'>"+(v>=100000?("₹"+(v/100000).toFixed(1)+"L"):("₹"+Math.round(v/1000)+"k"))+"</b></div></div>";}).join("")+"</div>":"<div class='empty'>Add tour costs to see revenue by month.</div>";
+  byTour.sort(function(a,b){return b.rev-a.rev;});
+  var top=byTour.filter(function(x){return x.rev>0;}).slice(0,8);
+  /* lead funnel */
+  var funnel=STAGES.map(function(st){return {k:st[0],label:st[1],n:leads.filter(function(l){return l.stage===st[0];}).length};});
+  var totLeads=leads.length||1;
+  var leadConv=Math.round(leads.filter(function(l){return l.stage==="Confirmed";}).length/(leads.length||1)*100);
+  /* quotation conversion */
+  var qc=(typeof quoteConversion==="function")?quoteConversion():{pct:0,counts:{Sent:0,Accepted:0,Lost:0},decided:0};
+  /* guide utilization: tour-days per guide (lead guide + allotted external) */
+  var gd={};
+  (tours||[]).forEach(function(t){
+    var days=durNights(t)+1;
+    [t.guide,t.guideAlloted].forEach(function(g){if(g&&g!=="—")gd[g]=(gd[g]||{tours:0,days:0}),gd[g].tours++,gd[g].days+=days;});
+  });
+  var guides=Object.keys(gd).map(function(g){return {g:g,tours:gd[g].tours,days:gd[g].days};}).sort(function(a,b){return b.days-a.days;}).slice(0,8);
+  var maxG=Math.max.apply(null,guides.map(function(x){return x.days;}).concat([1]));
+  /* lead sources */
+  var srcs={};leads.forEach(function(l){var k=l.src||"—";srcs[k]=(srcs[k]||0)+1;});
+  var srcList=Object.keys(srcs).map(function(k){return {k:k,n:srcs[k]};}).sort(function(a,b){return b.n-a.n;});
+  var hbar=function(label,val,max,display){return "<div style='margin-bottom:8px'><div style='display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px'><span>"+label+"</span><b class='mono'>"+(display!=null?display:val)+"</b></div><div style='height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden'><span style='display:block;height:100%;width:"+Math.max(Math.round(val/max*100),2)+"%;background:var(--sea);border-radius:99px'></span></div></div>";};
+  el.innerHTML=
+    "<div class='kpis'>"+
+      kpi("Net Tour Cost",fmt(s.val),"all tours in range","up","M3 3v18h18M7 14l4-4 3 3 5-6")+
+      kpi("Collected",fmt(s.dep),"deposits / advances","up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
+      kpi("Pending",fmt(s.pend),"still to collect",s.pend>0?"down":"up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
+      kpi("Quote conversion",qc.pct+"%",qc.counts.Accepted+" accepted of "+qc.decided+" decided","","M3 3v18h18M7 14l4-4 3 3 5-6")+
+      kpi("Lead conversion",leadConv+"%",leads.filter(function(l){return l.stage==="Confirmed";}).length+" confirmed of "+leads.length,"","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
+    "</div>"+
+    "<div class='card card-pad' style='margin-top:16px'>"+
+      "<div class='section-head'><div class='h-sec' style='font-size:15px'>Revenue by month <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(by tour start date)</span></div></div>"+revChart+
+    "</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+
+      "<div class='card card-pad'><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Top tours by revenue</div>"+
+        (top.length?top.map(function(x){return hbar("["+x.code+"] "+x.n,x.rev,top[0].rev,fmt(x.rev));}).join(""):"<div class='empty'>No revenue captured yet.</div>")+
+      "</div>"+
+      "<div class='card card-pad'><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Lead funnel</div>"+
+        funnel.map(function(f){return hbar(f.label,f.n,totLeads);}).join("")+
+        "<div style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>"+leadConv+"% of all leads reach Confirmed.</div>"+
+      "</div>"+
+    "</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+
+      "<div class='card card-pad'><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Guide utilization <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(tour-days)</span></div>"+
+        (guides.length?guides.map(function(x){return hbar(x.g+" · "+x.tours+" tour"+(x.tours>1?"s":""),x.days,maxG,x.days+" days");}).join(""):"<div class='empty'>No guides assigned yet.</div>")+
+      "</div>"+
+      "<div class='card card-pad'><div class='h-sec' style='font-size:15px;margin-bottom:10px'>Lead sources</div>"+
+        (srcList.length?srcList.map(function(x){return hbar(x.k,x.n,srcList[0].n);}).join(""):"<div class='empty'>No leads yet.</div>")+
+      "</div>"+
+    "</div>";
+}
+
 /* ===== TOURS ===== */
 let curTab="All";
 function viewTours(){
@@ -2678,7 +2775,7 @@ function renderTours(filter=curTab){
   }).join("")||"<div class='empty'>No tours in this view.</div>";
   persistData();
 }
-function deleteTour(id){if(!confirm("Delete this tour?"))return;tours=tours.filter(function(t){return t.id!==id;});renderTours();renderCalendar();}
+function deleteTour(id){if(!confirm("Delete this tour?"))return;var _t=tours.find(function(t){return t.id===id;});if(_t)audit("tour","deleted",tourCode(_t)+" · "+(_t.name||""));tours=tours.filter(function(t){return t.id!==id;});renderTours();renderCalendar();}
 function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderTours(f);}
 
 /* ===== CALENDAR ===== */
@@ -2782,13 +2879,25 @@ function editBooking(id){
   "</div>","saveEditBooking","Update booking");
   document.getElementById("modal").dataset.bid=id;
 }
+/* Overbooking guard: adding `party` pax to `tourId` (ignoring `excludeId`'s own
+   current pax) — warn when it would exceed the tour's capacity. Returns true to
+   proceed (user confirmed), false to abort. */
+function capacityOk(tourId,party,excludeId){
+  var t=tours.find(function(x){return x.id===tourId;});if(!t||!t.cap)return true;
+  var cur=bookings.filter(function(x){return x.tour===tourId&&x.id!==excludeId;}).reduce(function(s,x){return s+(x.party||0);},0);
+  if(cur+party<=t.cap)return true;
+  return confirm("⚠ Overbooking warning\n\n"+shortName(t)+" has capacity "+t.cap+" and already has "+cur+" pax booked. Adding "+party+" makes "+(cur+party)+".\n\nSave anyway?");
+}
 function saveEditBooking(){
   const id=document.getElementById("modal").dataset.bid;
   const b=bookings.find(x=>x.id===id);if(!b)return;
   var newStart=document.getElementById("eb_start").value;
   var newEnd=document.getElementById("eb_end").value;
   if(!newStart||!newEnd||newEnd<newStart){alert("Enter valid start and end dates.");return;}
-  b.tour=document.getElementById("eb_tour").value;
+  var _nt=document.getElementById("eb_tour").value;
+  var _np=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
+  if(_nt&&!capacityOk(_nt,_np,b.id))return;
+  b.tour=_nt;
   b.start=newStart;b.end=newEnd;
   b.guest=document.getElementById("eb_guest").value;
   b.members=document.getElementById("eb_members").value||"";
@@ -2803,6 +2912,7 @@ function saveEditBooking(){
   b.totalOverride=(tv===""||tv==null)?"":(parseFloat(tv)||0);
   b.lastPendingDate=document.getElementById("eb_lastpend").value||"";
   b.notes=document.getElementById("eb_notes").value;
+  audit("booking","edited",b.guest+" · "+b.party+" pax");
   syncBookingCustomers(b);
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();
   if(typeof renderPayments==="function")renderPayments();
@@ -2823,6 +2933,7 @@ function deleteBooking(id){
      submission too — otherwise auto-processing regenerates the booking on the
      next sync. The guest's details remain in the Customer record. */
   if(b&&b.fromSub)retireSourceSub(b.fromSub);
+  if(b)audit("booking","deleted",b.guest+" · "+(b.customTour||b.tour||""));
   bookings=bookings.filter(function(x){return x.id!==id;});
   persistData();renderBookings();renderTours();renderCalendar();
 }
@@ -3511,9 +3622,11 @@ function saveCurrentQuote(){
       date:_curQuote.date, validUntil:_curQuote.validUntil, departure:_curQuote.departure||"", endDate:_curQuote.endDate||"",
       participants:_curQuote.participants, total:_curQuote.total, perPerson:_curQuote.perPerson,
       depositPct:_curQuote.depositPct, pending:_curQuote.pending,
+      status:"Draft",
       html:docHtml, savedAt:new Date().toISOString()
     });
     _curQuote.savedId=id;
+    audit("quotation","saved",_curQuote.qid+" · "+(_curQuote.title||""));
   }
   persistData();
   if(typeof renderSavedQuotes==="function")renderSavedQuotes();
@@ -3543,16 +3656,38 @@ function deleteSavedQuote(id){
   quotationLog=quotationLog.filter(function(x){return x.id!==id;});
   persistData();renderSavedQuotes();
 }
+/* Quotation funnel: Draft → Sent → Accepted / Lost. Conversion = accepted out of
+   every quotation that reached a decision or is awaiting one (sent+accepted+lost). */
+var QUOTE_STATUSES=["Draft","Sent","Accepted","Lost"];
+function setQuoteStatus(id,val){
+  var r=quotationLog.find(function(x){return x.id===id;});if(!r)return;
+  r.status=val;audit("quotation",val.toLowerCase(),r.qid+" · "+(r.tour||""));
+  persistData();renderSavedQuotes();
+}
+function quoteConversion(){
+  var c={Draft:0,Sent:0,Accepted:0,Lost:0};
+  (quotationLog||[]).forEach(function(r){c[r.status||"Draft"]=(c[r.status||"Draft"]||0)+1;});
+  var decided=c.Sent+c.Accepted+c.Lost;
+  return {counts:c,pct:decided?Math.round(c.Accepted/decided*100):0,decided:decided};
+}
 /* The saved-quotations folder rendered inside the Group Quotation module. */
 function renderSavedQuotes(){
   var el=document.getElementById("savedQuotes");if(!el)return;
   var list=(quotationLog||[]).filter(function(x){return x&&x.html;});
   if(!list.length){el.innerHTML="<div style='padding:18px;text-align:center;color:var(--ink-soft);font-size:13px'>No saved quotations yet. Generate a quotation and press <b>Save quotation</b>.</div>";return;}
-  el.innerHTML=list.map(function(r){
+  var cv=quoteConversion();
+  var head="<div style='padding:9px 14px;border-bottom:1px solid var(--line-soft);font-size:12px;color:var(--ink-soft);display:flex;gap:14px;flex-wrap:wrap'>"+
+    "<span><b style='color:var(--ink)'>"+cv.pct+"%</b> conversion"+(cv.decided?" ("+cv.counts.Accepted+" of "+cv.decided+" sent)":"")+"</span>"+
+    "<span>Sent <b>"+cv.counts.Sent+"</b></span><span style='color:var(--forest)'>Accepted <b>"+cv.counts.Accepted+"</b></span><span style='color:var(--coral)'>Lost <b>"+cv.counts.Lost+"</b></span>"+
+  "</div>";
+  el.innerHTML=head+list.map(function(r){
+    var st=r.status||"Draft";
+    var stSel="<select class='input' style='width:auto;padding:4px 8px;font-size:11.5px' onchange=\"setQuoteStatus('"+r.id+"',this.value)\">"+QUOTE_STATUSES.map(function(s){return "<option "+(s===st?"selected":"")+">"+s+"</option>";}).join("")+"</select>";
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
-      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+"</div>"+
+      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":(st==="Lost"?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
         "<div style='font-size:11px;color:var(--ink-soft)'>"+(r.guest?r.guest+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
-      "<div style='display:flex;gap:6px;flex-shrink:0'>"+
+      "<div style='display:flex;gap:6px;flex-shrink:0;align-items:center'>"+
+        stSel+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedQuote('"+r.id+"')\">Open</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"editSavedQuote('"+r.id+"')\">Edit</button>"+
         "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteSavedQuote('"+r.id+"')\">Delete</button>"+
@@ -3588,7 +3723,32 @@ function invoiceMetaRow(vid,today,client,startD,endD){
       "<div><span style='color:#5a6b62'>Invoice #:</span> <b>"+vid+"</b></div>"+
       "<div><span style='color:#5a6b62'>Date:</span> "+today+"</div>"+
       (startD?"<div><span style='color:#5a6b62'>Tour dates:</span> "+startD+(endD?" – "+endD:"")+"</div>":"")+
+      (payCfg.gstin?"<div><span style='color:#5a6b62'>Our GSTIN:</span> <b>"+esc(payCfg.gstin)+"</b></div>":"")+
+      (payCfg.gstin&&payCfg.hsn?"<div><span style='color:#5a6b62'>SAC:</span> "+esc(payCfg.hsn)+"</div>":"")+
     "</div>"+
+  "</div>";
+}
+/* GST break-up for an invoice. Split rule: if the client's GSTIN starts with our
+   own state code it's an intra-state supply (CGST+SGST), otherwise inter-state
+   (IGST). B2C (no client GSTIN) defaults to intra-state — tours are consumed
+   here in the islands. Returns null when no GST rate is configured. */
+function gstBreakup(taxable,clientGst){
+  var rate=parseFloat(payCfg.gstRate)||0;if(rate<=0)return null;
+  var ours=(payCfg.stateCode||"35").slice(0,2);
+  var theirs=String(clientGst||"").trim().slice(0,2);
+  var inter=!!(theirs&&/^\d\d$/.test(theirs)&&theirs!==ours);
+  var tax=Math.round(taxable*rate)/100;
+  return {rate:rate,inter:inter,igst:inter?tax:0,cgst:inter?0:Math.round(tax*50)/100,sgst:inter?0:Math.round(tax*50)/100,tax:tax,grand:Math.round((taxable+tax)*100)/100};
+}
+/* "Pay now" block printed on invoices — UPI deep link + hosted payment page. */
+function payNowHTML(amount){
+  if(!payCfg.upi&&!payCfg.payPage)return "";
+  var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var upiUrl=payCfg.upi?("upi://pay?pa="+encodeURIComponent(payCfg.upi)+"&pn="+encodeURIComponent(company)+(amount>0?"&am="+amount:"")+"&cu=INR"):"";
+  return "<div style='background:#f3f9f5;border:1px solid #dcece3;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px'>"+
+    "<div style='font-weight:700;color:#15563c;margin-bottom:4px'>Pay now</div>"+
+    (payCfg.upi?"<div>UPI: <b>"+String(payCfg.upi).replace(/</g,"&lt;")+"</b>"+(upiUrl?" · <a href='"+upiUrl+"' style='color:#1f8f5f'>tap to pay"+(amount>0?" ₹"+amount.toLocaleString("en-IN"):"")+"</a>":"")+"</div>":"")+
+    (payCfg.payPage?"<div>Card / netbanking: <a href='"+String(payCfg.payPage).replace(/'/g,"")+"' style='color:#1f8f5f'>"+String(payCfg.payPage).replace(/</g,"&lt;")+"</a></div>":"")+
   "</div>";
 }
 function generateInvoice(){
@@ -3606,9 +3766,12 @@ function generateInvoice(){
   var endD=linkTour?dmy(new Date(linkTour.end+"T00:00:00")):"";
   var accommodation=d.accommodation||0,travel=d.vehicle||0,food=d.food||0,entry=d.entry||0,ship=d.ship||0,guide=d.guide||0,referral=0;
   var total=accommodation+travel+food+entry+ship+guide+referral;
+  var gst=gstBreakup(total,qClient&&qClient.gst);
+  var grand=gst?gst.grand:total;
   _curInvoice={invid:vid,tour:tourName,title:tourName,clientType:clientType,client:JSON.parse(JSON.stringify(qClient)),date:today,
     startDate:startD,endDate:endD,participants:pax,
-    accommodation:accommodation,travel:travel,food:food,entry:entry,ship:ship,guide:guide,referral:referral,total:total,savedId:null};
+    accommodation:accommodation,travel:travel,food:food,entry:entry,ship:ship,guide:guide,referral:referral,total:total,
+    gstRate:gst?gst.rate:0,gstAmount:gst?gst.tax:0,grandTotal:grand,savedId:null};
   var row=function(label,val){return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:9px 12px'>"+label+"</td><td style='padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums'>"+fmt(val||0)+"</td></tr>";};
   var html=
     "<div class='modal-head'>"+
@@ -3637,10 +3800,18 @@ function generateInvoice(){
             row('Guide Fee',guide)+
             row('Referral amount',referral)+
           "</tbody>"+
-          "<tfoot><tr style='background:#eaf4ee'><td style='padding:11px 12px;font-size:14px'><b>Total Amount</b></td><td style='padding:11px 12px;text-align:right;font-size:16px;font-weight:700;font-family:\"Calistoga\",serif;color:#15563c'>"+fmt(total)+"</td></tr></tfoot>"+
+          "<tfoot>"+
+            (gst?("<tr><td style='padding:9px 12px;color:#5a6b62'>Taxable value"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":"")+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(total)+"</td></tr>"+
+              (gst.inter
+                ?"<tr><td style='padding:9px 12px;color:#5a6b62'>IGST @ "+gst.rate+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.igst)+"</td></tr>"
+                :"<tr><td style='padding:9px 12px;color:#5a6b62'>CGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.cgst)+"</td></tr>"+
+                 "<tr><td style='padding:9px 12px;color:#5a6b62'>SGST/UTGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.sgst)+"</td></tr>")):"")+
+            "<tr style='background:#eaf4ee'><td style='padding:11px 12px;font-size:14px'><b>"+(gst?"Grand Total (incl. GST)":"Total Amount")+"</b></td><td style='padding:11px 12px;text-align:right;font-size:16px;font-weight:700;font-family:\"Calistoga\",serif;color:#15563c'>"+fmt(grand)+"</td></tr>"+
+          "</tfoot>"+
         "</table>"+
+        payNowHTML(grand)+
         "<div style='font-size:11px;color:#5a6b62;border-top:1px solid #e6efe9;padding-top:10px'>"+
-          "• Amounts are in Indian Rupees (INR) · Inclusive of applicable taxes unless stated<br>"+
+          (gst?"• Amounts are in Indian Rupees (INR) · GST charged as itemised above<br>":"• Amounts are in Indian Rupees (INR) · Inclusive of applicable taxes unless stated<br>")+
           "• Payable as per the agreed deposit and balance schedule<br>"+
           "• Thank you for travelling with us."+
         "</div>"+
@@ -3654,7 +3825,7 @@ function generateInvoice(){
       "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
       "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit invoice</button>"+
       "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentInvoice()'>Save invoice</button>"+
-      "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(vid)+","+JSON.stringify(tourName)+","+total+","+pax+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
+      "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(vid)+","+JSON.stringify(tourName)+","+grand+","+pax+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
       "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z'/></svg>PDF / Print</button>"+
     "</div>";
   document.getElementById('modal').innerHTML=html;
@@ -3678,9 +3849,11 @@ function saveCurrentInvoice(){
       participants:_curInvoice.participants, accommodation:_curInvoice.accommodation, travel:_curInvoice.travel,
       food:_curInvoice.food, entry:_curInvoice.entry, ship:_curInvoice.ship, guide:_curInvoice.guide,
       referral:_curInvoice.referral, total:_curInvoice.total,
+      gstRate:_curInvoice.gstRate||0, gstAmount:_curInvoice.gstAmount||0, grandTotal:_curInvoice.grandTotal||_curInvoice.total,
       html:docHtml, savedAt:new Date().toISOString()
     });
     _curInvoice.savedId=id;
+    audit("invoice","saved",_curInvoice.invid+" · "+(_curInvoice.title||"")+" · "+fmt(_curInvoice.grandTotal||_curInvoice.total));
   }
   persistData();
   if(typeof renderSavedInvoices==="function")renderSavedInvoices();
@@ -3731,7 +3904,8 @@ function shareInvoiceEmail(vid,tourName,total,pax){
     "INVOICE "+vid+"\n"+
     "Tour: "+tourName+"\n"+
     "Participants: "+pax+"\n"+
-    "Total Amount: "+fmt(total)+"\n\n"+
+    "Total Amount: "+fmt(total)+"\n"+
+    payLinkLines(total)+"\n"+
     "Thank you for travelling with "+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours")+".\n"
   );
   window.open("mailto:?subject="+subject+"&body="+body,"_blank");
@@ -4088,6 +4262,7 @@ function deleteLead(id){
       if(mt)subId=mt.id;
     }
     if(subId)retireSourceSub(subId);
+    audit("lead","deleted",l.name+" · "+(l.tour||""));
   }
   leads=leads.filter(function(x){return x.id!==id;});
   renderCRM();persistData();if(document.getElementById("v-dashboard"))refreshDashboard();
@@ -4357,6 +4532,8 @@ function viewCustomerDetail(name){
   if(finB){var _tc=bookingTotalCost(finB);if(_tc>0){var _dd=bookingDueDate(finB);finRows=[["Tour total cost",fmt(_tc)],["Deposit / advance",fmt(bookingDeposit(finB))],["Pending amount",fmt(bookingPending(finB))],["Payment due date",_dd?dShort(_dd):""]];}}
   var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
   var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div style='font-weight:600;font-size:14px'>"+r[1]+"</div></div>";}).join("");
+  var lifers=String(d.lifeList||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
+  if(lifers.length)html+="<div class='field full'><label>Life list · "+lifers.length+" lifers with us 🐦</label><div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:4px'>"+lifers.map(function(s){return "<span class='pill plain' style='font-size:11.5px'>"+s.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";
   if(d.documents&&d.documents.length)html+="<div class='field full'><label>Documents</label><div>"+d.documents.map(function(doc){var u=(typeof doc==="string")?doc:doc.url;var nm=(typeof doc==="string")?"file":(doc.name||"file");return u?"<a href='"+u+"' target='_blank' style='color:var(--sea);margin-right:10px'>"+nm+"</a>":nm;}).join("")+"</div></div>";
   html+="<div class='field full'><label>Bookings</label><div style='font-size:13px'>"+(rel.length?rel.map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return (t?tourLabel(t):(b.customTour||"—"))+" · "+dShort(b.start)+" · "+fmt(bookingTotalCost(b));}).join("<br>"):"—")+"</div></div>";
   html+="</div>";
@@ -5002,6 +5179,7 @@ function editCustomer(name){
     "<div class='field'><label>Payment</label><select class='input' id='ec_pay'><option "+(c.pay==="Paid"?"selected":"")+">Paid</option><option "+(c.pay==="Deposit"?"selected":"")+">Deposit</option><option "+(c.pay==="Balance due"?"selected":"")+">Balance due</option></select></div>"+
     "<div class='field full'><label>Medical / mobility</label><input class='input' id='ec_med' value='"+(d.medical||"")+"'></div>"+
     "<div class='field full'><label>Preferences</label><input class='input' id='ec_pref' value='"+(c.pref||"")+"'></div>"+
+    "<div class='field full'><label>Life list <span style='color:var(--ink-soft);font-weight:400'>(lifers seen with us — one species per line)</span></label><textarea class='input' id='ec_lifelist' style='min-height:70px'>"+String(d.lifeList||"").replace(/</g,"&lt;")+"</textarea></div>"+
   "</div>","saveEditCustomer","Update");
   document.getElementById("modal").dataset.cname=name;
 }
@@ -5012,10 +5190,10 @@ function saveEditCustomer(){
   c.type=g("ec_type")||c.type||"Client";
   c.tours=parseInt(g("ec_tours"))||0;c.pay=g("ec_pay");c.pref=g("ec_pref");
   var es=g("ec_start"),ee=g("ec_end");
-  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,lastTour:g("ec_tour"),startDate:es,endDate:ee,lastDates:(es?dShort(es)+(ee?" – "+dShort(ee):""):(c.details&&c.details.lastDates)),gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med")});
+  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,lastTour:g("ec_tour"),startDate:es,endDate:ee,lastDates:(es?dShort(es)+(ee?" – "+dShort(ee):""):(c.details&&c.details.lastDates)),gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med"),lifeList:g("ec_lifelist")});
   closeModal();renderCustomers();pushCustomer(c);
 }
-function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;customers=customers.filter(c=>c.name!==name);renderCustomers();persistData();}
+function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;audit("customer","deleted",name);customers=customers.filter(c=>c.name!==name);renderCustomers();persistData();}
 function openAddCustomer(){modalForm("New customer","Add customer","<div class='form-grid'><div class='field'><label>Name</label><input class='input' id='nc_name' placeholder='Full name'></div><div class='field'><label>Country</label><input class='input' id='nc_country' placeholder='Country'></div><div class='field'><label>Past tours</label><input class='input mono' type='number' id='nc_tours' value='1'></div><div class='field'><label>Payment</label><select class='input' id='nc_pay'><option>Paid</option><option>Balance due</option></select></div><div class='field full'><label>Preferences</label><input class='input' id='nc_pref' placeholder='Dietary, interests, etc.'></div></div>","saveNewCustomer","Add customer");}
 function saveNewCustomer(){var nc={name:document.getElementById("nc_name").value||"—",country:document.getElementById("nc_country").value||"—",tours:parseInt(document.getElementById("nc_tours").value)||0,pay:document.getElementById("nc_pay").value,repeat:false,type:"Client",pref:document.getElementById("nc_pref").value||"—"};ensureClientId(nc);customers.push(nc);closeModal();renderCustomers();pushCustomer(nc);}
 function openCustomerSheet(name){var c=customers.find(function(x){return x.name===name;});if(!c)return;var url="https://docs.google.com/spreadsheets/create?title=Customer:+"+encodeURIComponent(c.name)+"&usp=sheets_web";window.open(url,"_blank");}
@@ -5163,6 +5341,19 @@ function viewSettings(){
     "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-sea btn-sm' onclick='resyncAllTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15'/></svg>Re-sync all tours now</button></div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Billing</div><div class='h-sec' style='margin-bottom:6px'>Payments &amp; GST</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Used on every invoice (GST break-up + <b>Pay now</b> links) and in payment reminders. Leave GST rate 0 to keep invoices tax-silent. UPI ID adds a tap-to-pay link; the payment page can be any Razorpay/Stripe/bank link you already have.</p>"+
+    "<div class='form-grid'>"+
+      "<div class='field'><label>GSTIN</label><input class='input mono' id='pg_gstin' value='"+(payCfg.gstin||"")+"' placeholder='35XXXXXXXXXXXZ5'></div>"+
+      "<div class='field'><label>State code <span style='color:var(--ink-soft);font-weight:400'>(35 = Andaman &amp; Nicobar)</span></label><input class='input mono' id='pg_state' value='"+(payCfg.stateCode||"35")+"'></div>"+
+      "<div class='field'><label>GST rate % <span style='color:var(--ink-soft);font-weight:400'>(tour operator: usually 5)</span></label><input class='input mono' type='number' id='pg_rate' value='"+(payCfg.gstRate||0)+"'></div>"+
+      "<div class='field'><label>SAC / HSN code</label><input class='input mono' id='pg_hsn' value='"+(payCfg.hsn||"9985")+"'></div>"+
+      "<div class='field'><label>UPI ID</label><input class='input mono' id='pg_upi' value='"+(payCfg.upi||"")+"' placeholder='islandexplorer@okhdfcbank'></div>"+
+      "<div class='field'><label>Payment page link</label><input class='input' id='pg_page' value='"+(payCfg.payPage||"")+"' placeholder='https://rzp.io/l/…'></div>"+
+    "</div>"+
+    "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='savePayCfg()'>Save payment settings</button>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Paste a Google Apps Script <b>web-app URL</b> below. New bookings &amp; customers are then pushed to your Sheet automatically. Setup steps are in docs/SHEET_SYNC.md.</p>"+
     "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHook())+"'></div>"+
@@ -5217,7 +5408,55 @@ function viewSettings(){
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:8px'>On the shared SaaS backend the per-record tables are locked down (no direct browser access) because they aren't separated per company — the console uses the workspace-scoped sync above instead, which is fully isolated. The old permissive setup SQL was removed from here so it can't accidentally be run on the shared project.</p>"+
     "</details>"+
   "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Safety</div><div class='h-sec' style='margin-bottom:6px'>Backup &amp; restore</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Download everything (tours, bookings, customers, leads, quotations, invoices, settings) as one JSON file you keep. Restore replaces this device's data with the file's contents and then syncs.</p>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+
+      "<button class='btn btn-sea btn-sm' onclick='downloadBackup()'>Download full backup (.json)</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick=\"document.getElementById('bk_file').click()\">Restore from file…</button>"+
+      "<input type='file' id='bk_file' accept='.json,application/json' style='display:none' onchange='restoreBackupFile(this)'>"+
+    "</div>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Safety</div><div class='h-sec' style='margin-bottom:6px'>Activity log <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(last "+Math.min((auditLog||[]).length,60)+" of "+(auditLog||[]).length+")</span></div>"+
+    "<div style='max-height:280px;overflow:auto;font-size:12.5px'>"+
+      ((auditLog||[]).slice(0,60).map(function(a){var d=new Date(a.at);return "<div style='display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft)'><span class='mono' style='color:var(--ink-soft);white-space:nowrap'>"+d.toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+"</span><span><b>"+a.cat+"</b> "+a.action+" · "+String(a.detail||"").replace(/</g,"&lt;")+" <span style='color:var(--ink-soft)'>· "+String(a.who||"").replace(/</g,"&lt;")+"</span></span></div>";}).join("")||"<div class='empty'>Nothing logged yet — actions like creating tours, bookings, quotes and deletes appear here.</div>")+
+    "</div>"+
+    ((auditLog||[]).length?"<button class='btn btn-ghost btn-sm' style='margin-top:8px;color:var(--coral)' onclick=\"if(confirm('Clear the activity log?')){auditLog=[];persistData();refreshSettings();}\">Clear log</button>":"")+
+  "</div>"+
   "</section>";
+}
+function savePayCfg(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
+  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page")};
+  audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.upi||""));
+  persistData();
+  alert("Saved. Invoices now show "+(payCfg.gstRate>0?("the GST break-up @ "+payCfg.gstRate+"%"):"no GST line")+(payCfg.upi||payCfg.payPage?" and a Pay-now block.":"."));
+}
+/* Full-workspace backup: the same STORE snapshot the cloud sync uses, plus meta. */
+function downloadBackup(){
+  var snap={_meta:{app:"Island Explorer Ops Console",exportedAt:new Date().toISOString(),workspace:(sbConfig()&&sbConfig().ws)||"default"},data:collectStore()};
+  var blob=new Blob([JSON.stringify(snap,null,1)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="island-explorer-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},400);
+  audit("backup","downloaded","full workspace snapshot");
+}
+function restoreBackupFile(input){
+  var f=input.files&&input.files[0];input.value="";if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var snap=JSON.parse(rd.result);
+      var data=snap&&(snap.data||snap); /* accept raw collectStore dumps too */
+      if(!data||typeof data!=="object"||!STORE.some(function(s){return data[s.k]!==undefined;})){alert("That file doesn't look like a console backup.");return;}
+      if(!confirm("Restore this backup?\n\nExported: "+((snap._meta&&snap._meta.exportedAt)||"unknown")+"\n\nThis REPLACES the data on this device (and syncs to the cloud on the next push)."))return;
+      applyStore(data);persistData();
+      audit("backup","restored",(snap._meta&&snap._meta.exportedAt)||"file");
+      alert("Restored. Reloading…");location.reload();
+    }catch(e){alert("Could not read that file: "+e.message);}
+  };
+  rd.readAsText(f);
 }
 var ROLE_ACCESS={Admin:"All modules",Operator:"Tours, Bookings, Logistics",Guide:"Ops board (view)",Sales:"CRM, Bookings"};
 /* The sync-status diagnostics (record count, last-synced time, workspace mismatch
@@ -5244,6 +5483,7 @@ function opForm(o){o=o||{};
   "<div class='field full' id='op_namewrap' style='display:"+((!o.name||!known)?"block":"none")+"'><label>Or type a name</label><input class='input' id='op_name' value='"+((o.name&&!known)?o.name:"")+"'></div>"+
   "<div class='field'><label>Phone number</label><input class='input mono' id='op_phone' value='"+(o.phone||"")+"' placeholder='10-digit number'></div>"+
   "<div class='field'><label>Operator code</label><input class='input mono' id='op_code' value='"+(o.code||"")+"' placeholder='e.g. 1947'></div>"+
+  "<div class='field'><label>Login email <span style='color:var(--ink-soft);font-weight:400'>(links this role to their sign-in)</span></label><input class='input' id='op_email' value='"+(o.email||"")+"' placeholder='name@company.com'></div>"+
   "<div class='field'><label>Role</label><select class='input' id='op_role'>"+["Admin","Operator","Guide","Sales"].map(function(r){return "<option "+(r===(o.role||"Operator")?"selected":"")+">"+r+"</option>";}).join("")+"</select></div>"+
 "</div>";}
 /* Picking a name from External Guides auto-fills phone, code and sets role to Guide. */
@@ -5260,10 +5500,40 @@ function opNamePick(){
 }
 function opNameValue(){var sel=document.getElementById("op_namesel");if(sel&&sel.value!=="custom")return sel.value;var n=document.getElementById("op_name");return n?n.value.trim():"";}
 function openAddOperator(){modalForm("New operator","Add operator",opForm(),"saveNewOperator","Add operator");}
-function saveNewOperator(){var n=opNameValue();var ph=document.getElementById("op_phone").value.trim();var c=document.getElementById("op_code").value.trim();if(!n||!ph||!c){alert("Name, phone and code are required.");return;}operators.push({name:n,phone:ph,code:c,role:document.getElementById("op_role").value});persistData();closeModal();renderOperators();}
+function saveNewOperator(){var n=opNameValue();var ph=document.getElementById("op_phone").value.trim();var c=document.getElementById("op_code").value.trim();if(!n||!ph||!c){alert("Name, phone and code are required.");return;}operators.push({name:n,phone:ph,code:c,email:(document.getElementById("op_email")||{}).value||"",role:document.getElementById("op_role").value});audit("user","added",n+" ("+document.getElementById("op_role").value+")");persistData();closeModal();renderOperators();applyRoleNav();}
 function editOperator(i){var o=operators[i];if(!o)return;modalForm("Edit operator","Update operator",opForm(o),"saveEditOperator","Update");document.getElementById("modal").dataset.opi=i;}
-function saveEditOperator(){var i=parseInt(document.getElementById("modal").dataset.opi);var o=operators[i];if(!o)return;o.name=opNameValue();o.phone=document.getElementById("op_phone").value.trim();o.code=document.getElementById("op_code").value.trim();o.role=document.getElementById("op_role").value;persistData();closeModal();renderOperators();}
-function deleteOperator(i){if(!confirm("Remove this operator?"))return;operators.splice(i,1);persistData();renderOperators();}
+function saveEditOperator(){var i=parseInt(document.getElementById("modal").dataset.opi);var o=operators[i];if(!o)return;o.name=opNameValue();o.phone=document.getElementById("op_phone").value.trim();o.code=document.getElementById("op_code").value.trim();o.email=(document.getElementById("op_email")||{}).value||"";o.role=document.getElementById("op_role").value;audit("user","edited",o.name+" ("+o.role+")");persistData();closeModal();renderOperators();applyRoleNav();}
+function deleteOperator(i){if(!confirm("Remove this operator?"))return;audit("user","removed",(operators[i]||{}).name||"");operators.splice(i,1);persistData();renderOperators();applyRoleNav();}
+/* ===== Role-based access ===== ROLE_ACCESS names what each role may open; this
+   map enforces it on the sidebar. The signed-in user is matched to a Users-table
+   row by LOGIN EMAIL; no match (or no email set) = full access — the workspace
+   owner and existing setups keep working unchanged. Client-side gating: it keeps
+   staff out of modules they shouldn't use day-to-day; the RLS on the workspace
+   remains the real security boundary. */
+var ROLE_MODULES={
+  Admin:null, /* null = everything */
+  Operator:["dashboard","tours","calendar","bookings","accommodation","operations","logistics","requests","reservations"],
+  Guide:["dashboard","calendar","operations"],
+  Sales:["dashboard","analytics","tours","calendar","bookings","crm","requests","customers","calc"]
+};
+function currentRole(){
+  var email=((document.querySelector(".nav-foot .role")||{}).textContent||"").trim().toLowerCase();
+  if(!email||email.indexOf("@")<0)return "Admin";
+  var o=(operators||[]).find(function(x){return (x.email||"").trim().toLowerCase()===email;});
+  return (o&&o.role)||"Admin";
+}
+function applyRoleNav(){
+  var role=currentRole();var allowed=ROLE_MODULES[role]||null;
+  document.querySelectorAll("#nav .nav-item").forEach(function(b){
+    b.style.display=(!allowed||allowed.indexOf(b.dataset.v)!==-1||b.dataset.v==="settings"&&role==="Admin")?"":"none";
+  });
+  document.querySelectorAll("#bottomNav button").forEach(function(b){
+    var v=b.dataset.bn;if(!v)return;
+    b.style.display=(!allowed||allowed.indexOf(v)!==-1)?"":"none";
+  });
+  if(allowed&&allowed.indexOf(curView)===-1&&curView!=="settings")go("dashboard");
+  if(allowed&&curView==="settings"&&role!=="Admin")go("dashboard");
+}
 
 /* ===== MODALS / FORMS ===== */
 function modalForm(eyebrow,title,body,saveFn,saveLabel){
@@ -5288,6 +5558,7 @@ function openCreateTour(){
     "<div class='field'><label>Deposit received (₹)</label><input class='input mono' type='number' id='nt_deposit' value='0' oninput='ntPend()'></div>"+
     "<div class='field'><label>Pending (₹)</label><input class='input mono' id='nt_pending' readonly value='0' style='background:var(--surface-2)'></div>"+
     "<div class='field'><label>Due date</label><input class='input' type='date' id='nt_due'></div>"+
+    "<div class='field full'><label>Target species <span style='color:var(--ink-soft);font-weight:400'>(one per line — feeds the trip report & tour card)</span></label><textarea class='input' id='nt_species' style='min-height:70px' placeholder='Andaman Serpent Eagle&#10;Andaman Woodpecker&#10;Nicobar Megapode'></textarea></div>"+
   "</div>","saveTour","Create tour");
 }
 function saveTour(){
@@ -5297,8 +5568,10 @@ function saveTour(){
   var nt={id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
     guide:document.getElementById("nt_guide").value||"—",guideAlloted:document.getElementById("nt_guideAlloted").value||"",sessionType:document.getElementById("nt_session").value,pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
-    tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||""};
+    tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||"",
+    species:(document.getElementById("nt_species")||{}).value||""};
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
+  audit("tour","created",tourCode(nt)+" · "+name);
   opFromTour(nt); /* mirror into Operations so driver/guide can be assigned */
   closeModal();renderTours();renderCalendar();
   if(typeof renderPayments==="function")renderPayments();
@@ -5333,6 +5606,7 @@ function editTour(id){
     "<div class='field'><label>Deposit received (₹)</label><input class='input mono' type='number' id='et_deposit' value='"+(t.tourDeposit||0)+"' oninput='etPend()'></div>"+
     "<div class='field'><label>Pending (₹)</label><input class='input mono' id='et_pending' readonly value='"+Math.max((t.tourCost||0)-(t.tourDeposit||0),0)+"' style='background:var(--surface-2)'></div>"+
     "<div class='field'><label>Due date</label><input class='input' type='date' id='et_due' value='"+(t.due||"")+"'></div>"+
+    "<div class='field full'><label>Target species <span style='color:var(--ink-soft);font-weight:400'>(one per line — feeds the trip report & tour card)</span></label><textarea class='input' id='et_species' style='min-height:70px'>"+String(t.species||"").replace(/</g,"&lt;")+"</textarea></div>"+
   "</div>","saveEditTour","Update tour");
   document.getElementById("modal").dataset.tid=id;
 }
@@ -5359,6 +5633,8 @@ function saveEditTour(){
   t.tourCost=parseFloat(document.getElementById("et_cost").value)||0;
   t.tourDeposit=parseFloat(document.getElementById("et_deposit").value)||0;
   t.due=document.getElementById("et_due").value||"";
+  t.species=(document.getElementById("et_species")||{}).value||t.species||"";
+  audit("tour","edited",tourCode(t)+" · "+t.name);
   /* push every edit (dates, name, guide, pax, pickup, payment) out to the linked
      Operation, Bookings, Customers, Accommodation and Reservation */
   cascadeTourEdit(t);
@@ -5484,9 +5760,11 @@ function saveBooking(){
   var nb={id:"B"+Date.now(),bookingDate:dShort(new Date()),tour:custom?"":tour,customTour:custom,guest:guest,members:document.getElementById("nb_members").value||"",party:Math.max(parseInt(document.getElementById("nb_party").value)||1,1),
     country:document.getElementById("nb_country").value||"—",email:document.getElementById("nb_email").value||"",phone:document.getElementById("nb_phone").value||"",status:document.getElementById("nb_status").value,pay:document.getElementById("nb_pay").value,
     deposit:parseFloat(document.getElementById("nb_amount").value)||0,notes:document.getElementById("nb_notes").value||"",start:start,end:end,lastPendingDate:document.getElementById("nb_due").value||""};
+  if(nb.tour&&!capacityOk(nb.tour,nb.party,null))return;
   var picked=tours.find(function(x){return x.id===tour;});
   if(picked&&picked.tourCost)nb.totalOverride=picked.tourCost; /* inherit tour's total cost */
   bookings.push(nb);
+  audit("booking","created",nb.guest+" · "+(picked?shortName(picked):custom||"custom")+" · "+nb.party+" pax");
   syncBookingCustomers(nb);
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(nb);
 }
@@ -5509,6 +5787,7 @@ function saveLead(){
   leads.push({id:"L"+Date.now(),name,country:document.getElementById("nl_country").value||"—",
     tour:document.getElementById("nl_tour").value||"—",date:document.getElementById("nl_date").value||"—",
     stage:document.getElementById("nl_stage").value,src:document.getElementById("nl_src").value,manual:true});
+  audit("lead","created",name);
   closeModal();renderCRM();
 }
 
@@ -5562,10 +5841,13 @@ function openTour(id){
         "<div><b>Guide fee ("+f.st+")</b> · Lead "+fmt(f.lead)+"/day · Assistant "+fmt(f.asst)+"/day · "+f.days+" day(s) → <b>"+role+" payout "+fmt(payout)+"</b></div>"+
         "<div style='display:flex;gap:6px;align-items:center'><select class='input' style='width:auto;padding:5px 8px;font-size:12px' onchange=\"setGuideRole('"+id+"',this.value)\"><option "+(role==="Lead"?"selected":"")+">Lead</option><option "+(role==="Assistant"?"selected":"")+">Assistant</option></select><button class='btn btn-ghost btn-sm' onclick=\"editTour('"+id+"')\">Edit</button></div>"+
       "</div>";})()+
+      (function(){var sp=String(t.species||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);if(!sp.length)return "";
+        return "<div style='margin-bottom:12px'><div style='font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px'>Target species ("+sp.length+")</div><div style='display:flex;gap:6px;flex-wrap:wrap'>"+sp.map(function(s){return "<span class='pill plain' style='font-size:11.5px'>🐦 "+s.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";})()+
       "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px'>"+
         "<button class='btn btn-sea btn-sm' onclick=\"shareTourForm('"+id+"','interest')\">Share interest form</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourForm('"+id+"','client')\">Send guest form (after advance)</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourReservation('"+id+"')\">Guide reservation link</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"openTripReport('"+id+"')\">🐦 Trip report</button>"+
         "<button class='btn btn-primary btn-sm' onclick=\"editTour('"+id+"')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit tour</button>"+
       "</div>"+
       "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='"+id+"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
@@ -5574,6 +5856,47 @@ function openTour(id){
 "")+
     "</div>";
   openScrim();
+}
+
+/* ===== TRIP REPORT — printable, shareable post-tour report. Pre-filled from the
+   tour (dates, guide, participants, target species as a checklist); press "Edit
+   report" to tick species seen / add highlights, then PDF/Print or email it to
+   the group. Reuses the quotation modal plumbing (#quotationBody). ===== */
+function openTripReport(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  var bs=bookings.filter(function(x){return x.tour===id;});
+  var guests=[];bs.forEach(function(b){guests.push(b.guest);String(b.members||"").split(/[,\n]/).forEach(function(m){m=m.trim();if(m)guests.push(m);});});
+  var sp=String(t.species||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
+  var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+  var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var html=
+    "<div class='modal-head'><div><div class='eyebrow'>Trip report</div><div class='h-sec'>"+esc(shortName(t))+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+
+      quoteHeaderHTML()+
+      "<div style='text-align:center;margin:6px 0 18px'><div style='font-family:\"Calistoga\",serif;font-size:22px;color:#15563c'>Trip Report</div><div style='font-size:13px;color:#5a6b62'>"+esc(t.name||shortName(t))+" · "+dShort(t.start)+" – "+dShort(t.end)+"</div></div>"+
+      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:16px'>"+
+        "<div><span style='color:#5a6b62'>Guide</span><br><b>"+esc(t.guide||"—")+(t.guideAlloted?" · "+esc(t.guideAlloted):"")+"</b></div>"+
+        "<div><span style='color:#5a6b62'>Participants</span><br><b>"+(guests.length||booked(id))+"</b></div>"+
+        "<div><span style='color:#5a6b62'>Route / pickup</span><br><b>"+esc(t.pickup||"—")+(t.startLoc&&t.startLoc!=="—"?" → "+esc(t.startLoc):"")+"</b></div>"+
+        "<div><span style='color:#5a6b62'>Stay</span><br><b>"+esc(t.stay||"—")+"</b></div>"+
+      "</div>"+
+      (guests.length?"<div style='font-size:12px;color:#5a6b62;margin-bottom:16px'><b style='color:#20302b'>Group:</b> "+guests.map(esc).join(", ")+"</div>":"")+
+      "<div style='font-weight:700;color:#15563c;margin-bottom:8px'>Species checklist"+(sp.length?" · "+sp.length+" targets":"")+"</div>"+
+      (sp.length?"<table style='width:100%;font-size:13px;border-collapse:collapse;margin-bottom:16px'>"+sp.map(function(s,i){return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:7px 10px;width:34px;color:#5a6b62'>"+(i+1)+"</td><td style='padding:7px 10px'>"+esc(s)+"</td><td style='padding:7px 10px;width:90px;text-align:center'>☐ Seen</td><td style='padding:7px 10px;width:90px;text-align:center'>☐ Heard</td></tr>";}).join("")+"</table>"
+        :"<div style='font-size:12.5px;color:#5a6b62;margin-bottom:16px'>No target species on this tour yet — add them in Edit tour, or press <b>Edit report</b> and type the day-by-day list here.</div>")+
+      "<div style='font-weight:700;color:#15563c;margin-bottom:6px'>Highlights</div>"+
+      "<div style='min-height:64px;border:1px dashed #cfe3d6;border-radius:8px;padding:10px;font-size:13px;color:#5a6b62;margin-bottom:16px'>Press <b>Edit report</b> to write the trip highlights here — best sightings, weather, memorable moments…</div>"+
+      "<div style='text-align:center;margin-top:16px;padding-top:12px;border-top:2px solid #143a2e'>"+
+        "<div style='font-family:\"Calistoga\",serif;font-size:15px;color:#15563c'>"+esc(company)+"</div>"+
+        "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India · info@islandexplorer.in</div>"+
+      "</div>"+
+    "</div></div>"+
+    "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
+      "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
+      "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit report</button>"+
+      "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
+    "</div>";
+  document.getElementById("modal").innerHTML=html;openScrim();
 }
 
 /* ===== DRIVER LOG ===== */
@@ -5654,7 +5977,7 @@ function boot(keepView){
   ensureTourCodes();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderCostSheet();renderLog();renderCRM();renderCustomers();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
     /* In-place rebuild: no navigation, no history reset — and visually silent.
@@ -5835,6 +6158,7 @@ function applyUser(user){
   var av=document.querySelector(".nav-foot .av");if(av)av.textContent=String(name).split(/[ .]/).filter(Boolean).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase()||"U";
   /* unique, stable per-user ID (derived from the auth user's UUID) shown under the name */
   var uidEl=document.getElementById("navUid");if(uidEl)uidEl.textContent=(u&&u.id)?("ID · "+userShortId(u.id)):"";
+  if(typeof applyRoleNav==="function")try{applyRoleNav();}catch(e){}
 }
 /* ===== SaaS: show each company its own login + console =======================
    Email-first: typing an approved company's email on the sign-in screen shows
