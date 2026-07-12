@@ -667,7 +667,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 162</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 163</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +676,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 162</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 163</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4025,100 +4025,12 @@ function saveNewDriver(){drivers.push({name:document.getElementById("nd_name").v
 
 /* ===== CRM ===== */
 function leadSrcIcon(src){return src==="WhatsApp"?"💬":(src==="Email"?"✉":(src==="Facebook"?"📘":(src==="Instagram"?"📸":(src==="Messenger"?"💬":"🔗"))));}
-/* Paste any enquiry text (WhatsApp/email) and turn it into a lead — a light local
-   parse for phone / email / party size, no backend needed. Works even before the
-   auto-capture pipeline is deployed. */
-function captureFromText(){
-  var text=((document.getElementById("qc_text")||{}).value||"").trim();
-  if(!text){alert("Paste the message text first.");return;}
-  var from=((document.getElementById("qc_from")||{}).value||"").trim();
-  var nm=((document.getElementById("qc_name")||{}).value||"").trim();
-  var email=(text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)||[])[0]||(/@/.test(from)?from:"");
-  var phone=(from&&!/@/.test(from))?from.replace(/[^\d+]/g,""):(((text.match(/\+?\d[\d ()\-]{7,}\d/)||[])[0]||"").replace(/[()\-\s]/g,""));
-  var party=((text.match(/(\d+)\s*(?:pax|people|persons?|adults?|guests?|travell?ers?)/i)||[])[1])
-          ||((text.match(/(?:pax|people|group|persons?|guests?)[:\s]*0*(\d+)/i)||[])[1])||"";
-  var nights=((text.match(/(\d+)\s*(?:nights?|N\b)/i)||[])[1])||"";
-  var isEmail=/@/.test(from||email);
-  var name=nm||((from&&!/@/.test(from)&&!/^\+?\d/.test(from))?from:(email?email.split("@")[0]:"WhatsApp lead"));
-  var noteBits=[];if(party)noteBits.push(party+" pax");if(nights)noteBits.push(nights+" nights");
-  var notes=(noteBits.length?noteBits.join(" · ")+" — ":"")+text.replace(/\s+/g," ").trim().slice(0,280);
-  leads.unshift({id:"L"+Date.now(),name:name,country:"—",phone:phone||"",email:email||"",tour:"",date:"—",
-    notes:notes,stage:"New",src:isEmail?"Email":"WhatsApp"});
-  ["qc_text","qc_from","qc_name"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
-  renderCRM();persistData();
-  alert("✓ Lead added to New"+(party?(" ("+party+" pax)"):"")+". Open it to add the tour and dates.");
-}
 function viewCRM(){
   const conv=Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100);
   return "<section class='view' id='v-crm'>"+
     "<div class='section-head'><div><div class='eyebrow'>Pipeline · "+conv+"% conversion</div><div class='h-sec'>"+leads.length+" leads</div></div><button class='btn btn-primary' onclick='openAddLead()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Lead</button></div>"+
-    "<div class='card card-pad' style='margin-bottom:14px'>"+
-      "<div class='eyebrow'>Quick capture</div><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Paste a WhatsApp / email message → lead</div>"+
-      "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;max-width:720px'>Got an enquiry on WhatsApp (or anywhere)? Paste it here and it's turned into a lead in <b>New</b> — no setup needed. (For hands-off email auto-capture, use Settings → Lead capture.)</p>"+
-      "<div class='form-grid'>"+
-        "<div class='field'><label>Sender phone / email <span style='color:var(--ink-soft);font-weight:400'>(optional)</span></label><input class='input' id='qc_from' placeholder='e.g. 919812345678 or name@email.com'></div>"+
-        "<div class='field'><label>Contact name <span style='color:var(--ink-soft);font-weight:400'>(optional)</span></label><input class='input' id='qc_name' placeholder='If you know it'></div>"+
-        "<div class='field full'><label>Message</label><textarea class='input' id='qc_text' style='min-height:76px' placeholder='Paste the WhatsApp / email text here…'></textarea></div>"+
-      "</div>"+
-      "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='captureFromText()'>Capture as lead</button>"+
-    "</div>"+
-    "<div class='card card-pad' id='leadFilterCard' style='margin-bottom:14px'>"+
-      "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
-        "<div><div class='eyebrow'>Auto-capture</div><div class='h-sec' style='font-size:15px'>Email &amp; WhatsApp sources <span class='pill' id='lf_state' style='font-size:11px'>…</span></div></div>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"document.getElementById('lf_body').style.display=(document.getElementById('lf_body').style.display==='none'?'block':'none')\">Show / hide</button>"+
-      "</div>"+
-      "<div id='lf_body' style='display:none;margin-top:10px'>"+
-        "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;max-width:720px'>Leads captured from email &amp; WhatsApp land in <b>New</b> automatically. Choose whether to capture from <b>anyone</b>, or <b>only</b> from the addresses/numbers you list below — everything else is ignored. (Needs the lead-intake backend deployed — see docs/LEAD_INTAKE.md.)</p>"+
-        "<div class='field'><label>Capture mode</label><div class='tourist-toggle' id='lf_modeToggle'>"+
-          "<button class='btn btn-sm' id='lf_all' onclick=\"setLeadMode('all')\">From anyone</button>"+
-          "<button class='btn btn-sm' id='lf_list' onclick=\"setLeadMode('list')\">Only listed contacts</button>"+
-        "</div></div>"+
-        "<div class='cost-grid' id='lf_lists' style='margin-top:8px'>"+
-          "<div class='field'><label>Allowed email addresses <span style='color:var(--ink-soft);font-weight:400'>(one per line)</span></label><textarea class='input' id='lf_emails' style='min-height:80px' placeholder='asha@example.com&#10;bookings@partner.com'></textarea></div>"+
-          "<div class='field'><label>Allowed WhatsApp numbers <span style='color:var(--ink-soft);font-weight:400'>(one per line, with country code)</span></label><textarea class='input mono' id='lf_numbers' style='min-height:80px' placeholder='919812345678&#10;4915234262580'></textarea></div>"+
-        "</div>"+
-        "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='saveLeadFilter()'>Save capture settings</button>"+
-      "</div>"+
-    "</div>"+
     "<div class='kanban' id='kanban'></div>"+
   "</section>";
-}
-/* ===== Lead capture filter (which emails / WhatsApp numbers to accept) ===== */
-var _lfLoaded=false;
-function setLeadMode(m){
-  if(_leadSource)_leadSource.allow_mode=m;
-  var on=m==="list";
-  var a=document.getElementById("lf_all"),l=document.getElementById("lf_list");
-  if(a){a.classList.toggle("btn-primary",!on);a.classList.toggle("btn-ghost",on);}
-  if(l){l.classList.toggle("btn-primary",on);l.classList.toggle("btn-ghost",!on);}
-  var lists=document.getElementById("lf_lists");if(lists)lists.style.opacity=on?"1":".5";
-}
-function fillLeadFilter(){
-  var s=_leadSource||{};
-  var em=document.getElementById("lf_emails"),nu=document.getElementById("lf_numbers");
-  if(em&&document.activeElement!==em)em.value=(s.email_allow||[]).join("\n");
-  if(nu&&document.activeElement!==nu)nu.value=(s.wa_allow||[]).join("\n");
-  setLeadMode(s.allow_mode||"all");
-  var st=document.getElementById("lf_state");
-  if(st){if(!s.token){st.textContent="Not set up";st.className="pill open";}
-    else{st.textContent=(s.allow_mode==="list")?"Listed only":"Open";st.className="pill "+(s.allow_mode==="list"?"completed":"plain");}}
-}
-function loadLeadFilter(){
-  if(!document.getElementById("lf_emails"))return;
-  if(_leadSource){fillLeadFilter();return;}
-  var cl=sbClient();if(!cl)return;
-  if(_lfLoaded)return;_lfLoaded=true;
-  try{cl.rpc("my_lead_source").then(function(r){if(r&&r.data&&!r.data.error){_leadSource=r.data;fillLeadFilter();}}).catch(function(){});}catch(e){}
-}
-function saveLeadFilter(){
-  var cl=sbClient();if(!cl){alert("Not connected.");return;}
-  var mode=(_leadSource&&_leadSource.allow_mode)||"all";
-  var emails=((document.getElementById("lf_emails")||{}).value||"").split(/[\n,;]+/).map(function(x){return x.trim().toLowerCase();}).filter(Boolean);
-  var nums=((document.getElementById("lf_numbers")||{}).value||"").split(/[\n,;]+/).map(function(x){return x.replace(/[^\d]/g,"");}).filter(Boolean);
-  cl.rpc("set_lead_source",{p_allow_mode:mode,p_email_allow:emails,p_wa_allow:nums}).then(function(r){
-    if(r&&r.data&&!r.data.error){_leadSource=Object.assign({},_leadSource,{allow_mode:mode,email_allow:emails,wa_allow:nums});fillLeadFilter();alert("Saved. "+(mode==="list"?("Capturing only from "+emails.length+" email(s) and "+nums.length+" number(s)."):"Capturing leads from anyone."));}
-    else{alert("Could not save. Re-run the LATEST supabase/saas/lead-intake.sql in the Supabase SQL editor (an earlier version is missing the capture-filter fields), then try again.");}
-  });
 }
 function renderCRM(){
   const k=document.getElementById("kanban");if(!k)return;
@@ -4127,7 +4039,6 @@ function renderCRM(){
       var contact=l.email||l.phone||"";
       var srcline="<div class='lc'>"+l.country+" · "+l.src+"</div>"+(contact?"<div class='lc' style='color:var(--sea);font-size:11px'>"+leadSrcIcon(l.src)+" "+contact+"</div>":"");
       return "<div class='lead'><div class='ln'>"+l.name+"</div>"+srcline+"<div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='"+l.id+","+prev[0]+"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='"+l.id+","+next[0]+"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
-  if(typeof loadLeadFilter==="function")loadLeadFilter();
   persistData();
 }
 function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}
@@ -4310,17 +4221,9 @@ function replySub(id,via){
   var msg="Hello "+(s.name||"")+",\n\nThank you for reaching out to Island Explorer Birding Tours regarding "+(s.tour||"our tours")+". ";
   if(via==="email"){mailSend(s.email,"Island Explorer Birding Tours",msg);}else{waShare(msg,s.phone);}
 }
-/* A submission's origin, as a lead "source" label. Email/WhatsApp auto-captured
-   leads carry their channel; web-form submissions stay "Web form". */
-function subSourceLabel(s){
-  var v=(s&&(s.source||(s.data&&s.data.source))||"").toLowerCase();
-  if(v==="whatsapp")return "WhatsApp";
-  if(v==="email")return "Email";
-  if(v==="facebook")return "Facebook";
-  if(v==="instagram")return "Instagram";
-  if(v==="messenger")return "Messenger";
-  return "Web form";
-}
+/* A submission's origin, as a lead "source" label. Enquiries come in through the
+   public web form. */
+function subSourceLabel(s){ return "Web form"; }
 function leadFromSub(s){
   return {id:"L"+Date.now()+Math.floor(Math.random()*100),name:s.name||"—",country:s.country||"—",
     phone:s.phone||"",email:s.email||"",tour:s.tour||"—",date:(s.start_date||"").slice(0,7)||"—",
@@ -5217,18 +5120,6 @@ function viewSettings(){
     "<div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-sea btn-sm' onclick='resyncAllTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15'/></svg>Re-sync all tours now</button></div>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
-    "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Lead capture <span class='pill' id='ls_state' style='font-size:11px'>…</span></div>"+
-    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Auto-capture leads from <b>email</b>, <b>WhatsApp</b>, <b>Facebook</b> &amp; <b>Instagram</b> straight into your Leads Pipeline. Connect each channel in n8n and point it at the matching endpoint below — every endpoint is scoped to your company by a private token, so a lead can only ever be created in <b>your</b> workspace and no other company can see it. Setup: <b>docs/LEAD_INTAKE.md</b>. (Requires the lead-intake function + <code>lead-intake.sql</code> deployed once.)</p>"+
-    "<div class='field'><label>Your email-ingest domain <span style='color:var(--ink-soft);font-weight:400'>(the domain your Cloudflare Email Worker runs on)</span></label><input class='input' id='ls_domain' placeholder='ingest.yourdomain.com' onchange='saveIngestDomain()'></div>"+
-    "<div class='field'><label>Forward inquiry emails to</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_email' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_email')\">Copy</button></div><p style='font-size:11.5px;color:var(--ink-soft);margin-top:4px'>Add one forwarding rule in Gmail / Outlook / any mailbox that sends inquiries here — no password needed.</p></div>"+
-    "<div class='field'><label>WhatsApp Business webhook URL (Meta Cloud API)</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_wa' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_wa')\">Copy</button></div></div>"+
-    "<div class='field'><label>WhatsApp webhook Verify token</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_verify' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_verify')\">Copy</button></div></div>"+
-    "<div class='field'><label>Facebook Lead Ads endpoint <span style='color:var(--ink-soft);font-weight:400'>(use in your n8n Facebook trigger → HTTP)</span></label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_fb' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_fb')\">Copy</button></div></div>"+
-    "<div class='field'><label>Instagram endpoint</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_ig' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_ig')\">Copy</button></div></div>"+
-    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px'><button class='btn btn-sea btn-sm' onclick='testLeadCapture()'>Send test lead</button><button class='btn btn-ghost btn-sm' onclick='toggleLeadCapture()' id='ls_toggle'>…</button><button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='rotateLeadToken()'>Rotate token</button></div>"+
-    "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Personal WhatsApp can't be auto-read (no official API) — long-press a chat → <b>Forward → email</b> it to the address above, or use the free WhatsApp Business app. Rotating the token instantly revokes the old address/webhook.</p>"+
-  "</div>"+
-  "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Paste a Google Apps Script <b>web-app URL</b> below. New bookings &amp; customers are then pushed to your Sheet automatically. Setup steps are in docs/SHEET_SYNC.md.</p>"+
     "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHook())+"'></div>"+
@@ -5295,7 +5186,6 @@ function refreshSettings(){
   el.outerHTML=viewSettings();
   var ne=document.getElementById("v-settings");if(ne&&wasActive)ne.classList.add("active");
   renderOperators();
-  if(typeof loadLeadSources==="function")loadLeadSources();
 }
 function renderOperators(){
   var b=document.getElementById("opBody");if(!b)return;
@@ -5510,70 +5400,6 @@ function resyncAllTours(){
   alert("Re-synced "+tours.length+" tour(s) across Operations, Bookings, Customers, Accommodation and Reservations.");
 }
 
-/* ===== Lead capture (email + WhatsApp) settings card ===== */
-var _leadSource=null;
-function ingestDomain(){try{return localStorage.getItem("ieo_ingest_domain")||"";}catch(e){return "";}}
-function saveIngestDomain(){var v=(document.getElementById("ls_domain")||{}).value||"";v=v.trim().replace(/^https?:\/\//,"").replace(/\/.*$/,"");try{localStorage.setItem("ieo_ingest_domain",v);}catch(e){}renderLeadSourceFields();}
-function functionsBase(){try{var u=(sbConfig()&&sbConfig().url)||"";return u?u.replace(/\/$/,"")+"/functions/v1/lead-intake":"";}catch(e){return "";}}
-function copyLS(id){var el=document.getElementById(id);if(!el)return;el.select();try{navigator.clipboard.writeText(el.value);}catch(e){try{document.execCommand("copy");}catch(_){}}var b=event&&event.target;if(b){var t=b.textContent;b.textContent="Copied ✓";setTimeout(function(){b.textContent=t;},1200);}}
-function renderLeadSourceFields(){
-  var dom=ingestDomain();
-  var domEl=document.getElementById("ls_domain");if(domEl&&!domEl.value&&dom)domEl.value=dom;
-  var tok=_leadSource&&_leadSource.token;
-  var emailEl=document.getElementById("ls_email");
-  if(emailEl)emailEl.value=(tok&&dom)?("leads-"+tok+"@"+dom):(tok?"(set your ingest domain above)":"—");
-  var base=functionsBase();
-  var waEl=document.getElementById("ls_wa");
-  if(waEl)waEl.value=tok&&base?(base+"?channel=whatsapp&t="+tok):"—";
-  var vEl=document.getElementById("ls_verify");if(vEl)vEl.value=(_leadSource&&_leadSource.wa_verify)||"—";
-  var fbEl=document.getElementById("ls_fb");if(fbEl)fbEl.value=tok&&base?(base+"?channel=facebook&t="+tok):"—";
-  var igEl=document.getElementById("ls_ig");if(igEl)igEl.value=tok&&base?(base+"?channel=instagram&t="+tok):"—";
-  var st=document.getElementById("ls_state");
-  if(st){var on=_leadSource&&_leadSource.enabled;st.textContent=_leadSource?(on?"On":"Paused"):"Not set up";st.className="pill "+(on?"completed":"open");}
-  var tg=document.getElementById("ls_toggle");if(tg)tg.textContent=(_leadSource&&_leadSource.enabled)?"Pause capture":"Resume capture";
-}
-function loadLeadSources(){
-  if(!document.getElementById("ls_email"))return;
-  renderLeadSourceFields();
-  var cl=sbClient();if(!cl){return;}
-  try{cl.rpc("my_lead_source").then(function(r){
-    if(r&&r.data&&!r.data.error){_leadSource=r.data;renderLeadSourceFields();}
-    else{var st=document.getElementById("ls_state");if(st){st.textContent="Run lead-intake.sql";st.className="pill full";}}
-  }).catch(function(){});}catch(e){}
-}
-function rotateLeadToken(){
-  if(!confirm("Rotate the ingest token?\n\nThe current email address and WhatsApp webhook stop working immediately — you'll need to update your forwarding rule / Meta webhook with the new ones."))return;
-  var cl=sbClient();if(!cl)return;
-  cl.rpc("rotate_lead_source_token").then(function(r){if(r&&r.data&&r.data.token){_leadSource=Object.assign({},_leadSource,{token:r.data.token,wa_verify:r.data.wa_verify});renderLeadSourceFields();alert("Token rotated. Update your forwarding rule and WhatsApp webhook with the new address/URL.");}else{alert("Could not rotate — is lead-intake.sql deployed?");}});
-}
-function toggleLeadCapture(){
-  var cl=sbClient();if(!cl||!_leadSource)return;
-  var next=!_leadSource.enabled;
-  cl.rpc("set_lead_source",{p_enabled:next}).then(function(r){if(r&&r.data){_leadSource.enabled=r.data.enabled;renderLeadSourceFields();}});
-}
-/* One-click end-to-end test: POST a sample inquiry to the deployed lead-intake
-   function with this workspace's token, then confirm it came back as a created
-   lead. No terminal / curl needed. */
-function testLeadCapture(){
-  var tok=_leadSource&&_leadSource.token;
-  if(!tok){alert("No token yet. Run supabase/saas/lead-intake.sql first (then reopen Settings so the token loads).");return;}
-  var base=functionsBase();if(!base){alert("Couldn't work out the function URL.");return;}
-  var btn=event&&event.target;if(btn){btn.disabled=true;btn.textContent="Sending…";}
-  var done=function(msg){if(btn){btn.disabled=false;btn.textContent="Send test lead";}alert(msg);if(typeof loadSubmissions==="function")loadSubmissions(false);};
-  /* If capture is limited to listed contacts, send the test FROM an allowed
-     address so it isn't (correctly) filtered out. */
-  var fromEmail="test@example.com";
-  if(_leadSource&&_leadSource.allow_mode==="list"&&_leadSource.email_allow&&_leadSource.email_allow.length)fromEmail=_leadSource.email_allow[0];
-  fetch(base+"?channel=email&t="+encodeURIComponent(tok),{method:"POST",headers:{"content-type":"application/json"},
-    body:JSON.stringify({from:"Test Lead <"+fromEmail+">",subject:"Demo inquiry",body:"Interested in 5N South Andaman birding tour, 2 pax, next month."})})
-    .then(function(r){return r.json().catch(function(){return {ok:false,status:r.status};});})
-    .then(function(d){
-      if(d&&d.ok&&d.created){done("✓ Success! The test lead was created. Open Inbox, or Leads (CRM) → New — 'Test Lead' should appear within a few seconds.");}
-      else if(d&&d.ok){done("The function responded OK but created 0 leads (it may have been filtered by your 'Only listed contacts' setting, or seen as spam).\n\nResponse: "+JSON.stringify(d));}
-      else{done("The function did not accept the request.\n\nMost likely: the lead-intake function isn't deployed yet, or it was deployed with 'Verify JWT' ON (turn it OFF).\n\nResponse: "+JSON.stringify(d));}
-    })
-    .catch(function(e){done("Couldn't reach the function. Deploy 'lead-intake' in Supabase → Edge Functions with 'Verify JWT' OFF, then try again.\n\nError: "+e.message);});
-}
 function tourOptionLabel(t){var y=t.start?new Date(t.start).getFullYear():"";return "["+tourCode(t)+"] "+shortName(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+(y?", "+y:"")+")";}
 function openAddBooking(tourId){
   const tOpts="<option value=''>— Custom tour (none) —</option>"+tours.map(t=>"<option value='"+t.id+"' "+(t.id===tourId?"selected":"")+">"+tourOptionLabel(t)+"</option>").join("");
