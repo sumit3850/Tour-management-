@@ -1,0 +1,52 @@
+{
+  "name": "WhatsApp → Leads (lead-intake)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## WhatsApp → Leads\nWorks with **WAHA** or **Evolution API** (connect your existing WhatsApp/Business number by scanning a QR — a linked device, like WhatsApp Web; the phone app keeps working).\n\n1. Run a WAHA container (see docs/N8N_LEADS.md) and scan the QR with your number.\n2. **Activate** this workflow, then copy this node's **Production Webhook URL** and set it as WAHA's webhook (event: message).\n3. In **POST to lead-intake**, replace **YOUR_TOKEN** with your console token.\n\n⚠️ Unofficial WhatsApp automation is against WhatsApp's Terms and can get a number banned. Use low-volume, read-only. Prefer the official Cloud API if you need guarantees.",
+        "height": 340,
+        "width": 380
+      },
+      "id": "note1",
+      "name": "How to set up",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, 100]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-leads",
+        "options": {}
+      },
+      "id": "wh1",
+      "name": "WhatsApp Webhook (from WAHA)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [620, 320],
+      "webhookId": "whatsapp-leads"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tbxzxfjumlnciczizols.supabase.co/functions/v1/lead-intake?channel=whatsapp&t=YOUR_TOKEN",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "http1",
+      "name": "POST to lead-intake",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 320]
+    }
+  ],
+  "connections": {
+    "WhatsApp Webhook (from WAHA)": {
+      "main": [[{ "node": "POST to lead-intake", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {},
+  "active": false
+}
