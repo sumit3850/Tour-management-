@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 169</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 170</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 169</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 170</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3198,7 +3198,7 @@ function generateQuotation(){
 
   const html = `
     <div class="modal-head">
-      <div><div class="eyebrow">Quotation</div><div class="h-sec">${tourName}</div><div style="font-size:12px;color:var(--ink-soft);margin-top:2px">${qid} \u00b7 ${today}</div></div>
+      <div><div class="eyebrow">Quotation</div><div class="h-sec">${tourName}</div><div style="font-size:12px;color:var(--ink-soft);margin-top:2px"><span id="qhNo">${qid}</span> \u00b7 ${today}</div></div>
       ${XBTN}
     </div>
     <div class="modal-body" style="padding:0">
@@ -3648,7 +3648,7 @@ function generateGroupQuotation(){
   }).join("");
   var html=
     "<div class='modal-head'>"+
-      "<div><div class='eyebrow'>Group Quotation</div><div class='h-sec'>"+q.title+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+qid+" · "+today+"</div></div>"+
+      "<div><div class='eyebrow'>Group Quotation</div><div class='h-sec'>"+q.title+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+qid+"</span> · "+today+"</div></div>"+
       XBTN+
     "</div>"+
     "<div class='modal-body' style='padding:0'>"+
@@ -3730,14 +3730,29 @@ function shareGroupQuoteWhatsApp(enc){
    advances the quotation number: a brand-new quotation commits quoteSeq+1; editing
    an already-saved one just updates it in place. The whole rendered document
    (#quotationBody) is stored so it can be re-opened, edited and printed exactly. */
+/* Read the document number back OUT of the (possibly hand-edited) document, so
+   changing "Q-3" to "Q-2" inside the editor renames the record everywhere —
+   folder list, modal header and the workbook tabs — on the next Save. */
+function docNoFrom(html,kind){
+  var txt=String(html||"").replace(/<[^>]+>/g," ").replace(/&nbsp;/g," ").replace(/\s+/g," ");
+  var re=(kind==="inv")?/Invoice\s*#\s*:?\s*([A-Za-z0-9][A-Za-z0-9\/\-\.]*)/:/Quotation\s*#\s*:?\s*([A-Za-z0-9][A-Za-z0-9\/\-\.]*)/;
+  var m=txt.match(re);
+  return m?m[1].replace(/[.,;:]+$/,""):"";
+}
+function setDocHeaderNo(no){var el=document.getElementById("qhNo");if(el&&no)el.textContent=no;}
 function saveCurrentQuote(){
   if(!_curQuote){return;}
   var body=document.getElementById("quotationBody");
   var docHtml=body?body.innerHTML:"";
+  var editedNo=docNoFrom(docHtml,"q");
+  if(editedNo)_curQuote.qid=editedNo;
+  setDocHeaderNo(editedNo);
   if(_curQuote.savedId){
-    /* updating an existing saved quotation — no number change */
     var rec=quotationLog.find(function(x){return x.id===_curQuote.savedId;});
-    if(rec){rec.html=docHtml;rec.title=_curQuote.title;rec.updatedAt=new Date().toISOString();}
+    if(rec){
+      if(editedNo&&editedNo!==rec.qid){audit("quotation","renumbered",rec.qid+" → "+editedNo);rec.qid=editedNo;}
+      rec.html=docHtml;rec.title=_curQuote.title;rec.updatedAt=new Date().toISOString();
+    }
   }else{
     /* new quotation → consume the next number now */
     quoteSeq=(parseInt(quoteSeq,10)||0)+1;
@@ -3771,7 +3786,7 @@ function openSavedQuote(id){
     "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
   "</div>";
   document.getElementById('modal').innerHTML=
-    "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+rec.qid+" · "+rec.date+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+rec.qid+"</span> · "+rec.date+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+(rec.html||"")+"</div></div>"+
     foot;
   openScrim();
@@ -3907,7 +3922,7 @@ function generateInvoice(src){
   var row=function(label,val){return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:9px 12px'>"+label+"</td><td style='padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums'>"+fmt(val||0)+"</td></tr>";};
   var html=
     "<div class='modal-head'>"+
-      "<div><div class='eyebrow'>Invoice</div><div class='h-sec'>"+tourName+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+vid+" · "+today+"</div></div>"+XBTN+
+      "<div><div class='eyebrow'>Invoice</div><div class='h-sec'>"+tourName+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+vid+"</span> · "+today+"</div></div>"+XBTN+
     "</div>"+
     "<div class='modal-body' style='padding:0'>"+
       "<div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+
@@ -3967,9 +3982,15 @@ function saveCurrentInvoice(){
   if(!_curInvoice)return;
   var body=document.getElementById("quotationBody");
   var docHtml=body?body.innerHTML:"";
+  var editedNo=docNoFrom(docHtml,"inv");
+  if(editedNo)_curInvoice.invid=editedNo;
+  setDocHeaderNo(editedNo);
   if(_curInvoice.savedId){
     var rec=invoiceLog.find(function(x){return x.id===_curInvoice.savedId;});
-    if(rec){rec.html=docHtml;rec.title=_curInvoice.title;rec.updatedAt=new Date().toISOString();}
+    if(rec){
+      if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
+      rec.html=docHtml;rec.title=_curInvoice.title;rec.updatedAt=new Date().toISOString();
+    }
   }else{
     invoiceSeq=(parseInt(invoiceSeq,10)||0)+1;
     var id="INV"+invoiceSeq+"-"+Date.now().toString(36);
@@ -4002,7 +4023,7 @@ function openSavedInvoice(id){
     "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
   "</div>";
   document.getElementById('modal').innerHTML=
-    "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+(rec.invid||"")+" · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+(rec.html||"")+"</div></div>"+foot;
   openScrim();
 }
