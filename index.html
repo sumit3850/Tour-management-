@@ -311,6 +311,21 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .result .calc-mini{color:var(--ink)}
 .res-row.big{border-bottom:none;margin-top:8px;padding-top:14px}
 .res-row.big b{font-size:22px;color:var(--amber);font-family:'Calistoga',serif}
+/* Cost Calculator redesign: hero total on top, breakdown with live share-bars */
+.res-hero{text-align:center;padding:6px 0 16px;border-bottom:1px solid rgba(255,255,255,.16);margin-bottom:12px}
+.res-hero .lab{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.res-hero .amt{font-family:'Calistoga',serif;font-size:34px;color:#fff;line-height:1.15;margin-top:4px}
+.res-hero .pp{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border-radius:99px;padding:5px 14px;font-size:12.5px;color:#fff;margin-top:8px}
+.res-hero .pp b{color:var(--amber)}
+.res-item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.res-item .ln{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px}
+.res-item .ln span{color:rgba(255,255,255,.85)}
+.res-item .trk{height:4px;background:rgba(255,255,255,.14);border-radius:99px;margin-top:7px;overflow:hidden}
+.res-item .trk i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),#ffd066);border-radius:99px;transition:width .25s}
+.res-chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.res-chips .chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border-radius:99px;padding:4px 11px;font-size:12px;color:rgba(255,255,255,.9)}
+.res-chips .chip input{width:44px;background:rgba(255,255,255,.92);border:none;border-radius:6px;padding:2px 5px;text-align:center;font-size:12px;color:var(--ink)}
+@media (max-width:860px){.calc-grid{grid-template-columns:1fr}.result{position:static}}
 
 .sheet-link{display:flex;align-items:center;gap:10px;background:var(--sea-soft);border:1px dashed #a9d2d6;border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:13px}
 .sheet-link .ok{color:#0c656f;font-weight:600}
@@ -667,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 167</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 168</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -676,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 167</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 168</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -820,7 +835,7 @@ var _curInvoice=null;/* the invoice currently open in the modal (for Save / edit
 let sheetChangeLog=[]; /* audit log of Cost Sheet saves */
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
-let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:""};
+let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:""};
 let auditLog=[]; /* who did what, when — rendered in Settings → Activity log */
 var csTour="",csType="indian"; /* Cost Sheet editor selection */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
@@ -864,7 +879,7 @@ const STORE=[
   {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
-  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:""},v);}},
+  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:""},v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}}
 ];
 /* One line per meaningful action. Capped so the blob never bloats. */
@@ -2108,14 +2123,15 @@ const NAV=[
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["operations","Operations","M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h4"],
   ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
-  ["calc","Cost Calculator & Invoice","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
+  ["calc","Cost Calculator","M9 7h6M9 11h6M9 15h2M5 3h14v18H5z"],
+  ["invoices","Invoices","M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Cost Calculator & Invoice"],profit:["Sales & Ops","Profit Calculator"],groupquote:["Sales & Ops","Group Quotation"],costsheet:["Sales & Ops","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales & Ops","Cost Calculator"],invoices:["Sales & Ops","Invoices"],profit:["Sales & Ops","Profit Calculator"],groupquote:["Sales & Ops","Group Quotation"],costsheet:["Sales & Ops","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -2397,7 +2413,8 @@ function renderView(v){
   else if(v==="reservations"){renderReservations();renderGuides();loadSubmissions(false);startSubPoll();}
   else if(v==="settings")refreshSettings();
   else if(v==="logistics"){logTab(_logTab);loadSubmissions(false);startSubPoll();}
-  else if(v==="calc"){calc();renderSavedInvoices();}
+  else if(v==="calc")calc();
+  else if(v==="invoices")renderSavedInvoices();
   else if(v==="profit")renderProfitCalc();
   else if(v==="groupquote")renderGroupQuote();
   else if(v==="costsheet")renderCostSheet();
@@ -2729,7 +2746,7 @@ function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
       "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
-      "<div style='display:flex;gap:8px'>"+dlBtn('exportToursCSV')+"<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
+      "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button><button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
     "</div>"+
     "<div class='tour-cols' id='tourGrid'></div>"+
   "</section>";
@@ -2941,28 +2958,66 @@ function deleteBooking(id){
 /* ===== CALCULATOR ===== */
 /* Tab bar shared by the Cost Calculator and the Profit Calculator (which now lives
    as a sub-tab of Cost Calculator rather than its own sidebar item). */
-function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator &amp; Invoice</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button></div>";}
+function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='invoices'?'active':'')+"' onclick=\"go('invoices')\">Invoices</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button></div>";}
 function viewCalc(){
   if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
   const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"' "+(k===currentCalcTourId?"selected":"")+">"+CALC_LABELS[k]+"</option>";}).join("");
   const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
   return "<section class='view' id='v-calc'>"+calcTabsBar('calc')+"<div class='calc-grid'>"+
     "<div class='card card-pad'>"+
-      "<div class='eyebrow'>From your costing sheet</div><div class='h-sec' style='margin-bottom:14px'>Tour cost lookup</div>"+
+      "<div class='eyebrow'>From your costing sheet</div><div class='h-sec' style='margin-bottom:14px'>Build a tour cost</div>"+
+      "<div class='field'><label>Tour</label><select class='input' id='calcCategory' onchange='currentCalcTourId=this.value;calc()'>"+tourOpts+"</select></div>"+
       "<div class='cost-grid'>"+
-        "<div class='field full'><label>Tour</label><select class='input' id='calcCategory' onchange='currentCalcTourId=this.value;calc()'>"+tourOpts+"</select></div>"+
         "<div class='field'><label>Group size</label><select class='input mono' id='calcGroupSize' onchange='calc()'>"+groupOpts+"</select></div>"+
         "<div class='field'><label>Client type</label><div class='tourist-toggle'><button class='btn btn-sm "+(touristType==="indian"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"indian\")'>Indian</button><button class='btn btn-sm "+(touristType==="foreigner"?"btn-primary":"btn-ghost")+"' onclick='setTouristType(\"foreigner\")'>Foreigner</button></div></div>"+
       "</div>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:14px'>Rates come straight from your Birding Tour Expense Calculator. Pick a tour, group size and client type to see the full breakdown and per-person cost.</p>"+
+      "<div class='fieldset' style='margin-top:4px'><legend>How it works</legend><p style='font-size:12.5px;color:var(--ink-soft);margin:0'>Rates load from your Birding Tour Expense Calculator for the tour, group size and client type you pick. Every line in the summary is <b>editable</b> — the total, per-person figure and share-bars update live. <b>Save rates</b> writes your edits back to the costing sheet; <b>Quotation</b> and <b>Invoice</b> turn the current figures into documents.</p></div>"+
     "</div>"+
     "<div class='card result' id='calcResult'></div>"+
   "</div>"+
-  "<div class='card' style='margin-top:16px'>"+
-    "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Invoices</div><div class='h-sec' style='margin-bottom:6px'>Your invoice folder</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Pick a tour, group size and client type above, press <b>Invoice</b>, then <b>Save invoice</b>. Saved invoices appear here and in the workbook's Invoice tab.</p></div>"+
-    "<div id='savedInvoices'></div>"+
-  "</div>"+
   "</section>";
+}
+/* ===== INVOICES — standalone module (generator + folder), split out of the
+   Cost Calculator. Same costing data; its own selection + client fields. ===== */
+function viewInvoices(){
+  if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
+  const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"'>"+CALC_LABELS[k]+"</option>";}).join("");
+  const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
+  return "<section class='view' id='v-invoices'>"+calcTabsBar('invoices')+
+    "<div class='card card-pad' style='margin-bottom:16px'>"+
+      "<div class='eyebrow'>New invoice</div><div class='h-sec' style='margin-bottom:6px'>Generate an invoice</div>"+
+      "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Itemises the actual cost heads (accommodation, travel, food, entry, ship, guide) for the selection below — with the GST break-up and Pay-now links from <b>Settings → Payments &amp; GST</b>. Next number: <b class='mono'>"+peekInvoiceNo()+"</b></p>"+
+      "<div class='cost-grid'>"+
+        "<div class='field'><label>Tour</label><select class='input' id='inv_cat'>"+tourOpts+"</select></div>"+
+        "<div class='field'><label>Group size</label><select class='input mono' id='inv_pax'>"+groupOpts+"</select></div>"+
+        "<div class='field'><label>Client type</label><select class='input' id='inv_type'><option value='indian'>Indian</option><option value='foreign'>Foreigner</option></select></div>"+
+        "<div class='field'><label>Invoice to (guest / company)</label><input class='input' id='inv_name' placeholder='Guest name'></div>"+
+        "<div class='field'><label>Address</label><input class='input' id='inv_addr' placeholder='Billing address'></div>"+
+        "<div class='field'><label>Client GST No. <span style='color:var(--ink-soft);font-weight:400'>(optional — sets CGST/SGST vs IGST)</span></label><input class='input mono' id='inv_gst' placeholder='29XXXXXXXXXXXZ5'></div>"+
+      "</div>"+
+      "<button class='btn btn-primary' onclick=\"generateInvoice('inv')\" style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6'/></svg>Generate invoice</button>"+
+    "</div>"+
+    "<div class='card'>"+
+      "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Folder</div><div class='h-sec' style='margin-bottom:6px'>Saved invoices</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Generate above, press <b>Save invoice</b> in the preview, and it lands here and in the workbook's Invoice tab.</p></div>"+
+      "<div id='savedInvoices'></div>"+
+    "</div>"+
+  "</section>";
+}
+/* Selection for the standalone Invoices module (mirrors calcSelection). */
+function invSelection(){
+  var key=(document.getElementById("inv_cat")||{}).value||currentCalcTourId;
+  var pax=String((document.getElementById("inv_pax")||{}).value||"2");
+  var type=((document.getElementById("inv_type")||{}).value==="foreign")?"foreign":"indian";
+  var src=SHEET_DATA[key];
+  return {key:key,pax:pax,type:type,d:src&&src[type]?src[type][pax]:null,label:CALC_LABELS[key]||(src?src.title:"")};
+}
+/* Jump from the calculator to the Invoices module carrying the current selection. */
+function invoiceFromCalc(){
+  var sel=calcSelection();
+  var c=document.getElementById("inv_cat");if(c)c.value=sel.key;
+  var p=document.getElementById("inv_pax");if(p)p.value=sel.pax;
+  var t=document.getElementById("inv_type");if(t)t.value=sel.type;
+  go('invoices');
 }
 function setTouristType(type){
   touristType=(type==="foreigner")?"foreigner":"indian";
@@ -3751,10 +3806,15 @@ function payNowHTML(amount){
     (payCfg.payPage?"<div>Card / netbanking: <a href='"+String(payCfg.payPage).replace(/'/g,"")+"' style='color:#1f8f5f'>"+String(payCfg.payPage).replace(/</g,"&lt;")+"</a></div>":"")+
   "</div>";
 }
-function generateInvoice(){
-  var sel=calcSelection();
+function generateInvoice(src){
+  var fromInv=(src==='inv');
+  var sel=fromInv?invSelection():calcSelection();
   if(!sel.d){alert("Select a tour first to generate an invoice.");return;}
-  var d=document.getElementById('cb_accommodation')?readCalcInputs():sel.d;
+  if(fromInv){
+    var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
+    qClient={name:g("inv_name"),country:"",address:g("inv_addr"),gst:g("inv_gst")};
+  }
+  var d=(!fromInv&&document.getElementById('cb_accommodation'))?readCalcInputs():sel.d;
   var pax=sel.pax;
   var tourName=catName(sel.key);
   var clientType=sel.type==="foreign"?"Foreigner":"Indian";
@@ -3923,24 +3983,28 @@ const CALC_ITEMS=[["accommodation","Accommodation"],["vehicle","Vehicle transpor
 function calc(){
   const r=document.getElementById("calcResult");if(!r)return;
   var sel=calcSelection();var d=sel.d;
-  if(!d){r.innerHTML="<div style='padding:30px;text-align:center;color:var(--ink-soft)'>No costing data for this selection.</div>";return;}
-  var rowEdit=function(key,lab){return "<div class='res-row edit'><span>"+lab+"</span><input class='calc-in mono' type='number' id='cb_"+key+"' value='"+(d[key]||0)+"' oninput='recalcCalc()'></div>";};
-  r.innerHTML="<h3>"+sel.label+"</h3>"+
-    "<div class='calc-sub'>"+
-      "<input class='calc-mini mono' type='number' id='cb_nights' value='"+(d.nights||0)+"' oninput='recalcCalc()'> nights · "+
-      "<input class='calc-mini mono' type='number' id='cb_rooms' value='"+(d.rooms||0)+"' oninput='recalcCalc()'> room(s) · "+sel.pax+" pax · "+(sel.type==="foreign"?"Foreigner":"Indian")+
+  if(!d){r.innerHTML="<div style='padding:30px;text-align:center;color:rgba(255,255,255,.85)'>No costing data for this selection.</div>";return;}
+  var total=d.total||CALC_ITEMS.reduce(function(s,it){return s+(d[it[0]]||0);},0)||1;
+  var item=function(key,lab){var v=d[key]||0;var pct=Math.min(Math.round(v/total*100),100);
+    return "<div class='res-item'><div class='ln'><span>"+lab+"</span><input class='calc-in mono' type='number' id='cb_"+key+"' value='"+v+"' oninput='recalcCalc()'></div><div class='trk'><i id='bar_"+key+"' style='width:"+pct+"%'></i></div></div>";};
+  r.innerHTML="<h3 style='margin-bottom:10px'>"+sel.label+"</h3>"+
+    "<div class='res-hero'>"+
+      "<div class='lab'>Total tour cost</div><div class='amt' id='c_total'>"+fmt(d.total)+"</div>"+
+      "<div class='pp'>Per person <b class='mono' id='c_per'>"+fmt(d.perPerson)+"</b></div>"+
     "</div>"+
-    CALC_ITEMS.map(function(it){return rowEdit(it[0],it[1]);}).join("")+
-    "<div class='res-row big'><span>Total tour cost</span><b class='mono' id='c_total'>"+fmt(d.total)+"</b></div>"+
-    "<div class='res-row big'><span>Per person</span><b class='mono' id='c_per'>"+fmt(d.perPerson)+"</b></div>"+
+    "<div class='res-chips'>"+
+      "<span class='chip'><input class='mono' type='number' id='cb_nights' value='"+(d.nights||0)+"' oninput='recalcCalc()'> nights</span>"+
+      "<span class='chip'><input class='mono' type='number' id='cb_rooms' value='"+(d.rooms||0)+"' oninput='recalcCalc()'> rooms</span>"+
+      "<span class='chip'>"+sel.pax+" pax</span><span class='chip'>"+(sel.type==="foreign"?"Foreigner":"Indian")+"</span>"+
+    "</div>"+
+    CALC_ITEMS.map(function(it){return item(it[0],it[1]);}).join("")+
     "<div style='display:flex;gap:8px;margin-top:14px;flex-wrap:wrap'>"+
-      "<button class='btn btn-sea' onclick='saveCalcRates()' style='flex:1;min-width:110px'>Save rates</button>"+
-      "<button class='btn btn-primary' onclick='generateQuotation()' style='flex:1;min-width:120px'>"+
+      "<button class='btn btn-sea' onclick='saveCalcRates()' style='flex:1;min-width:104px'>Save rates</button>"+
+      "<button class='btn btn-primary' onclick='generateQuotation()' style='flex:1;min-width:112px'>"+
         "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>Quotation</button>"+
-      "<button class='btn btn-primary' onclick='generateInvoice()' style='flex:1;min-width:120px;background:var(--forest)'>"+
-        "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M9 13h6M9 17h6'/></svg>Invoice</button>"+
+      "<button class='btn btn-ghost' onclick='invoiceFromCalc()' style='flex:1;min-width:104px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)'>Invoice →</button>"+
     "</div>"+
-    "<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Edit any line to update the total live. <b>Save rates</b> stores it for this tour · "+sel.pax+" pax · "+(sel.type==="foreign"?"Foreigner":"Indian")+" (synced).</p>";
+    "<p style='font-size:11px;color:rgba(255,255,255,.75);margin-top:8px'>Edit any line — total, per-person and the share-bars update live. <b>Save rates</b> stores it for this tour · <b>Invoice →</b> carries this selection to the Invoices module.</p>";
 }
 function readCalcInputs(){
   var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
@@ -3955,6 +4019,8 @@ function recalcCalc(){
   var o=readCalcInputs();
   var t=document.getElementById("c_total"),p=document.getElementById("c_per");
   if(t)t.textContent=fmt(o.total);if(p)p.textContent=fmt(o.perPerson);
+  var tot=o.total||1;
+  CALC_ITEMS.forEach(function(it){var b=document.getElementById("bar_"+it[0]);if(b)b.style.width=Math.min(Math.round((o[it[0]]||0)/tot*100),100)+"%";});
 }
 function saveCalcRates(){
   var sel=calcSelection();if(!sel.d)return;
@@ -4344,6 +4410,16 @@ var _submissions=[];
    tagged with it would be readable by nobody — so it maps to island-explorer. */
 function wsTag(){var w="";try{w=sbConfig().ws||"";}catch(e){}return (w&&w!=="default")?w:"island-explorer";}
 function formLink(type){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"register.html?type="+type+"&ws="+encodeURIComponent(wsTag());}
+/* Shareable public departures board (departures.html) — copies the link and opens
+   it. Live data comes from get_public_departures (public-departures.sql), which
+   returns only marketing fields for approved workspaces. */
+function openPublicDepartures(){
+  var base=location.href.split("#")[0].replace(/[^/]*$/,"");
+  var url=base+"departures.html?ws="+encodeURIComponent(wsTag());
+  try{navigator.clipboard.writeText(url);}catch(e){}
+  window.open(url,"_blank");
+  alert("Public departures page opened (link copied).\n\nShare it in your Instagram bio / WhatsApp status:\n"+url+"\n\nIt shows upcoming tours with seats left; the 'I'm interested' button feeds your Leads Pipeline.\n\n(One-time: run supabase/saas/public-departures.sql in the SQL editor so the page can read tour dates.)");
+}
 /* Guide ops link — signed in with phone + a personal login code, so only that guide
    sees their own operations and can update status from their phone. The phone/code
    are shown to YOU here for reference, but never included in the shared message —
@@ -5213,8 +5289,59 @@ function deleteReservation(id){if(!confirm("Delete this reservation?"))return;re
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
     "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px;flex-wrap:wrap'>"+dlBtn('exportCustomersCSV')+"<button class='btn btn-ghost btn-sm' id='wbDlBtn' onclick='downloadWorkbookXlsx()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Excel</button><button class='btn btn-sea btn-sm' onclick='openSheet()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open Google Sheet</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
+    "<div id='reviewPanel' style='margin-bottom:14px'></div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th>Phone</th><th>Email</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
+}
+/* ===== Review collector — guests whose tour ended recently, with ask/track. =====
+   Reviews are the cheapest marketing a tour company has; this makes asking a
+   two-click habit. Status lives on the booking (reviewAsked date, reviewDone). */
+function reviewMsg(b){
+  var t=tours.find(function(x){return x.id===b.tour;});
+  return "Hello "+b.guest+",\n\nThank you for birding with Island Explorer"+(t?" on the "+shortName(t):"")+"! 🐦 If you enjoyed the tour, a short Google review would mean a lot to our small team:\n"+(payCfg.reviewUrl||"")+"\n\nHope to see you on the islands again!\nSumit Kumar · Island Explorer Birding Tours";
+}
+function reviewCandidates(){
+  var today=new Date().toISOString().slice(0,10);
+  var horizon=new Date(Date.now()-180*86400000).toISOString().slice(0,10);
+  return (bookings||[]).filter(function(b){
+    return b.end&&b.end<today&&b.end>=horizon&&b.status!=="Cancelled"&&(b.phone||b.email);
+  }).sort(function(a,b){return (b.end||"").localeCompare(a.end||"");}).slice(0,12);
+}
+function reviewAsk(id,via){
+  if(!payCfg.reviewUrl){alert("Add your Google review link first: Settings → Payments & GST → Google review link.");return;}
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  if(via==="em"){if(!b.email){alert("No email on this booking.");return;}mailSend(b.email,"How was your tour? · Island Explorer",reviewMsg(b));}
+  else{waShare(reviewMsg(b),b.phone);}
+  b.reviewAsked=new Date().toISOString().slice(0,10);
+  audit("review","asked",b.guest);
+  persistData();renderReviews();
+}
+function toggleReviewed(id){
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  b.reviewDone=!b.reviewDone;
+  if(b.reviewDone)audit("review","received",b.guest);
+  persistData();renderReviews();
+}
+function renderReviews(){
+  var el=document.getElementById("reviewPanel");if(!el)return;
+  var list=reviewCandidates();
+  var asked=(bookings||[]).filter(function(b){return b.reviewAsked;}).length;
+  var got=(bookings||[]).filter(function(b){return b.reviewDone;}).length;
+  if(!list.length){el.innerHTML="";return;}
+  el.innerHTML="<div class='card card-pad'>"+
+    "<div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>After the tour</div><div class='h-sec' style='font-size:15px'>Review collector <span class='pill plain' style='font-size:11px'>"+asked+" asked · "+got+" received</span></div></div></div>"+
+    (payCfg.reviewUrl?"":"<p style='font-size:12px;color:var(--coral);margin-bottom:8px'>Set your Google review link in Settings → Payments &amp; GST to enable the ask buttons.</p>")+
+    list.map(function(b){
+      var t=tours.find(function(x){return x.id===b.tour;});
+      var st=b.reviewDone?"<span class='pill completed'>⭐ Reviewed</span>":(b.reviewAsked?"<span class='pill open'>Asked "+dShort(b.reviewAsked)+"</span>":"<span class='pill plain'>Not asked</span>");
+      return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+"</div><div class='s'>"+(t?shortName(t):(b.customTour||"—"))+" · ended "+dShort(b.end)+"</div></div>"+st+
+        "<div style='display:flex;gap:6px;flex-shrink:0'>"+
+        (b.phone?"<button class='btn btn-sea btn-sm' onclick=\"reviewAsk('"+b.id+"','wa')\">Ask · WA</button>":"")+
+        (b.email?"<button class='btn btn-ghost btn-sm' onclick=\"reviewAsk('"+b.id+"','em')\">Email</button>":"")+
+        "<button class='btn btn-ghost btn-sm' onclick=\"toggleReviewed('"+b.id+"')\">"+(b.reviewDone?"Undo":"Mark ⭐")+"</button>"+
+        "</div></div>";
+    }).join("")+
+  "</div>";
 }
 /* Every participant on a tour mirrors that tour's POC payment status — so a member
    can never show "Paid" while the POC (and the tour) is on "Deposit". Runs on every
@@ -5229,6 +5356,7 @@ function cascadeTourCustomers(tourId){
 function cascadeAllCustomerPayments(){(tours||[]).forEach(function(t){cascadeTourCustomers(t.id);});}
 function renderCustomers(){
   const b=document.getElementById("custBody");if(!b)return;
+  if(typeof renderReviews==="function")renderReviews();
   cascadeAllCustomerPayments();
   b.innerHTML=customers.map(c=>{var dt=c.details||{};var _pc=c.pay==="Paid"?"completed":(c.pay==="Deposit"?"open":"full");return "<tr><td class='strong' style='cursor:pointer' data-action='viewCustomer' data-arg='"+c.name+"'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+(c.country||"—")+"</td><td class='nowrap'>"+(c.phone||dt.phone||"—")+"</td><td class='nowrap'>"+(c.email||dt.email||"—")+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+_pc+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+(c.pref||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='viewCustomer' data-arg='"+c.name+"' title='View full details'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='8' class='empty'>No customers yet.</td></tr>";
   persistData();
@@ -5437,6 +5565,7 @@ function viewSettings(){
       "<div class='field'><label>SAC / HSN code</label><input class='input mono' id='pg_hsn' value='"+(payCfg.hsn||"9985")+"'></div>"+
       "<div class='field'><label>UPI ID</label><input class='input mono' id='pg_upi' value='"+(payCfg.upi||"")+"' placeholder='islandexplorer@okhdfcbank'></div>"+
       "<div class='field'><label>Payment page link</label><input class='input' id='pg_page' value='"+(payCfg.payPage||"")+"' placeholder='https://rzp.io/l/…'></div>"+
+      "<div class='field full'><label>Google review link <span style='color:var(--ink-soft);font-weight:400'>(used by the Review collector in Customers — Google Maps → your business → Share review form)</span></label><input class='input' id='pg_review' value='"+(payCfg.reviewUrl||"")+"' placeholder='https://g.page/r/…/review'></div>"+
     "</div>"+
     "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='savePayCfg()'>Save payment settings</button>"+
   "</div>"+
@@ -5515,7 +5644,7 @@ function viewSettings(){
 }
 function savePayCfg(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
-  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page")};
+  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page"),reviewUrl:g("pg_review")};
   audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.upi||""));
   persistData();
   alert("Saved. Invoices now show "+(payCfg.gstRate>0?("the GST break-up @ "+payCfg.gstRate+"%"):"no GST line")+(payCfg.upi||payCfg.payPage?" and a Pay-now block.":"."));
@@ -5602,7 +5731,7 @@ var ROLE_MODULES={
   Admin:null, /* null = everything */
   Operator:["dashboard","tours","calendar","bookings","accommodation","operations","logistics","requests","reservations"],
   Guide:["dashboard","calendar","operations"],
-  Sales:["dashboard","analytics","tours","calendar","bookings","crm","requests","customers","calc"]
+  Sales:["dashboard","analytics","tours","calendar","bookings","crm","requests","customers","calc","invoices"]
 };
 function currentRole(){
   var email=((document.querySelector(".nav-foot .role")||{}).textContent||"").trim().toLowerCase();
@@ -6130,7 +6259,7 @@ function boot(keepView){
   ensureTourCodes();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderCostSheet();renderLog();renderCRM();renderCustomers();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
     /* In-place rebuild: no navigation, no history reset — and visually silent.

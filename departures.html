@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Upcoming Departures · Island Explorer Birding Tours</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--sea:#0a6ed1;--sea-soft:#e7f1fb;--forest:#004c8f;--amber:#f0a400;--coral:#ed232a;
+    --ink:#1b2a4a;--ink-soft:#5a6a86;--line:#e2e8f1;--paper:#eef1f6;--surface:#fff}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+  .hero{background:linear-gradient(160deg,var(--forest),#0a6ed1);color:#fff;padding:44px 20px 60px;text-align:center}
+  .hero img{max-height:84px;max-width:230px;object-fit:contain;margin-bottom:12px;background:#fff;border-radius:12px;padding:6px 12px}
+  .hero h1{font-family:'Calistoga',Georgia,serif;font-size:clamp(24px,5vw,36px);line-height:1.15}
+  .hero p{color:rgba(255,255,255,.85);margin-top:8px;font-size:14.5px}
+  .wrap{max-width:860px;margin:-34px auto 60px;padding:0 16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;
+    display:flex;gap:16px;align-items:center;flex-wrap:wrap;box-shadow:0 14px 30px -24px rgba(20,40,80,.35)}
+  .date{flex-shrink:0;width:74px;text-align:center;background:var(--sea-soft);border-radius:12px;padding:10px 6px}
+  .date .d{font-family:'Calistoga',serif;font-size:24px;color:var(--forest);line-height:1.1}
+  .date .m{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--sea);font-weight:700}
+  .meta{flex:1;min-width:200px}
+  .meta h3{font-size:16.5px;line-height:1.3}
+  .meta .sub{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:4px 11px;border-radius:99px;margin-top:8px}
+  .pill.open{background:#e2f6ef;color:#066a52}
+  .pill.few{background:#fdf0d2;color:#8a5a00}
+  .pill.full{background:#fde4e5;color:#a3131a}
+  .cta{flex-shrink:0}
+  .btn{display:inline-block;background:var(--sea);color:#fff;font-weight:700;font-size:13.5px;padding:12px 20px;border-radius:11px;text-decoration:none;transition:background .15s}
+  .btn:hover{background:var(--forest)}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);pointer-events:none}
+  .empty,.loading{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:44px 20px;text-align:center;color:var(--ink-soft);font-size:14px}
+  .foot{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:0 16px 40px}
+  .foot a{color:var(--sea)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <img src="assets/logo.png" alt="" onerror="this.style.display='none'">
+  <h1 id="pgTitle">Upcoming Birding Departures</h1>
+  <p>Endemic birding tours across the Andaman &amp; Nicobar Islands · small groups · expert guides</p>
+</div>
+<div class="wrap" id="list"><div class="loading">Loading departures…</div></div>
+<div class="foot">Questions? WhatsApp <a href="https://wa.me/919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const WS=new URLSearchParams(location.search).get("ws")||"island-explorer";
+const MONTHS=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function nights(t){try{return Math.max(Math.round((new Date(t.end)-new Date(t.start))/86400000),1);}catch(e){return "";}}
+function interestLink(t){
+  var base=location.href.split("?")[0].replace(/[^/]*$/,"");
+  return base+"register.html?type=interest&ws="+encodeURIComponent(WS)+"&tour="+encodeURIComponent(t.name||"");
+}
+(async function(){
+  var el=document.getElementById("list");
+  try{
+    var sb=window.supabase.createClient(SB_URL,SB_KEY);
+    var r=await sb.rpc("get_public_departures",{p_workspace:WS});
+    var data=r.data;
+    if(!data){el.innerHTML="<div class='empty'>This departures board isn't available. Please contact us directly.</div>";return;}
+    if(data.company)document.getElementById("pgTitle").textContent="Upcoming Departures · "+data.company;
+    var tours=(data.tours||[]);
+    if(!tours.length){el.innerHTML="<div class='empty'>New season dates are being finalised — message us on WhatsApp and we'll let you know first! 🐦</div>";return;}
+    el.innerHTML=tours.map(function(t){
+      var d=new Date(t.start+"T00:00:00");
+      var left=Math.max((t.cap||0)-(t.booked||0),0);
+      var soldOut=t.cap>0&&left<=0;
+      var pill=soldOut?"<span class='pill full'>Fully booked</span>":(left<=2&&t.cap>0?"<span class='pill few'>Only "+left+" seat"+(left>1?"s":"")+" left</span>":"<span class='pill open'>"+(t.cap>0?left+" seats available":"Open")+"</span>");
+      return "<div class='card'>"+
+        "<div class='date'><div class='m'>"+MONTHS[d.getMonth()]+"</div><div class='d'>"+d.getDate()+"</div><div class='m'>"+d.getFullYear()+"</div></div>"+
+        "<div class='meta'><h3>"+esc(t.name)+"</h3><div class='sub'>"+nights(t)+" nights · "+esc(t.start)+" → "+esc(t.end)+(t.code?" · "+esc(t.code):"")+"</div>"+pill+"</div>"+
+        "<div class='cta'>"+(soldOut?"<span class='btn ghost'>Waitlist — message us</span>":"<a class='btn' href='"+interestLink(t)+"'>I'm interested →</a>")+"</div>"+
+      "</div>";
+    }).join("");
+  }catch(e){
+    el.innerHTML="<div class='empty'>Couldn't load departures right now — please try again in a minute.</div>";
+  }
+})();
+</script>
+</body>
+</html>
