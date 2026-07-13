@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How was your tour? · Island Explorer Birding Tours</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--sea:#0a6ed1;--sea-soft:#e7f1fb;--forest:#004c8f;--amber:#f0a400;
+    --ink:#1b2a4a;--ink-soft:#5a6a86;--line:#e2e8f1;--paper:#eef1f6;--surface:#fff}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+  .hero{background:linear-gradient(160deg,var(--forest),var(--sea));color:#fff;padding:38px 20px 54px;text-align:center}
+  .hero img{max-height:76px;max-width:210px;object-fit:contain;margin-bottom:10px;background:#fff;border-radius:12px;padding:6px 12px}
+  .hero h1{font-family:'Calistoga',Georgia,serif;font-size:clamp(22px,5vw,32px)}
+  .hero p{color:rgba(255,255,255,.85);margin-top:6px;font-size:14px}
+  .wrap{max-width:560px;margin:-30px auto 60px;padding:0 16px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:0 14px 30px -24px rgba(20,40,80,.35)}
+  .q{padding:14px 0;border-bottom:1px solid var(--line)}
+  .q:last-of-type{border-bottom:none}
+  .q label{display:block;font-weight:700;font-size:14.5px;margin-bottom:2px}
+  .q .hint{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+  .stars{display:flex;gap:6px}
+  .stars button{font-size:26px;background:none;border:none;cursor:pointer;color:#cfd8e6;padding:2px;transition:transform .1s,color .1s;line-height:1}
+  .stars button.on{color:var(--amber)}
+  .stars button:hover{transform:scale(1.15)}
+  .input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--ink)}
+  .input:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px var(--sea-soft)}
+  textarea.input{min-height:76px;resize:vertical}
+  .send{width:100%;margin-top:16px;background:var(--sea);color:#fff;font-weight:800;font-size:15px;padding:14px;border:none;border-radius:12px;cursor:pointer}
+  .send:hover{background:var(--forest)} .send:disabled{opacity:.6}
+  .ok{display:none;text-align:center;padding:34px 10px}
+  .ok .big{font-size:44px} .ok h2{font-family:'Calistoga',serif;margin:8px 0 6px}
+  .ok p{color:var(--ink-soft);font-size:14px}
+  .err{display:none;background:#fde4e5;color:#a3131a;border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
+  .foot{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:18px 16px 40px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <img src="assets/logo.png" alt="" onerror="this.style.display='none'">
+  <h1>How was your tour?</h1>
+  <p>Five quick taps — it helps us make every expedition better 🐦</p>
+</div>
+<div class="wrap"><div class="card">
+  <div id="formBody">
+    <div class="q"><label>Your name</label><div class="hint">So we know which trip to thank you for</div><input class="input" id="fb_name" placeholder="Full name"></div>
+    <div class="q"><label>Your guide</label><div class="hint">Knowledge, effort and company in the field</div><div class="stars" data-k="guide"></div></div>
+    <div class="q"><label>Hospitality</label><div class="hint">Stay, food and how we looked after you</div><div class="stars" data-k="hospitality"></div></div>
+    <div class="q"><label>Target species</label><div class="hint">Did we find the birds you came for?</div><div class="stars" data-k="targets"></div></div>
+    <div class="q"><label>Overall experience</label><div class="hint">The whole journey, start to finish</div><div class="stars" data-k="overall"></div></div>
+    <div class="q"><label>Anything else? <span style="font-weight:400;color:var(--ink-soft)">(optional)</span></label><textarea class="input" id="fb_comment" placeholder="A highlight, a suggestion, a bird we should have found…"></textarea></div>
+    <button class="send" id="sendBtn" onclick="send()">Send feedback</button>
+    <div class="err" id="err"></div>
+  </div>
+  <div class="ok" id="ok"><div class="big">🦜</div><h2>Thank you!</h2><p>Your feedback reached the team — we read every one.</p></div>
+</div></div>
+<div class="foot">Island Explorer Birding Tours · Andaman &amp; Nicobar Islands</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const P=new URLSearchParams(location.search);
+const WORKSPACE=P.get("ws")||"island-explorer";
+const TOUR=P.get("tour")||"";
+const ratings={guide:0,hospitality:0,targets:0,overall:0};
+document.querySelectorAll(".stars").forEach(function(w){
+  var k=w.dataset.k;
+  for(var i=1;i<=5;i++){
+    (function(n){
+      var b=document.createElement("button");b.type="button";b.textContent="★";
+      b.onclick=function(){ratings[k]=n;Array.prototype.forEach.call(w.children,function(c,idx){c.classList.toggle("on",idx<n);});};
+      w.appendChild(b);
+    })(i);
+  }
+});
+async function send(){
+  var name=(document.getElementById("fb_name").value||"").trim();
+  var err=document.getElementById("err");err.style.display="none";
+  if(!name){err.textContent="Please add your name so we know which trip to thank you for.";err.style.display="block";return;}
+  if(!ratings.overall){err.textContent="Please rate your overall experience (last stars).";err.style.display="block";return;}
+  var btn=document.getElementById("sendBtn");btn.disabled=true;btn.textContent="Sending…";
+  try{
+    var sb=window.supabase.createClient(SB_URL,SB_KEY);
+    var rec={type:"feedback",status:"new",name:name,tour:TOUR,
+      id:"S"+Date.now()+Math.floor(Math.random()*100000),
+      created_at:new Date().toISOString(),workspace:WORKSPACE,
+      data:{ratings:ratings,comment:(document.getElementById("fb_comment").value||"").slice(0,600)}};
+    var res=await sb.from("workspaces").insert({id:"sub_"+rec.id,data:rec,updated_at:rec.created_at});
+    if(res.error)throw res.error;
+    document.getElementById("formBody").style.display="none";
+    document.getElementById("ok").style.display="block";
+  }catch(e){
+    btn.disabled=false;btn.textContent="Send feedback";
+    err.textContent="Could not send: "+(e.message||e)+". Please try again.";err.style.display="block";
+  }
+}
+</script>
+</body>
+</html>

@@ -11,10 +11,10 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v42"; /* v42: Invoices module split out, Cost Calculator redesign, Review collector, public departures page */
+var CACHE = "ie-ops-v43"; /* v43: review+feedback collector, public-page tour picker, tour tab counts + archive + zoom, analytics filters */
 var SHELL = [
   "config.js",
-  "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "index.html",
+  "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
   "manifest.json", "driver-manifest.json", "guide-manifest.json",
   "assets/logo.png", "assets/logo.jpg", "assets/icon.svg", "assets/icon-192.png", "assets/icon-512.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"

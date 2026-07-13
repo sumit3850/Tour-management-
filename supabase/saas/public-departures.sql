@@ -44,6 +44,8 @@ begin
     from jsonb_array_elements(coalesce(blob->'tours','[]'::jsonb)) t
     where (t->>'end') >= to_char(current_date,'YYYY-MM-DD')
       and coalesce(t->>'status','open') not in ('completed','closed')
+      and (t->>'pub') = 'true'            -- only tours the owner marked 🌐 Public
+      and coalesce(t->>'archived','') <> 'true'
   ) s;
 
   return jsonb_build_object('company', comp, 'tours', out_tours);

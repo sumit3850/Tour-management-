@@ -29,6 +29,9 @@
   .pill.open{background:#e2f6ef;color:#066a52}
   .pill.few{background:#fdf0d2;color:#8a5a00}
   .pill.full{background:#fde4e5;color:#a3131a}
+  .seatbar{height:6px;background:var(--sea-soft);border-radius:99px;overflow:hidden;margin-top:8px;max-width:280px}
+  .seatbar i{display:block;height:100%;background:linear-gradient(90deg,var(--sea),var(--forest));border-radius:99px}
+  .seatnum{font-size:11.5px;color:var(--ink-soft);margin-top:4px;font-variant-numeric:tabular-nums}
   .cta{flex-shrink:0}
   .btn{display:inline-block;background:var(--sea);color:#fff;font-weight:700;font-size:13.5px;padding:12px 20px;border-radius:11px;text-decoration:none;transition:background .15s}
   .btn:hover{background:var(--forest)}
@@ -60,7 +63,7 @@ function interestLink(t){
   var base=location.href.split("?")[0].replace(/[^/]*$/,"");
   return base+"register.html?type=interest&ws="+encodeURIComponent(WS)+"&tour="+encodeURIComponent(t.name||"");
 }
-(async function(){
+async function load(){
   var el=document.getElementById("list");
   try{
     var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -73,18 +76,22 @@ function interestLink(t){
     el.innerHTML=tours.map(function(t){
       var d=new Date(t.start+"T00:00:00");
       var left=Math.max((t.cap||0)-(t.booked||0),0);
+      var pct=t.cap>0?Math.min(Math.round((t.booked||0)/t.cap*100),100):0;
       var soldOut=t.cap>0&&left<=0;
       var pill=soldOut?"<span class='pill full'>Fully booked</span>":(left<=2&&t.cap>0?"<span class='pill few'>Only "+left+" seat"+(left>1?"s":"")+" left</span>":"<span class='pill open'>"+(t.cap>0?left+" seats available":"Open")+"</span>");
+      var seats=t.cap>0?"<div class='seatbar'><i style='width:"+pct+"%'></i></div><div class='seatnum'>"+(t.booked||0)+" of "+t.cap+" seats taken · "+pct+"% full</div>":"";
       return "<div class='card'>"+
         "<div class='date'><div class='m'>"+MONTHS[d.getMonth()]+"</div><div class='d'>"+d.getDate()+"</div><div class='m'>"+d.getFullYear()+"</div></div>"+
-        "<div class='meta'><h3>"+esc(t.name)+"</h3><div class='sub'>"+nights(t)+" nights · "+esc(t.start)+" → "+esc(t.end)+(t.code?" · "+esc(t.code):"")+"</div>"+pill+"</div>"+
+        "<div class='meta'><h3>"+esc(t.name)+"</h3><div class='sub'>"+nights(t)+" nights · "+esc(t.start)+" → "+esc(t.end)+(t.code?" · "+esc(t.code):"")+"</div>"+pill+seats+"</div>"+
         "<div class='cta'>"+(soldOut?"<span class='btn ghost'>Waitlist — message us</span>":"<a class='btn' href='"+interestLink(t)+"'>I'm interested →</a>")+"</div>"+
       "</div>";
     }).join("");
   }catch(e){
     el.innerHTML="<div class='empty'>Couldn't load departures right now — please try again in a minute.</div>";
   }
-})();
+}
+load();
+setInterval(load,60000); /* live board: seat counts refresh every minute */
 </script>
 </body>
 </html>
