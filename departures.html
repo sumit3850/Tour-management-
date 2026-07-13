@@ -27,13 +27,6 @@
   .brandcard .cin{color:#c0622a;font-weight:700;font-size:13px;letter-spacing:.02em;margin-top:6px}
   .brandcard .addr{color:#3a4a43;margin-top:8px;font-size:13px;line-height:1.6;max-width:640px;margin-left:auto;margin-right:auto}
   .brandcard .contact{color:#3a4a43;margin-top:6px;font-size:13px}
-  .linkrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
-  .biglink{display:inline-flex;align-items:center;gap:9px;font-size:16.5px;font-weight:800;text-decoration:none;
-    padding:13px 22px;border-radius:14px;transition:transform .15s,box-shadow .15s}
-  .biglink:hover{transform:translateY(-2px)}
-  .biglink.wa{background:#e5f8ee;color:#0a7a4b;box-shadow:0 10px 22px -14px rgba(10,122,75,.6)}
-  .biglink.em{background:var(--sea-soft);color:var(--forest);box-shadow:0 10px 22px -14px rgba(10,110,209,.6)}
-  .biglink.web{background:#fdf3da;color:#8a5a00;box-shadow:0 10px 22px -14px rgba(240,164,0,.55)}
 
   .cats{display:flex;gap:8px;flex-wrap:wrap;margin:0 2px 18px}
   .cat{background:#f2f5fa;border:1px solid var(--line);color:var(--ink-soft);font-weight:700;font-size:12.5px;
@@ -104,11 +97,6 @@
     <div class="cin" id="coCin">CIN: U79120AN2026PTC006196</div>
     <div class="addr" id="coAddr">Sri Ram Nagar, Attam Pahad, Garacharma, Opp. Shiv Mandir, Sri Vijaya Puram, South Andaman, Andaman and Nicobar Islands - 744105, India</div>
     <div class="contact" id="coContact">Mob: +91 99332 02175; Email: info@islandexplorer.in; Web: www.islandexplorer.in</div>
-    <div class="linkrow">
-      <a class="biglink wa" id="lnkWa" href="#">💬 WhatsApp us</a>
-      <a class="biglink em" id="lnkEm" href="#">✉️ Email your query</a>
-      <a class="biglink web" id="lnkWeb" href="#" target="_blank" rel="noopener">🌐 Website</a>
-    </div>
   </div>
 
   <div class="secttl"><h2 id="pgTitle">Scheduled Tours</h2><span class="ln"></span><span class="live"><i></i>LIVE SEATS</span></div>
@@ -149,10 +137,6 @@ if(B.cin)document.getElementById("coCin").textContent="CIN: "+B.cin;
 if(CO.addr)document.getElementById("coAddr").textContent=CO.addr;
 document.getElementById("coContact").textContent="Mob: "+(B.phone||"+91 99332 02175")+"; Email: "+CO.email+"; Web: "+CO.web.replace(/^https?:\/\//i,"");
 document.getElementById("footLine").textContent=CO.name+" · Andaman & Nicobar Islands · India";
-document.getElementById("lnkWa").href=waHref();
-document.getElementById("lnkEm").href=emHref(null);
-document.getElementById("lnkWeb").href=/^https?:/i.test(CO.web)?CO.web:("https://"+CO.web);
-document.getElementById("lnkWeb").textContent="🌐 "+CO.web.replace(/^https?:\/\//i,"");
 
 /* tour categories (same keys the console uses) */
 const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",
@@ -163,7 +147,7 @@ function setCat(c){FILTER=c;render({company:null,tours:TOURS},true);}
 function catRow(){
   var present={};TOURS.forEach(function(t){if(t.cat)present[t.cat]=1;});
   var keys=Object.keys(present);
-  if(keys.length<2){document.getElementById("catRow").innerHTML="";return;}
+  if(!TOURS.length){document.getElementById("catRow").innerHTML="";return;}
   document.getElementById("catRow").innerHTML=
     "<button class='cat "+(FILTER==="all"?"on":"")+"' onclick=\"setCat('all')\">All scheduled tours ("+TOURS.length+")</button>"+
     keys.map(function(k){var n=TOURS.filter(function(t){return t.cat===k;}).length;
