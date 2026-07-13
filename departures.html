@@ -6,49 +6,111 @@
 <title>Upcoming Departures · Island Explorer Birding Tours</title>
 <link rel="icon" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root{--sea:#0a6ed1;--sea-soft:#e7f1fb;--forest:#004c8f;--amber:#f0a400;--coral:#ed232a;
-    --ink:#1b2a4a;--ink-soft:#5a6a86;--line:#e2e8f1;--paper:#eef1f6;--surface:#fff}
+  :root{--sea:#0a6ed1;--sea-soft:#e7f1fb;--forest:#004c8f;--amber:#f0a400;
+    --ink:#1b2a4a;--ink-soft:#5a6a86;--line:#e2e8f1;--surface:#fff}
   *{box-sizing:border-box;margin:0}
-  body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
-  .hero{background:linear-gradient(160deg,var(--forest),#0a6ed1);color:#fff;padding:44px 20px 60px;text-align:center}
-  .hero img{max-height:84px;max-width:230px;object-fit:contain;margin-bottom:12px;background:#fff;border-radius:12px;padding:6px 12px}
-  .hero h1{font-family:'Calistoga',Georgia,serif;font-size:clamp(24px,5vw,36px);line-height:1.15}
-  .hero p{color:rgba(255,255,255,.85);margin-top:8px;font-size:14.5px}
-  .wrap{max-width:860px;margin:-34px auto 60px;padding:0 16px}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;
-    display:flex;gap:16px;align-items:center;flex-wrap:wrap;box-shadow:0 14px 30px -24px rgba(20,40,80,.35)}
-  .date{flex-shrink:0;width:74px;text-align:center;background:var(--sea-soft);border-radius:12px;padding:10px 6px}
-  .date .d{font-family:'Calistoga',serif;font-size:24px;color:var(--forest);line-height:1.1}
-  .date .m{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--sea);font-weight:700}
-  .meta{flex:1;min-width:200px}
-  .meta h3{font-size:16.5px;line-height:1.3}
-  .meta .sub{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
-  .pill{display:inline-block;font-size:11px;font-weight:700;padding:4px 11px;border-radius:99px;margin-top:8px}
-  .pill.open{background:#e2f6ef;color:#066a52}
-  .pill.few{background:#fdf0d2;color:#8a5a00}
+  body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--ink);min-height:100vh;overflow-x:hidden}
+  /* soft ambient colour, keeps the page white but alive */
+  .glow{position:fixed;border-radius:50%;filter:blur(90px);opacity:.16;pointer-events:none;z-index:0}
+  .glow.a{width:480px;height:480px;background:var(--sea);top:-160px;right:-120px}
+  .glow.b{width:420px;height:420px;background:var(--amber);bottom:-180px;left:-140px}
+
+  .page{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:34px 18px 70px}
+
+  /* ===== company header ===== */
+  .brandcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:30px 26px;text-align:center;
+    box-shadow:0 1px 2px rgba(20,40,80,.05),0 12px 28px -18px rgba(20,40,80,.25),0 34px 70px -40px rgba(10,110,209,.35);
+    animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+  .brandcard img{max-height:110px;max-width:300px;object-fit:contain;margin-bottom:10px}
+  .brandcard h1{font-family:'Calistoga',Georgia,serif;font-size:clamp(24px,4.6vw,34px);color:var(--forest);line-height:1.15;text-wrap:balance}
+  .brandcard .tag{color:var(--ink-soft);margin-top:6px;font-size:14.5px}
+  .brandcard .addr{color:var(--ink-soft);margin-top:10px;font-size:12.5px;line-height:1.5}
+  .linkrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .biglink{display:inline-flex;align-items:center;gap:9px;font-size:16.5px;font-weight:800;text-decoration:none;
+    padding:13px 22px;border-radius:14px;transition:transform .15s,box-shadow .15s}
+  .biglink:hover{transform:translateY(-2px)}
+  .biglink.wa{background:#e5f8ee;color:#0a7a4b;box-shadow:0 10px 22px -14px rgba(10,122,75,.6)}
+  .biglink.em{background:var(--sea-soft);color:var(--forest);box-shadow:0 10px 22px -14px rgba(10,110,209,.6)}
+  .biglink.web{background:#fdf3da;color:#8a5a00;box-shadow:0 10px 22px -14px rgba(240,164,0,.55)}
+
+  .secttl{display:flex;align-items:center;gap:12px;margin:34px 4px 16px}
+  .secttl h2{font-family:'Calistoga',serif;font-size:21px;color:var(--ink)}
+  .secttl .ln{flex:1;height:2px;background:linear-gradient(90deg,var(--line),transparent)}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#0a7a4b;background:#e5f8ee;border-radius:99px;padding:4px 11px}
+  .live i{width:7px;height:7px;border-radius:50%;background:#12b76a;animation:pulse 1.6s infinite}
+
+  /* ===== tour cards, 3D ===== */
+  .tcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;margin-bottom:18px;
+    display:flex;gap:18px;align-items:center;flex-wrap:wrap;
+    box-shadow:0 1px 2px rgba(20,40,80,.05),0 14px 30px -20px rgba(20,40,80,.3);
+    transform-style:preserve-3d;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;
+    animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+  .tcard:hover{transform:translateY(-5px) rotateX(1.6deg);box-shadow:0 2px 3px rgba(20,40,80,.06),0 26px 48px -22px rgba(10,110,209,.4)}
+  .tcard:nth-child(2){animation-delay:.06s}.tcard:nth-child(3){animation-delay:.12s}.tcard:nth-child(4){animation-delay:.18s}
+  .date{flex-shrink:0;width:86px;text-align:center;background:linear-gradient(160deg,var(--forest),var(--sea));color:#fff;border-radius:16px;padding:13px 6px;
+    box-shadow:0 12px 22px -12px rgba(10,110,209,.7);transform:translateZ(24px)}
+  .date .d{font-family:'Calistoga',serif;font-size:30px;line-height:1.05}
+  .date .m{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;opacity:.9}
+  .meta{flex:1;min-width:230px}
+  .meta h3{font-size:17.5px;font-weight:800;line-height:1.3}
+  .meta .dates{font-size:16px;font-weight:800;color:var(--forest);margin-top:6px;font-variant-numeric:tabular-nums}
+  .meta .dates small{font-weight:600;color:var(--ink-soft);font-size:12.5px}
+  .pill{display:inline-block;font-size:11px;font-weight:800;padding:4px 12px;border-radius:99px;margin-top:9px}
+  .pill.open{background:#e5f8ee;color:#0a7a4b}
+  .pill.few{background:#fdf3da;color:#8a5a00}
   .pill.full{background:#fde4e5;color:#a3131a}
-  .seatbar{height:6px;background:var(--sea-soft);border-radius:99px;overflow:hidden;margin-top:8px;max-width:280px}
-  .seatbar i{display:block;height:100%;background:linear-gradient(90deg,var(--sea),var(--forest));border-radius:99px}
-  .seatnum{font-size:11.5px;color:var(--ink-soft);margin-top:4px;font-variant-numeric:tabular-nums}
+  .seatbar{height:7px;background:var(--sea-soft);border-radius:99px;overflow:hidden;margin-top:9px;max-width:300px}
+  .seatbar i{display:block;height:100%;background:linear-gradient(90deg,var(--sea),var(--forest));border-radius:99px;transition:width .6s}
+  .seatnum{font-size:12px;color:var(--ink-soft);margin-top:5px;font-variant-numeric:tabular-nums}
   .cta{flex-shrink:0}
-  .btn{display:inline-block;background:var(--sea);color:#fff;font-weight:700;font-size:13.5px;padding:12px 20px;border-radius:11px;text-decoration:none;transition:background .15s}
-  .btn:hover{background:var(--forest)}
-  .btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);pointer-events:none}
-  .empty,.loading{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:44px 20px;text-align:center;color:var(--ink-soft);font-size:14px}
-  .foot{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:0 16px 40px}
-  .foot a{color:var(--sea)}
+  .btn{display:inline-block;background:linear-gradient(160deg,var(--sea),var(--forest));color:#fff;font-weight:800;font-size:14px;
+    padding:14px 22px;border-radius:13px;text-decoration:none;border:none;cursor:pointer;font-family:inherit;
+    box-shadow:0 14px 26px -14px rgba(10,110,209,.8);transition:transform .15s,box-shadow .15s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 20px 34px -16px rgba(10,110,209,.85)}
+  .btn.ghost{background:#f2f5fa;color:var(--ink-soft);box-shadow:none;pointer-events:none}
+
+  /* per-card contact chooser */
+  .choose{display:none;width:100%;margin-top:6px;padding-top:14px;border-top:1px dashed var(--line)}
+  .choose.on{display:block;animation:rise .3s both}
+  .choose .lbl{font-size:12px;color:var(--ink-soft);margin-bottom:10px}
+  .choose .row{display:flex;gap:10px;flex-wrap:wrap}
+  .choose a{flex:1;min-width:180px;text-align:center;text-decoration:none;font-weight:800;font-size:14.5px;padding:14px;border-radius:13px;transition:transform .15s}
+  .choose a:hover{transform:translateY(-2px)}
+  .choose a.wa{background:#e5f8ee;color:#0a7a4b;box-shadow:0 12px 24px -14px rgba(10,122,75,.6)}
+  .choose a.em{background:var(--sea-soft);color:var(--forest);box-shadow:0 12px 24px -14px rgba(10,110,209,.6)}
+  .choose .alt{display:block;text-align:center;font-size:12px;color:var(--ink-soft);margin-top:10px}
+  .choose .alt a{color:var(--sea);font-weight:700}
+
+  .empty,.loading{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:46px 20px;text-align:center;color:var(--ink-soft);font-size:14px;box-shadow:0 14px 30px -20px rgba(20,40,80,.3)}
+  .foot{text-align:center;color:var(--ink-soft);font-size:12.5px;padding:26px 16px 10px}
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="hero">
-  <img src="assets/logo.png" alt="" onerror="this.style.display='none'">
-  <h1 id="pgTitle">Upcoming Birding Departures</h1>
-  <p>Endemic birding tours across the Andaman &amp; Nicobar Islands · small groups · expert guides</p>
+<div class="glow a"></div><div class="glow b"></div>
+<div class="page">
+
+  <div class="brandcard">
+    <img src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
+    <h1 id="coName">Island Explorer Birding Tours</h1>
+    <div class="tag">Endemic birding expeditions · Andaman &amp; Nicobar Islands · small groups · expert guides</div>
+    <div class="addr" id="coAddr">Sri Ram Nagar, Attam Pahad, Garacharma, Sri Vijaya Puram, South Andaman, A&amp;N Islands – 744105, India</div>
+    <div class="linkrow">
+      <a class="biglink wa" id="lnkWa" href="#">💬 WhatsApp us</a>
+      <a class="biglink em" id="lnkEm" href="#">✉️ Email your query</a>
+      <a class="biglink web" id="lnkWeb" href="#" target="_blank" rel="noopener">🌐 Website</a>
+    </div>
+  </div>
+
+  <div class="secttl"><h2 id="pgTitle">Upcoming Departures</h2><span class="ln"></span><span class="live"><i></i>LIVE SEATS</span></div>
+  <div id="list"><div class="loading">Loading departures…</div></div>
+
+  <div class="foot" id="footLine">Island Explorer Birding Tours · Andaman &amp; Nicobar Islands · India</div>
 </div>
-<div class="wrap" id="list"><div class="loading">Loading departures…</div></div>
-<div class="foot">Questions? WhatsApp <a href="https://wa.me/919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -56,38 +118,73 @@
 const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const WS=new URLSearchParams(location.search).get("ws")||"island-explorer";
+const B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+const CO={name:B.company||"Island Explorer Birding Tours",
+  phone:(B.phone||"+91 9933202175").replace(/\D/g,""),
+  email:B.contactEmail||"info@islandexplorer.in",
+  web:B.web||"www.islandexplorer.in",
+  addr:B.address||""};
 const MONTHS=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function ddmmyyyy(iso){if(!iso)return "";var p=String(iso).slice(0,10).split("-");return p.length===3?(p[2]+"-"+p[1]+"-"+p[0]):iso;}
 function nights(t){try{return Math.max(Math.round((new Date(t.end)-new Date(t.start))/86400000),1);}catch(e){return "";}}
-function interestLink(t){
-  var base=location.href.split("?")[0].replace(/[^/]*$/,"");
-  return base+"register.html?type=interest&ws="+encodeURIComponent(WS)+"&tour="+encodeURIComponent(t.name||"");
+/* Pre-filled enquiry per tour: name + code + DD-MM-YYYY dates travel with the click. */
+function tourMsg(t){return "Hi! I'm interested in \""+t.name+"\""+(t.code?" ("+t.code+")":"")+", "+ddmmyyyy(t.start)+" to "+ddmmyyyy(t.end)+". Please share the details and price.";}
+/* encodeURIComponent leaves ' ( ) ! unescaped — they break single-quoted HTML
+   attributes and some mail apps, so percent-encode them too. */
+function encAll(s){return encodeURIComponent(s).replace(/'/g,"%27").replace(/\(/g,"%28").replace(/\)/g,"%29").replace(/!/g,"%21");}
+function waHref(msg){return "https://wa.me/"+CO.phone+"?text="+encAll(msg||"Hi! I have a query about your birding tours.");}
+function emHref(t){var sub=t?("Tour enquiry: "+t.name+(t.code?" ("+t.code+")":"")):("Tour enquiry · "+CO.name);
+  return "mailto:"+CO.email+"?subject="+encAll(sub)+"&body="+encAll(t?tourMsg(t):"Hi! I have a query about your birding tours.");}
+function interestForm(t){var base=location.href.split("?")[0].replace(/[^/]*$/,"");
+  return base+"register.html?type=interest&ws="+encodeURIComponent(WS)+"&tour="+encodeURIComponent(t.name||"");}
+/* company header links */
+document.getElementById("coName").textContent=CO.name;
+if(CO.addr)document.getElementById("coAddr").textContent=CO.addr;
+document.getElementById("footLine").textContent=CO.name+" · Andaman & Nicobar Islands · India";
+document.getElementById("lnkWa").href=waHref();
+document.getElementById("lnkEm").href=emHref(null);
+document.getElementById("lnkWeb").href=/^https?:/i.test(CO.web)?CO.web:("https://"+CO.web);
+document.getElementById("lnkWeb").textContent="🌐 "+CO.web.replace(/^https?:\/\//i,"");
+
+let TOURS=[];
+function toggleChoose(i){var el=document.getElementById("ch"+i);if(el)el.classList.toggle("on");}
+function render(data){
+  var el=document.getElementById("list");
+  if(!data){el.innerHTML="<div class='empty'>This departures board isn't available. Please contact us directly.</div>";return;}
+  if(data.company){document.getElementById("coName").textContent=data.company;document.getElementById("footLine").textContent=data.company+" · Andaman & Nicobar Islands · India";}
+  TOURS=(data.tours||[]);
+  if(!TOURS.length){el.innerHTML="<div class='empty'>New season dates are being finalised — WhatsApp us and we'll let you know first! 🐦</div>";return;}
+  el.innerHTML=TOURS.map(function(t,i){
+    var d=new Date(t.start+"T00:00:00");
+    var left=Math.max((t.cap||0)-(t.booked||0),0);
+    var pct=t.cap>0?Math.min(Math.round((t.booked||0)/t.cap*100),100):0;
+    var soldOut=t.cap>0&&left<=0;
+    var pill=soldOut?"<span class='pill full'>Fully booked</span>":(left<=2&&t.cap>0?"<span class='pill few'>Only "+left+" seat"+(left>1?"s":"")+" left</span>":"<span class='pill open'>"+(t.cap>0?left+" seats available":"Open")+"</span>");
+    var seats=t.cap>0?"<div class='seatbar'><i style='width:"+pct+"%'></i></div><div class='seatnum'>"+(t.booked||0)+" of "+t.cap+" seats taken · "+pct+"% full</div>":"";
+    return "<div class='tcard'>"+
+      "<div class='date'><div class='m'>"+MONTHS[d.getMonth()]+"</div><div class='d'>"+d.getDate()+"</div><div class='m'>"+d.getFullYear()+"</div></div>"+
+      "<div class='meta'><h3>"+esc(t.name)+"</h3>"+
+        "<div class='dates'>"+ddmmyyyy(t.start)+" → "+ddmmyyyy(t.end)+" <small>· "+nights(t)+" nights"+(t.code?" · "+esc(t.code):"")+"</small></div>"+
+        pill+seats+"</div>"+
+      "<div class='cta'>"+(soldOut?"<span class='btn ghost'>Waitlist — WhatsApp us</span>":"<button class='btn' onclick='toggleChoose("+i+")'>I'm interested →</button>")+"</div>"+
+      "<div class='choose' id='ch"+i+"'><div class='lbl'>Your enquiry will carry: <b>"+esc(t.name)+(t.code?" ("+esc(t.code)+")":"")+" · "+ddmmyyyy(t.start)+" → "+ddmmyyyy(t.end)+"</b></div>"+
+        "<div class='row'>"+
+          "<a class='wa' href='"+waHref(tourMsg(t))+"' target='_blank' rel='noopener'>💬 Chat on WhatsApp</a>"+
+          "<a class='em' href='"+emHref(t)+"'>✉️ Mail your query</a>"+
+        "</div>"+
+        "<span class='alt'>prefer a form? <a href='"+interestForm(t)+"'>leave your details →</a></span>"+
+      "</div>"+
+    "</div>";
+  }).join("");
 }
 async function load(){
-  var el=document.getElementById("list");
   try{
     var sb=window.supabase.createClient(SB_URL,SB_KEY);
     var r=await sb.rpc("get_public_departures",{p_workspace:WS});
-    var data=r.data;
-    if(!data){el.innerHTML="<div class='empty'>This departures board isn't available. Please contact us directly.</div>";return;}
-    if(data.company)document.getElementById("pgTitle").textContent="Upcoming Departures · "+data.company;
-    var tours=(data.tours||[]);
-    if(!tours.length){el.innerHTML="<div class='empty'>New season dates are being finalised — message us on WhatsApp and we'll let you know first! 🐦</div>";return;}
-    el.innerHTML=tours.map(function(t){
-      var d=new Date(t.start+"T00:00:00");
-      var left=Math.max((t.cap||0)-(t.booked||0),0);
-      var pct=t.cap>0?Math.min(Math.round((t.booked||0)/t.cap*100),100):0;
-      var soldOut=t.cap>0&&left<=0;
-      var pill=soldOut?"<span class='pill full'>Fully booked</span>":(left<=2&&t.cap>0?"<span class='pill few'>Only "+left+" seat"+(left>1?"s":"")+" left</span>":"<span class='pill open'>"+(t.cap>0?left+" seats available":"Open")+"</span>");
-      var seats=t.cap>0?"<div class='seatbar'><i style='width:"+pct+"%'></i></div><div class='seatnum'>"+(t.booked||0)+" of "+t.cap+" seats taken · "+pct+"% full</div>":"";
-      return "<div class='card'>"+
-        "<div class='date'><div class='m'>"+MONTHS[d.getMonth()]+"</div><div class='d'>"+d.getDate()+"</div><div class='m'>"+d.getFullYear()+"</div></div>"+
-        "<div class='meta'><h3>"+esc(t.name)+"</h3><div class='sub'>"+nights(t)+" nights · "+esc(t.start)+" → "+esc(t.end)+(t.code?" · "+esc(t.code):"")+"</div>"+pill+seats+"</div>"+
-        "<div class='cta'>"+(soldOut?"<span class='btn ghost'>Waitlist — message us</span>":"<a class='btn' href='"+interestLink(t)+"'>I'm interested →</a>")+"</div>"+
-      "</div>";
-    }).join("");
+    render(r.data);
   }catch(e){
-    el.innerHTML="<div class='empty'>Couldn't load departures right now — please try again in a minute.</div>";
+    document.getElementById("list").innerHTML="<div class='empty'>Couldn't load departures right now — please try again in a minute.</div>";
   }
 }
 load();
