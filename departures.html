@@ -23,10 +23,10 @@
   .brandcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:30px 26px;text-align:center;
     box-shadow:0 1px 2px rgba(20,40,80,.05),0 12px 28px -18px rgba(20,40,80,.25),0 34px 70px -40px rgba(10,110,209,.35);
     animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
-  .brandcard img{max-height:110px;max-width:300px;object-fit:contain;margin-bottom:10px}
-  .brandcard h1{font-family:'Calistoga',Georgia,serif;font-size:clamp(24px,4.6vw,34px);color:var(--forest);line-height:1.15;text-wrap:balance}
-  .brandcard .tag{color:var(--ink-soft);margin-top:6px;font-size:14.5px}
-  .brandcard .addr{color:var(--ink-soft);margin-top:10px;font-size:12.5px;line-height:1.5}
+  .brandcard img{max-height:120px;max-width:320px;object-fit:contain;margin-bottom:8px}
+  .brandcard .cin{color:#c0622a;font-weight:700;font-size:13px;letter-spacing:.02em;margin-top:6px}
+  .brandcard .addr{color:#3a4a43;margin-top:8px;font-size:13px;line-height:1.6;max-width:640px;margin-left:auto;margin-right:auto}
+  .brandcard .contact{color:#3a4a43;margin-top:6px;font-size:13px}
   .linkrow{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:18px}
   .biglink{display:inline-flex;align-items:center;gap:9px;font-size:16.5px;font-weight:800;text-decoration:none;
     padding:13px 22px;border-radius:14px;transition:transform .15s,box-shadow .15s}
@@ -35,6 +35,11 @@
   .biglink.em{background:var(--sea-soft);color:var(--forest);box-shadow:0 10px 22px -14px rgba(10,110,209,.6)}
   .biglink.web{background:#fdf3da;color:#8a5a00;box-shadow:0 10px 22px -14px rgba(240,164,0,.55)}
 
+  .cats{display:flex;gap:8px;flex-wrap:wrap;margin:0 2px 18px}
+  .cat{background:#f2f5fa;border:1px solid var(--line);color:var(--ink-soft);font-weight:700;font-size:12.5px;
+    padding:9px 16px;border-radius:99px;cursor:pointer;font-family:inherit;transition:all .15s}
+  .cat:hover{transform:translateY(-1px);border-color:var(--sea)}
+  .cat.on{background:linear-gradient(160deg,var(--sea),var(--forest));color:#fff;border-color:transparent;box-shadow:0 10px 20px -12px rgba(10,110,209,.8)}
   .secttl{display:flex;align-items:center;gap:12px;margin:34px 4px 16px}
   .secttl h2{font-family:'Calistoga',serif;font-size:21px;color:var(--ink)}
   .secttl .ln{flex:1;height:2px;background:linear-gradient(90deg,var(--line),transparent)}
@@ -95,10 +100,10 @@
 <div class="page">
 
   <div class="brandcard">
-    <img src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-    <h1 id="coName">Island Explorer Birding Tours</h1>
-    <div class="tag">Endemic birding expeditions · Andaman &amp; Nicobar Islands · small groups · expert guides</div>
-    <div class="addr" id="coAddr">Sri Ram Nagar, Attam Pahad, Garacharma, Sri Vijaya Puram, South Andaman, A&amp;N Islands – 744105, India</div>
+    <img src="assets/logo.png" alt="Island Explorer Birding Tours" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
+    <div class="cin" id="coCin">CIN: U79120AN2026PTC006196</div>
+    <div class="addr" id="coAddr">Sri Ram Nagar, Attam Pahad, Garacharma, Opp. Shiv Mandir, Sri Vijaya Puram, South Andaman, Andaman and Nicobar Islands - 744105, India</div>
+    <div class="contact" id="coContact">Mob: +91 99332 02175; Email: info@islandexplorer.in; Web: www.islandexplorer.in</div>
     <div class="linkrow">
       <a class="biglink wa" id="lnkWa" href="#">💬 WhatsApp us</a>
       <a class="biglink em" id="lnkEm" href="#">✉️ Email your query</a>
@@ -106,7 +111,8 @@
     </div>
   </div>
 
-  <div class="secttl"><h2 id="pgTitle">Upcoming Departures</h2><span class="ln"></span><span class="live"><i></i>LIVE SEATS</span></div>
+  <div class="secttl"><h2 id="pgTitle">Scheduled Tours</h2><span class="ln"></span><span class="live"><i></i>LIVE SEATS</span></div>
+  <div class="cats" id="catRow"></div>
   <div id="list"><div class="loading">Loading departures…</div></div>
 
   <div class="foot" id="footLine">Island Explorer Birding Tours · Andaman &amp; Nicobar Islands · India</div>
@@ -138,24 +144,42 @@ function emHref(t){var sub=t?("Tour enquiry: "+t.name+(t.code?" ("+t.code+")":""
   return "mailto:"+CO.email+"?subject="+encAll(sub)+"&body="+encAll(t?tourMsg(t):"Hi! I have a query about your birding tours.");}
 function interestForm(t){var base=location.href.split("?")[0].replace(/[^/]*$/,"");
   return base+"register.html?type=interest&ws="+encodeURIComponent(WS)+"&tour="+encodeURIComponent(t.name||"");}
-/* company header links */
-document.getElementById("coName").textContent=CO.name;
+/* company header — same content as the document letterhead, nothing extra */
+if(B.cin)document.getElementById("coCin").textContent="CIN: "+B.cin;
 if(CO.addr)document.getElementById("coAddr").textContent=CO.addr;
+document.getElementById("coContact").textContent="Mob: "+(B.phone||"+91 99332 02175")+"; Email: "+CO.email+"; Web: "+CO.web.replace(/^https?:\/\//i,"");
 document.getElementById("footLine").textContent=CO.name+" · Andaman & Nicobar Islands · India";
 document.getElementById("lnkWa").href=waHref();
 document.getElementById("lnkEm").href=emHref(null);
 document.getElementById("lnkWeb").href=/^https?:/i.test(CO.web)?CO.web:("https://"+CO.web);
 document.getElementById("lnkWeb").textContent="🌐 "+CO.web.replace(/^https?:\/\//i,"");
 
-let TOURS=[];
+/* tour categories (same keys the console uses) */
+const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",
+  session:"Guided Session - Full Day","guided-night":"Guided Session - Night","guided-half":"Guided Session - Half Day",
+  narcondam:"Narcondam Expedition",anbirding:"A & N Birding Expeditions",custom:"Custom"};
+let TOURS=[],FILTER="all";
+function setCat(c){FILTER=c;render({company:null,tours:TOURS},true);}
+function catRow(){
+  var present={};TOURS.forEach(function(t){if(t.cat)present[t.cat]=1;});
+  var keys=Object.keys(present);
+  if(keys.length<2){document.getElementById("catRow").innerHTML="";return;}
+  document.getElementById("catRow").innerHTML=
+    "<button class='cat "+(FILTER==="all"?"on":"")+"' onclick=\"setCat('all')\">All scheduled tours ("+TOURS.length+")</button>"+
+    keys.map(function(k){var n=TOURS.filter(function(t){return t.cat===k;}).length;
+      return "<button class='cat "+(FILTER===k?"on":"")+"' onclick=\"setCat('"+k+"')\">"+(CATS[k]||k)+" ("+n+")</button>";}).join("");
+}
 function toggleChoose(i){var el=document.getElementById("ch"+i);if(el)el.classList.toggle("on");}
-function render(data){
+function render(data,keepTours){
   var el=document.getElementById("list");
   if(!data){el.innerHTML="<div class='empty'>This departures board isn't available. Please contact us directly.</div>";return;}
-  if(data.company){document.getElementById("coName").textContent=data.company;document.getElementById("footLine").textContent=data.company+" · Andaman & Nicobar Islands · India";}
-  TOURS=(data.tours||[]);
+  if(data.company){document.getElementById("footLine").textContent=data.company+" · Andaman & Nicobar Islands · India";}
+  if(!keepTours)TOURS=(data.tours||[]);
+  catRow();
+  var show=FILTER==="all"?TOURS:TOURS.filter(function(t){return t.cat===FILTER;});
   if(!TOURS.length){el.innerHTML="<div class='empty'>New season dates are being finalised — WhatsApp us and we'll let you know first! 🐦</div>";return;}
-  el.innerHTML=TOURS.map(function(t,i){
+  if(!show.length){el.innerHTML="<div class='empty'>No scheduled tours in this category right now — try All scheduled tours.</div>";return;}
+  el.innerHTML=show.map(function(t,i){
     var d=new Date(t.start+"T00:00:00");
     var left=Math.max((t.cap||0)-(t.booked||0),0);
     var pct=t.cap>0?Math.min(Math.round((t.booked||0)/t.cap*100),100):0;
