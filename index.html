@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 173</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 174</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 173</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 174</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3431,8 +3431,11 @@ function viewCostSheet(){
       "<div style='display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'>"+
         "<button class='btn btn-primary' onclick='saveCostSheet()'>Save cost sheet</button>"+
         "<button class='btn btn-ghost' onclick='renderCostSheet()'>Reload saved</button>"+
+        "<button class='btn btn-ghost' onclick='document.getElementById(\"csImportFile\").click()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><path d='M7 10l5 5 5-5'/><path d='M12 15V3'/></svg>Import rates (.xlsx)</button>"+
+        "<input type='file' id='csImportFile' accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' style='display:none' onchange='importRatesXlsx(this)'>"+
       "</div>"+
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:10px'>Edit any amount and press <b>Save cost sheet</b>. The Cost Calculator and both quotation generators then use these saved rates. Total = ship + accommodation + vehicle + guide + entry + food; per-person = total ÷ group size.</p>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'><b>Import rates (.xlsx)</b> migrates a reference sheet straight into this database — name each tab with the tour + client type (e.g. <i>South Andaman 5N Indian</i>, <i>Narcondam A V1 Foreigner</i>) with columns Pax · Nights · Rooms · Ship/Boat · Accommodation · Vehicle · Guide · Entry · Food (per-head or total). From a Google Sheet: <b>File → Download → Microsoft Excel (.xlsx)</b>, then upload it here.</p>"+
     "</div>"+
     "<div class='card' style='margin-bottom:16px'>"+
       "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>History</div><div class='h-sec' style='margin-bottom:6px'>Saved changes log</div></div>"+
@@ -3503,9 +3506,127 @@ function renderCsLog(){
   el.innerHTML=sheetChangeLog.slice(0,60).map(function(r){
     var d=new Date(r.ts);var when=isNaN(d.getTime())?(r.ts||""):(dmy(d)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2));
     return "<div style='display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:13px'>"+
-      "<div><b>"+(r.tourName||r.tour||"")+"</b> · "+(r.type||"")+" rates updated</div>"+
+      "<div><b>"+(r.tourName||r.tour||"")+"</b> · "+(r.type||"")+" rates updated"+(r.via?" <span style='color:var(--ink-soft)'>· "+r.via+"</span>":"")+"</div>"+
       "<div style='color:var(--ink-soft);white-space:nowrap'>"+when+"</div></div>";
   }).join("");
+}
+
+/* ---- Import rates from an uploaded .xlsx (rate card / Google Sheets export) ----
+   Every worksheet whose tab name identifies a tour + client type (e.g. "South
+   Andaman 5N Indian") is parsed and migrated into SHEET_DATA — the same database
+   the Cost Calculator and both quotation generators read. The header row is found
+   by its "Pax" cell and columns are matched by name, so a Google Sheet downloaded
+   as .xlsx imports exactly like the console's own rate-card workbook. Entry/Food
+   columns may be per-head (× pax) or totals; per-person re-rounds UP to ₹100. */
+function csTabTarget(name){
+  var s=String(name||"").toLowerCase();
+  var type=/foreign/.test(s)?"foreign":(/indian|domestic/.test(s)?"indian":null);
+  var key=null;
+  if(/narcondam/.test(s)){
+    if(/v1|(^|[^a-z])a([^a-z]|$)/.test(s))key="T8";
+    else if(/v2|(^|[^a-z])b([^a-z]|$)/.test(s))key="T9";
+    else if(/v3|road|(^|[^a-z])c([^a-z]|$)/.test(s))key="T10";
+  }
+  else if(/expedition|15\s*n/.test(s))key="T5";
+  else if(/nicobar/.test(s))key="T2";
+  else if(/custom/.test(s))key="TC";
+  else if(/5\s*n/.test(s))key="T1";
+  else if(/7\s*n/.test(s))key="T3";
+  else if(/8\s*n/.test(s))key="T4";
+  return (key&&type)?{key:key,type:type}:null;
+}
+function _csCellText(v){
+  if(v==null)return "";
+  if(typeof v==="object"){
+    if(v.richText)return v.richText.map(function(t){return t.text;}).join("");
+    if(v.result!==undefined&&v.result!==null)return String(v.result);
+    if(v.text!==undefined)return String(v.text);
+    return "";
+  }
+  return String(v);
+}
+function _csCellNum(row,c){
+  if(!c)return 0;
+  var v=row.getCell(c).value;
+  if(v&&typeof v==="object")v=(v.result!==undefined?v.result:_csCellText(v));
+  var n=parseFloat(v);return isFinite(n)?n:0;
+}
+/* Locate the header row (first cell reading "Pax"/"Guests"/…) and map each rate
+   column by its header text. Returns null when the sheet has no such table. */
+function csFindHeader(ws){
+  for(var r=1;r<=12;r++){
+    var row=ws.getRow(r),m={},hasPax=false;
+    for(var c=1;c<=20;c++){
+      var t=_csCellText(row.getCell(c).value).toLowerCase().trim();
+      if(!t)continue;
+      if(m.pax==null&&/^(pax|guests?|persons?|people|group ?size)\b/.test(t)){m.pax=c;hasPax=true;}
+      else if(m.nights==null&&/night/.test(t))m.nights=c;
+      else if(m.rooms==null&&/room/.test(t))m.rooms=c;
+      else if(m.ship==null&&/ship|boat|ferry/.test(t))m.ship=c;
+      else if(m.accommodation==null&&/accom|hotel|stay/.test(t))m.accommodation=c;
+      else if(m.vehicle==null&&/vehicle|transport/.test(t))m.vehicle=c;
+      else if(m.guide==null&&/guide/.test(t))m.guide=c;
+      else if(/entry|permit/.test(t)){if(/total/.test(t))m.entryTotal=c;else if(m.entryHead==null)m.entryHead=c;}
+      else if(/food|meal|cater/.test(t)){if(/total/.test(t))m.foodTotal=c;else if(m.foodHead==null)m.foodHead=c;}
+    }
+    if(hasPax&&m.accommodation!=null)return {row:r,cols:m};
+  }
+  return null;
+}
+function importRatesXlsx(input){
+  var file=input.files&&input.files[0];
+  input.value="";
+  if(!file)return;
+  var fname=String(file.name||"rates.xlsx").replace(/[<>]/g,"");
+  Promise.all([loadExcelJS(),file.arrayBuffer()]).then(function(res){
+    var wb=new res[0].Workbook();
+    return wb.xlsx.load(res[1]);
+  }).then(function(wb){
+    var staged=[],skipped=[];
+    wb.worksheets.forEach(function(ws){
+      var tgt=csTabTarget(ws.name);
+      if(!tgt){skipped.push(ws.name);return;}
+      var hdr=csFindHeader(ws);
+      if(!hdr){skipped.push(ws.name+" — no Pax header row");return;}
+      var rows={},count=0,m=hdr.cols;
+      for(var r=hdr.row+1;r<=hdr.row+40;r++){
+        var row=ws.getRow(r);
+        var pax=Math.round(_csCellNum(row,m.pax));
+        if(pax<1||pax>10)continue;
+        var entry=m.entryTotal?_csCellNum(row,m.entryTotal):_csCellNum(row,m.entryHead)*pax;
+        var food=m.foodTotal?_csCellNum(row,m.foodTotal):_csCellNum(row,m.foodHead)*pax;
+        var o={nights:_csCellNum(row,m.nights),rooms:_csCellNum(row,m.rooms),
+               ship:_csCellNum(row,m.ship),accommodation:_csCellNum(row,m.accommodation),
+               vehicle:_csCellNum(row,m.vehicle),guide:_csCellNum(row,m.guide),
+               entry:entry,food:food};
+        o.total=o.ship+o.accommodation+o.vehicle+o.guide+o.entry+o.food;
+        o.perPerson=Math.ceil(o.total/pax/100)*100;
+        rows[String(pax)]=o;count++;
+      }
+      if(!count){skipped.push(ws.name+" — no data rows under the header");return;}
+      staged.push({tab:ws.name,key:tgt.key,type:tgt.type,rows:rows,count:count});
+    });
+    if(!staged.length){
+      alert("Nothing to import from \""+fname+"\".\n\nNo sheet tab matched a console tour + client type. Name each tab like the rate card, e.g. \"South Andaman 5N Indian\" or \"Narcondam A V1 Foreigner\"."+(skipped.length?"\n\nTabs found:\n• "+skipped.join("\n• "):""));
+      return;
+    }
+    var lines=staged.map(function(s){return "• "+s.tab+"  →  "+(CALC_LABELS[s.key]||s.key)+" ("+(s.type==="foreign"?"Foreign":"Indian")+", "+s.count+" group sizes)";});
+    if(!confirm("Import rates from \""+fname+"\"?\n\nThis overwrites the saved cost sheet for:\n\n"+lines.join("\n")+(skipped.length?"\n\nSkipped (not recognised):\n• "+skipped.join("\n• "):"")+"\n\nThe Cost Calculator and quotation generators use the new rates immediately."))return;
+    staged.forEach(function(s){
+      if(!SHEET_DATA[s.key])SHEET_DATA[s.key]={title:(CALC_LABELS[s.key]||s.key),indian:{},foreign:{}};
+      if(!SHEET_DATA[s.key][s.type])SHEET_DATA[s.key][s.type]={};
+      Object.keys(s.rows).forEach(function(p){SHEET_DATA[s.key][s.type][p]=s.rows[p];});
+      sheetChangeLog.unshift({ts:new Date().toISOString(),tour:s.key,tourName:(SHEET_DATA[s.key].title||s.key),type:(s.type==="foreign"?"Foreign":"Indian"),via:"imported from "+fname});
+    });
+    if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
+    audit("costsheet","imported",fname+" → "+staged.length+" sheet(s)");
+    persistData();
+    renderCostSheet();
+    if(typeof calc==="function")calc();
+    alert("Imported "+staged.length+" rate sheet(s) from \""+fname+"\" ✓\n\nThe Cost Calculator and both quotation generators now use the new rates.");
+  }).catch(function(e){
+    alert("Could not read \""+fname+"\": "+((e&&e.message)||e)+"\n\nUpload a .xlsx file — from a Google Sheet use File → Download → Microsoft Excel (.xlsx).");
+  });
 }
 
 /* ===== GROUP QUOTATION GENERATOR =====
