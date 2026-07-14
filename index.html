@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 172</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 173</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 172</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 173</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3455,14 +3455,17 @@ function renderCostSheet(){
   var body=document.getElementById("csBody");if(!body)return;
   var head="<tr style='border-bottom:2px solid var(--line)'><th style='text-align:left;padding:8px 10px'>Pax</th>"+
     CS_COLS.map(function(c){return "<th style='padding:8px 10px;text-align:right;white-space:nowrap'>"+c[1]+"</th>";}).join("")+
-    "<th style='padding:8px 10px;text-align:right'>Total</th><th style='padding:8px 10px;text-align:right'>Per person</th></tr>";
+    "<th style='padding:8px 10px;text-align:right'>Per person <span style='font-weight:400;color:var(--ink-soft)'>(↑100)</span></th><th style='padding:8px 10px;text-align:right'>Total quoted</th></tr>";
   var rows="";
   for(var n=1;n<=10;n++){
     var d=data[String(n)]||{};
+    /* rate-card rule: per person rounds UP to ₹100; the quoted total is pp × pax
+       so the two always tally (stored total stays the raw line-sum) */
+    var pp=d.perPerson||Math.ceil((d.total||0)/n/100)*100;
     var cells=CS_COLS.map(function(c){return "<td style='padding:4px 5px'><input class='input mono' style='width:88px;text-align:right;padding:6px 8px' type='number' id='cs_"+c[0]+"_"+n+"' value='"+(d[c[0]]||0)+"' oninput='csRecalc("+n+")'></td>";}).join("");
     rows+="<tr><td style='padding:6px 10px;font-weight:600'>"+n+"</td>"+cells+
-      "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums' id='cs_total_"+n+"'>"+fmt(d.total||0)+"</td>"+
-      "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums' id='cs_pp_"+n+"'>"+fmt(d.perPerson||0)+"</td></tr>";
+      "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--sea)' id='cs_pp_"+n+"'>"+fmt(pp)+"</td>"+
+      "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700' id='cs_total_"+n+"'>"+fmt(pp*n)+"</td></tr>";
   }
   body.innerHTML="<table style='width:100%;border-collapse:collapse;font-size:12px;min-width:820px'><thead>"+head+"</thead><tbody>"+rows+"</tbody></table>";
   renderCsLog();
@@ -3470,9 +3473,9 @@ function renderCostSheet(){
 function csRecalc(n){
   var g=function(k){var e=document.getElementById("cs_"+k+"_"+n);return e?(parseFloat(e.value)||0):0;};
   var total=g("ship")+g("accommodation")+g("vehicle")+g("guide")+g("entry")+g("food");
-  var pp=Math.round(total/Math.max(n,1));
+  var pp=Math.ceil(total/Math.max(n,1)/100)*100;
   var t=document.getElementById("cs_total_"+n),p=document.getElementById("cs_pp_"+n);
-  if(t)t.textContent=fmt(total);if(p)p.textContent=fmt(pp);
+  if(t)t.textContent=fmt(pp*n);if(p)p.textContent=fmt(pp);
 }
 function saveCostSheet(){
   if(!csTour)csTour=CALC_ORDER[0];
@@ -3484,7 +3487,7 @@ function saveCostSheet(){
     var g=function(k){var e=document.getElementById("cs_"+k+"_"+n);return e?(parseFloat(e.value)||0):0;};
     var o={nights:g("nights"),rooms:g("rooms"),ship:g("ship"),accommodation:g("accommodation"),vehicle:g("vehicle"),guide:g("guide"),entry:g("entry"),food:g("food")};
     o.total=o.ship+o.accommodation+o.vehicle+o.guide+o.entry+o.food;
-    o.perPerson=Math.round(o.total/n);
+    o.perPerson=Math.ceil(o.total/n/100)*100;
     SHEET_DATA[csTour][csType][String(n)]=o;
   }
   sheetChangeLog.unshift({ts:new Date().toISOString(),tour:csTour,tourName:(SHEET_DATA[csTour].title||csTour),type:(csType==="foreign"?"Foreign":"Indian")});
