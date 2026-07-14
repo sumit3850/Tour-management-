@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 177</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 178</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 177</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 178</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -710,7 +710,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
       <button data-bn="dashboard" onclick="go('dashboard')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
       <button data-bn="tours" onclick="go('tours')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Tours</button>
       <button data-bn="bookings" onclick="go('bookings')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Bookings</button>
-      <button data-bn="reservations" onclick="go('reservations')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"/></svg>Reserve</button>
+      <button data-bn="operations" onclick="go('operations')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h4"/></svg>Ops</button>
       <button data-bn="requests" onclick="go('requests')"><svg viewBox="0 0 24 24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"/></svg>Inbox</button>
     </nav>
   </div>
@@ -753,6 +753,15 @@ function ensureSheetDefaults(){
   if(!SHEET_DATA["TC"])SHEET_DATA["TC"]={title:"Custom Tour",indian:blank(),foreign:blank()};
 }
 ensureSheetDefaults();
+/* Multi-tenant guard: SHEET_DATA_DEFAULT holds ISLAND EXPLORER's private rate
+   card. Any OTHER company must start from a blank cost sheet — never from IE's
+   prices. Blank = every built-in tour with zeroed rows, ready to fill/import. */
+function blankSheetData(){
+  var blank=function(){var o={};for(var p=1;p<=10;p++){o[String(p)]={rooms:Math.ceil(p/2),nights:3,ship:0,accommodation:0,vehicle:0,guide:0,entry:0,food:0,total:0,perPerson:0};}return o;};
+  var out={};
+  CALC_ORDER.forEach(function(k){out[k]={title:(CALC_LABELS[k]||k),indian:blank(),foreign:blank()};});
+  return out;
+}
 /* "TC" (the old built-in Custom Tour slot) is retired from the pickers — user-made
    custom tours (CT… keys) replaced it. Its data stays in SHEET_DATA so old saved
    documents keep their labels. */
@@ -947,7 +956,9 @@ function applyStore(d){
      SHEET_DATA_EPOCH are replaced wholesale with the approved defaults (the user
      signed these off in the rate-card workbook). Syncs to every device once. */
   if((parseInt(sheetEpoch,10)||0)<SHEET_DATA_EPOCH){
-    SHEET_DATA=JSON.parse(JSON.stringify(SHEET_DATA_DEFAULT));
+    /* Island Explorer gets the approved FINAL rate card; every other company
+       gets a blank sheet — the default card is IE's private pricing. */
+    SHEET_DATA=(typeof wsTag==="function"&&wsTag()!=="island-explorer")?blankSheetData():JSON.parse(JSON.stringify(SHEET_DATA_DEFAULT));
     ensureSheetDefaults();
     sheetEpoch=SHEET_DATA_EPOCH;
   }
@@ -1897,6 +1908,13 @@ async function cloudInit(){
        sides are empty there is nothing to sync; tell the user instead. */
     if(result==="applied"||result==="kept-local")await cloudPush(true);
     else if(result==="empty"){
+      /* Brand-new workspace: a non-IE company must not inherit Island Explorer's
+         rate card from the shipped defaults — blank the cost sheet before any
+         push can cement it into their blob. */
+      if(typeof wsTag==="function"&&wsTag()!=="island-explorer"){
+        SHEET_DATA=blankSheetData();ensureSheetDefaults();sheetEpoch=SHEET_DATA_EPOCH;_sheetRev++;
+        try{localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));}catch(e){}
+      }
       if(totalRecordCount()>0)await cloudPush(true);
       else cloudEmptyNotice(c.ws||"default");
     }
@@ -2151,24 +2169,24 @@ function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='l
 const NAV=[
   ["group","Overview"],
   ["dashboard","Dashboard","M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"],
+  ["requests","Inbox","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
+  ["calendar","Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"],
   ["analytics","Analytics","M3 3v18h18M7 14l4-4 3 3 5-6"],
   ["group","Sales & Ops"],
   ["tours","Tours","M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"],
-  ["requests","Inbox","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
-  ["calendar","Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"],
   ["bookings","Bookings","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
-  ["reviews","Reviews & Feedback","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["operations","Operations","M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h4"],
   ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
-  ["calc","Sales","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01"],
+  ["calc","Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
+  ["reviews","Reviews & Feedback","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
-const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Sales & Ops","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Sales","Cost Calculator"],invoices:["Sales","Invoices"],profit:["Sales","Profit Calculator"],groupquote:["Sales","Group Quotation"],costsheet:["Sales","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Sales & Ops","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Reviews & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Overview","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
+  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Tour costing","Cost Calculator"],invoices:["Tour costing","Invoices"],profit:["Tour costing","Profit Calculator"],groupquote:["Tour costing","Group Quotation"],costsheet:["Tour costing","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Overview","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Reviews & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -2727,7 +2745,24 @@ function anaCard(id,title,body,withYear){
   return "<div class='card card-pad'><div class='section-head' style='margin-bottom:10px'><div class='h-sec' style='font-size:15px'>"+title+"</div>"+
     "<div style='display:flex;gap:6px;align-items:center'>"+sel+"<button class='btn btn-ghost btn-sm' style='min-width:30px;padding:4px 9px;color:var(--coral)' title='Hide this card' onclick=\"hideAnaCard('"+id+"')\">✕</button></div></div>"+body+"</div>";
 }
-function anaYearFilter(id){var y=_anaYearBy[id]||"all";return function(t){return y==="all"||((t.start||"").slice(0,4)===y);};}
+/* Global From/To date filter (persisted per device) — combines with the per-card
+   year dropdowns. Native date inputs render as DD-MM-YYYY on Indian/UK locales. */
+var _anaRange=(function(){try{return JSON.parse(localStorage.getItem("ieo_anaRange")||"{}")||{};}catch(e){return {};}})();
+function setAnaRange(){
+  var f=(document.getElementById("anaFrom")||{}).value||"";
+  var t=(document.getElementById("anaTo")||{}).value||"";
+  _anaRange={from:f,to:t};
+  try{localStorage.setItem("ieo_anaRange",JSON.stringify(_anaRange));}catch(e){}
+  renderAnalytics();
+}
+function clearAnaRange(){_anaRange={};try{localStorage.removeItem("ieo_anaRange");}catch(e){}renderAnalytics();}
+function anaRangeOk(t){
+  var s=t.start||"";
+  if(_anaRange.from&&s&&s<_anaRange.from)return false;
+  if(_anaRange.to&&s&&s>_anaRange.to)return false;
+  return true;
+}
+function anaYearFilter(id){var y=_anaYearBy[id]||"all";return function(t){return (y==="all"||((t.start||"").slice(0,4)===y))&&anaRangeOk(t);};}
 function renderAnalytics(){
   var el=document.getElementById("anaBody");if(!el)return;
   var s=paymentStats();
@@ -2773,7 +2808,17 @@ function renderAnalytics(){
   if(vis("guides"))half.push(anaCard("guides","Guide utilization <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(tour-days)</span>",(guides.length?guides.map(function(x){return hbar(x.g+" · "+x.tours+" tour"+(x.tours>1?"s":""),x.days,maxG,x.days+" days");}).join(""):"<div class='empty'>No guides assigned yet.</div>"),true));
   if(vis("sources"))half.push(anaCard("sources","Lead sources",(srcList.length?srcList.map(function(x){return hbar(x.k,x.n,srcList[0].n);}).join(""):"<div class='empty'>No leads yet.</div>"),false));
   var halves="";for(var i=0;i<half.length;i+=2){halves+="<div class='grid-2' style='margin-top:16px'>"+half[i]+(half[i+1]||"")+"</div>";}
+  var rangeOn=!!(_anaRange.from||_anaRange.to);
+  var rangeBar="<div class='card card-pad' style='margin-bottom:14px'>"+
+    "<div style='display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end'>"+
+      "<div class='field' style='margin:0'><label>From (DD-MM-YYYY)</label><input class='input' type='date' id='anaFrom' value='"+(_anaRange.from||"")+"' onchange='setAnaRange()'></div>"+
+      "<div class='field' style='margin:0'><label>To (DD-MM-YYYY)</label><input class='input' type='date' id='anaTo' value='"+(_anaRange.to||"")+"' onchange='setAnaRange()'></div>"+
+      (rangeOn?"<button class='btn btn-ghost btn-sm' onclick='clearAnaRange()' style='color:var(--coral)'>Clear dates</button>":"")+
+      "<span style='font-size:11.5px;color:var(--ink-soft);padding-bottom:8px'>"+(rangeOn?("Showing tours starting "+(_anaRange.from?dmy(new Date(_anaRange.from+"T00:00:00")):"…")+" → "+(_anaRange.to?dmy(new Date(_anaRange.to+"T00:00:00")):"…")):"Filters the charts below by tour start date (works together with each card's year dropdown).")+"</span>"+
+    "</div>"+
+  "</div>";
   el.innerHTML=
+    rangeBar+
     "<div class='kpis'>"+
       kpi("Net Tour Cost",fmt(s.val),"all tours in range","up","M3 3v18h18M7 14l4-4 3 3 5-6")+
       kpi("Collected",fmt(s.dep),"deposits / advances","up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
@@ -3491,9 +3536,12 @@ function printQuotation() {
         body{font-family:'Inter',system-ui,sans-serif;display:flex;justify-content:center}
         #quotationBody{max-width:760px;width:100%}
         @media print{
-          @page{margin:14mm}
-          body{display:block}
-          #quotationBody{max-width:none}
+          /* Fit the document on ONE A4 page: slim margins + a gentle scale-down.
+             color-adjust keeps the green table fills in the PDF. */
+          @page{size:A4;margin:8mm}
+          body{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+          #quotationBody{max-width:none;zoom:.72;padding:10px 18px !important}
+          #quotationBody table{page-break-inside:avoid}
         }
       </style>
     </head>
@@ -6147,6 +6195,10 @@ function viewSettings(){
     "</div>"+
   "</div>";
   })()+
+  /* Advanced backend card: only the primary (Island Explorer) workspace sees it.
+     Other companies get every settings card except this one — their sync runs on
+     the shared default automatically and mustn't be re-pointed by accident. */
+  ((typeof wsTag==="function"&&wsTag()!=="island-explorer")?"":
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Cloud Sync · Supabase</div>"+
     "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:680px'>Every device should use the <b>exact same</b> Project URL, anon key and workspace name — that's what makes them see the same data. Leave these as the shared default unless you deliberately created your own Supabase project.</p>"+
@@ -6165,7 +6217,7 @@ function viewSettings(){
     "<details style='margin-top:14px'><summary style='cursor:pointer;font-size:13px;color:var(--sea);font-weight:600'>Backend setup notes</summary>"+
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:8px'>The shared SaaS backend is already set up (tables, per-company isolation and sign-in policies) by <code>supabase/saas/schema.sql</code> in the repo. Data problems after a migration? Run <code>supabase/saas/recover-data.sql</code> once in the Supabase SQL editor — it repairs account linkage, restores the data blob and re-opens the inbox. Never disable row level security on the shared project: it would let every company read every other company's data.</p>"+
     "</details>"+
-  "</div>"+
+  "</div>")+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Cloud</div><div class='h-sec' style='margin-bottom:6px'>Per-record database <span class='pill "+(_perRecordActive?"completed":"plain")+"' style='margin-left:6px'>"+(_perRecordActive?"Active":"Not set up yet")+"</span></div>"+
     "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Every tour, booking, customer, vehicle, driver, guide, operation, reservation, quotation and trip log gets its <b>own row in its own table</b>, instead of one shared file being overwritten wholesale. A sync can only ever touch the specific record that changed — never wipe your whole dataset. Run the SQL below <b>once</b> in the Supabase SQL editor; the app detects the tables automatically on its next load — no further setup.</p>"+
