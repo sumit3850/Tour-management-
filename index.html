@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 174</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 175</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 174</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 175</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -755,6 +755,26 @@ function ensureSheetDefaults(){
 ensureSheetDefaults();
 const CALC_ORDER=["T1","T3","T4","T2","T5","T8","T9","T10","TC"];
 const CALC_LABELS={T1:"5N · South Andaman",T3:"7N · South & Little Andaman",T4:"8N · South & Little Andaman",T2:"12N · Great Nicobar",T5:"15N · A&N Expedition",T8:"03N · Narcondam Exp (A)",T9:"03N · Narcondam Exp (B)",T10:"03N · Narcondam Exp (C)",TC:"Custom Tour"};
+/* Tour list = the built-in keys plus any custom tours saved in SHEET_DATA (added
+   via "New custom tour" in the Cost Sheet). Every tour dropdown builds from these,
+   so a custom tour appears in the calculator, invoices and both quotation pickers. */
+function tourKeys(){var ks=CALC_ORDER.slice();Object.keys(SHEET_DATA||{}).forEach(function(k){if(ks.indexOf(k)<0)ks.push(k);});return ks;}
+function calcTourLabel(k){var s=SHEET_DATA[k];return CALC_LABELS[k]||((s&&s.title)||k);}
+function tourOptions(selKey){return tourKeys().map(function(k){return "<option value='"+k+"' "+(k===selKey?"selected":"")+">"+String(calcTourLabel(k)).replace(/</g,"&lt;")+"</option>";}).join("");}
+function rebuildTourSelects(){
+  ["calcCategory","inv_cat","csTour","gqTour"].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    var keep=el.value;
+    el.innerHTML=tourOptions(keep);
+    if(keep&&SHEET_DATA[keep])el.value=keep;
+  });
+}
+/* _sheetRev increments whenever the rate database changes (save, import, copy,
+   cloud pull). The calculator panel stamps the revision it rendered from, and the
+   quotation generator only trusts the on-screen figures while that stamp is still
+   current — otherwise it reads the live database. Without this, a quotation could
+   be built from a stale panel showing rates from before the latest save/sync. */
+var _sheetRev=0,_calcSheetRev=-1;
 var touristType="indian";
 var currentCalcTourId="";
 /* ===== Group Quotation generator state =====
@@ -928,6 +948,7 @@ function applyStore(d){
     ensureSheetDefaults();
     sheetEpoch=SHEET_DATA_EPOCH;
   }
+  _sheetRev++; /* rates may have changed under any already-rendered calculator panel */
 }
 /* Guards the window between page load and the first cloud sync decision. The very
    first boot() call renders the UI from whatever is cached locally — and several
@@ -3046,7 +3067,7 @@ function deleteBooking(id){
 function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='invoices'?'active':'')+"' onclick=\"go('invoices')\">Invoices</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button></div>";}
 function viewCalc(){
   if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
-  const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"' "+(k===currentCalcTourId?"selected":"")+">"+CALC_LABELS[k]+"</option>";}).join("");
+  const tourOpts=tourOptions(currentCalcTourId);
   const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
   return "<section class='view' id='v-calc'>"+calcTabsBar('calc')+"<div class='calc-grid'>"+
     "<div class='card card-pad'>"+
@@ -3066,7 +3087,7 @@ function viewCalc(){
    Cost Calculator. Same costing data; its own selection + client fields. ===== */
 function viewInvoices(){
   if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
-  const tourOpts=CALC_ORDER.map(function(k){return "<option value='"+k+"'>"+CALC_LABELS[k]+"</option>";}).join("");
+  const tourOpts=tourOptions(currentCalcTourId);
   const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
   return "<section class='view' id='v-invoices'>"+calcTabsBar('invoices')+
     "<div class='card card-pad' style='margin-bottom:16px'>"+
@@ -3094,7 +3115,7 @@ function invSelection(){
   var pax=String((document.getElementById("inv_pax")||{}).value||"2");
   var type=((document.getElementById("inv_type")||{}).value==="foreign")?"foreign":"indian";
   var src=SHEET_DATA[key];
-  return {key:key,pax:pax,type:type,d:src&&src[type]?src[type][pax]:null,label:CALC_LABELS[key]||(src?src.title:"")};
+  return {key:key,pax:pax,type:type,d:src&&src[type]?src[type][pax]:null,label:calcTourLabel(key)};
 }
 /* Jump from the calculator to the Invoices module carrying the current selection. */
 function invoiceFromCalc(){
@@ -3208,7 +3229,12 @@ function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
 function generateQuotation(){
   const sel = calcSelection();
   if(!sel.d){ alert("Select a tour first to generate a quotation."); return; }
-  const d = document.getElementById('cb_accommodation') ? readCalcInputs() : sel.d;
+  /* Use the editable on-screen figures ONLY while they were rendered from the
+     current rate database (_calcSheetRev stamp). If the rates changed since the
+     panel was drawn — a cost-sheet save, an .xlsx import, a cloud sync from
+     another device — fall back to the live database so a quotation can never be
+     built from stale numbers. */
+  const d = (document.getElementById('cb_accommodation') && _calcSheetRev===_sheetRev) ? readCalcInputs() : sel.d;
   const pax = sel.pax;
   const tourName = catName(sel.key);
   const clientType = sel.type==="foreign" ? "Foreigner" : "Indian";
@@ -3426,11 +3452,16 @@ function viewCostSheet(){
           "<button class='btn btn-sm' data-cst='foreign' onclick='csSetType(\"foreign\")'>Foreign</button>"+
         "</div></div>"+
       "</div>"+
-      "<div class='cost-grid' style='margin-top:10px'><div class='field full'><label>Tour name (editable — used on quotations)</label><input class='input' id='csTitle' placeholder='Tour name'></div></div>"+
+      "<div class='cost-grid' style='margin-top:10px'>"+
+        "<div class='field'><label>Tour name (editable — used on quotations)</label><input class='input' id='csTitle' placeholder='Tour name'></div>"+
+        "<div class='field'><label>Migrate prebuilt rates → this tour</label><div style='display:flex;gap:8px'><select class='input' id='csCopyFrom' style='flex:1;min-width:0'></select><button class='btn btn-ghost' onclick='copyRatesFrom()' style='white-space:nowrap'>Copy rates</button></div></div>"+
+      "</div>"+
       "<div id='csBody' style='overflow-x:auto;margin-top:14px'></div>"+
       "<div style='display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'>"+
         "<button class='btn btn-primary' onclick='saveCostSheet()'>Save cost sheet</button>"+
         "<button class='btn btn-ghost' onclick='renderCostSheet()'>Reload saved</button>"+
+        "<button class='btn btn-ghost' onclick='addCustomTour()'>+ New custom tour</button>"+
+        "<button class='btn btn-ghost' id='csDeleteBtn' style='display:none;color:var(--coral)' onclick='deleteCustomTour()'>Delete custom tour</button>"+
         "<button class='btn btn-ghost' onclick='document.getElementById(\"csImportFile\").click()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><path d='M7 10l5 5 5-5'/><path d='M12 15V3'/></svg>Import rates (.xlsx)</button>"+
         "<input type='file' id='csImportFile' accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' style='display:none' onchange='importRatesXlsx(this)'>"+
       "</div>"+
@@ -3447,10 +3478,18 @@ function csSetType(t){csType=(t==="foreign")?"foreign":"indian";renderCostSheet(
 function renderCostSheet(){
   var sel=document.getElementById("csTour");
   if(sel){
-    if(!csTour)csTour=CALC_ORDER[0];
-    if(!sel.options.length)sel.innerHTML=CALC_ORDER.map(function(k){return "<option value='"+k+"'>"+CALC_LABELS[k]+"</option>";}).join("");
+    if(!csTour||!SHEET_DATA[csTour])csTour=CALC_ORDER[0];
+    sel.innerHTML=tourOptions(csTour); /* rebuilt each render so custom tours appear */
     sel.value=csTour;
   }
+  var cp=document.getElementById("csCopyFrom");
+  if(cp){
+    var cpKeep=cp.value;
+    cp.innerHTML="<option value=''>Choose a reference tour…</option>"+tourKeys().filter(function(k){return k!==csTour;}).map(function(k){return "<option value='"+k+"'>"+String(calcTourLabel(k)).replace(/</g,"&lt;")+"</option>";}).join("");
+    if(cpKeep&&cpKeep!==csTour&&SHEET_DATA[cpKeep])cp.value=cpKeep;
+  }
+  var db=document.getElementById("csDeleteBtn");
+  if(db)db.style.display=/^CT/.test(csTour)?"":"none";
   document.querySelectorAll("#csTypeToggle .btn").forEach(function(b){var on=b.getAttribute("data-cst")===csType;b.classList.toggle("btn-primary",on);b.classList.toggle("btn-ghost",!on);});
   var src=SHEET_DATA[csTour]||{};
   var titleEl=document.getElementById("csTitle");if(titleEl)titleEl.value=(src.title||"");
@@ -3493,6 +3532,7 @@ function saveCostSheet(){
     o.perPerson=Math.ceil(o.total/n/100)*100;
     SHEET_DATA[csTour][csType][String(n)]=o;
   }
+  _sheetRev++;
   sheetChangeLog.unshift({ts:new Date().toISOString(),tour:csTour,tourName:(SHEET_DATA[csTour].title||csTour),type:(csType==="foreign"?"Foreign":"Indian")});
   if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
   persistData();
@@ -3509,6 +3549,65 @@ function renderCsLog(){
       "<div><b>"+(r.tourName||r.tour||"")+"</b> · "+(r.type||"")+" rates updated"+(r.via?" <span style='color:var(--ink-soft)'>· "+r.via+"</span>":"")+"</div>"+
       "<div style='color:var(--ink-soft);white-space:nowrap'>"+when+"</div></div>";
   }).join("");
+}
+
+/* ---- Custom tours ------------------------------------------------------------
+   A custom tour is an extra SHEET_DATA entry (key "CT…") the user creates, names
+   and prices in the Cost Sheet. It shows up in every tour dropdown (calculator,
+   invoices, both quotation generators) exactly like the built-in tours, and rates
+   can be migrated into it from any existing tour with "Copy rates". */
+function addCustomTour(){
+  var name=prompt("Name of the new custom tour (appears in every tour dropdown and on quotations):","");
+  if(name==null)return;
+  name=name.trim();
+  if(!name){alert("Give the custom tour a name.");return;}
+  var key="CT"+Date.now().toString(36);
+  var blank=function(){var o={};for(var p=1;p<=10;p++){o[String(p)]={rooms:Math.ceil(p/2),nights:3,ship:0,accommodation:0,vehicle:0,guide:0,entry:0,food:0,total:0,perPerson:0};}return o;};
+  SHEET_DATA[key]={title:name,indian:blank(),foreign:blank()};
+  _sheetRev++;
+  csTour=key;
+  sheetChangeLog.unshift({ts:new Date().toISOString(),tour:key,tourName:name,type:"Custom tour",via:"created"});
+  if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
+  audit("costsheet","custom-tour-added",name);
+  persistData();
+  rebuildTourSelects();
+  renderCostSheet();
+  alert("Custom tour \""+name+"\" created ✓\n\nIt is now in every tour dropdown. Fill its rates below (or use \"Copy rates\" to migrate a prebuilt tour's rates into it), then Save.");
+}
+function deleteCustomTour(){
+  if(!/^CT/.test(csTour))return; /* built-in tours can't be deleted */
+  var name=(SHEET_DATA[csTour]&&SHEET_DATA[csTour].title)||csTour;
+  if(!confirm("Delete the custom tour \""+name+"\" and its rates?\n\nQuotations already saved keep their figures; the tour just disappears from the dropdowns."))return;
+  delete SHEET_DATA[csTour];
+  _sheetRev++;
+  csTour=CALC_ORDER[0];
+  if(currentCalcTourId&&!SHEET_DATA[currentCalcTourId])currentCalcTourId=CALC_ORDER[0];
+  if(gqTour&&!SHEET_DATA[gqTour])gqTour=CALC_ORDER[0];
+  audit("costsheet","custom-tour-deleted",name);
+  persistData();
+  rebuildTourSelects();
+  renderCostSheet();
+  if(typeof calc==="function")calc();
+}
+/* One-click migration: copy a reference tour's complete rate table (Indian +
+   Foreign, group sizes 1–10) into the tour currently open in the Cost Sheet. */
+function copyRatesFrom(){
+  var srcKey=(document.getElementById("csCopyFrom")||{}).value;
+  if(!srcKey||!SHEET_DATA[srcKey]){alert("Pick a reference tour to copy rates from.");return;}
+  if(srcKey===csTour){alert("Source and destination are the same tour.");return;}
+  var dst=SHEET_DATA[csTour];
+  if(!dst){alert("Pick a destination tour first.");return;}
+  var dstName=dst.title||calcTourLabel(csTour);
+  if(!confirm("Copy ALL rates (Indian + Foreign, group sizes 1–10) from\n\n  \""+calcTourLabel(srcKey)+"\"\n\ninto \""+dstName+"\"?\n\nThis overwrites \""+dstName+"\"'s current rates (its name stays the same). Press Save afterwards if you edit further — the copy itself is saved immediately."))return;
+  dst.indian=JSON.parse(JSON.stringify(SHEET_DATA[srcKey].indian||{}));
+  dst.foreign=JSON.parse(JSON.stringify(SHEET_DATA[srcKey].foreign||{}));
+  _sheetRev++;
+  sheetChangeLog.unshift({ts:new Date().toISOString(),tour:csTour,tourName:dstName,type:"Indian + Foreign",via:"copied from "+String(calcTourLabel(srcKey)).replace(/[<>]/g,"")});
+  if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
+  audit("costsheet","rates-copied",calcTourLabel(srcKey)+" → "+dstName);
+  persistData();
+  renderCostSheet();
+  if(typeof calc==="function")calc();
 }
 
 /* ---- Import rates from an uploaded .xlsx (rate card / Google Sheets export) ----
@@ -3619,8 +3718,10 @@ function importRatesXlsx(input){
       sheetChangeLog.unshift({ts:new Date().toISOString(),tour:s.key,tourName:(SHEET_DATA[s.key].title||s.key),type:(s.type==="foreign"?"Foreign":"Indian"),via:"imported from "+fname});
     });
     if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
+    _sheetRev++;
     audit("costsheet","imported",fname+" → "+staged.length+" sheet(s)");
     persistData();
+    rebuildTourSelects();
     renderCostSheet();
     if(typeof calc==="function")calc();
     alert("Imported "+staged.length+" rate sheet(s) from \""+fname+"\" ✓\n\nThe Cost Calculator and both quotation generators now use the new rates.");
@@ -3720,8 +3821,8 @@ function renderGroupQuote(){
   /* keep the controls in sync with state (first render / after nav) */
   var tourSel=document.getElementById("gqTour");
   if(tourSel){
-    if(!gqTour)gqTour=CALC_ORDER[0];
-    if(!tourSel.options.length)tourSel.innerHTML=CALC_ORDER.map(function(k){return "<option value='"+k+"'>"+CALC_LABELS[k]+"</option>";}).join("");
+    if(!gqTour||!SHEET_DATA[gqTour])gqTour=CALC_ORDER[0];
+    tourSel.innerHTML=tourOptions(gqTour); /* rebuilt each render so custom tours appear */
     tourSel.value=gqTour;
   }
   document.querySelectorAll("#gqTypeToggle .btn").forEach(function(b){
@@ -4229,7 +4330,7 @@ function calcSelection(){
   var type=(touristType==="foreigner")?"foreign":"indian";
   var src=SHEET_DATA[currentCalcTourId];
   var d=src&&src[type]?src[type][pax]:null;
-  return {key:currentCalcTourId,pax:pax,type:type,d:d,label:CALC_LABELS[currentCalcTourId]||(src?src.title:"")};
+  return {key:currentCalcTourId,pax:pax,type:type,d:d,label:calcTourLabel(currentCalcTourId)};
 }
 const CALC_ITEMS=[["accommodation","Accommodation"],["vehicle","Vehicle transport"],["guide","Guide charges"],["ship","Ship / ferry tickets"],["entry","Entry fees / permits"],["food","Food (extra)"]];
 function calc(){
@@ -4257,6 +4358,7 @@ function calc(){
       "<button class='btn btn-ghost' onclick='invoiceFromCalc()' style='flex:1;min-width:104px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)'>Invoice →</button>"+
     "</div>"+
     "<p style='font-size:11px;color:rgba(255,255,255,.75);margin-top:8px'>Edit any line — total, per-person and the share-bars update live. <b>Save rates</b> stores it for this tour · <b>Invoice →</b> carries this selection to the Invoices module.</p>";
+  _calcSheetRev=_sheetRev; /* panel now reflects the current rate database */
 }
 function readCalcInputs(){
   var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
@@ -4282,6 +4384,7 @@ function saveCalcRates(){
   var sel=calcSelection();if(!sel.d)return;
   var o=readCalcInputs();
   SHEET_DATA[sel.key][sel.type][sel.pax]=o;
+  _sheetRev++;
   persistData();calc();
   var btn=event&&event.target;if(btn){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1200);}
 }
@@ -5505,7 +5608,7 @@ function renderReservations(){
   checkOrphanReservations();
 }
 var RES_GUIDED=["Guided session - Half Day","Guided session - Full Day","Guided session - Night","Guided session - Half Day + Night","Guided session - Full Day + Night"];
-function resTourList(){return CALC_ORDER.map(function(k){return CALC_LABELS[k];}).concat(RES_GUIDED).concat(["Custom"]);}
+function resTourList(){return tourKeys().map(calcTourLabel).concat(RES_GUIDED).concat(["Custom"]);}
 function rsTourPick(){var v=document.getElementById("rs_tour").value;var w=document.getElementById("rs_customwrap");if(w)w.style.display=(v==="Custom")?"block":"none";}
 function resForm(r){r=r||{};var list=resTourList();var known=list.indexOf(r.tour)>-1;var tourOpts="<option value=''>—</option>"+list.map(function(lbl){var sel=(r.tour===lbl)||(!known&&r.tour&&lbl==="Custom");return "<option "+(sel?"selected":"")+">"+lbl+"</option>";}).join("");
   return "<div class='form-grid'>"+
@@ -6598,7 +6701,11 @@ function refreshUI(){
     else if(curView==="profit"&&typeof renderProfitCalc==="function")renderProfitCalc();
     else if(curView==="groupquote"&&typeof renderGroupQuote==="function")renderGroupQuote();
     else if(curView==="costsheet"&&typeof renderCostSheet==="function")renderCostSheet();
-    /* dashboard, calc, requests, settings: intentionally no visible refresh */
+    /* calc: re-render so freshly-synced rates are what the user sees (and what a
+       quotation generated from the panel would use). refreshUI only runs when a
+       pull actually applied newer cloud data, so this can't wipe edits on a timer. */
+    else if(curView==="calc"&&typeof calc==="function")calc();
+    /* dashboard, requests, settings: intentionally no visible refresh */
   }catch(e){}
   _sbApplying=wasApplying;
 }
