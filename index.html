@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 178</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 179</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 178</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 179</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5307,10 +5307,22 @@ function autoProcessSubmissions(){
       markSubProcessed(s.id);
     }
     else if(s.type==="interest"){
-      if(!findCustomer(s.name,s.email,s.phone)){addOrUpdateCustomer(s);changed=true;}
+      /* The interest FORM works like the guest form too: it auto-creates a
+         booking (+ customer) with the same duplicate/wipe guards. Two carve-outs:
+         channel-captured leads (email/WhatsApp/Instagram intake) stay leads —
+         a cold enquiry isn't a confirmed booking — and interests already
+         processed as leads before this feature keep their status (convert those
+         with the Inbox's "Create booking" button, no retroactive booking flood). */
+      var isForm=subSourceLabel(s)==="Web form"&&s.status!=="lead-added";
+      if(isForm){
+        if(!bookings.some(function(b){return b.fromSub===s.id;})){makeBookingFromSub(s);changed=true;} /* creates booking + customer */
+        else if(!findCustomer(s.name,s.email,s.phone)){addOrUpdateCustomer(s);changed=true;}
+      }
+      else if(!findCustomer(s.name,s.email,s.phone)){addOrUpdateCustomer(s);changed=true;}
       if(!leads.find(function(l){return (l.name||"").toLowerCase()===(s.name||"").toLowerCase()&&l.tour===(s.tour||"—");})){
         leads.unshift(leadFromSub(s));changed=true;}
-      if(s.status!=="lead-added"){s.status="lead-added";saveSubmissionRow(s);changed=true;}
+      var want=isForm?"booked":"lead-added";
+      if(s.status!==want){s.status=want;saveSubmissionRow(s);changed=true;}
       markSubProcessed(s.id);
     }
   });
