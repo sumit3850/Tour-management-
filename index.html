@@ -699,7 +699,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 185</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 186</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -708,7 +708,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 185</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 186</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3207,21 +3207,23 @@ function viewBookings(){
   return "<section class='view' id='v-bookings'>"+
     "<div class='section-head'><div class='h-sec'>All bookings</div><div style='display:flex;gap:8px'>"+dlBtn('exportBookingsCSV')+"<button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div></div>"+
     "<div class='card card-pad' style='margin-bottom:14px'>"+
-      "<div class='eyebrow'>Message every guest on a tour</div>"+
-      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px'>"+
-        "<select class='input' id='bkBulkTour' style='flex:1;min-width:200px;max-width:420px'></select>"+
-        "<button class='btn btn-sea btn-sm' onclick='waAllBooked()'>WhatsApp all</button>"+
-        "<button class='btn btn-ghost btn-sm' onclick='emailAllBooked()'>Email all</button>"+
+      "<div class='eyebrow' style='margin-bottom:10px'>Message every guest on a tour</div>"+
+      "<select class='input' id='bkBulkTour' style='width:100%;margin-bottom:10px'></select>"+
+      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'>"+
+        "<button class='btn btn-sea' style='justify-content:center' onclick='waAllBooked()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5z'/></svg>WhatsApp all</button>"+
+        "<button class='btn btn-ghost' style='justify-content:center' onclick='emailAllBooked()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 7l8 6 8-6'/></svg>Email all</button>"+
       "</div>"+
-      "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Pick a tour code — <b>Email all</b> opens one email with every registered address in BCC; <b>WhatsApp all</b> lists every registered number with your message prefilled, one tap per guest.</p>"+
-      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)'>"+
-        "<span style='font-size:12px;font-weight:700'>After the tour:</span>"+
-        "<button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('review','wa')\">⭐ Review link · WA</button>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('review','em')\">Email</button>"+
-        "<button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('feedback','wa')\">📝 Feedback form · WA</button>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('feedback','em')\">Email</button>"+
+      "<div class='eyebrow' style='margin:16px 0 8px'>After the tour</div>"+
+      "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px'>"+
+        "<div style='display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px'>"+
+          "<span style='font-size:13px;font-weight:700;white-space:nowrap'>⭐ Review link</span>"+
+          "<span style='display:flex;gap:6px'><button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('review','wa')\">WA</button><button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('review','em')\">Email</button></span>"+
+        "</div>"+
+        "<div style='display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px'>"+
+          "<span style='font-size:13px;font-weight:700;white-space:nowrap'>📝 Feedback form</span>"+
+          "<span style='display:flex;gap:6px'><button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('feedback','wa')\">WA</button><button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('feedback','em')\">Email</button></span>"+
+        "</div>"+
       "</div>"+
-      "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>Prefilled thank-you message with your saved link (Settings → Review &amp; feedback links).</p>"+
     "</div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total Cost</th><th class='num'>Deposit</th><th class='num'>Pending</th><th>Due Date</th><th>Payment Status</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
