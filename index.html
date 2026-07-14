@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 176</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 177</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 176</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 177</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -862,7 +862,7 @@ var SHEET_DATA_EPOCH=2;
 let sheetEpoch=0;
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
-let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:""};
+let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:""};
 let auditLog=[]; /* who did what, when — rendered in Settings → Activity log */
 var csTour="",csType="indian"; /* Cost Sheet editor selection */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
@@ -907,7 +907,7 @@ const STORE=[
   {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
-  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:""},v);}},
+  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:""},v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}}
 ];
 /* One line per meaningful action. Capped so the blob never bloats. */
@@ -2847,7 +2847,7 @@ function refreshTourTabCounts(){
 var _tourZoom=(function(){try{return parseFloat(localStorage.getItem("ieo_tourzoom"))||1;}catch(e){return 1;}})();
 function applyTourZoom(){var g=document.getElementById("tourGrid");if(g)g.style.zoom=_tourZoom;var p=document.getElementById("tzPct");if(p)p.textContent=Math.round(_tourZoom*100)+"%";}
 function tourZoom(dir){
-  _tourZoom=Math.min(1.4,Math.max(0.6,Math.round((_tourZoom+dir*0.1)*10)/10));
+  _tourZoom=Math.min(1.4,Math.max(0.1,Math.round((_tourZoom+dir*0.1)*10)/10));
   try{localStorage.setItem("ieo_tourzoom",_tourZoom);}catch(e){}
   applyTourZoom();
 }
@@ -2956,6 +2956,14 @@ function viewBookings(){
         "<button class='btn btn-ghost btn-sm' onclick='emailAllBooked()'>Email all</button>"+
       "</div>"+
       "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Pick a tour code — <b>Email all</b> opens one email with every registered address in BCC; <b>WhatsApp all</b> lists every registered number with your message prefilled, one tap per guest.</p>"+
+      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)'>"+
+        "<span style='font-size:12px;font-weight:700'>After the tour:</span>"+
+        "<button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('review','wa')\">⭐ Review link · WA</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('review','em')\">Email</button>"+
+        "<button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('feedback','wa')\">📝 Feedback form · WA</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('feedback','em')\">Email</button>"+
+      "</div>"+
+      "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>Prefilled thank-you message with your saved link (Settings → Review &amp; feedback links).</p>"+
     "</div>"+
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guest</th><th>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total Cost</th><th class='num'>Deposit</th><th class='num'>Pending</th><th>Due Date</th><th>Payment Status</th><th>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
@@ -5805,7 +5813,7 @@ function reviewCandidates(){
   }).sort(function(a,b){return (b.end||"").localeCompare(a.end||"");}).slice(0,12);
 }
 function reviewAsk(id,via){
-  if(!payCfg.reviewUrl){alert("Add your Google review link first: Settings → Payments & GST → Google review link.");return;}
+  if(!payCfg.reviewUrl){alert("Add your Google review link first: Settings → Review & feedback links.");return;}
   var b=bookings.find(function(x){return x.id===id;});if(!b)return;
   if(via==="em"){if(!b.email){alert("No email on this booking.");return;}mailSend(b.email,"How was your tour? · Island Explorer",reviewMsg(b));}
   else{waShare(reviewMsg(b),b.phone);}
@@ -5819,11 +5827,16 @@ function toggleReviewed(id){
   if(b.reviewDone)audit("review","received",b.guest);
   persistData();renderReviews();
 }
-function feedbackLink(){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"feedback.html?ws="+encodeURIComponent(wsTag());}
+/* The feedback link the console forwards: the saved custom link (Settings →
+   Review & feedback links) when set, otherwise the built-in 5-question form. */
+function feedbackLink(){
+  if(payCfg.feedbackUrl)return payCfg.feedbackUrl;
+  var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"feedback.html?ws="+encodeURIComponent(wsTag());
+}
 function shareLinkVia(kind,via){
   var isRev=(kind==="review");
   var url=isRev?payCfg.reviewUrl:feedbackLink();
-  if(isRev&&!url){alert("Set your Google review link first: Settings → Payments & GST → Google review link.");return;}
+  if(isRev&&!url){alert("Set your Google review link first: Settings → Review & feedback links.");return;}
   var msg=isRev
     ?"Hello! Thank you for birding with Island Explorer 🐦 If you enjoyed the tour, a short Google review would mean a lot to our small team:\n"+url
     :"Hello! Thank you for birding with Island Explorer 🐦 Could you spare 30 seconds for 5 quick questions about your tour?\n"+url;
@@ -5842,7 +5855,7 @@ function renderReviews(){
   var got=(bookings||[]).filter(function(b){return b.reviewDone;}).length;
   var fbs=feedbackSubs();
   var shareRow=function(label,desc,kind,url){
-    return "<div class='list-row'><div class='meta'><div class='t'>"+label+"</div><div class='s' style='word-break:break-all'>"+(url||"<span style='color:var(--coral)'>Not set — Settings → Payments &amp; GST</span>")+"</div><div class='s'>"+desc+"</div></div>"+
+    return "<div class='list-row'><div class='meta'><div class='t'>"+label+"</div><div class='s' style='word-break:break-all'>"+(url||"<span style='color:var(--coral)'>Not set — Settings → Review &amp; feedback links</span>")+"</div><div class='s'>"+desc+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap'>"+
       "<button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('"+kind+"','wa')\">Share · WA</button>"+
       "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('"+kind+"','em')\">Email</button>"+
@@ -5852,7 +5865,7 @@ function renderReviews(){
   el.innerHTML="<div class='card card-pad'>"+
     "<div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>After the tour</div><div class='h-sec' style='font-size:15px'>Reviews &amp; feedback <span class='pill plain' style='font-size:11px'>"+asked+" asked · "+got+" reviewed · "+fbs.length+" feedback</span></div></div></div>"+
     shareRow("⭐ Google review link","Public rating on Google — share with any happy guest.","review",payCfg.reviewUrl)+
-    shareRow("📝 Feedback form (5 questions)","Guide · Hospitality · Targets · Overall + comments — lands right here.","feedback",feedbackLink())+
+    shareRow("📝 Feedback form"+(payCfg.feedbackUrl?" (custom link)":" (5 questions)"),payCfg.feedbackUrl?"Your saved custom form — responses collect wherever that form sends them.":"Guide · Hospitality · Targets · Overall + comments — lands right here.","feedback",feedbackLink())+
     (list.length?"<div class='h-sec' style='font-size:13.5px;margin:14px 0 4px'>Guests to ask (tours ended recently)</div>"+
       list.map(function(b){
         var t=tours.find(function(x){return x.id===b.tour;});
@@ -6097,9 +6110,17 @@ function viewSettings(){
       "<div class='field'><label>SAC / HSN code</label><input class='input mono' id='pg_hsn' value='"+(payCfg.hsn||"9985")+"'></div>"+
       "<div class='field'><label>UPI ID</label><input class='input mono' id='pg_upi' value='"+(payCfg.upi||"")+"' placeholder='islandexplorer@okhdfcbank'></div>"+
       "<div class='field'><label>Payment page link</label><input class='input' id='pg_page' value='"+(payCfg.payPage||"")+"' placeholder='https://rzp.io/l/…'></div>"+
-      "<div class='field full'><label>Google review link <span style='color:var(--ink-soft);font-weight:400'>(used by the Review collector in Customers — Google Maps → your business → Share review form)</span></label><input class='input' id='pg_review' value='"+(payCfg.reviewUrl||"")+"' placeholder='https://g.page/r/…/review'></div>"+
     "</div>"+
     "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='savePayCfg()'>Save payment settings</button>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Sharing</div><div class='h-sec' style='margin-bottom:6px'>Review &amp; feedback links</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>These are the links the console forwards whenever you share from <b>Reviews &amp; Feedback</b> or the <b>Bookings</b> page. Save them once — every share button then sends exactly these saved links.</p>"+
+    "<div class='form-grid'>"+
+      "<div class='field full'><label>Google review link <span style='color:var(--ink-soft);font-weight:400'>(Google Maps → your business → Share review form)</span></label><input class='input' id='rl_review' value='"+(payCfg.reviewUrl||"")+"' placeholder='https://g.page/r/…/review'></div>"+
+      "<div class='field full'><label>Custom feedback link <span style='color:var(--ink-soft);font-weight:400'>(optional — your own Google Form / Typeform etc. Leave blank to use the built-in 5-question form, whose answers land in Reviews &amp; Feedback)</span></label><input class='input' id='rl_feedback' value='"+(payCfg.feedbackUrl||"")+"' placeholder='https://forms.gle/… (blank = built-in form)'></div>"+
+    "</div>"+
+    "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='saveReviewLinks()'>Save links</button>"+
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
@@ -6176,10 +6197,20 @@ function viewSettings(){
 }
 function savePayCfg(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
-  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page"),reviewUrl:g("pg_review")};
+  /* review/feedback links live in their own settings card (saveReviewLinks) — keep them */
+  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page"),reviewUrl:payCfg.reviewUrl||"",feedbackUrl:payCfg.feedbackUrl||""};
   audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.upi||""));
   persistData();
   alert("Saved. Invoices now show "+(payCfg.gstRate>0?("the GST break-up @ "+payCfg.gstRate+"%"):"no GST line")+(payCfg.upi||payCfg.payPage?" and a Pay-now block.":"."));
+}
+function saveReviewLinks(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
+  payCfg.reviewUrl=g("rl_review");
+  payCfg.feedbackUrl=g("rl_feedback");
+  audit("settings","review-links-updated",(payCfg.reviewUrl?"review ✓":"review —")+" · "+(payCfg.feedbackUrl?"custom feedback ✓":"built-in feedback"));
+  persistData();
+  if(typeof renderReviews==="function")renderReviews();
+  alert("Saved ✓\n\nReview link: "+(payCfg.reviewUrl||"not set")+"\nFeedback link: "+(payCfg.feedbackUrl||feedbackLink()+" (built-in form)")+"\n\nEvery share button in Reviews & Feedback and Bookings now forwards these links.");
 }
 /* Full-workspace backup: the same STORE snapshot the cloud sync uses, plus meta. */
 function downloadBackup(){
