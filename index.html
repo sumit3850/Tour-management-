@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 179</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 180</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 179</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 180</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -872,6 +872,16 @@ let sheetEpoch=0;
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
 let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:""};
+/* Integrations switchboard (Settings → Integrations): real gates, synced.
+   sheets off → no Google-Sheet pushes; whatsapp/email off → those share/send
+   buttons explain instead of opening; maps is informational. */
+let integCfg={sheets:true,maps:true,whatsapp:true,email:true};
+function toggleInteg(k){
+  integCfg[k]=integCfg[k]===false;
+  audit("settings","integration",k+" "+(integCfg[k]?"on":"off"));
+  persistData();
+  if(typeof refreshSettings==="function")refreshSettings();
+}
 let auditLog=[]; /* who did what, when — rendered in Settings → Activity log */
 var csTour="",csType="indian"; /* Cost Sheet editor selection */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
@@ -917,7 +927,8 @@ const STORE=[
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
   {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:""},v);}},
-  {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}}
+  {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
+  {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}}
 ];
 /* One line per meaningful action. Capped so the blob never bloats. */
 function audit(cat,action,detail){
@@ -1421,7 +1432,13 @@ function objsToCSV(objs){
   return rows;
 }
 /* ===== Google Sheet auto-push (Apps Script webhook) ===== */
-function sheetHook(){try{return localStorage.getItem("ieo_sheethook")||"";}catch(e){return "";}}
+/* Raw stored webhook (settings UI) vs effective hook (every push path): the
+   Integrations toggle pauses all Sheet pushes by blanking the effective hook. */
+function sheetHookRaw(){try{return localStorage.getItem("ieo_sheethook")||"";}catch(e){return "";}}
+function sheetHook(){
+  if(typeof integCfg!=="undefined"&&integCfg.sheets===false)return "";
+  return sheetHookRaw();
+}
 function sheetViewUrl(){try{return localStorage.getItem("ieo_sheetview")||"";}catch(e){return "";}}
 function openSheet(){var u=sheetViewUrl();if(!u){alert("Paste your Google Sheet link in the field, then Save.");return;}window.open(u,"_blank");}
 function postToSheet(kind,row,keyField){
@@ -1443,6 +1460,7 @@ function clearAllData(){
   alert("All data cleared on this device and the cloud. Only entries you add from now on will appear.");
 }
 function pushAllToSheet(){
+  if(typeof integCfg!=="undefined"&&integCfg.sheets===false){alert("Google Sheets is switched off — turn it on in Settings → Integrations.");return;}
   if(!sheetHook()){alert("Add your Google Apps Script webhook URL first.");return;}
   syncSheets();
   alert("Synced your Google Sheet to match the console — all "+workbookSpec().length+" tabs rebuilt in the standard format (Booking, Accommodations, Customer DB, Operations, Guide_Roster, Quotation Log, Invoice, Activities Log, Profit, Guides, Drivers, Vehicles). Rows are ordered newest-tour-first and old/deleted rows are removed.");
@@ -2182,11 +2200,11 @@ const NAV=[
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
-  ["reviews","Reviews & Feedback","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
+  ["reviews","Forms, Review & Feedback","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Overview","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Tour costing","Cost Calculator"],invoices:["Tour costing","Invoices"],profit:["Tour costing","Profit Calculator"],groupquote:["Tour costing","Group Quotation"],costsheet:["Tour costing","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Overview","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Reviews & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Tour costing","Cost Calculator"],invoices:["Tour costing","Invoices"],profit:["Tour costing","Profit Calculator"],groupquote:["Tour costing","Group Quotation"],costsheet:["Tour costing","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Overview","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Forms, Review & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -2502,8 +2520,14 @@ function billableBookings(){
   return out;
 }
 function pendingBookings(){return billableBookings().filter(function(b){return bookingPending(b)>0;});}
-function waShare(text,phone){var n=String(phone||"").replace(/\D/g,"");window.open("https://wa.me/"+n+"?text="+encodeURIComponent(text),"_blank");}
-function mailSend(to,subject,body){window.open("mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body),"_blank");}
+function waShare(text,phone){
+  if(typeof integCfg!=="undefined"&&integCfg.whatsapp===false){alert("WhatsApp is switched off — turn it on in Settings → Integrations.");return;}
+  var n=String(phone||"").replace(/\D/g,"");window.open("https://wa.me/"+n+"?text="+encodeURIComponent(text),"_blank");
+}
+function mailSend(to,subject,body){
+  if(typeof integCfg!=="undefined"&&integCfg.email===false){alert("Email is switched off — turn it on in Settings → Integrations.");return;}
+  window.open("mailto:"+encodeURIComponent(to||"")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body),"_blank");
+}
 /* "Pay now" lines for reminders/invoices, built from Settings → Payments & GST.
    Empty string when nothing is configured, so messages stay clean. */
 function payLinkLines(amount){
@@ -5851,12 +5875,28 @@ function viewCustomers(){
     "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th>Phone</th><th>Email</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
 }
-/* Reviews & Feedback — its own sidebar module (moved out of the Customer database). */
+/* Forms, Review & Feedback — its own sidebar module (moved out of the Customer database). */
 function viewReviews(){
   return "<section class='view' id='v-reviews'>"+
-    "<div class='section-head'><div class='h-sec'>Reviews &amp; Feedback</div></div>"+
+    "<div class='section-head'><div class='h-sec'>Forms, Review &amp; Feedback</div></div>"+
     "<div id='reviewPanel'></div>"+
   "</section>";
+}
+/* Public form links (register.html) shared from the Forms card. */
+var FORM_SHARE={
+  client:  {label:"Guest details form",  desc:"Full guest particulars for a confirmed booking — auto-creates the booking + customer."},
+  interest:{label:"Guest interest form", desc:"Tour enquiry — auto-creates a booking, customer and CRM lead."},
+  driver:  {label:"Driver ops form",     desc:"Driver self-registration — lands in Logistics → Vehicles & Drivers."},
+  guidedir:{label:"Guide ops form",      desc:"Guide self-registration — lands in Logistics → External Guides."}
+};
+function shareFormVia(type,via){
+  var f=FORM_SHARE[type];if(!f)return;
+  var url=formLink(type);
+  var comp=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var msg="Hello! Please fill the "+f.label.toLowerCase()+" for "+comp+":\n"+url;
+  if(via==="copy"){try{navigator.clipboard.writeText(url);}catch(e){}var b=event&&event.target;if(b){var t=b.textContent;b.textContent="Copied ✓";setTimeout(function(){b.textContent=t;},1200);}return;}
+  if(via==="em"){mailSend("",f.label+" · "+comp,msg);return;}
+  waShare(msg,"");
 }
 /* ===== Review collector — guests whose tour ended recently, with ask/track. =====
    Reviews are the cheapest marketing a tour company has; this makes asking a
@@ -5922,7 +5962,20 @@ function renderReviews(){
       "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('"+kind+"','copy')\">Copy</button>"+
       "</div></div>";
   };
-  el.innerHTML="<div class='card card-pad'>"+
+  var formRows=Object.keys(FORM_SHARE).map(function(k){
+    var f=FORM_SHARE[k];
+    return "<div class='list-row'><div class='meta'><div class='t'>"+f.label+"</div><div class='s' style='word-break:break-all'>"+formLink(k)+"</div><div class='s'>"+f.desc+"</div></div>"+
+      "<div style='display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap'>"+
+      "<button class='btn btn-sea btn-sm' onclick=\"shareFormVia('"+k+"','wa')\">Share · WA</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick=\"shareFormVia('"+k+"','em')\">Email</button>"+
+      "<button class='btn btn-ghost btn-sm' onclick=\"shareFormVia('"+k+"','copy')\">Copy</button>"+
+      "</div></div>";
+  }).join("");
+  el.innerHTML="<div class='card card-pad' style='margin-bottom:14px'>"+
+    "<div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Public forms</div><div class='h-sec' style='font-size:15px'>Forms — share with guests &amp; crew</div></div></div>"+
+    formRows+
+  "</div>"+
+  "<div class='card card-pad'>"+
     "<div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>After the tour</div><div class='h-sec' style='font-size:15px'>Reviews &amp; feedback <span class='pill plain' style='font-size:11px'>"+asked+" asked · "+got+" reviewed · "+fbs.length+" feedback</span></div></div></div>"+
     shareRow("⭐ Google review link","Public rating on Google — share with any happy guest.","review",payCfg.reviewUrl)+
     shareRow("📝 Feedback form"+(payCfg.feedbackUrl?" (custom link)":" (5 questions)"),payCfg.feedbackUrl?"Your saved custom form — responses collect wherever that form sends them.":"Guide · Hospitality · Targets · Overall + comments — lands right here.","feedback",feedbackLink())+
@@ -6118,10 +6171,15 @@ Hashtags: #AndamanBirding #NicobarMegapode #IslandExplorer #BirdsOfIndia #Endemi
 /* ===== SETTINGS ===== */
 function viewSettings(){
   var sbc=sbConfig()||{};
-  const integ=[["Google Sheets","Cost data sync","M3 3h18v18H3zM3 9h18M9 3v18",true],["Google Maps","Pickup & birding locations","M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z",true],["WhatsApp","Booking & lead replies","M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5z",true],["Email","Quotations & confirmations","M4 4h16v16H4zM4 7l8 6 8-6",false]];
+  const integ=[
+    ["sheets","Google Sheets",(sheetHookRaw()?"Auto-push to your Sheet — connected":"Auto-push — add the Apps Script URL below"),"M3 3h18v18H3zM3 9h18M9 3v18"],
+    ["maps","Google Maps","Pickup & birding locations","M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"],
+    ["whatsapp","WhatsApp","Every WhatsApp share/send button","M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5z"],
+    ["email","Email","Every email share/send button","M4 4h16v16H4zM4 7l8 6 8-6"]];
   return "<section class='view' id='v-settings'><div class='grid-2'>"+
     "<div class='card card-pad'><div class='eyebrow'>Connections</div><div class='h-sec' style='margin-bottom:6px'>Integrations</div>"+
-      integ.map(s=>"<div class='set-row'><div class='si'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+s[2]+"'/></svg></div><div class='sm'><b>"+s[0]+"</b><span>"+s[1]+"</span></div><div class='toggle "+(s[3]?"on":"")+"' onclick='this.classList.toggle(\'on\')'></div></div>").join("")+
+      integ.map(function(s){return "<div class='set-row'><div class='si'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+s[3]+"'/></svg></div><div class='sm'><b>"+s[1]+"</b><span>"+s[2]+"</span></div><div class='toggle "+(integCfg[s[0]]!==false?"on":"")+"' onclick=\"toggleInteg('"+s[0]+"')\"></div></div>";}).join("")+
+      "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>These switches are live: turning one off pauses that channel everywhere in the console (saved to your workspace).</p>"+
     "</div>"+
     "<div class='card card-pad'><div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Access</div><div class='h-sec'>User roles &amp; access</div></div><div style='display:flex;gap:6px'><button class='btn btn-ghost btn-sm' onclick='logout()'>Sign out</button><button class='btn btn-primary btn-sm' onclick='openAddOperator()'>Add user</button></div></div>"+
       "<p style='font-size:12px;color:var(--ink-soft);margin-bottom:10px'>Each user signs in with their phone number and personal code. Edit or remove anyone below.</p>"+
@@ -6185,7 +6243,7 @@ function viewSettings(){
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Google Sheet auto-push</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Paste a Google Apps Script <b>web-app URL</b> below. New bookings &amp; customers are then pushed to your Sheet automatically. Setup steps are in docs/SHEET_SYNC.md.</p>"+
-    "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHook())+"'></div>"+
+    "<div class='field'><label>Apps Script web-app URL</label><input class='input' id='sheethook_url' placeholder='https://script.google.com/macros/s/XXXX/exec' value='"+(sheetHookRaw())+"'></div>"+
     "<div class='field'><label>Your Google Sheet link (to open it from the app)</label><input class='input' id='sheetview_url' placeholder='https://docs.google.com/spreadsheets/d/…' value='"+(sheetViewUrl())+"'></div>"+
     "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><button class='btn btn-primary btn-sm' onclick='saveSheetHook()'>Save</button><button class='btn btn-sea btn-sm' onclick='pushAllToSheet()'>Push all now</button><button class='btn btn-ghost btn-sm' onclick='openSheet()'>Open Google Sheet</button></div>"+
   "</div>"+
