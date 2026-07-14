@@ -245,9 +245,10 @@ body.no-anim .view{animation:none} /* background data refresh — rebuild withou
 .up{color:#2f7d5b}.down{color:var(--coral)}
 
 .grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.grid-2>*{min-width:0} /* stop wide tables inside a card from forcing the column (and the page) wider than the screen */
 
-.chart{display:flex;align-items:flex-end;gap:14px;height:140px;padding-top:10px}
-.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
+.chart{display:flex;align-items:flex-end;gap:14px;height:140px;padding-top:10px;overflow-x:auto} /* many months scroll inside the card instead of pushing the page wide */
+.chart .col{flex:1;min-width:34px;display:flex;flex-direction:column;align-items:center;gap:7px;height:100%;justify-content:flex-end}
 .chart .stk{width:100%;max-width:34px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--sea),var(--forest));transition:height .6s cubic-bezier(.2,.7,.2,1)}
 .chart .cl{font-size:11px;color:var(--ink-soft);text-align:center}
 
@@ -645,6 +646,15 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   .form-grid{grid-template-columns:1fr}
   .field label{font-size:13px}
   .input{font-size:16px}      /* 16px stops iOS from zooming on focus */
+  /* Phone form redesign: every two-column entry grid becomes a single, roomy
+     column — full-width fields, comfortable tap targets, even spacing. */
+  .cost-grid{grid-template-columns:1fr;gap:0}
+  .cost-grid .field,.form-grid .field{margin-bottom:12px}
+  .field .input,.field select.input{width:100%;padding:12px 13px;border-radius:11px}
+  .tourist-toggle .btn{padding:10px 18px}
+  .list-row{flex-wrap:wrap;row-gap:8px}
+  .list-row .meta{flex:1 1 200px;min-width:0}
+  .section-head{flex-wrap:wrap;gap:10px}
 }
 </style>
 <script src="config.js"></script>
@@ -689,7 +699,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 183</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 184</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -698,7 +708,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 183</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 184</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2738,7 +2748,6 @@ function viewDashboard(){
     "<div class='card card-pad' id='dashOpsBoard' style='margin-top:16px'>"+opsBoardMarkup()+"</div>"+
     alertsCard()+
     "<div id='payPanel' style='margin-top:16px'></div>"+
-    profitBriefCard()+
     "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
     (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
     "<div class='card card-pad' style='margin-top:16px'>"+
@@ -2954,8 +2963,9 @@ function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
       "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed","Archived"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
-      "<div style='display:flex;gap:4px;align-items:center'><button class='btn btn-ghost btn-sm' onclick='tourZoom(-1)' title='Zoom out' style='min-width:34px;font-weight:800'>−</button><span class='mono' id='tzPct' style='font-size:11px;color:var(--ink-soft);min-width:36px;text-align:center'>100%</span><button class='btn btn-ghost btn-sm' onclick='tourZoom(1)' title='Zoom in' style='min-width:34px;font-weight:800'>+</button></div>"+
-      "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button><button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
+      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button>"+
+      "<span style='display:inline-flex;gap:4px;align-items:center'><button class='btn btn-ghost btn-sm' onclick='tourZoom(-1)' title='Zoom out' style='min-width:34px;font-weight:800'>−</button><span class='mono' id='tzPct' style='font-size:11px;color:var(--ink-soft);min-width:36px;text-align:center'>100%</span><button class='btn btn-ghost btn-sm' onclick='tourZoom(1)' title='Zoom in' style='min-width:34px;font-weight:800'>+</button></span>"+
+      "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
     "</div>"+
     "<div class='tour-cols' id='tourGrid'></div>"+
   "</section>";
@@ -5876,7 +5886,7 @@ function renderProfitCalc(){
     (window._pcEditId?"<div class='eyebrow' style='color:var(--amber);margin-bottom:8px'>Editing a saved calculation</div>":"")+
     "<div class='kpis'>"+kpi("Total Tour Cost",fmt(tourRevenue(t)),"from bookings","","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+"</div>"+
     "<div class='form-grid' style='margin-top:14px'>"+PROFIT_EXP_FIELDS.map(function(f){return "<div class='field'><label>"+f[1]+" (₹)</label><input class='input mono' type='number' id='pc_"+f[0]+"' value='"+(e[f[0]]||0)+"' oninput='pcRecalc()'></div>";}).join("")+"</div>"+
-    "<div class='stat-strip' style='grid-template-columns:repeat(3,1fr);margin-top:14px'>"+
+    "<div class='stat-strip' style='grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-top:14px'>"+
       "<div class='s'><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='l'>Total Tour Cost</div></div>"+
       "<div class='s'><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div><div class='l'>Total Expenses</div></div>"+
       "<div class='s'><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div><div class='l'>Profit</div></div>"+
@@ -6133,16 +6143,18 @@ function renderReviews(){
   var got=(bookings||[]).filter(function(b){return b.reviewDone;}).length;
   var fbs=feedbackSubs();
   var shareRow=function(label,desc,kind,url){
-    return "<div class='list-row'><div class='meta'><div class='t'>"+label+"</div><div class='s' style='word-break:break-all'>"+(url||"<span style='color:var(--coral)'>Not set — Settings → Review &amp; feedback links</span>")+"</div><div class='s'>"+desc+"</div></div>"+
+    return "<div class='list-row'><div class='meta'><div class='t'>"+label+"</div><div class='s'>"+(url?"<span style='color:var(--forest);font-weight:600'>✓ Link saved</span>":"<span style='color:var(--coral)'>Not set — Settings → Review &amp; feedback links</span>")+"</div><div class='s'>"+desc+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap'>"+
       "<button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('"+kind+"','wa')\">Share · WA</button>"+
       "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('"+kind+"','em')\">Email</button>"+
       "<button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('"+kind+"','copy')\">Copy</button>"+
       "</div></div>";
   };
+  /* No raw URLs on screen — the label + purpose is enough; Copy/WA/Email carry
+     the actual link. Keeps the card clean, especially on phones. */
   var formRows=Object.keys(FORM_SHARE).map(function(k){
     var f=FORM_SHARE[k];
-    return "<div class='list-row'><div class='meta'><div class='t'>"+f.label+"</div><div class='s' style='word-break:break-all'>"+formLink(k)+"</div><div class='s'>"+f.desc+"</div></div>"+
+    return "<div class='list-row'><div class='meta'><div class='t'>"+f.label+"</div><div class='s'>"+f.desc+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap'>"+
       "<button class='btn btn-sea btn-sm' onclick=\"shareFormVia('"+k+"','wa')\">Share · WA</button>"+
       "<button class='btn btn-ghost btn-sm' onclick=\"shareFormVia('"+k+"','em')\">Email</button>"+
