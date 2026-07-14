@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v60"; /* v60: wider tour columns — ID/Public/eBird/countdown share one row */
+var CACHE = "ie-ops-v61"; /* v61: mobile polish — no horizontal overflow, single-column forms, clean form rows */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
