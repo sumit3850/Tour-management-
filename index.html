@@ -682,7 +682,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 180</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 181</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -691,7 +691,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 180</span></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 181</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -871,7 +871,7 @@ var SHEET_DATA_EPOCH=2;
 let sheetEpoch=0;
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
-let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:""};
+let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:""};
 /* Integrations switchboard (Settings → Integrations): real gates, synced.
    sheets off → no Google-Sheet pushes; whatsapp/email off → those share/send
    buttons explain instead of opening; maps is informational. */
@@ -926,7 +926,7 @@ const STORE=[
   {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
-  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:""},v);}},
+  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:""},v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
   {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}}
 ];
@@ -2787,6 +2787,53 @@ function anaRangeOk(t){
   return true;
 }
 function anaYearFilter(id){var y=_anaYearBy[id]||"all";return function(t){return (y==="all"||((t.start||"").slice(0,4)===y))&&anaRangeOk(t);};}
+/* ---- AUTO PROFIT PER TOUR --------------------------------------------------
+   Revenue: tourRevenue (tour cost / bookings). Expenses, in order of trust:
+   1) actual figures typed into the Profit Calculator (t.profitExp),
+   2) the latest saved Profit Calculator log for the tour,
+   3) an estimate from the cost sheet (rate key matched by name/nights, booked
+      pax, majority client type) — clearly badged so nobody mistakes it. */
+function tourPaxBooked(t){return (bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";}).reduce(function(s,b){return s+(parseInt(b.party,10)||1);},0);}
+function tourRateKey(t){
+  var s=((t.name||"")+" "+(t.cat||"")).toLowerCase();
+  var n=(typeof durNights==="function")?durNights(t):0;
+  if(/narcondam/.test(s))return "T8";
+  if(n>=13)return "T5"; /* the 15N A&N expedition — by length, names vary */
+  if(/nicobar/.test(s))return "T2";
+  if(/little/.test(s))return n>=8?"T4":"T3";
+  if(n>=8)return "T4";
+  if(n>=7)return "T3";
+  return "T1";
+}
+function estimateTourCost(t){
+  var bs=(bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";});
+  var n=Math.min(Math.max(tourPaxBooked(t),1),10);
+  var forn=bs.filter(function(b){return b.country&&!/india/i.test(b.country);}).length;
+  var type=(forn>bs.length/2)?"foreign":"indian";
+  var key=tourRateKey(t);
+  var d=SHEET_DATA[key]&&SHEET_DATA[key][type]&&SHEET_DATA[key][type][String(n)];
+  return (d&&d.total)?{cost:d.total,key:key,type:type,pax:n}:null;
+}
+function autoTourProfit(t){
+  var rev=tourRevenue(t);
+  var exp=tourExpTotal(t),src="actual";
+  if(!exp){
+    var log=(profitLogs||[]).filter(function(x){return x.tourId===t.id&&(+x.totalExp||0)>0;}).sort(function(a,b){return (b.savedAt||"").localeCompare(a.savedAt||"");})[0];
+    if(log){exp=+log.totalExp||0;src="log";}
+  }
+  if(!exp){var est=estimateTourCost(t);if(est){exp=est.cost;src="estimate";}else src="none";}
+  var profit=rev-exp;
+  return {rev:rev,exp:exp,src:src,profit:profit,pct:rev>0?Math.round(profit/rev*100):null};
+}
+/* ---- OCCUPANCY / SEASON DATA: seats offered vs booked, by start month ------ */
+function seasonMonthData(filterFn){
+  var m=[];for(var i=0;i<12;i++)m.push({tours:0,cap:0,booked:0});
+  (tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(filterFn).forEach(function(t){
+    var mi=parseInt(t.start.slice(5,7),10)-1;if(mi<0||mi>11)return;
+    m[mi].tours++;m[mi].cap+=(parseInt(t.cap,10)||0);m[mi].booked+=(typeof booked==="function"?booked(t.id):0);
+  });
+  return m;
+}
 function renderAnalytics(){
   var el=document.getElementById("anaBody");if(!el)return;
   var s=paymentStats();
@@ -2822,10 +2869,49 @@ function renderAnalytics(){
   var srcs={};leads.forEach(function(l){var k=l.src||"—";srcs[k]=(srcs[k]||0)+1;});
   var srcList=Object.keys(srcs).map(function(k){return {k:k,n:srcs[k]};}).sort(function(a,b){return b.n-a.n;});
   var hbar=function(label,val,max,display){return "<div style='margin-bottom:8px'><div style='display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px'><span>"+label+"</span><b class='mono'>"+(display!=null?display:val)+"</b></div><div style='height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden'><span style='display:block;height:100%;width:"+Math.max(Math.round(val/max*100),2)+"%;background:var(--sea);border-radius:99px'></span></div></div>";};
-  var hiddenChips=_anaHidden.length?"<div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center'><span style='font-size:11.5px;color:var(--ink-soft)'>Hidden cards:</span>"+_anaHidden.map(function(c){var names={rev:"Revenue by month",top:"Top tours",funnel:"Lead funnel",guides:"Guide utilization",sources:"Lead sources"};return "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:3px 10px' onclick=\"showAnaCard('"+c+"')\">+ "+(names[c]||c)+"</button>";}).join("")+"</div>":"";
+  var hiddenChips=_anaHidden.length?"<div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center'><span style='font-size:11.5px;color:var(--ink-soft)'>Hidden cards:</span>"+_anaHidden.map(function(c){var names={rev:"Revenue by month",top:"Top tours",funnel:"Lead funnel",guides:"Guide utilization",sources:"Lead sources",profit:"Profit by tour",season:"Profit by season",heat:"Season planner"};return "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:3px 10px' onclick=\"showAnaCard('"+c+"')\">+ "+(names[c]||c)+"</button>";}).join("")+"</div>":"";
+  /* ---- Profit by tour (auto): actual > log > cost-sheet estimate ---- */
+  var pRows=(tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(anaYearFilter("profit")).map(function(t){
+    var p=autoTourProfit(t);p.t=t;return p;
+  }).filter(function(p){return p.rev>0||p.exp>0;}).sort(function(a,b){return b.profit-a.profit;});
+  var srcBadge=function(s){return s==="actual"?"<span class='pill completed' style='font-size:10px'>actual costs</span>":(s==="log"?"<span class='pill open' style='font-size:10px'>saved calc</span>":(s==="estimate"?"<span class='pill plain' style='font-size:10px'>cost-sheet est.</span>":"<span class='pill full' style='font-size:10px'>no costs yet</span>"));};
+  var profitBody=pRows.length?pRows.slice(0,12).map(function(p,i){
+    var best=i===0&&p.profit>0,worst=i===pRows.length-1&&pRows.length>1&&p.profit<pRows[0].profit;
+    return "<div style='display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft)'>"+
+      "<div style='min-width:0'><div style='font-size:13px;font-weight:600'>["+tourCode(p.t)+"] "+shortName(p.t)+(best?" <span style='color:var(--forest);font-size:11px'>★ best</span>":"")+(worst?" <span style='color:var(--coral);font-size:11px'>▼ worst</span>":"")+"</div>"+
+      "<div style='font-size:11.5px;color:var(--ink-soft)'>Rev "+fmt(p.rev)+" · Cost "+(p.exp?fmt(p.exp):"—")+" "+srcBadge(p.src)+"</div></div>"+
+      "<div style='text-align:right;flex-shrink:0'><div class='mono' style='font-weight:700;color:"+(p.profit>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(p.profit)+"</div>"+(p.pct!=null?"<div style='font-size:11px;color:var(--ink-soft)'>"+p.pct+"% margin</div>":"")+"</div></div>";
+  }).join("")+"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Costs come from the Profit Calculator when entered; otherwise estimated from the cost sheet (booked pax + client mix). Enter real expenses in Tour costing → Profit Calculator to firm a tour up.</p>"
+  :"<div class='empty'>No tours with revenue in this range yet.</div>";
+  /* ---- Profit by season: month-of-start aggregation ---- */
+  var MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var seas=[];for(var si=0;si<12;si++)seas.push(0);
+  pRows.forEach(function(p){if(p.t.start&&anaYearFilter("season")(p.t))seas[parseInt(p.t.start.slice(5,7),10)-1]+=p.profit;});
+  var maxSeas=Math.max.apply(null,seas.map(Math.abs).concat([1]));
+  var seasonBody=pRows.length?"<div class='chart'>"+seas.map(function(v,i){
+    return "<div class='col'><div class='stk' style='height:"+Math.max(Math.round(Math.abs(v)/maxSeas*100),2)+"%;"+(v<0?"background:var(--coral)":"")+"'></div><div class='cl'>"+MN[i]+"<br><b class='mono'>"+(v?(Math.abs(v)>=100000?("₹"+(v/100000).toFixed(1)+"L"):("₹"+Math.round(v/1000)+"k")):"—")+"</b></div></div>";
+  }).join("")+"</div>":"<div class='empty'>Profit appears here once tours have revenue.</div>";
+  /* ---- Season planner: occupancy heatmap (seats booked / offered per month) ---- */
+  var hm=seasonMonthData(anaYearFilter("heat"));
+  var gapMonths=MN.filter(function(_,i){return hm[i].tours===0;});
+  var heatBody="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px'>"+hm.map(function(m,i){
+    var util=m.cap>0?Math.round(m.booked/m.cap*100):null;
+    var bg=util==null?"var(--surface-2)":(util>=80?"#1f8f5f":(util>=50?"#7cc08f":(util>=25?"#f0c36b":"#e8938c")));
+    var fg=util==null?"var(--ink-soft)":"#fff";
+    return "<div style='border-radius:10px;padding:10px;background:"+bg+";color:"+fg+"'>"+
+      "<div style='font-weight:800;font-size:13px'>"+MN[i]+"</div>"+
+      (util==null?"<div style='font-size:11px'>no departures</div>":
+        "<div class='mono' style='font-size:17px;font-weight:800'>"+util+"%</div>"+
+        "<div style='font-size:10.5px;opacity:.9'>"+m.booked+"/"+m.cap+" seats · "+m.tours+" tour"+(m.tours===1?"":"s")+"</div>")+
+    "</div>";
+  }).join("")+"</div>"+
+  (gapMonths.length?"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'><b>Gap months (no departures):</b> "+gapMonths.join(", ")+" — space to add tours where demand exists.</p>":"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'>Every month has at least one departure.</p>");
   var vis=function(id){return _anaHidden.indexOf(id)<0;};
   var cards=[];
   if(vis("rev"))cards.push(anaCard("rev","Revenue by month <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(by tour start)</span>",revChart,true));
+  if(vis("profit"))cards.push(anaCard("profit","Profit by tour <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(auto — revenue vs costs)</span>",profitBody,true));
+  if(vis("heat"))cards.push(anaCard("heat","Season planner <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(seat utilization by month)</span>",heatBody,true));
+  if(vis("season"))cards.push(anaCard("season","Profit by season <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(month of departure)</span>",seasonBody,true));
   var half=[];
   if(vis("top"))half.push(anaCard("top","Top tours by revenue",(top.length?top.map(function(x){return hbar("["+x.code+"] "+x.n,x.rev,top[0].rev,fmt(x.rev));}).join(""):"<div class='empty'>No revenue captured yet.</div>"),true));
   if(vis("funnel"))half.push(anaCard("funnel","Lead funnel",funnel.map(function(f){return hbar(f.label,f.n,totLeads);}).join("")+"<div style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>"+leadConv+"% of all leads reach Confirmed.</div>",false));
@@ -2879,6 +2965,7 @@ function tourCard(t){
     "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
     "<div class='tc-top'><span class='tc-id' title='Tour ID'>"+tourCode(t)+"</span>"+
       "<button class='tc-chip' onclick='event.stopPropagation();togglePubTour(\""+t.id+"\")' title='"+(t.pub?"Shown on the public departures page — click to unlist":"Not on the public page — click to show it")+"' style='cursor:pointer;border:1px solid "+(t.pub?"var(--sea)":"var(--line)")+";"+(t.pub?"background:var(--sea-soft);color:var(--sea);font-weight:700":"color:var(--ink-soft)")+"'>"+(t.pub?"🌐 Public":"🌐 Private")+"</button>"+
+      "<button class='tc-chip' onclick='event.stopPropagation();ebirdReport(\""+t.id+"\")' title='Build a branded species-list trip report from eBird checklists' style='cursor:pointer;border:1px solid var(--line);color:var(--ink-soft)'>🐦 eBird report</button>"+
       (when.label?"<span class='tc-when "+when.cls+"'>"+when.label+"</span>":"")+"</div>"+
     "<div class='tc-name' title='"+nm+"'>"+shortName(t)+"</div>"+
     "<div class='tc-dates'>"+CAL+"<span>"+dRangeNice(t.start,t.end)+"</span><span class='tc-nights'>"+durNights(t)+"N</span></div>"+
@@ -2923,6 +3010,90 @@ function tourZoom(dir){
 function archiveTour(id){var t=tours.find(function(x){return x.id===id;});if(!t)return;t.archived=true;audit("tour","archived",tourCode(t)+" · "+(t.name||""));renderTours();renderCalendar();}
 function restoreTour(id){var t=tours.find(function(x){return x.id===id;});if(!t)return;t.archived=false;audit("tour","restored",tourCode(t)+" · "+(t.name||""));renderTours();renderCalendar();}
 function togglePubTour(id){var t=tours.find(function(x){return x.id===id;});if(!t)return;t.pub=!t.pub;audit("tour",t.pub?"published":"unlisted",tourCode(t));persistData();renderTours();}
+/* ===== eBird trip report — branded species-list PDF per departure ===========
+   Paste the tour's eBird checklist IDs (S…), fetch species + counts through the
+   eBird API (key in Settings → Review & feedback links), review/edit the list,
+   then print the letterhead report. If the API can't be reached (offline/CORS),
+   the species list can be pasted by hand — the report builder is the same. */
+function ebirdReport(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>"+tourCode(t)+" · "+dRangeNice(t.start,t.end)+"</span><h2 class='display' style='font-size:20px;margin-top:6px'>eBird trip report — "+shortName(t)+"</h2></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<div class='field full'><label>eBird checklist IDs <span style='color:var(--ink-soft);font-weight:400'>(comma-separated, e.g. S123456789 — from each checklist's URL)</span></label>"+
+        "<div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='eb_ids' style='flex:1;min-width:220px' placeholder='S123456789, S987654321'>"+
+        "<button class='btn btn-sea btn-sm' onclick=\"ebirdFetch('"+id+"')\" id='ebFetchBtn'>Fetch from eBird</button></div>"+
+        (payCfg.ebirdKey?"":"<p style='font-size:11.5px;color:var(--coral);margin-top:6px'>No eBird API key saved yet — add it in Settings → Review &amp; feedback links (free at ebird.org/api/keygen). You can still paste the species list below.</p>")+
+      "</div>"+
+      "<div class='field full' style='margin-top:10px'><label>Species list <span style='color:var(--ink-soft);font-weight:400'>(one per line: Common name (Scientific name) — count · edit freely before printing)</span></label>"+
+        "<textarea class='input mono' id='eb_species' rows='10' style='font-size:12px' placeholder='Andaman Serpent-Eagle (Spilornis elgini) — 2\nAndaman Woodpecker (Dryocopus hodgei) — 1'></textarea></div>"+
+      "<div style='display:flex;gap:8px;margin-top:12px;flex-wrap:wrap'>"+
+        "<button class='btn btn-primary' onclick=\"ebirdBuild('"+id+"')\">Generate report (print / PDF)</button>"+
+      "</div>"+
+    "</div>";
+  openScrim();
+}
+function ebirdFetch(id){
+  var key=(payCfg.ebirdKey||"").trim();
+  if(!key){alert("Add your eBird API key first: Settings → Review & feedback links.\n(Free at ebird.org/api/keygen.)");return;}
+  var ids=((document.getElementById("eb_ids")||{}).value||"").split(/[\s,]+/).map(function(s){return s.trim();}).filter(function(s){return /^S\d+/i.test(s);});
+  if(!ids.length){alert("Paste at least one checklist ID (looks like S123456789).");return;}
+  var btn=document.getElementById("ebFetchBtn");if(btn){btn.disabled=true;btn.textContent="Fetching…";}
+  var H={headers:{"X-eBirdApiToken":key}};
+  var counts={};
+  Promise.all(ids.map(function(sub){
+    return fetch("https://api.ebird.org/v2/product/checklist/view/"+encodeURIComponent(sub),H).then(function(r){
+      if(!r.ok)throw new Error("checklist "+sub+": HTTP "+r.status);
+      return r.json();
+    });
+  })).then(function(cls){
+    cls.forEach(function(c){(c.obs||[]).forEach(function(o){
+      var n=parseInt(o.howManyStr,10);
+      counts[o.speciesCode]=(counts[o.speciesCode]||0)+(isFinite(n)?n:0);
+    });});
+    var codes=Object.keys(counts);
+    if(!codes.length)throw new Error("no observations found on those checklists");
+    return fetch("https://api.ebird.org/v2/ref/taxonomy/ebird?fmt=json&species="+codes.join(","),H).then(function(r){
+      if(!r.ok)throw new Error("taxonomy lookup: HTTP "+r.status);
+      return r.json();
+    });
+  }).then(function(tax){
+    tax.sort(function(a,b){return (a.taxonOrder||0)-(b.taxonOrder||0);});
+    var lines=tax.map(function(x){var c=counts[x.speciesCode];return x.comName+" ("+x.sciName+")"+(c?" — "+c:"");});
+    var ta=document.getElementById("eb_species");if(ta)ta.value=lines.join("\n");
+    if(btn){btn.disabled=false;btn.textContent="Fetched "+tax.length+" species ✓";}
+  }).catch(function(e){
+    if(btn){btn.disabled=false;btn.textContent="Fetch from eBird";}
+    alert("Couldn't fetch from eBird: "+((e&&e.message)||e)+"\n\nCheck the key and checklist IDs — or paste the species list into the box by hand (from the eBird trip report page) and generate the report anyway.");
+  });
+}
+function ebirdBuild(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  var lines=((document.getElementById("eb_species")||{}).value||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
+  if(!lines.length){alert("The species list is empty — fetch from eBird or paste it in first.");return;}
+  var rows=lines.map(function(ln,i){
+    var m=ln.match(/^(.*?)\s*(?:\(([^)]*)\))?\s*(?:[—\-–]+\s*(\d+))?\s*$/);
+    return {n:i+1,com:(m&&m[1]||ln).trim(),sci:(m&&m[2]||"").trim(),count:(m&&m[3])||""};
+  });
+  var guide=(t.guideAlloted&&t.guideAlloted!=="—"?t.guideAlloted:(t.guide&&t.guide!=="—"?t.guide:""));
+  var tbl=rows.map(function(r){return "<tr><td style='padding:5px 8px;border-bottom:1px solid #eef4f0;text-align:right;color:#7b8a84'>"+r.n+"</td><td style='padding:5px 8px;border-bottom:1px solid #eef4f0;font-weight:600'>"+r.com.replace(/</g,"&lt;")+"</td><td style='padding:5px 8px;border-bottom:1px solid #eef4f0;font-style:italic;color:#3a4a43'>"+r.sci.replace(/</g,"&lt;")+"</td><td style='padding:5px 8px;border-bottom:1px solid #eef4f0;text-align:right;font-variant-numeric:tabular-nums'>"+r.count+"</td></tr>";}).join("");
+  var w=window.open("","_blank");
+  w.document.write("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Trip Report — "+shortName(t)+"</title><style>"+
+    "@import url('https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap');"+
+    "*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}"+
+    "body{font-family:'Inter',system-ui,sans-serif;color:#20302b;display:flex;justify-content:center}"+
+    "#rep{max-width:760px;width:100%;padding:24px}"+
+    "@media print{@page{size:A4;margin:10mm}body{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}#rep{max-width:none;zoom:.85}thead{display:table-header-group}}"+
+    "</style></head><body><div id='rep'>"+
+    quoteHeaderHTML()+
+    "<div style='text-align:center;margin-bottom:14px'><div style='font-family:Calistoga,Georgia,serif;font-size:22px;color:#15563c'>Trip Report — Species List</div>"+
+    "<div style='font-size:14px;font-weight:700;margin-top:6px'>"+shortName(t)+" <span style='color:#7b8a84;font-weight:400'>("+tourCode(t)+")</span></div>"+
+    "<div style='font-size:12.5px;color:#3a4a43;margin-top:3px'>"+dRangeNice(t.start,t.end)+(guide?" · Guide: "+guide:"")+" · "+rows.length+" species recorded</div></div>"+
+    "<table style='width:100%;border-collapse:collapse;font-size:12.5px'><thead><tr style='background:#e9f4ee;color:#15563c'><th style='padding:7px 8px;text-align:right;width:34px'>#</th><th style='padding:7px 8px;text-align:left'>Common name</th><th style='padding:7px 8px;text-align:left'>Scientific name</th><th style='padding:7px 8px;text-align:right;width:60px'>Count</th></tr></thead><tbody>"+tbl+"</tbody></table>"+
+    "<div style='margin-top:16px;font-size:11.5px;color:#7b8a84;text-align:center'>Recorded with eBird during the tour · "+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours")+"</div>"+
+    "</div><script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>");
+  w.document.close();
+  audit("tour","ebird-report",tourCode(t)+" · "+rows.length+" species");
+}
 var _archY="all",_archM="all";
 function setArchFilter(y,m){if(y!=null)_archY=y;if(m!=null)_archM=m;renderTours("Archived");}
 function renderArchive(grid){
@@ -6237,6 +6408,7 @@ function viewSettings(){
     "<div class='form-grid'>"+
       "<div class='field full'><label>Google review link <span style='color:var(--ink-soft);font-weight:400'>(Google Maps → your business → Share review form)</span></label><input class='input' id='rl_review' value='"+(payCfg.reviewUrl||"")+"' placeholder='https://g.page/r/…/review'></div>"+
       "<div class='field full'><label>Custom feedback link <span style='color:var(--ink-soft);font-weight:400'>(optional — your own Google Form / Typeform etc. Leave blank to use the built-in 5-question form, whose answers land in Reviews &amp; Feedback)</span></label><input class='input' id='rl_feedback' value='"+(payCfg.feedbackUrl||"")+"' placeholder='https://forms.gle/… (blank = built-in form)'></div>"+
+      "<div class='field full'><label>eBird API key <span style='color:var(--ink-soft);font-weight:400'>(free from ebird.org/api/keygen — powers the 🐦 species-list trip report on each tour card)</span></label><input class='input mono' id='rl_ebird' value='"+(payCfg.ebirdKey||"")+"' placeholder='e.g. abc1def2ghi3'></div>"+
     "</div>"+
     "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='saveReviewLinks()'>Save links</button>"+
   "</div>"+
@@ -6320,7 +6492,7 @@ function viewSettings(){
 function savePayCfg(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
   /* review/feedback links live in their own settings card (saveReviewLinks) — keep them */
-  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page"),reviewUrl:payCfg.reviewUrl||"",feedbackUrl:payCfg.feedbackUrl||""};
+  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page"),reviewUrl:payCfg.reviewUrl||"",feedbackUrl:payCfg.feedbackUrl||"",ebirdKey:payCfg.ebirdKey||""};
   audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.upi||""));
   persistData();
   alert("Saved. Invoices now show "+(payCfg.gstRate>0?("the GST break-up @ "+payCfg.gstRate+"%"):"no GST line")+(payCfg.upi||payCfg.payPage?" and a Pay-now block.":"."));
@@ -6329,6 +6501,7 @@ function saveReviewLinks(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
   payCfg.reviewUrl=g("rl_review");
   payCfg.feedbackUrl=g("rl_feedback");
+  var ek=document.getElementById("rl_ebird");if(ek)payCfg.ebirdKey=ek.value.trim();
   audit("settings","review-links-updated",(payCfg.reviewUrl?"review ✓":"review —")+" · "+(payCfg.feedbackUrl?"custom feedback ✓":"built-in feedback"));
   persistData();
   if(typeof renderReviews==="function")renderReviews();
