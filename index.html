@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Ops Console">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Playfair+Display:wght@600;700;800&family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   /* HDFC-style banking palette: navy blue + red accent on a light-grey canvas */
@@ -45,10 +45,11 @@ svg{display:block}
 
 .app{display:flex;min-height:100dvh}
 .sidebar{width:var(--sidebar-w);flex-shrink:0;background:linear-gradient(180deg,rgba(227,242,253,0.97) 0%,rgba(200,230,255,0.95) 100%);color:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100dvh;border-right:1px solid rgba(25,118,210,0.1)}
-.brand{display:flex;align-items:center;gap:11px;padding:22px 20px 18px}
-.brand .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,var(--sea),#0d47a1);display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.brand .name{font-family:'Calistoga',serif;font-size:18px;color:var(--ink);line-height:1.05}
-.brand .sub{font-size:11px;color:var(--ink-soft);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+/* Brand block: large legible logo over the company name in a display serif. */
+.brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;padding:20px 16px 14px}
+.brand .brand-logo{max-height:76px;max-width:200px;width:auto;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px 12px;box-shadow:0 6px 18px -12px rgba(20,40,80,.35)}
+.brand .name{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:19.5px;color:var(--ink);line-height:1.22;letter-spacing:.01em}
+.brand .sub{font-size:10.5px;color:var(--ink-soft);letter-spacing:.14em;text-transform:uppercase;font-weight:600}
 .nav{flex:1;overflow-y:auto;padding:6px 12px 18px}
 .nav-group{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#5a7d9a;margin:16px 10px 6px;font-weight:600}
 .nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#4a6b7c;font-size:14px;font-weight:500;width:100%;text-align:left;transition:background .15s,color .15s}
@@ -665,7 +666,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 <body>
 <div class="login-overlay" id="loginOverlay">
   <div class="login-hero">
-    <div class="lh-wordmark">Operation Console</div>
+    <div class="lh-wordmark" style="text-transform:uppercase;letter-spacing:.1em">Operation Console</div>
     <div>
       <div class="lh-eyebrow">Tour operations, simplified</div>
       <h1>Fewer spreadsheets.<br><span class="accent">Zero double-bookings.</span><br>Happier guests.</h1>
@@ -702,7 +703,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 189</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 190</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -710,8 +711,8 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="mark" style="background:#fff;overflow:hidden;border:1px solid var(--line)"><img id="brandSideLogo" src="assets/logo.png" alt="" style="width:100%;height:100%;object-fit:contain;padding:2px" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}"></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName" style="font-size:19px;letter-spacing:.01em">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 189</span></div>
+      <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 190</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
