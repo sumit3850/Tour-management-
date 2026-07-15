@@ -702,7 +702,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 188</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 189</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -710,8 +710,8 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cfe6dd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7c-3 0-5 2-7 5-1.5 2.2-3 3.5-5 4 3 .5 5-1 6.5-2.5"/><path d="M16 7c2.5 0 4 1.5 4 4 0 1-.5 2-1.5 2.8"/><circle cx="17.5" cy="6" r="1" fill="#cfe6dd"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 188</span></div>
+      <div class="mark" style="background:#fff;overflow:hidden;border:1px solid var(--line)"><img id="brandSideLogo" src="assets/logo.png" alt="" style="width:100%;height:100%;object-fit:contain;padding:2px" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}"></div>
+      <div style="flex:1;min-width:0"><div class="name" id="brandSideName" style="font-size:19px;letter-spacing:.01em">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 189</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2220,7 +2220,7 @@ const NAV=[
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
-  ["reviews","Forms, Review & Feedback","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
+  ["reviews","Forms & Reviews","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Overview","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
@@ -2869,7 +2869,13 @@ function seasonMonthData(filterFn){
 }
 function renderAnalytics(){
   var el=document.getElementById("anaBody");if(!el)return;
+  /* KPI strip has its own date range (id "kpi") — reuse paymentStats by lending
+     it the range through the dashboard's payFrom/payTo, then restoring them. */
+  var kr=_anaRangeBy.kpi||{};
+  var _pf=payFrom,_pt=payTo;
+  payFrom=kr.from||"";payTo=kr.to||"";
   var s=paymentStats();
+  payFrom=_pf;payTo=_pt;
   /* revenue by month (tour start month) — per-card year filters below */
   var byMonth={},byTour=[];
   (tours||[]).forEach(function(t){
@@ -2902,7 +2908,7 @@ function renderAnalytics(){
   var srcs={};leads.forEach(function(l){var k=l.src||"—";srcs[k]=(srcs[k]||0)+1;});
   var srcList=Object.keys(srcs).map(function(k){return {k:k,n:srcs[k]};}).sort(function(a,b){return b.n-a.n;});
   var hbar=function(label,val,max,display){return "<div style='margin-bottom:8px'><div style='display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px'><span>"+label+"</span><b class='mono'>"+(display!=null?display:val)+"</b></div><div style='height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden'><span style='display:block;height:100%;width:"+Math.max(Math.round(val/max*100),2)+"%;background:var(--sea);border-radius:99px'></span></div></div>";};
-  var hiddenChips=_anaHidden.length?"<div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center'><span style='font-size:11.5px;color:var(--ink-soft)'>Hidden cards:</span>"+_anaHidden.map(function(c){var names={rev:"Revenue by month",top:"Top tours",funnel:"Lead funnel",guides:"Guide utilization",sources:"Lead sources",profit:"Profit by tour",season:"Profit by season",heat:"Season planner"};return "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:3px 10px' onclick=\"showAnaCard('"+c+"')\">+ "+(names[c]||c)+"</button>";}).join("")+"</div>":"";
+  var hiddenChips=_anaHidden.length?"<div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center'><span style='font-size:11.5px;color:var(--ink-soft)'>Hidden cards:</span>"+_anaHidden.map(function(c){var names={rev:"Revenue by month",top:"Top tours",funnel:"Lead funnel",guides:"Guide utilization",sources:"Lead sources",profit:"Profit by tour",season:"Profit by season",heat:"Season planner",greviews:"Google reviews"};return "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:3px 10px' onclick=\"showAnaCard('"+c+"')\">+ "+(names[c]||c)+"</button>";}).join("")+"</div>":"";
   /* ---- Profit by tour (auto): actual > log > cost-sheet estimate ---- */
   var pRows=(tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(anaYearFilter("profit")).map(function(t){
     var p=autoTourProfit(t);p.t=t;return p;
@@ -2939,11 +2945,35 @@ function renderAnalytics(){
     "</div>";
   }).join("")+"</div>"+
   (gapMonths.length?"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'><b>Gap months (no departures):</b> "+gapMonths.join(", ")+" — space to add tours where demand exists.</p>":"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'>Every month has at least one departure.</p>");
+  /* ---- Google reviews by tour: who reviewed, who's still to ask ---- */
+  var grRows=(tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(anaYearFilter("greviews")).map(function(t){
+    var bs=(bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";});
+    if(!bs.length)return null;
+    var done=bs.filter(function(b){return b.reviewDone;});
+    var pend=bs.filter(function(b){return !b.reviewDone;});
+    var ended=t.end&&t.end<(new Date().toISOString().slice(0,10));
+    if(!ended&&!done.length)return null; /* only ended tours (or any with reviews already) */
+    return {t:t,total:bs.length,done:done,pend:pend};
+  }).filter(Boolean).sort(function(a,b){return (b.t.end||"").localeCompare(a.t.end||"");});
+  var greviewsBody=grRows.length?grRows.slice(0,10).map(function(r){
+    var pct=Math.round(r.done.length/r.total*100);
+    var pendNames=r.pend.slice(0,6).map(function(b){return String(b.guest||"—").replace(/</g,"&lt;");}).join(", ")+(r.pend.length>6?" +"+(r.pend.length-6)+" more":"");
+    return "<div style='padding:9px 0;border-bottom:1px solid var(--line-soft)'>"+
+      "<div style='display:flex;justify-content:space-between;gap:10px;align-items:baseline'>"+
+        "<div style='font-size:13px;font-weight:600'>["+tourCode(r.t)+"] "+shortName(r.t)+"</div>"+
+        "<div class='mono' style='font-weight:700;color:"+(pct>=50?"var(--forest)":"var(--amber)")+";white-space:nowrap'>"+r.done.length+"/"+r.total+" reviewed</div>"+
+      "</div>"+
+      "<div style='height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:6px 0'><span style='display:block;height:100%;width:"+Math.max(pct,2)+"%;background:var(--amber);border-radius:99px'></span></div>"+
+      (r.pend.length?"<div style='font-size:11.5px;color:var(--ink-soft)'><b>Yet to review:</b> "+pendNames+"</div>":"<div style='font-size:11.5px;color:var(--forest)'>Everyone reviewed ⭐</div>")+
+    "</div>";
+  }).join("")+"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Mark a guest ⭐ Reviewed in Forms &amp; Reviews when their Google review lands; ask the pending ones from there with one tap.</p>"
+  :"<div class='empty'>No ended tours with guests yet — reviewed counts appear here after departures finish.</div>";
   var vis=function(id){return _anaHidden.indexOf(id)<0;};
   var cards=[];
   if(vis("rev"))cards.push(anaCard("rev","Revenue by month <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(by tour start)</span>",revChart,true));
   if(vis("profit"))cards.push(anaCard("profit","Profit by tour <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(auto — revenue vs costs)</span>",profitBody,true));
   if(vis("heat"))cards.push(anaCard("heat","Season planner <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(seat utilization by month)</span>",heatBody,true));
+  if(vis("greviews"))cards.push(anaCard("greviews","Google reviews <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(participants reviewed, by tour)</span>",greviewsBody,true));
   if(vis("season"))cards.push(anaCard("season","Profit by season <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(month of departure)</span>",seasonBody,true));
   var half=[];
   if(vis("top"))half.push(anaCard("top","Top tours by revenue",(top.length?top.map(function(x){return hbar("["+x.code+"] "+x.n,x.rev,top[0].rev,fmt(x.rev));}).join(""):"<div class='empty'>No revenue captured yet.</div>"),true));
@@ -2952,6 +2982,12 @@ function renderAnalytics(){
   if(vis("sources"))half.push(anaCard("sources","Lead sources",(srcList.length?srcList.map(function(x){return hbar(x.k,x.n,srcList[0].n);}).join(""):"<div class='empty'>No leads yet.</div>"),false));
   var halves="";for(var i=0;i<half.length;i+=2){halves+="<div class='grid-2' style='margin-top:16px'>"+half[i]+(half[i+1]||"")+"</div>";}
   el.innerHTML=
+    "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Overview</div>"+
+      "<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"+
+        "<input type='date' class='input mono' id='af_kpi' value='"+(kr.from||"")+"' onchange=\"setAnaRange('kpi')\" title='From date' style='width:120px;padding:4px 6px;font-size:11px'>"+
+        "<input type='date' class='input mono' id='at_kpi' value='"+(kr.to||"")+"' onchange=\"setAnaRange('kpi')\" title='To date' style='width:120px;padding:4px 6px;font-size:11px'>"+
+        ((kr.from||kr.to)?"<button class='btn btn-ghost btn-sm' style='padding:3px 9px;font-size:11px;color:var(--coral)' onclick=\"clearAnaRange('kpi')\">Clear dates</button>":"")+
+      "</div></div>"+
     "<div class='kpis'>"+
       kpi("Net Tour Cost",fmt(s.val),"all tours in range","up","M3 3v18h18M7 14l4-4 3 3 5-6")+
       kpi("Collected",fmt(s.dep),"deposits / advances","up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
@@ -6095,14 +6131,16 @@ function viewReviews(){
 }
 /* Public form links (register.html) shared from the Forms card. */
 var FORM_SHARE={
-  client:  {label:"Guest details form",  desc:"Full guest particulars for a confirmed booking — auto-creates the booking + customer."},
-  interest:{label:"Guest interest form", desc:"Tour enquiry — auto-creates a booking, customer and CRM lead."},
-  driver:  {label:"Driver ops form",     desc:"Driver self-registration — lands in Logistics → Vehicles & Drivers."},
-  guidedir:{label:"Guide ops form",      desc:"Guide self-registration — lands in Logistics → External Guides."}
+  client:   {label:"Guest details form",       desc:"Full guest particulars for a confirmed booking — auto-creates the booking + customer."},
+  interest: {label:"Guest interest form",      desc:"Tour enquiry — auto-creates a booking, customer and CRM lead."},
+  driver:   {label:"Driver registration form", desc:"Driver self-registration — lands in Logistics → Vehicles & Drivers."},
+  driverops:{label:"Driver ops form",          desc:"Driver's daily app — trip logs & assignments. They sign in with their phone + login code.",page:"driver-app.html"},
+  guidedir: {label:"Guide registration form",  desc:"Guide self-registration — lands in Logistics → External Guides."},
+  guideops: {label:"Guide ops form",           desc:"Guide's operations app — schedules & status updates. They sign in with their phone + login code.",page:"ops-guide.html"}
 };
 function shareFormVia(type,via){
   var f=FORM_SHARE[type];if(!f)return;
-  var url=formLink(type);
+  var url=f.page?(location.href.split("#")[0].replace(/[^/]*$/,"")+f.page):formLink(type);
   var comp=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
   var msg="Hello! Please fill the "+f.label.toLowerCase()+" for "+comp+":\n"+url;
   if(via==="copy"){try{navigator.clipboard.writeText(url);}catch(e){}var b=event&&event.target;if(b){var t=b.textContent;b.textContent="Copied ✓";setTimeout(function(){b.textContent=t;},1200);}return;}
@@ -6184,6 +6222,14 @@ function renderReviews(){
       "<button class='btn btn-ghost btn-sm' onclick=\"shareFormVia('"+k+"','copy')\">Copy</button>"+
       "</div></div>";
   }).join("");
+  /* Google reviews received — guests marked ⭐ Reviewed, newest tours first. */
+  var gDone=(bookings||[]).filter(function(b){return b.reviewDone;});
+  var googleRows=gDone.length?gDone.slice(0,15).map(function(b){
+    var tt=tours.find(function(x){return x.id===b.tour;});
+    return "<div class='list-row'><div class='meta'><div class='t'>"+String(b.guest||"—").replace(/</g,"&lt;")+" <span style='color:var(--amber)'>⭐</span></div>"+
+      "<div class='s'>"+(tt?shortName(tt)+" ("+tourCode(tt)+")":(b.customTour||"—"))+(b.end?" · ended "+dShort(b.end):"")+"</div></div>"+
+      "<span class='pill completed' style='flex-shrink:0'>On Google</span></div>";
+  }).join(""):"";
   el.innerHTML="<div class='card card-pad' style='margin-bottom:14px'>"+
     "<div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Public forms</div><div class='h-sec' style='font-size:15px'>Forms — share with guests &amp; crew</div></div></div>"+
     formRows+
@@ -6204,6 +6250,7 @@ function renderReviews(){
           "</div></div>";
       }).join("")
     :"<p style='font-size:12px;color:var(--ink-soft);margin-top:10px'>No recently-ended tours yet — guests appear here automatically once a tour's end date passes, ready to be asked.</p>")+
+    (googleRows?"<div class='h-sec' style='font-size:13.5px;margin:14px 0 4px'>Google reviews received ("+gDone.length+")</div>"+googleRows:"")+
     (fbs.length?"<div class='h-sec' style='font-size:13.5px;margin:14px 0 4px'>Feedback received</div>"+
       fbs.slice(0,10).map(function(s){
         var r=(s.data&&s.data.ratings)||{};
@@ -7247,6 +7294,7 @@ function applyBrand(){
     var set=function(id,txt){var e=document.getElementById(id);if(e&&txt)e.textContent=txt;};
     set('brandSideName',B.company);set('brandLoginName',B.company);set('brandFootName',B.company);
     var lg=document.getElementById('brandLoginLogo');if(lg&&B.logo){lg.src=B.logo;lg.alt=B.company;}
+    var sl=document.getElementById('brandSideLogo');if(sl&&B.logo){sl.src=B.logo;sl.alt=B.company;sl.style.display='';}
     /* Favicon follows the signed-in company's logo (falls back to the shipped one). */
     try{if(B.logo){var fav=document.getElementById('favicon');if(fav)fav.href=B.logo;}}catch(e){}
     try{var _tg=B.tagline||"Ops Console";document.title=(B.company&&B.company!==_tg)?(B.company+" · "+_tg):_tg;}catch(e){}
