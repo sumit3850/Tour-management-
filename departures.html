@@ -196,7 +196,7 @@ async function load(){
   }
 }
 load();
-setInterval(load,60000); /* live board: seat counts refresh every minute */
+setInterval(load,300000); /* live board: seat counts refresh every 5 minutes (public page — keeps backend egress low) */
 </script>
 </body>
 </html>

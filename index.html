@@ -703,7 +703,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 191</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 192</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -712,7 +712,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 191</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 192</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1867,6 +1867,18 @@ async function cloudPull(silent){
   if(!cl){if(!silent)sbStatus("Not connected — enter Project URL + anon key and Save first.","err");return "failed";}
   if(!silent)sbStatus("Pulling from cloud…","");
   try{
+    /* EGRESS DIET: on background/auto pulls, read only the tiny updated_at stamp
+       first and download the full blob ONLY when the cloud copy is actually newer.
+       Without this, every poll re-downloaded the entire workspace blob even when
+       nothing had changed — which is exactly how the Supabase egress quota got
+       burned. A manual "Pull from cloud" still always fetches. */
+    if(silent){
+      var head=await cl.from("workspaces").select("updated_at").eq("id",c.ws||"default").maybeSingle();
+      if(head.error)throw head.error;
+      if(!head.data)return "empty";
+      var hTs=head.data.updated_at||"",lTs=localUpdated();
+      if(lTs&&!(hTs&&hTs>lTs))return "kept-local";
+    }
     var res=await cl.from("workspaces").select("data,updated_at").eq("id",c.ws||"default").maybeSingle();
     if(res.error)throw res.error;
     if(!res.data){if(!silent)sbStatus("Nothing saved in the cloud yet — Push from one device first.","");return "empty";}
@@ -2081,7 +2093,10 @@ async function pullAllRecords(){
     return true;
   }catch(e){return false;}
 }
-setInterval(function(){if(!document.hidden)cloudResync();},45000);
+/* 3 minutes, not 45s: with the cheap updated_at pre-check above, each quiet tick
+   now costs a few hundred BYTES instead of the whole blob — keeps well inside the
+   Supabase free-plan egress quota. Focus/visibility still resyncs instantly. */
+setInterval(function(){if(!document.hidden)cloudResync();},180000);
 
 
 function loadLogs(){
@@ -5184,7 +5199,9 @@ function refreshDashboard(){var dash=document.getElementById("v-dashboard");if(!
 function dashRefresh(){var p=(typeof cloudPull==="function")?cloudPull(true):null;if(p&&p.then)p.then(function(){refreshDashboard();});else refreshDashboard();}
 /* Live inbox sync: while viewing Requests/Reservations, re-pull submissions every 5s. */
 var _subPoll=null;
-function startSubPoll(){stopSubPoll();_subPoll=setInterval(function(){if(curView==="requests"||curView==="reservations"||curView==="logistics")loadSubmissions(false);else stopSubPoll();},5000);}
+/* 30s, not 5s — every tick downloads all sub_ rows, so the old 5s poll was a big
+   slice of the egress bill. New submissions still appear within half a minute. */
+function startSubPoll(){stopSubPoll();_subPoll=setInterval(function(){if(curView==="requests"||curView==="reservations"||curView==="logistics")loadSubmissions(false);else stopSubPoll();},30000);}
 function stopSubPoll(){if(_subPoll){clearInterval(_subPoll);_subPoll=null;}}
 function deleteLead(id){
   if(!confirm("Delete this lead?"))return;
