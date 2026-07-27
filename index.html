@@ -703,7 +703,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 194</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 195</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -712,7 +712,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 194</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 195</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -989,8 +989,15 @@ function applyStore(d){
      signed these off in the rate-card workbook). Syncs to every device once. */
   if((parseInt(sheetEpoch,10)||0)<SHEET_DATA_EPOCH){
     /* Island Explorer gets the approved FINAL rate card; every other company
-       gets a blank sheet — the default card is IE's private pricing. */
+       gets a blank sheet — the default card is IE's private pricing.
+       CUSTOM tours (CT…) are the user's own work and must survive the rollout:
+       without this carry-over, an old-epoch blob (or a fresh device that saved
+       before this check ran) wiped every custom tour on the next load, and the
+       quotation pickers silently fell back to a built-in tour. */
+    var _keepCT={};
+    Object.keys(SHEET_DATA||{}).forEach(function(k){if(/^CT/.test(k)&&k!=="CT")_keepCT[k]=SHEET_DATA[k];});
     SHEET_DATA=(typeof wsTag==="function"&&wsTag()!=="island-explorer")?blankSheetData():JSON.parse(JSON.stringify(SHEET_DATA_DEFAULT));
+    Object.keys(_keepCT).forEach(function(k){SHEET_DATA[k]=_keepCT[k];});
     ensureSheetDefaults();
     sheetEpoch=SHEET_DATA_EPOCH;
   }
@@ -1084,6 +1091,11 @@ function restoreLocalBackup(){
 }
 (function loadData(){
   try{var s=localStorage.getItem(DATA_KEY);if(s)applyStore(JSON.parse(s));}catch(e){}
+  /* Fresh device (no saved blob): SHEET_DATA is already the code's current rate
+     card, so stamp the current epoch. Without this the first save persisted
+     sheetEpoch 0, and the NEXT load ran the epoch rollout and wiped the sheet —
+     including any custom tours created in the first session. */
+  if((parseInt(sheetEpoch,10)||0)<SHEET_DATA_EPOCH)sheetEpoch=SHEET_DATA_EPOCH;
 })();
 /* Backup / restore — a portable file you can move between devices (manual sync) */
 function exportData(){
@@ -1963,7 +1975,10 @@ async function cloudInit(){
          rate card from the shipped defaults — blank the cost sheet before any
          push can cement it into their blob. */
       if(typeof wsTag==="function"&&wsTag()!=="island-explorer"){
-        SHEET_DATA=blankSheetData();ensureSheetDefaults();sheetEpoch=SHEET_DATA_EPOCH;_sheetRev++;
+        /* keep the company's own custom tours — only IE's default card is private */
+        var _keepCT2={};Object.keys(SHEET_DATA||{}).forEach(function(k){if(/^CT/.test(k))_keepCT2[k]=SHEET_DATA[k];});
+        SHEET_DATA=blankSheetData();Object.keys(_keepCT2).forEach(function(k){SHEET_DATA[k]=_keepCT2[k];});
+        ensureSheetDefaults();sheetEpoch=SHEET_DATA_EPOCH;_sheetRev++;
         try{localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));}catch(e){}
       }
       if(totalRecordCount()>0)await cloudPush(true);
