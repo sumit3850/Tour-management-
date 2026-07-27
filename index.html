@@ -703,7 +703,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 196</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 197</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -712,7 +712,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 196</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 197</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3828,11 +3828,11 @@ function printQuotation() {
              compact paddings. color-adjust keeps the green table fills in the PDF. */
           @page{size:A4 portrait;margin:8mm 10mm}
           body{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-          /* Standard A4: the document is laid out at a fixed logical width and
-             scaled so it renders ~186mm wide, centred inside the printable area
-             (190mm) — instead of stretching edge-to-edge, which made the PDF
-             look overly wide with tiny type. */
-          #quotationBody{width:266mm !important;max-width:266mm !important;margin:0 auto;zoom:.7;padding:4px 10px !important}
+          /* Standard A4 letter look: the doc is laid out at 215mm and the onload
+             script scales it to render ~172mm wide, centred — real side margins,
+             not edge-to-edge. The scale also shrinks further if a long document
+             would spill past one page. */
+          #quotationBody{margin:0 auto;padding:4px 10px !important}
           #quotationBody img{max-height:88px !important}
           #quotationBody table{page-break-inside:avoid;min-width:0 !important;width:100% !important}
           #quotationBody div{overflow:visible !important}
@@ -3843,11 +3843,28 @@ function printQuotation() {
     </head>
     <body>
       ${body.outerHTML}
-      <script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script>
     <\/body>
     <\/html>
   `);
   printWindow.document.close();
+  /* Auto-fit + print, driven from THIS window (scripts written into the popup
+     don't execute reliably): lay the document out at 215mm, scale it so it
+     renders ~172mm wide — a standard A4 letter with real side margins — and
+     shrink further if a long document would spill past one page. */
+  var _fitAndPrint=function(){
+    try{
+      var el=printWindow.document.getElementById('quotationBody');
+      if(el&&!el.getAttribute('data-fitted')){
+        el.setAttribute('data-fitted','1');
+        el.style.width='215mm';el.style.maxWidth='215mm';
+        var px=function(mm){return mm*96/25.4;};
+        var z=Math.min(px(172)/el.offsetWidth, px(276)/el.scrollHeight, 0.85);
+        el.style.zoom=z;
+      }
+    }catch(e){}
+    try{printWindow.focus();printWindow.print();}catch(e){}
+  };
+  setTimeout(_fitAndPrint,500);
 }
 
 /* ===== COST SHEET =====
