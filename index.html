@@ -3901,12 +3901,15 @@ function renderCostSheet(){
     CS_COLS.map(function(c){return "<th style='padding:8px 10px;text-align:right;white-space:nowrap'>"+c[1]+"</th>";}).join("")+
     "<th style='padding:8px 10px;text-align:right'>Per person <span style='font-weight:400;color:var(--ink-soft)'>(↑100)</span></th><th style='padding:8px 10px;text-align:right'>Total quoted</th></tr>";
   var rows="";
+  _csBase={}; /* fresh scaling baselines for this tour/type — set per row below */
   for(var n=1;n<=10;n++){
     var d=data[String(n)]||{};
     /* rate-card rule: per person rounds UP to ₹100; the quoted total is pp × pax
        so the two always tally (stored total stays the raw line-sum) */
     var pp=d.perPerson||Math.ceil((d.total||0)/n/100)*100;
-    var cells=CS_COLS.map(function(c){return "<td style='padding:4px 5px'><input class='input mono' style='width:88px;text-align:right;padding:6px 8px' type='number' id='cs_"+c[0]+"_"+n+"' value='"+(d[c[0]]||0)+"' oninput='csRecalc("+n+")'></td>";}).join("");
+    var cells=CS_COLS.map(function(c){var h=(c[0]==="nights"||c[0]==="rooms")?"csScaleDims("+n+")":"csLineEdited(&quot;"+c[0]+"&quot;,"+n+")";return "<td style='padding:4px 5px'><input class='input mono' style='width:88px;text-align:right;padding:6px 8px' type='number' id='cs_"+c[0]+"_"+n+"' value='"+(d[c[0]]||0)+"' oninput='"+h+"'></td>";}).join("");
+    _csBase[n]={n:(d.nights||1),r:(d.rooms||1),lines:{}};
+    CS_SCALE_LINES.concat(["ship","entry"]).forEach(function(k){_csBase[n].lines[k]={v:d[k]||0,n:_csBase[n].n,r:_csBase[n].r};});
     rows+="<tr><td style='padding:6px 10px;font-weight:600'>"+n+"</td>"+cells+
       "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--sea)' id='cs_pp_"+n+"'>"+fmt(pp)+"</td>"+
       "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700' id='cs_total_"+n+"'>"+fmt(pp*n)+"</td></tr>";
@@ -3920,6 +3923,28 @@ function csRecalc(n){
   var pp=Math.ceil(total/Math.max(n,1)/100)*100;
   var t=document.getElementById("cs_total_"+n),p=document.getElementById("cs_pp_"+n);
   if(t)t.textContent=fmt(pp*n);if(p)p.textContent=fmt(pp);
+}
+/* Nights/Rooms scaling in the Cost Sheet grid — same rule as the calculator:
+   accommodation scales with nights × rooms; vehicle, guide and food scale with
+   nights; ship/entry are per-trip. Works for every tour (built-in, custom or
+   freshly copied rates) because baselines are captured whenever the grid renders. */
+var _csBase={};
+var CS_SCALE_LINES=["accommodation","vehicle","guide","food"];
+function csScaleDims(n){
+  var b=_csBase[n];if(!b){csRecalc(n);return;}
+  var g=function(k){var e=document.getElementById("cs_"+k+"_"+n);return e?(parseFloat(e.value)||0):0;};
+  var nn=g("nights")||1, rr=g("rooms")||1;
+  CS_SCALE_LINES.forEach(function(k){
+    var lb=b.lines[k];if(!lb)return;
+    var f=(k==="accommodation")?(nn/(lb.n||1))*(rr/(lb.r||1)):(nn/(lb.n||1));
+    var el=document.getElementById("cs_"+k+"_"+n);if(el)el.value=Math.round(lb.v*f);
+  });
+  csRecalc(n);
+}
+function csLineEdited(k,n){
+  var g=function(id){var e=document.getElementById("cs_"+id+"_"+n);return e?(parseFloat(e.value)||0):0;};
+  if(_csBase[n]&&_csBase[n].lines[k])_csBase[n].lines[k]={v:g(k),n:g("nights")||1,r:g("rooms")||1};
+  csRecalc(n);
 }
 function saveCostSheet(){
   if(!csTour)csTour=CALC_ORDER[0];
