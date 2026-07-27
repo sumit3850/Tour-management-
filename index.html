@@ -703,7 +703,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 192</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 193</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -712,7 +712,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 192</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 193</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4802,15 +4802,15 @@ function calc(){
   if(!d){r.innerHTML="<div style='padding:30px;text-align:center;color:rgba(255,255,255,.85)'>No costing data for this selection.</div>";return;}
   var total=d.total||CALC_ITEMS.reduce(function(s,it){return s+(d[it[0]]||0);},0)||1;
   var item=function(key,lab){var v=d[key]||0;var pct=Math.min(Math.round(v/total*100),100);
-    return "<div class='res-item'><div class='ln'><span>"+lab+"</span><input class='calc-in mono' type='number' id='cb_"+key+"' value='"+v+"' oninput='recalcCalc()'></div><div class='trk'><i id='bar_"+key+"' style='width:"+pct+"%'></i></div></div>";};
+    return "<div class='res-item'><div class='ln'><span>"+lab+"</span><input class='calc-in mono' type='number' id='cb_"+key+"' value='"+v+"' oninput=\"lineEdited('"+key+"')\"></div><div class='trk'><i id='bar_"+key+"' style='width:"+pct+"%'></i></div></div>";};
   r.innerHTML="<h3 style='margin-bottom:10px'>"+sel.label+"</h3>"+
     "<div class='res-hero'>"+
       "<div class='lab'>Total tour cost (quoted)</div><div class='amt' id='c_total'>"+fmt(quotedTotal(d,sel.pax))+"</div>"+
       "<div class='pp'>Per person <b class='mono' id='c_per'>"+fmt(d.perPerson)+"</b></div>"+
     "</div>"+
     "<div class='res-chips'>"+
-      "<span class='chip'><input class='mono' type='number' id='cb_nights' value='"+(d.nights||0)+"' oninput='recalcCalc()'> nights</span>"+
-      "<span class='chip'><input class='mono' type='number' id='cb_rooms' value='"+(d.rooms||0)+"' oninput='recalcCalc()'> rooms</span>"+
+      "<span class='chip'><input class='mono' type='number' id='cb_nights' value='"+(d.nights||0)+"' oninput='scaleCalcDims()'> nights</span>"+
+      "<span class='chip'><input class='mono' type='number' id='cb_rooms' value='"+(d.rooms||0)+"' oninput='scaleCalcDims()'> rooms</span>"+
       "<span class='chip'>"+sel.pax+" pax</span><span class='chip'>"+(sel.type==="foreign"?"Foreigner":"Indian")+"</span>"+
     "</div>"+
     CALC_ITEMS.map(function(it){return item(it[0],it[1]);}).join("")+
@@ -4820,8 +4820,32 @@ function calc(){
         "<svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/><path d='M16 13H8M16 17H8M10 9H8'/></svg>Quotation</button>"+
       "<button class='btn btn-ghost' onclick='invoiceFromCalc()' style='flex:1;min-width:104px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)'>Invoice →</button>"+
     "</div>"+
-    "<p style='font-size:11px;color:rgba(255,255,255,.75);margin-top:8px'>Edit any line — total, per-person and the share-bars update live. <b>Save rates</b> stores it for this tour · <b>Invoice →</b> carries this selection to the Invoices module.</p>";
+    "<p style='font-size:11px;color:rgba(255,255,255,.75);margin-top:8px'>Change nights or rooms — accommodation scales with nights × rooms, and vehicle, guide &amp; food scale with nights. Edit any line to override it. <b>Save rates</b> stores it for this tour · <b>Invoice →</b> carries this selection to the Invoices module.</p>";
+  /* Baseline for nights/rooms scaling: each line remembers the value and the
+     nights/rooms it was priced at, so scaling is proportional and a manual
+     edit to a line re-baselines just that line. */
+  _calcBase={n:(d.nights||1),r:(d.rooms||1),lines:{}};
+  CALC_ITEMS.forEach(function(it){_calcBase.lines[it[0]]={v:d[it[0]]||0,n:_calcBase.n,r:_calcBase.r};});
   _calcSheetRev=_sheetRev; /* panel now reflects the current rate database */
+}
+var _calcBase=null;
+function scaleCalcDims(){
+  if(!_calcBase){recalcCalc();return;}
+  var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
+  var nn=g("cb_nights")||1, rr=g("cb_rooms")||1;
+  CALC_ITEMS.forEach(function(it){
+    var k=it[0],b=_calcBase.lines[k];if(!b)return;
+    var f=1;
+    if(k==="accommodation")f=(nn/(b.n||1))*(rr/(b.r||1));
+    else if(k==="vehicle"||k==="guide"||k==="food")f=nn/(b.n||1);
+    if(f!==1){var el=document.getElementById("cb_"+k);if(el)el.value=Math.round(b.v*f);}
+  });
+  recalcCalc();
+}
+function lineEdited(k){
+  var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
+  if(_calcBase&&_calcBase.lines[k])_calcBase.lines[k]={v:g("cb_"+k),n:g("cb_nights")||1,r:g("cb_rooms")||1};
+  recalcCalc();
 }
 function readCalcInputs(){
   var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
