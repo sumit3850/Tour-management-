@@ -405,8 +405,11 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .lhead{display:flex;align-items:flex-start;gap:9px}
 .lav{flex:none;width:30px;height:30px;border-radius:50%;background:var(--kc,#0a6ed1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.02em}
 .lead .ln{font-weight:650;font-size:13.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis}.lead .lc{font-size:11.5px;color:var(--ink-soft);margin-top:1px;overflow:hidden;text-overflow:ellipsis}
-.ldel{flex:none;margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--coral);border-radius:8px;width:26px;height:26px;font-size:14px;font-weight:700;line-height:1;cursor:pointer}
+.ldel{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--coral);border-radius:8px;width:26px;height:26px;font-size:14px;font-weight:700;line-height:1;cursor:pointer}
 .ldel:hover{background:var(--coral);border-color:var(--coral);color:#fff}
+.ledit{flex:none;margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);border-radius:8px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ledit:hover{background:var(--sea-soft);border-color:#a9d2d6;color:#0c656f}
+.ledit+.ldel{margin-left:6px}
 .lchips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .lchip{font-size:10.5px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--ink-soft);background:var(--surface-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lead .lt{font-size:11.5px;color:var(--sea);margin-top:8px;font-weight:600;line-height:1.35}
@@ -718,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 198</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 199</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -727,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 198</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 199</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2506,6 +2509,7 @@ function dispatchAction(e){
     else if(a==='deleteOp')deleteOp(t.dataset.arg);
     else if(a==='moveLead'){var parts=t.dataset.arg.split(',');moveLead(parts[0],parts[1]);}
     else if(a==='deleteLead')deleteLead(t.dataset.arg);
+    else if(a==='openEditLead')openEditLead(t.dataset.arg);
     else if(a==='editCustomer')editCustomer(t.dataset.arg);
     else if(a==='viewCustomer')viewCustomerDetail(t.dataset.arg);
     else if(a==='deleteCustomer')deleteCustomer(t.dataset.arg);
@@ -5286,6 +5290,7 @@ function leadCard(l){
   return "<div class='lead' draggable='true' ondragstart=\"kanDrag(event,'"+l.id+"')\">"+
     "<div class='lhead'><span class='lav'>"+esc(initials)+"</span>"+
       "<div style='min-width:0;flex:1'><div class='ln'>"+esc(l.name)+"</div>"+(l.notes?"<div class='lc' title='"+esc(l.notes)+"'>"+esc(String(l.notes).slice(0,42))+"</div>":"")+"</div>"+
+      "<button class='ledit' title='Edit lead' data-action='openEditLead' data-arg='"+l.id+"'><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button>"+
       "<button class='ldel' title='Delete lead' data-action='deleteLead' data-arg='"+l.id+"'>×</button></div>"+
     (chips?"<div class='lchips'>"+chips+"</div>":"")+
     (l.tour&&l.tour!=="—"?"<div class='lt'>"+esc(l.tour)+"</div>":"")+
@@ -7137,30 +7142,58 @@ function saveBooking(){
   closeModal();renderBookings();renderTours();renderCalendar();renderCustomers();pushBooking(nb);
 }
 
-function openAddLead(){
-  modalForm("New lead","Add a lead","<div class='form-grid'>"+
-    "<div class='field'><label>Name</label><input class='input' id='nl_name' placeholder='Full name'></div>"+
-    "<div class='field'><label>Country</label><input class='input' id='nl_country' placeholder='Country'></div>"+
-    "<div class='field'><label>Email</label><input class='input' id='nl_email' placeholder='name@email.com'></div>"+
-    "<div class='field'><label>Phone</label><input class='input' id='nl_phone' placeholder='+91…'></div>"+
-    "<div class='field'><label>Source</label><select class='input' id='nl_src'>"+["Website","WhatsApp","Instagram","Referral","eBird","Email","Other"].map(s=>opt(s)).join("")+"</select></div>"+
-    "<div class='field'><label>Stage</label><select class='input' id='nl_stage'>"+STAGES.map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("")+"</select></div>"+
-    "<div class='field full'><label>Interested tour</label><input class='input' id='nl_tour' placeholder='e.g. Great Nicobar'></div>"+
-    "<div class='field'><label>Proposed tour start date</label><input class='input' type='date' id='nl_start'></div>"+
-    "<div class='field'><label>Proposed tour end date</label><input class='input' type='date' id='nl_end'></div>"+
-  "</div>","saveLead","Add lead");
+/* One form serves Add AND Edit — _editLeadId says which lead is being edited. */
+var _editLeadId=null;
+function leadFormHtml(l){
+  l=l||{};
+  var esc=function(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");};
+  var blank=function(v){return (!v||v==="—")?"":v;};
+  var SRCS=["Website","WhatsApp","Instagram","Referral","eBird","Email","Other"];
+  var src=blank(l.src)||"Website";
+  if(SRCS.indexOf(src)<0)SRCS.push(src); /* keep auto-captured / legacy sources selectable */
+  return "<div class='form-grid'>"+
+    "<div class='field'><label>Name</label><input class='input' id='nl_name' placeholder='Full name' value='"+esc(blank(l.name))+"'></div>"+
+    "<div class='field'><label>Country</label><input class='input' id='nl_country' placeholder='Country' value='"+esc(blank(l.country))+"'></div>"+
+    "<div class='field'><label>Email</label><input class='input' id='nl_email' placeholder='name@email.com' value='"+esc(blank(l.email))+"'></div>"+
+    "<div class='field'><label>Phone</label><input class='input' id='nl_phone' placeholder='+91…' value='"+esc(blank(l.phone))+"'></div>"+
+    "<div class='field'><label>Source</label><select class='input' id='nl_src'>"+SRCS.map(s=>opt(s,src)).join("")+"</select></div>"+
+    "<div class='field'><label>Stage</label><select class='input' id='nl_stage'>"+STAGES.map(s=>"<option value='"+s[0]+"' "+(s[0]===(l.stage||"New")?"selected":"")+">"+s[1]+"</option>").join("")+"</select></div>"+
+    "<div class='field full'><label>Interested tour</label><input class='input' id='nl_tour' placeholder='e.g. Great Nicobar' value='"+esc(blank(l.tour))+"'></div>"+
+    "<div class='field'><label>Proposed tour start date</label><input class='input' type='date' id='nl_start' value='"+esc(l.start||"")+"'></div>"+
+    "<div class='field'><label>Proposed tour end date</label><input class='input' type='date' id='nl_end' value='"+esc(l.end||"")+"'></div>"+
+    "<div class='field full'><label>Notes</label><textarea class='input' id='nl_notes' style='min-height:64px' placeholder='Anything worth remembering…'>"+esc(blank(l.notes))+"</textarea></div>"+
+  "</div>";
+}
+function openAddLead(){_editLeadId=null;modalForm("New lead","Add a lead",leadFormHtml(null),"saveLead","Add lead");}
+function openEditLead(id){
+  var l=leads.find(function(x){return x.id===id;});if(!l)return;
+  _editLeadId=id;
+  modalForm("Lead","Edit lead",leadFormHtml(l),"saveLead","Save changes");
 }
 function saveLead(){
   const name=document.getElementById("nl_name").value.trim();
   if(!name){alert("Enter a name.");return;}
-  var st=(document.getElementById("nl_start")||{}).value||"",en=(document.getElementById("nl_end")||{}).value||"";
+  var g=function(id){var e=document.getElementById(id);return e?e.value:"";};
+  var st=g("nl_start"),en=g("nl_end");
   if(st&&en&&en<st){alert("The proposed end date is before the start date.");return;}
-  var dateLabel=st&&en?(dShort?dShort(st)+" → "+dShort(en):st+" → "+en):(st?(dShort?dShort(st):st):"—");
-  leads.push({id:"L"+Date.now(),name,country:document.getElementById("nl_country").value||"—",
-    email:(document.getElementById("nl_email")||{}).value||"",phone:(document.getElementById("nl_phone")||{}).value||"",
-    tour:document.getElementById("nl_tour").value||"—",date:dateLabel,start:st,end:en,
-    stage:document.getElementById("nl_stage").value,src:document.getElementById("nl_src").value,manual:true});
-  audit("lead","created",name);
+  var dateLabel=st&&en?(dShort(st)+" → "+dShort(en)):(st?dShort(st):"—");
+  var patch={name:name,country:g("nl_country")||"—",email:g("nl_email"),phone:g("nl_phone"),
+    tour:g("nl_tour")||"—",date:dateLabel,start:st,end:en,
+    stage:g("nl_stage"),src:g("nl_src"),notes:g("nl_notes")};
+  if(_editLeadId){
+    var l=leads.find(function(x){return x.id===_editLeadId;});
+    if(l){
+      /* dates left empty while editing keep whatever label the lead had
+         (older leads carry a freeform date with no start/end fields) */
+      if(!st&&!en&&l.date&&l.date!=="—"){delete patch.date;delete patch.start;delete patch.end;}
+      Object.assign(l,patch);
+      audit("lead","edited",name);
+    }
+    _editLeadId=null;
+  }else{
+    leads.push(Object.assign({id:"L"+Date.now(),manual:true},patch));
+    audit("lead","created",name);
+  }
   closeModal();renderCRM();
 }
 
