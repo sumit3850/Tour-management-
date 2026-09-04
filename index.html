@@ -391,13 +391,28 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .copybtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:600;color:var(--ink-soft)}
 .copybtn:hover{background:var(--surface-2)}
 
-.kanban{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:12px;overflow-x:auto;padding-bottom:6px}
-.kcol{background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:10px;min-width:200px}
-.kcol h4{font-size:13px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:var(--ink)}
-.kcol .ct{font-size:11px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--ink-soft)}
-.lead{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow)}
-.lead .ln{font-weight:600;font-size:14px}.lead .lc{font-size:12px;color:var(--ink-soft);margin-top:2px}
-.lead .lt{font-size:11px;color:var(--sea);margin-top:7px;font-weight:600}
+.kanban{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 12px;align-items:flex-start}
+.kcol{flex:0 0 268px;width:268px;background:var(--surface-2);border:1px solid var(--line);border-top:3px solid var(--kc,var(--line));border-radius:14px;padding:10px;transition:background .15s,box-shadow .15s}
+.kcol.kover{background:var(--sea-soft);box-shadow:inset 0 0 0 2px var(--kc)}
+.khead{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:0 2px}
+.kdot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--kc,var(--ink-soft))}
+.klab{flex:1;font-size:12.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kcol .ct{font-size:11px;font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--ink-soft)}
+.kempty{border:1.5px dashed var(--line);border-radius:10px;padding:16px 8px;text-align:center;font-size:11.5px;color:var(--ink-soft)}
+.lead{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:9px;box-shadow:var(--shadow);cursor:grab;transition:transform .12s,box-shadow .12s}
+.lead:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(20,40,80,.10)}
+.lead:active{cursor:grabbing}
+.lhead{display:flex;align-items:flex-start;gap:9px}
+.lav{flex:none;width:30px;height:30px;border-radius:50%;background:var(--kc,#0a6ed1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.02em}
+.lead .ln{font-weight:650;font-size:13.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis}.lead .lc{font-size:11.5px;color:var(--ink-soft);margin-top:1px;overflow:hidden;text-overflow:ellipsis}
+.ldel{flex:none;margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--coral);border-radius:8px;width:26px;height:26px;font-size:14px;font-weight:700;line-height:1;cursor:pointer}
+.ldel:hover{background:var(--coral);border-color:var(--coral);color:#fff}
+.lchips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.lchip{font-size:10.5px;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--ink-soft);background:var(--surface-2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lead .lt{font-size:11.5px;color:var(--sea);margin-top:8px;font-weight:600;line-height:1.35}
+.ldate{font-size:11px;color:var(--ink-soft);margin-top:4px;font-variant-numeric:tabular-nums}
+.lfoot{display:flex;gap:6px;margin-top:9px;align-items:center}
+.kmove{flex:1;min-width:0;font-size:11px;font-weight:600;padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .lead .mv{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
 .lead .mv button{font-size:11px;padding:4px 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-soft)}
 .lead .mv button:hover{background:var(--sea-soft);color:#0c656f;border-color:#a9d2d6}
@@ -703,7 +718,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 197</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 198</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -712,7 +727,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 197</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 198</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3881,7 +3896,8 @@ function viewCostSheet(){
         "<div><div class='eyebrow'>Background rate sheet</div><div class='h-sec'>Tour cost sheet</div></div>"+
         "<div class='btn-pair'>"+
           "<button class='btn btn-primary btn-sm' onclick='addCustomTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>New custom tour</button>"+
-          "<button class='btn btn-ghost btn-sm' id='csDlBtn' onclick='downloadRatesXlsx()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download (.xlsx)</button>"+
+          "<button class='btn btn-ghost btn-sm' id='csDlSelBtn' onclick='downloadSelectedXlsx()' title='Download only the tour selected below (Indian + Foreign)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download this tour</button>"+
+          "<button class='btn btn-ghost btn-sm' id='csDlBtn' onclick='downloadRatesXlsx()' title='Download every tour as one workbook'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download all (.xlsx)</button>"+
         "</div>"+
       "</div>"+
       "<div class='cost-grid'>"+
@@ -4028,14 +4044,14 @@ function clearCsLog(){
    the same layout the importer reads, so the file round-trips: download, edit in
    Excel/Google Sheets, re-import. */
 var CS_EXPORT_NAMES={T1:"South Andaman 5N",T3:"S-L Andaman 7N",T4:"S-L Andaman 8N",T2:"Great Nicobar 12N",T5:"A-N Expedition 15N",T8:"Narcondam A V1",T9:"Narcondam B V2",T10:"Narcondam C Road"};
-function downloadRatesXlsx(){
-  var btn=document.getElementById("csDlBtn");if(btn){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent="Building…";}
-  var done=function(){if(btn){btn.disabled=false;btn.textContent=btn.dataset.lbl||"Download (.xlsx)";}};
+function downloadRatesXlsx(keys,fname,btnId){
+  var btn=document.getElementById(btnId||"csDlBtn");if(btn){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent="Building…";}
+  var done=function(){if(btn){btn.disabled=false;btn.textContent=btn.dataset.lbl||"Download";}};
   loadExcelJS().then(function(ExcelJS){
     var wb=new ExcelJS.Workbook();
     wb.creator=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Operation Console";
     var used={};
-    tourKeys().forEach(function(key){
+    ((keys&&keys.length)?keys:tourKeys()).forEach(function(key){
       var src=SHEET_DATA[key];if(!src)return;
       var base=CS_EXPORT_NAMES[key]||String(src.title||key).replace(/[\\\/\?\*\[\]:]/g," ").replace(/\s+/g," ").trim().slice(0,20);
       [["indian"," Indian"],["foreign"," Foreigner"]].forEach(function(tp){
@@ -4068,14 +4084,21 @@ function downloadRatesXlsx(){
   }).then(function(buf){
     var blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     var url=URL.createObjectURL(blob);var a=document.createElement("a");
-    a.href=url;a.download="Rate-Card-"+new Date().toISOString().slice(0,10)+".xlsx";
+    a.href=url;a.download=(fname||("Rate-Card-"+new Date().toISOString().slice(0,10)))+".xlsx";
     document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-    audit("costsheet","exported","rate card .xlsx");
+    audit("costsheet","exported",(fname||"rate card")+" .xlsx");
     done();
   }).catch(function(e){
     done();
     alert("Couldn't build the Excel file: "+((e&&e.message)||e)+"\n\n(The formatter needs a network connection the first time.)");
   });
+}
+/* Download ONLY the tour currently selected in the Cost Sheet (Indian + Foreign tabs). */
+function downloadSelectedXlsx(){
+  var t=SHEET_DATA[csTour];
+  if(!t){alert("Pick a tour first.");return;}
+  var nm=String(t.title||calcTourLabel(csTour)||csTour).replace(/[^A-Za-z0-9 \-]/g,"").trim().replace(/\s+/g,"-").slice(0,48)||"Tour";
+  downloadRatesXlsx([csTour],nm+"-rates-"+new Date().toISOString().slice(0,10),"csDlSelBtn");
 }
 
 /* ---- Custom tours ------------------------------------------------------------
@@ -5205,37 +5228,9 @@ function captureFromText(){
   alert("✓ Lead added to New"+(party?(" ("+party+" pax)"):"")+". Open it to add the tour and dates.");
 }
 function viewCRM(){
-  const conv=Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100);
+  const conv=leads.length?Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100):0;
   return "<section class='view' id='v-crm'>"+
     "<div class='section-head'><div><div class='eyebrow'>Pipeline · "+conv+"% conversion</div><div class='h-sec'>"+leads.length+" leads</div></div><button class='btn btn-primary' onclick='openAddLead()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Lead</button></div>"+
-    "<div class='card card-pad' style='margin-bottom:14px'>"+
-      "<div class='eyebrow'>Quick capture</div><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Paste a WhatsApp / email message → lead</div>"+
-      "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;max-width:720px'>Got an enquiry on your <b>personal WhatsApp</b> (or anywhere)? Paste it here and it becomes a lead in <b>New</b> — no setup needed. Hands-off auto-capture for email/Business WhatsApp/Facebook/Instagram lives in <b>Settings → Lead capture</b>.</p>"+
-      "<div class='form-grid'>"+
-        "<div class='field'><label>Sender phone / email <span style='color:var(--ink-soft);font-weight:400'>(optional)</span></label><input class='input' id='qc_from' placeholder='e.g. 919812345678 or name@email.com'></div>"+
-        "<div class='field'><label>Contact name <span style='color:var(--ink-soft);font-weight:400'>(optional)</span></label><input class='input' id='qc_name' placeholder='If you know it'></div>"+
-        "<div class='field full'><label>Message</label><textarea class='input' id='qc_text' style='min-height:76px' placeholder='Paste the WhatsApp / email text here…'></textarea></div>"+
-      "</div>"+
-      "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='captureFromText()'>Capture as lead</button>"+
-    "</div>"+
-    "<div class='card card-pad' id='leadFilterCard' style='margin-bottom:14px'>"+
-      "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
-        "<div><div class='eyebrow'>Auto-capture</div><div class='h-sec' style='font-size:15px'>Email &amp; WhatsApp sources <span class='pill' id='lf_state' style='font-size:11px'>…</span></div></div>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"document.getElementById('lf_body').style.display=(document.getElementById('lf_body').style.display==='none'?'block':'none')\">Show / hide</button>"+
-      "</div>"+
-      "<div id='lf_body' style='display:none;margin-top:10px'>"+
-        "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;max-width:720px'>Auto-captured leads land in <b>New</b>. Capture from <b>anyone</b> (recommended — real customers are unknown senders), or <b>only</b> from the addresses/numbers listed below.</p>"+
-        "<div class='field'><label>Capture mode</label><div class='tourist-toggle' id='lf_modeToggle'>"+
-          "<button class='btn btn-sm' id='lf_all' onclick=\"setLeadMode('all')\">From anyone</button>"+
-          "<button class='btn btn-sm' id='lf_list' onclick=\"setLeadMode('list')\">Only listed contacts</button>"+
-        "</div></div>"+
-        "<div class='cost-grid' id='lf_lists' style='margin-top:8px'>"+
-          "<div class='field'><label>Allowed email addresses <span style='color:var(--ink-soft);font-weight:400'>(one per line)</span></label><textarea class='input' id='lf_emails' style='min-height:80px' placeholder='asha@example.com&#10;bookings@partner.com'></textarea></div>"+
-          "<div class='field'><label>Allowed WhatsApp numbers <span style='color:var(--ink-soft);font-weight:400'>(one per line, with country code)</span></label><textarea class='input mono' id='lf_numbers' style='min-height:80px' placeholder='919812345678&#10;4915234262580'></textarea></div>"+
-        "</div>"+
-        "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='saveLeadFilter()'>Save capture settings</button>"+
-      "</div>"+
-    "</div>"+
     "<div class='kanban' id='kanban'></div>"+
   "</section>";
 }
@@ -5276,17 +5271,45 @@ function saveLeadFilter(){
     else{alert("Could not save. Re-run the LATEST supabase/saas/lead-intake.sql in the Supabase SQL editor, then try again.");}
   });
 }
+/* Stage accent colours drive the column top-border, dot and card avatar. */
+const KAN_COLORS={New:"#0a6ed1",Contacted:"#7c5cff",Proposal:"#b8860b",FollowUp:"#d97706",Confirmed:"#1b7a4d",Lost:"#c0392b"};
+function leadCard(l){
+  var esc=function(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");};
+  var initials=String(l.name||"?").trim().split(/\s+/).map(function(w){return w.charAt(0);}).slice(0,2).join("").toUpperCase()||"?";
+  var contact=l.email||l.phone||"";
+  var chips="";
+  if(l.country&&l.country!=="—")chips+="<span class='lchip'>"+esc(l.country)+"</span>";
+  if(l.src&&l.src!=="—")chips+="<span class='lchip'>"+leadSrcIcon(l.src)+" "+esc(l.src)+"</span>";
+  if(contact)chips+="<span class='lchip' title='"+esc(contact)+"'>"+esc(contact)+"</span>";
+  var sel="<select class='kmove' title='Move to stage' onclick='event.stopPropagation()' onchange=\"moveLead('"+l.id+"',this.value)\">"+
+    STAGES.map(function(s){return "<option value='"+s[0]+"' "+(s[0]===l.stage?"selected":"")+">"+s[1]+"</option>";}).join("")+"</select>";
+  return "<div class='lead' draggable='true' ondragstart=\"kanDrag(event,'"+l.id+"')\">"+
+    "<div class='lhead'><span class='lav'>"+esc(initials)+"</span>"+
+      "<div style='min-width:0;flex:1'><div class='ln'>"+esc(l.name)+"</div>"+(l.notes?"<div class='lc' title='"+esc(l.notes)+"'>"+esc(String(l.notes).slice(0,42))+"</div>":"")+"</div>"+
+      "<button class='ldel' title='Delete lead' data-action='deleteLead' data-arg='"+l.id+"'>×</button></div>"+
+    (chips?"<div class='lchips'>"+chips+"</div>":"")+
+    (l.tour&&l.tour!=="—"?"<div class='lt'>"+esc(l.tour)+"</div>":"")+
+    (l.date&&l.date!=="—"?"<div class='ldate'>📅 "+esc(l.date)+"</div>":"")+
+    "<div class='lfoot'>"+sel+"</div>"+
+  "</div>";
+}
 function renderCRM(){
   const k=document.getElementById("kanban");if(!k)return;
-  k.innerHTML=STAGES.map(([key,label])=>{const items=leads.filter(l=>l.stage===key);
-    return "<div class='kcol'><h4>"+label+"<span class='ct'>"+items.length+"</span></h4>"+(items.map(l=>{const idx=STAGES.findIndex(s=>s[0]===l.stage);const prev=idx>0?STAGES[idx-1]:null,next=idx<STAGES.length-1?STAGES[idx+1]:null;
-      var contact=l.email||l.phone||"";
-      var srcline="<div class='lc'>"+l.country+" · "+l.src+"</div>"+(contact?"<div class='lc' style='color:var(--sea);font-size:11px'>"+leadSrcIcon(l.src)+" "+contact+"</div>":"");
-      return "<div class='lead'><div class='ln'>"+l.name+"</div>"+srcline+"<div class='lt'>"+l.tour+" · "+l.date+"</div><div class='mv'>"+(prev?"<button data-action='moveLead' data-arg='"+l.id+","+prev[0]+"'>← "+prev[1].split(" ")[0]+"</button>":"")+(next?"<button data-action='moveLead' data-arg='"+l.id+","+next[0]+"'>"+next[1].split(" ")[0]+" →</button>":"")+"</div><button class='del-btn' data-action='deleteLead' data-arg='"+l.id+"'>Delete</button></div>";}).join("")||"<div style='font-size:12px;color:var(--ink-soft);padding:8px 4px'>—</div>")+"</div>";}).join("");
-  if(typeof loadLeadFilter==="function")loadLeadFilter();
+  k.innerHTML=STAGES.map(function(st){
+    var key=st[0],label=st[1];
+    var items=leads.filter(function(l){return l.stage===key;});
+    return "<div class='kcol' style='--kc:"+(KAN_COLORS[key]||"var(--ink-soft)")+"' ondragover='kanOver(event)' ondragleave='kanLeave(event)' ondrop=\"kanDrop(event,'"+key+"')\">"+
+      "<div class='khead'><span class='kdot'></span><span class='klab'>"+label+"</span><span class='ct'>"+items.length+"</span></div>"+
+      (items.map(leadCard).join("")||"<div class='kempty'>No leads — drag one here</div>")+
+    "</div>";}).join("");
   persistData();
 }
-function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l){l.stage=stage;renderCRM();}}
+/* Drag & drop between pipeline stages. */
+function kanDrag(e,id){try{e.dataTransfer.setData("text/plain",id);e.dataTransfer.effectAllowed="move";}catch(x){}}
+function kanOver(e){e.preventDefault();e.currentTarget.classList.add("kover");}
+function kanLeave(e){e.currentTarget.classList.remove("kover");}
+function kanDrop(e,stage){e.preventDefault();e.currentTarget.classList.remove("kover");var id="";try{id=e.dataTransfer.getData("text/plain");}catch(x){}if(id)moveLead(id,stage);}
+function moveLead(id,stage){const l=leads.find(x=>x.id===id);if(l&&l.stage!==stage){l.stage=stage;audit("lead","stage",l.name+" → "+stage);renderCRM();}}
 function refreshDashboard(){var dash=document.getElementById("v-dashboard");if(!dash)return;var wasActive=dash.classList.contains("active");dash.outerHTML=viewDashboard();var nd=document.getElementById("v-dashboard");if(nd&&wasActive)nd.classList.add("active");renderPayments();attachClickHandlers();persistData();}
 /* Manual dashboard refresh — pull the latest cloud copy first, then redraw. */
 function dashRefresh(){var p=(typeof cloudPull==="function")?cloudPull(true):null;if(p&&p.then)p.then(function(){refreshDashboard();});else refreshDashboard();}
@@ -6581,7 +6604,7 @@ function viewSettings(){
   "</div>"+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Lead capture <span class='pill' id='ls_state' style='font-size:11px'>…</span></div>"+
-    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Auto-capture leads from <b>email</b>, <b>WhatsApp (Business Cloud)</b>, <b>Facebook</b> &amp; <b>Instagram</b> straight into your Leads Pipeline. Connect each channel once (n8n or the direct webhooks below) — every endpoint is scoped to your company by a private token, so leads can only ever be created in <b>your</b> workspace. Setup: <b>docs/LEAD_INTAKE.md</b>. Personal WhatsApp has no official API — use the <b>Quick capture</b> box in Leads, or forward chats to your email.</p>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Auto-capture leads from <b>email</b>, <b>WhatsApp (Business Cloud)</b>, <b>Facebook</b> &amp; <b>Instagram</b> straight into your Leads Pipeline. Connect each channel once (n8n or the direct webhooks below) — every endpoint is scoped to your company by a private token, so leads can only ever be created in <b>your</b> workspace. Setup: <b>docs/LEAD_INTAKE.md</b>. Personal WhatsApp has no official API — add those enquiries with <b>Add Lead</b> (source: WhatsApp), or forward chats to your email.</p>"+
     "<div class='field'><label>Your email-ingest domain <span style='color:var(--ink-soft);font-weight:400'>(only for the Cloudflare email route — skip if using n8n IMAP)</span></label><input class='input' id='ls_domain' placeholder='ingest.yourdomain.com' onchange='saveIngestDomain()'></div>"+
     "<div class='field'><label>Forward inquiry emails to</label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_email' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_email')\">Copy</button></div><p style='font-size:11.5px;color:var(--ink-soft);margin-top:4px'>Personal mailbox? Add one forwarding rule (Gmail/Outlook/any) to this address — no password shared.</p></div>"+
     "<div class='field'><label>Email endpoint <span style='color:var(--ink-soft);font-weight:400'>(n8n IMAP → HTTP)</span></label><div style='display:flex;gap:8px;flex-wrap:wrap'><input class='input mono' id='ls_em_ep' readonly style='flex:1;min-width:220px;background:var(--surface-2)' value='—'><button class='btn btn-ghost btn-sm' onclick=\"copyLS('ls_em_ep')\">Copy</button></div></div>"+
@@ -7120,17 +7143,22 @@ function openAddLead(){
     "<div class='field'><label>Country</label><input class='input' id='nl_country' placeholder='Country'></div>"+
     "<div class='field'><label>Email</label><input class='input' id='nl_email' placeholder='name@email.com'></div>"+
     "<div class='field'><label>Phone</label><input class='input' id='nl_phone' placeholder='+91…'></div>"+
-    "<div class='field'><label>Source</label><select class='input' id='nl_src'>"+["Website","Instagram","Referral","eBird","Email","Other"].map(s=>opt(s)).join("")+"</select></div>"+
+    "<div class='field'><label>Source</label><select class='input' id='nl_src'>"+["Website","WhatsApp","Instagram","Referral","eBird","Email","Other"].map(s=>opt(s)).join("")+"</select></div>"+
     "<div class='field'><label>Stage</label><select class='input' id='nl_stage'>"+STAGES.map(s=>"<option value='"+s[0]+"'>"+s[1]+"</option>").join("")+"</select></div>"+
-    "<div class='field'><label>Interested tour</label><input class='input' id='nl_tour' placeholder='e.g. Great Nicobar'></div>"+
-    "<div class='field'><label>Travel date</label><input class='input' id='nl_date' placeholder='e.g. 2026-11' value='2026-'></div>"+
+    "<div class='field full'><label>Interested tour</label><input class='input' id='nl_tour' placeholder='e.g. Great Nicobar'></div>"+
+    "<div class='field'><label>Proposed tour start date</label><input class='input' type='date' id='nl_start'></div>"+
+    "<div class='field'><label>Proposed tour end date</label><input class='input' type='date' id='nl_end'></div>"+
   "</div>","saveLead","Add lead");
 }
 function saveLead(){
   const name=document.getElementById("nl_name").value.trim();
   if(!name){alert("Enter a name.");return;}
+  var st=(document.getElementById("nl_start")||{}).value||"",en=(document.getElementById("nl_end")||{}).value||"";
+  if(st&&en&&en<st){alert("The proposed end date is before the start date.");return;}
+  var dateLabel=st&&en?(dShort?dShort(st)+" → "+dShort(en):st+" → "+en):(st?(dShort?dShort(st):st):"—");
   leads.push({id:"L"+Date.now(),name,country:document.getElementById("nl_country").value||"—",
-    tour:document.getElementById("nl_tour").value||"—",date:document.getElementById("nl_date").value||"—",
+    email:(document.getElementById("nl_email")||{}).value||"",phone:(document.getElementById("nl_phone")||{}).value||"",
+    tour:document.getElementById("nl_tour").value||"—",date:dateLabel,start:st,end:en,
     stage:document.getElementById("nl_stage").value,src:document.getElementById("nl_src").value,manual:true});
   audit("lead","created",name);
   closeModal();renderCRM();
