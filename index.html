@@ -6,7 +6,7 @@
 <title>Ops Console</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="assets/favicon.png" id="favicon">
-<link rel="apple-touch-icon" href="assets/favicon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <meta name="theme-color" content="#143a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 208</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 209</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 208</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 209</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -7900,8 +7900,9 @@ function applyBrand(){
     set('brandSideName',B.company);set('brandLoginName',B.company);set('brandFootName',B.company);
     var lg=document.getElementById('brandLoginLogo');if(lg&&B.logo){lg.src=B.logo;lg.alt=B.company;}
     var sl=document.getElementById('brandSideLogo');if(sl&&B.logo){sl.src=B.logo;sl.alt=B.company;sl.style.display='';}
-    /* Favicon follows the signed-in company's logo (falls back to the shipped one). */
-    try{if(B.logo){var fav=document.getElementById('favicon');if(fav)fav.href=B.logo;}}catch(e){}
+    /* Favicon follows a CUSTOM company logo only — the shipped default keeps the
+       dedicated bird app icon (assets/favicon.png) instead of the full wordmark. */
+    try{if(B.logo&&B.logo!=="assets/logo.png"){var fav=document.getElementById('favicon');if(fav)fav.href=B.logo;}}catch(e){}
     try{var _tg=B.tagline||"Ops Console";document.title=(B.company&&B.company!==_tg)?(B.company+" · "+_tg):_tg;}catch(e){}
   }catch(e){}
 }
