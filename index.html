@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 199</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 200</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 199</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 200</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3825,60 +3825,111 @@ function toggleQuoteEdit(){
 /* Print/PDF must reuse the same light-green tabular design shown in the modal —
    so we clone the quotation div's outerHTML (id + its own scoped <style> + inline
    styles all travel with it), not just innerHTML which drops the id and background. */
+/* Page 2 of every printed QUOTATION: how to pay. Bank blocks + the online
+   payment link (clickable in the saved PDF) + a scannable QR. Island Explorer's
+   own details are built in; any other workspace falls back to its Settings →
+   Payments config (UPI / payment page) and gets no page if neither is set. */
+function paymentPageHTML(){
+  var isIE=(typeof wsTag!=="function")||wsTag()==="island-explorer";
+  var link=(typeof payCfg!=="undefined"&&payCfg.payPage)||(isIE?"https://razorpay.me/@islandexplorerbirdingtours":"");
+  var upi=(typeof payCfg!=="undefined"&&payCfg.upi)||"";
+  if(!isIE&&!link&&!upi)return "";
+  var row=function(k,v){return "<tr><td style='padding:7px 12px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:7px 12px;font-weight:600;border-bottom:1px solid #eef4f0'>"+v+"</td></tr>";};
+  var card=function(title,rows){return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
+    "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:13px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
+  var html="<div id='payPage' style='padding:24px;background:#fff;color:#20302b'>"+
+    "<div style='border-bottom:2px solid #143a2e;padding-bottom:10px;margin-bottom:16px'>"+
+      "<div style='font-family:\"Calistoga\",serif;font-size:20px;color:#15563c'>Payment Information</div>"+
+      "<div style='font-size:12px;color:#5a6b62;margin-top:2px'>Please mention the quotation number in your payment reference.</div>"+
+    "</div>";
+  if(isIE){
+    html+=card("Bank Transfer — India (INR)",
+      row("Account holder","ISLAND EXPLORER BIRDING TOURS PRIVATE LIMITED")+
+      row("Account number","<span style='font-family:monospace'>00000045081877969</span>")+
+      row("Bank","State Bank of India")+
+      row("Branch","Dollygunj")+
+      row("IFSC","<span style='font-family:monospace'>SBIN0017178</span>")+
+      row("Bank address","State Bank of India, Dollygunj, Sri Vijaya Puram, Andaman and Nicobar Islands, India"));
+    html+=card("International Payment — ACH (USD)",
+      row("Account holder","ISLAND EXPLORER BIRDING TOURS PRIVATE LIMITED")+
+      row("Payment method","ACH")+
+      row("Account number","<span style='font-family:monospace'>8305046454</span>")+
+      row("Routing number (ACH)","<span style='font-family:monospace'>026073150</span>")+
+      row("Bank","Community Federal Savings Bank")+
+      row("Bank address","5 Penn Plaza, 14th Floor, New York, NY 10001, US"));
+  }
+  if(link||upi){
+    html+="<div style='display:flex;gap:16px;align-items:center;border:1px solid #e2efe8;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;background:#f3f9f5'>"+
+      "<div style='flex:1;min-width:0'>"+
+        "<div style='font-weight:700;font-size:14px;color:#15563c;margin-bottom:5px'>Pay Online — UPI · Cards · NetBanking</div>"+
+        (link?"<div style='font-size:13px;margin-bottom:4px'>Click to pay securely: <a href='"+link+"' style='color:#0a6ed1;font-weight:700;text-decoration:underline'>"+link.replace(/^https?:\/\//,"")+"</a></div>":"")+
+        (upi?"<div style='font-size:12.5px'>UPI ID: <b style='font-family:monospace'>"+upi+"</b></div>":"")+
+        "<div style='font-size:11.5px;color:#5a6b62;margin-top:5px'>Or scan the QR with any UPI app — Google Pay, PhonePe, Paytm, BHIM.</div>"+
+      "</div>"+
+      (isIE?"<div style='flex:none;text-align:center'><img src='assets/pay-qr.png' alt='Payment QR' style='width:118px;height:118px;display:block;border:1px solid #d3e7db;border-radius:8px;padding:5px;background:#fff'><div style='font-size:10px;color:#5a6b62;margin-top:4px'>SCAN &amp; PAY</div></div>":"")+
+    "</div>";
+  }
+  html+="<div style='text-align:center;margin-top:22px;padding-top:12px;border-top:2px solid #143a2e'>"+
+    "<div style='font-family:\"Calistoga\",serif;font-size:15px;color:#15563c'>"+(((window.APP_CONFIG||{}).brand||{}).company||"Island Explorer Birding Tours")+"</div>"+
+    "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman &amp; Nicobar Islands · India</div>"+
+  "</div></div>";
+  return html;
+}
 function printQuotation() {
   const body = document.getElementById('quotationBody');
   if (!body) return;
+  /* Invoice or quotation? The document itself says so. Quotations carry the
+     Payment Information page; invoices stay a single page. */
+  var isInv=/Invoice\s*#/i.test(body.innerText||body.textContent||"");
+  var payHtml=isInv?"":paymentPageHTML();
 
   const printWindow = window.open('', '_blank');
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Quotation - ${(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Ops Console"}</title>
+      <title>${isInv?"Invoice":"Quotation"} - ${(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Ops Console"}</title>
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap');
         *{box-sizing:border-box}
         html,body{margin:0;padding:0;background:#fff}
-        body{font-family:'Inter',system-ui,sans-serif;display:flex;justify-content:center}
-        #quotationBody{max-width:760px;width:100%}
+        body{font-family:'Inter',system-ui,sans-serif;display:block}
+        #quotationBody,#payPage{max-width:760px;width:100%;margin:0 auto}
         @media print{
-          /* Fit the document on ONE A4 page: slim margins, a firmer scale-down and
-             compact paddings. color-adjust keeps the green table fills in the PDF. */
           @page{size:A4 portrait;margin:8mm 10mm}
-          body{display:block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-          /* Standard A4 letter look: the doc is laid out at 215mm and the onload
-             script scales it to render ~172mm wide, centred — real side margins,
-             not edge-to-edge. The scale also shrinks further if a long document
-             would spill past one page. */
-          #quotationBody{margin:0 auto;padding:4px 10px !important}
-          #quotationBody img{max-height:88px !important}
-          #quotationBody table{page-break-inside:avoid;min-width:0 !important;width:100% !important}
+          body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+          /* Natural letter layout (like the approved sample): the document keeps
+             its on-screen size, centred on A4, shrinking only if it would spill
+             past one page. The payment page always starts on its own page. */
+          #quotationBody,#payPage{margin:0 auto;padding:4px 10px !important}
+          #payPage{page-break-before:always}
+          #quotationBody table,#payPage table{page-break-inside:avoid;min-width:0 !important;width:100% !important}
           #quotationBody div{overflow:visible !important}
-          #quotationBody td,#quotationBody th{padding:6px 9px !important}
-          #quotationBody .qcard{padding:10px !important;margin-bottom:10px !important}
         }
       </style>
     </head>
     <body>
       ${body.outerHTML}
+      ${payHtml}
     <\/body>
     <\/html>
   `);
   printWindow.document.close();
-  /* Auto-fit + print, driven from THIS window (scripts written into the popup
-     don't execute reliably): lay the document out at 215mm, scale it so it
-     renders ~172mm wide — a standard A4 letter with real side margins — and
-     shrink further if a long document would spill past one page. */
+  /* Fit + print, driven from THIS window (scripts written into the popup don't
+     execute reliably). Both document kinds print at natural size on A4 and are
+     scaled down only as far as needed to keep the document to one page. */
   var _fitAndPrint=function(){
     try{
       var el=printWindow.document.getElementById('quotationBody');
       if(el&&!el.getAttribute('data-fitted')){
         el.setAttribute('data-fitted','1');
-        el.style.width='215mm';el.style.maxWidth='215mm';
         var px=function(mm){return mm*96/25.4;};
-        var z=Math.min(px(172)/el.offsetWidth, px(276)/el.scrollHeight, 0.85);
+        el.style.width='176mm';el.style.maxWidth='176mm';
+        var z=Math.min(px(276)/el.scrollHeight, 1);
         el.style.zoom=z;
+        var pp=printWindow.document.getElementById('payPage');
+        if(pp){pp.style.width='176mm';pp.style.maxWidth='176mm';}
       }
     }catch(e){}
     try{printWindow.focus();printWindow.print();}catch(e){}
