@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 201</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 202</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 201</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 202</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -910,7 +910,7 @@ var SHEET_DATA_EPOCH=2;
 let sheetEpoch=0;
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
-let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:""};
+let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""};
 /* Integrations switchboard (Settings → Integrations): real gates, synced.
    sheets off → no Google-Sheet pushes; whatsapp/email off → those share/send
    buttons explain instead of opening; maps is informational. */
@@ -965,7 +965,7 @@ const STORE=[
   {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
-  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:""},v);}},
+  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
   {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}}
 ];
@@ -3825,39 +3825,39 @@ function toggleQuoteEdit(){
 /* Print/PDF must reuse the same light-green tabular design shown in the modal —
    so we clone the quotation div's outerHTML (id + its own scoped <style> + inline
    styles all travel with it), not just innerHTML which drops the id and background. */
-/* Page 2 of every printed QUOTATION: how to pay. Bank blocks + the online
-   payment link (clickable in the saved PDF) + a scannable QR. Island Explorer's
-   own details are built in; any other workspace falls back to its Settings →
-   Payments config (UPI / payment page) and gets no page if neither is set. */
+/* Page 2 of every printed QUOTATION: how to pay. Built ENTIRELY from the
+   Payment details the operator saves in Tour costing (payCfg, synced per
+   workspace) — nothing is hard-coded. Sections left empty don't print; if
+   nothing at all is filled in, the quotation stays a single page. */
 function paymentPageHTML(){
-  var isIE=(typeof wsTag!=="function")||wsTag()==="island-explorer";
-  var link=(typeof payCfg!=="undefined"&&payCfg.payPage)||(isIE?"https://razorpay.me/@islandexplorerbirdingtours":"");
-  var upi=(typeof payCfg!=="undefined"&&payCfg.upi)||"";
-  if(!isIE&&!link&&!upi)return "";
-  var row=function(k,v){return "<tr><td style='padding:7px 12px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:7px 12px;font-weight:600;border-bottom:1px solid #eef4f0'>"+v+"</td></tr>";};
-  var card=function(title,rows){return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
+  if(typeof payCfg==="undefined")return "";
+  var esc=function(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+  var link=(payCfg.payPage||"").trim();
+  var upi=(payCfg.upi||"").trim();
+  var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:7px 12px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:7px 12px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
+  var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
     "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:13px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
+  var inCard=card("Bank Transfer — India",
+    row("Account holder",payCfg.bkHolder)+
+    row("Account number",payCfg.bkAcc,1)+
+    row("Bank",payCfg.bkBank)+
+    row("Branch",payCfg.bkBranch)+
+    row("IFSC",payCfg.bkIfsc,1)+
+    row("Bank address",payCfg.bkAddr));
+  var xCard=card("International Payment"+(payCfg.xMethod?" — "+esc(payCfg.xMethod):""),
+    row("Account holder",payCfg.xHolder)+
+    row("Payment method",payCfg.xMethod)+
+    row("Account number",payCfg.xAcc,1)+
+    row("Routing code",payCfg.xRouting,1)+
+    row("Routing type",payCfg.xRoutingType)+
+    row("Bank",payCfg.xBank)+
+    row("Bank address",payCfg.xAddr));
+  if(!inCard&&!xCard&&!link&&!upi)return "";
   var html="<div id='payPage' style='padding:24px;background:#fff;color:#20302b'>"+
     "<div style='border-bottom:2px solid #143a2e;padding-bottom:10px;margin-bottom:16px'>"+
       "<div style='font-family:\"Calistoga\",serif;font-size:20px;color:#15563c'>Payment Information</div>"+
       "<div style='font-size:12px;color:#5a6b62;margin-top:2px'>Please mention the quotation number in your payment reference.</div>"+
-    "</div>";
-  if(isIE){
-    html+=card("Bank Transfer — India (INR)",
-      row("Account holder","ISLAND EXPLORER BIRDING TOURS PRIVATE LIMITED")+
-      row("Account number","<span style='font-family:monospace'>00000045081877969</span>")+
-      row("Bank","State Bank of India")+
-      row("Branch","Dollygunj")+
-      row("IFSC","<span style='font-family:monospace'>SBIN0017178</span>")+
-      row("Bank address","State Bank of India, Dollygunj, Sri Vijaya Puram, Andaman and Nicobar Islands, India"));
-    html+=card("International Payment — ACH (USD)",
-      row("Account holder","ISLAND EXPLORER BIRDING TOURS PRIVATE LIMITED")+
-      row("Payment method","ACH")+
-      row("Account number","<span style='font-family:monospace'>8305046454</span>")+
-      row("Routing number (ACH)","<span style='font-family:monospace'>026073150</span>")+
-      row("Bank","Community Federal Savings Bank")+
-      row("Bank address","5 Penn Plaza, 14th Floor, New York, NY 10001, US"));
-  }
+    "</div>"+inCard+xCard;
   if(link||upi){
     html+="<div style='display:flex;gap:16px;align-items:center;border:1px solid #e2efe8;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;background:#f3f9f5'>"+
       "<div style='flex:1;min-width:0'>"+
@@ -4368,11 +4368,60 @@ function viewGroupQuote(){
       "</div>"+
     "</div>"+
     "<div class='card' id='gqResult'></div>"+
+    "<div class='card card-pad' style='margin-top:16px'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap'>"+
+        "<div><div class='eyebrow'>Quotation · page 2</div><div class='h-sec' style='font-size:15px'>Payment details</div></div>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"var b=document.getElementById('pd_body');b.style.display=(b.style.display==='none'?'block':'none')\">Show / hide</button>"+
+      "</div>"+
+      "<div id='pd_body' style='display:none;margin-top:10px'>"+
+        "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Everything you fill in here prints as <b>page 2 — Payment Information</b> of every quotation, in the document's own design. Leave a whole section empty and it simply won't appear.</p>"+
+        "<div class='eyebrow' style='margin-bottom:8px'>Bank transfer — India</div>"+
+        "<div class='cost-grid'>"+
+          "<div class='field'><label>Account holder</label><input class='input' id='pd_bkHolder' placeholder='Company account name'></div>"+
+          "<div class='field'><label>Account number</label><input class='input mono' id='pd_bkAcc' placeholder='0000004…'></div>"+
+          "<div class='field'><label>Bank name</label><input class='input' id='pd_bkBank' placeholder='State Bank of India'></div>"+
+          "<div class='field'><label>Branch</label><input class='input' id='pd_bkBranch' placeholder='Branch'></div>"+
+          "<div class='field'><label>IFSC</label><input class='input mono' id='pd_bkIfsc' placeholder='SBIN0…'></div>"+
+          "<div class='field full'><label>Bank address</label><input class='input' id='pd_bkAddr' placeholder='Full branch address'></div>"+
+        "</div>"+
+        "<div class='eyebrow' style='margin:14px 0 8px'>International payment</div>"+
+        "<div class='cost-grid'>"+
+          "<div class='field'><label>Account holder</label><input class='input' id='pd_xHolder' placeholder='Company account name'></div>"+
+          "<div class='field'><label>Payment method</label><input class='input' id='pd_xMethod' placeholder='e.g. ACH / SWIFT'></div>"+
+          "<div class='field'><label>Account number</label><input class='input mono' id='pd_xAcc' placeholder='Account number'></div>"+
+          "<div class='field'><label>Routing code</label><input class='input mono' id='pd_xRouting' placeholder='Routing / SWIFT code'></div>"+
+          "<div class='field'><label>Routing type</label><input class='input' id='pd_xRoutingType' placeholder='e.g. ach_routing_number'></div>"+
+          "<div class='field'><label>Bank name</label><input class='input' id='pd_xBank' placeholder='Bank name'></div>"+
+          "<div class='field full'><label>Bank address</label><input class='input' id='pd_xAddr' placeholder='Full bank address'></div>"+
+        "</div>"+
+        "<div class='eyebrow' style='margin:14px 0 8px'>Pay online</div>"+
+        "<div class='cost-grid'>"+
+          "<div class='field'><label>Payment link <span style='color:var(--ink-soft);font-weight:400'>(clickable in the PDF)</span></label><input class='input' id='pd_link' placeholder='https://razorpay.me/@yourcompany'></div>"+
+          "<div class='field'><label>UPI ID</label><input class='input mono' id='pd_upi' placeholder='name@bank'></div>"+
+        "</div>"+
+        "<button class='btn btn-primary btn-sm' style='margin-top:12px' onclick='savePayDetails()'>Save payment details</button>"+
+      "</div>"+
+    "</div>"+
     "<div class='card' style='margin-top:16px'>"+
       "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Saved quotations</div><div class='h-sec' style='margin-bottom:6px'>Your quotation folder</div></div>"+
       "<div id='savedQuotes'></div>"+
     "</div>"+
   "</section>";
+}
+/* The Payment-details form <-> payCfg (synced per workspace). */
+var PD_KEYS=["bkHolder","bkAcc","bkBank","bkBranch","bkIfsc","bkAddr","xHolder","xMethod","xAcc","xRouting","xRoutingType","xBank","xAddr"];
+function fillPayDetails(){
+  PD_KEYS.forEach(function(k){var e=document.getElementById("pd_"+k);if(e&&document.activeElement!==e)e.value=payCfg[k]||"";});
+  var l=document.getElementById("pd_link");if(l&&document.activeElement!==l)l.value=payCfg.payPage||"";
+  var u=document.getElementById("pd_upi");if(u&&document.activeElement!==u)u.value=payCfg.upi||"";
+}
+function savePayDetails(){
+  PD_KEYS.forEach(function(k){var e=document.getElementById("pd_"+k);if(e)payCfg[k]=e.value.trim();});
+  var l=document.getElementById("pd_link");if(l)payCfg.payPage=l.value.trim();
+  var u=document.getElementById("pd_upi");if(u)payCfg.upi=u.value.trim();
+  audit("costsheet","payment-details","updated");
+  persistData();
+  var btn=event&&event.target;if(btn&&btn.tagName==="BUTTON"){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1300);}
 }
 function setGqType(t){gqType=(t==="foreign")?"foreign":"indian";renderGroupQuote();}
 function gqReadSizes(){
@@ -4432,6 +4481,7 @@ function renderGroupQuote(){
   var tierSel=document.getElementById("gqTierSel");if(tierSel)tierSel.value=gqTierId;
   var pctEl=document.getElementById("gqPct");
   if(pctEl&&pctEl.value===""){var t0=GQ_TIERS.find(function(x){return x.id===gqTierId;})||GQ_TIERS[0];pctEl.value=t0.pct;}
+  if(typeof fillPayDetails==="function")fillPayDetails();
 
   var q=gqCollect();
   var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px'>"+rw.size+" pax</th>";}).join("");
