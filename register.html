@@ -42,7 +42,13 @@ textarea{min-height:84px;resize:vertical}
 .foot{text-align:center;font-size:11px;color:var(--soft);padding:14px}
 .veh-row{display:grid;grid-template-columns:1fr 1fr 84px auto;gap:8px;align-items:end;margin-bottom:10px}
 .veh-row>button{align-self:end}
-@media(max-width:520px){.row{grid-template-columns:1fr}.veh-row{grid-template-columns:1fr 1fr}.veh-row>button{grid-column:2;justify-self:end}}
+.pax-row{position:relative;border:1px solid var(--line);border-radius:12px;padding:12px;padding-top:34px;margin-bottom:10px;background:#fafcfb}
+.pax-row .pax-tag{position:absolute;top:10px;left:12px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--sea)}
+.pax-row .pax-x{position:absolute;top:5px;right:8px;padding:4px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--err);font-weight:700;cursor:pointer}
+.pax-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pax-grid .full{grid-column:1/-1}
+.pax-grid input,.pax-grid select{width:100%}
+@media(max-width:520px){.row{grid-template-columns:1fr}.veh-row{grid-template-columns:1fr 1fr}.veh-row>button{grid-column:2;justify-self:end}.pax-grid{grid-template-columns:1fr}}
 @media(max-width:480px){.row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -84,6 +90,8 @@ textarea{min-height:84px;resize:vertical}
 const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
 const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
 const TOURS=["5N- South Andaman","7N- South & Little And.","8N- South & Little And.","12N- Great Nicobar","03N- Narcondam Exp_(A)","03N- Narcondam Exp _(B)","03N- Narcondam Exp_(C)","15N- A&N Expedition","GS- Half Day","GS-Full day","GS-Night"];
+/* Session Registration form offers guided sessions only — not the multi-day tour list. */
+const SESSIONS=["Guided birding session (Full day)","Guided birding session (Half day)","Guided birding session (Night)","Guided birding session (Full day and Night)","Guided birding session (Half day and Night)","Guided herping session (Full day)","Guided herping session (Half day)","Guided herping session (Night)","Guided herping session (Full day and Night)","Guided herping session (Half day and Night)"];
 
 const params=new URLSearchParams(location.search);
 const type=(params.get("type")||"interest").toLowerCase();
@@ -96,7 +104,7 @@ const presetStart=params.get("start")||"";
 const presetEnd=params.get("end")||"";
 
 const TITLES={
-  interest:["Join a Tour","Register your interest and preferred dates — we'll confirm availability."],
+  interest:["Session Registration","Register for a guided session with your preferred dates — we'll confirm availability."],
   client:["Guest Details","Please share the details below so we can finalise your booking and travel arrangements."],
   guide:["Guide Reservation Request","Propose dates to reserve Island Explorer's guiding services."],
   guidedir:["Guide / Naturalist Registration","Register as a bird guide / naturalist with Island Explorer."],
@@ -107,7 +115,7 @@ document.getElementById("formIntro").textContent=TITLES[type]?TITLES[type][1]:TI
 
 function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*</span>":"";var t=opts.type||"text";
   var ctrl;
-  if(opts.tour){var list=TOURS.slice();if(presetTour&&list.indexOf(presetTour)===-1)list.unshift(presetTour);ctrl="<select id='"+id+"' "+(opts.req?"required":"")+"><option value=''>Select a tour…</option>"+list.map(function(t){return "<option "+(t===presetTour?"selected":"")+">"+t+"</option>";}).join("")+"</select>";}
+  if(opts.tour||opts.sessions){var list=(opts.sessions?SESSIONS:TOURS).slice();if(presetTour&&list.indexOf(presetTour)===-1)list.unshift(presetTour);ctrl="<select id='"+id+"' "+(opts.req?"required":"")+"><option value=''>"+(opts.sessions?"Select a session…":"Select a tour…")+"</option>"+list.map(function(t){return "<option "+(t===presetTour?"selected":"")+">"+t+"</option>";}).join("")+"</select>";}
   else if(opts.select){ctrl="<select id='"+id+"' "+(opts.req?"required":"")+">"+opts.select.map(function(o){return "<option>"+o+"</option>";}).join("")+"</select>";}
   else if(t==="textarea"){ctrl="<textarea id='"+id+"' placeholder='"+(opts.ph||"")+"'></textarea>";}
   else{ctrl="<input id='"+id+"' type='"+t+"' value='"+(opts.val||"")+"' placeholder='"+(opts.ph||"")+"' "+(opts.req?"required":"")+">";}
@@ -119,6 +127,20 @@ function addVehRow(){
   var box=document.getElementById("veh_list");if(!box)return;
   var d=document.createElement("div");d.className="veh-row";
   d.innerHTML="<div><input class='veh-name' placeholder='Vehicle name'></div><div><input class='veh-reg' placeholder='AN01 XXXXX'></div><div><input class='veh-seats' type='number' placeholder='Seats'></div><button type='button' onclick='this.closest(\".veh-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
+  box.appendChild(d);
+}
+/* One participant card (name + gender + email + phone + hotel/pickup) for group session registrations. */
+function addPaxRow(){
+  var box=document.getElementById("pax_list");if(!box)return;
+  var d=document.createElement("div");d.className="pax-row";
+  d.innerHTML="<span class='pax-tag'>Participant</span><button type='button' class='pax-x' onclick='this.closest(\".pax-row\").remove()'>✕</button>"+
+    "<div class='pax-grid'>"+
+    "<div class='full'><input class='pax-name' placeholder='Full name (as on passport/ID)'></div>"+
+    "<div><select class='pax-gender'><option value=''>Gender…</option><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select></div>"+
+    "<div><input class='pax-phone' type='tel' placeholder='Phone / WhatsApp'></div>"+
+    "<div><input class='pax-email' type='email' placeholder='Email'></div>"+
+    "<div><input class='pax-hotel' placeholder='Hotel / Pickup point'></div>"+
+    "</div>";
   box.appendChild(d);
 }
 function docField(id,label){return "<div class='field'><label>"+label+"</label><input id='"+id+"' type='file' multiple accept='image/*,application/pdf'><div class='hint'>Attach one or more files (photo, PDF). Optional.</div></div>";}
@@ -201,13 +223,14 @@ if(type==="guide"){
   html+=rowOf(inp("c_emname","Emergency contact name",{}),inp("c_emphone","Emergency contact phone",{type:"tel"}));
   html+=inp("c_med","Medical notes / mobility",{type:"textarea",ph:"Anything we should know to keep you safe & comfortable"});
 }else{
-  html+=inp("i_tour","Tour category",{tour:1,req:1});
+  html+=inp("i_tour","Session category",{sessions:1,req:1});
   html+=rowOf(inp("i_start","Preferred start date",{type:"date",val:presetStart}),inp("i_end","Preferred end date",{type:"date",val:presetEnd}));
   html+=inp("i_name","Your name",{req:1});
   html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
-  html+=rowOf(inp("i_country","Country",{req:1}),inp("i_party","Number of guests",{type:"number"}));
+  html+=rowOf(inp("i_country","Country",{req:1}),inp("i_hotel","Hotel / Pickup point",{ph:"Hotel name or where we should pick you up"}));
   html+=inp("i_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner","Other"]});
+  html+="<div class='field'><label>Additional participants</label><div id='pax_list'></div><button type='button' onclick='addPaxRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add participant</button><div class='hint'>Joining as a group? Add each additional participant with their gender, email, phone / WhatsApp and hotel / pickup point.</div></div>";
   html+=docField("i_docs","Upload documents (optional)");
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
 }
@@ -247,8 +270,14 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
     rec.tour=val("i_tour");rec.start_date=val("i_start")||null;rec.end_date=val("i_end")||null;
-    rec.party=parseInt(val("i_party"))||null;
-    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg")};
+    var paxs=[];document.querySelectorAll(".pax-row").forEach(function(r){
+      function pv(cls){var el=r.querySelector(cls);return el?el.value.trim():"";}
+      var pn=pv(".pax-name"),pg=pv(".pax-gender"),pe=pv(".pax-email"),pp=pv(".pax-phone"),ph=pv(".pax-hotel");
+      if(pn||pe||pp)paxs.push({name:pn,gender:pg,email:pe,phone:pp,hotel:ph});
+    });
+    rec.party=1+paxs.length; /* registrant + additional participants */
+    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel")};
+    if(paxs.length)rec.data.participants=paxs;
   }
   if(params.get("tid"))rec.data.tourId=params.get("tid");
   if(presetTourCode)rec.data.tourCode=presetTourCode;
@@ -280,6 +309,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
     document.getElementById("formBody").style.display="none";
     document.getElementById("success").style.display="block";
     if(type==="client")document.getElementById("successMsg").textContent="Thank you. Your details have been received — our team will confirm your booking and travel arrangements shortly.";
+    if(type==="interest")document.getElementById("successMsg").textContent="Thank you. Your session registration has been received — our team will confirm availability shortly.";
     if(type==="guide")document.getElementById("successMsg").textContent="Your reservation request has been sent to Island Explorer. We'll respond with availability soon.";
     if(type==="guidedir")document.getElementById("successMsg").textContent="Thank you — you've been added to Island Explorer's guide directory.";
     if(type==="driver")document.getElementById("successMsg").textContent="Thank you — your driver details have been received. Island Explorer will share your login code shortly.";
