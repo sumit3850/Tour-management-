@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 209</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 210</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 209</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 210</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8178,6 +8178,19 @@ function installApp(){
   var ua=navigator.userAgent||"";
   var isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
   if(isIOS){alert("To install on iPhone/iPad:\n\n1. Tap the Share button (square with an up-arrow) at the bottom of Safari.\n2. Choose \"Add to Home Screen\".");return;}
+  var isAndroid=/Android/i.test(ua);
+  /* OEM/in-app browsers (Mi, HeyTap/Oppo, vivo, Samsung Internet, UC, webviews…)
+     are Chromium-based so their UA says "Chrome/", but they cannot install
+     PWAs — their Add-to-Home-screen makes a plain bookmark. Detect them and
+     bounce the user into real Chrome via an Android intent link instead. */
+  var isRealChrome=/Chrome\/\d/.test(ua)&&!/SamsungBrowser|MiuiBrowser|HeyTapBrowser|VivoBrowser|HuaweiBrowser|UCBrowser|OppoBrowser|Quark|EdgA|OPR|YaBrowser|DuckDuckGo|; wv\)/i.test(ua);
+  if(isAndroid&&!isRealChrome){
+    if(confirm("This browser can only add a bookmark — it can't install web apps.\n\nOpen the console in Chrome to install it properly?\n(In Chrome, tap Install app again.)")){
+      location.href="intent://"+location.host+location.pathname+"#Intent;scheme=https;package=com.android.chrome;end";
+    }
+    return;
+  }
+  if(isAndroid){alert("Almost ready — in Chrome, tap the menu (⋮) and choose \"Install app\".\n\nIf you only see \"Add to Home screen\", give the page a few seconds (it's finishing the offline setup), then reopen the menu — the Install option appears once Chrome verifies the app.");return;}
   alert("To install:\n\nOpen your browser menu (⋮ or ⋯) and choose \"Install app\" or \"Add to Home screen\".\n\nIf you don't see it, the app may already be installed, or try opening this site in Chrome.");
 }
 (function initInstallHint(){
