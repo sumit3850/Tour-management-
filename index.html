@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 207</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 208</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 207</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 208</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4544,7 +4544,7 @@ function viewGroupQuote(){
         "</div></div>"+
         (gqMode==="session"
           ?"<div class='field full'><label>Session</label><select class='input' id='gqSession' onchange='gqPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"
-          :"<div class='field full'><label>Tour</label><select class='input' id='gqTour' onchange='gqTour=this.value;renderGroupQuote()'></select></div>")+
+          :"<div class='field full'><label>Tour</label><select class='input' id='gqTour' onchange='gqTour=this.value;gqResetEdits();renderGroupQuote()'></select></div>")+
         "<div class='field'><label>Client type</label><div class='tourist-toggle' id='gqTypeToggle'>"+
           "<button class='btn btn-sm' data-gqt='indian' onclick='setGqType(\"indian\")'>Indian</button>"+
           "<button class='btn btn-sm' data-gqt='foreign' onclick='setGqType(\"foreign\")'>Foreign</button>"+
@@ -4618,7 +4618,45 @@ function savePayDetails(){
   persistData();
   var btn=event&&event.target;if(btn&&btn.tagName==="BUTTON"){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1300);}
 }
-function setGqType(t){gqType=(t==="foreign")?"foreign":"indian";renderGroupQuote();}
+/* Inline "Edit rates" on the quotation preview: per-column overrides for THIS
+   quotation only (the cost sheet is untouched). Editing price-per-person recomputes
+   the total; editing the total recomputes price-per-person; deposit can be
+   overridden too; pending is always total − deposit. Generate uses the edits. */
+var gqEditMode=false;
+var gqOverrides={};    /* {size:{perPerson,total,deposit}} */
+function gqResetEdits(){gqOverrides={};}
+function gqToggleEdit(){gqEditMode=!gqEditMode;renderGroupQuote();}
+function applyGqOverrides(rows,pct){
+  return rows.map(function(rw){
+    var o=gqOverrides[rw.size];if(!o)return rw;
+    var pp=rw.perPerson,tot=rw.total;
+    if(o.perPerson!=null){pp=o.perPerson;tot=Math.round(pp*rw.size);}
+    if(o.total!=null){tot=o.total;pp=rw.size?Math.round(tot/rw.size):pp;}
+    var dep=(o.deposit!=null)?o.deposit:(tot!=null?Math.round(tot*pct/100):null);
+    return {size:rw.size,d:rw.d,perPerson:pp,total:tot,deposit:dep};
+  });
+}
+function gqCellEdit(size,field,val){
+  var o=gqOverrides[size]=gqOverrides[size]||{};
+  var n=parseFloat(val);
+  if(field==="perPerson"){if(isFinite(n))o.perPerson=n;else delete o.perPerson;delete o.total;}
+  else if(field==="total"){if(isFinite(n))o.total=n;else delete o.total;delete o.perPerson;}
+  else if(field==="deposit"){if(isFinite(n))o.deposit=n;else delete o.deposit;}
+  /* update the column's sibling cells in place — no re-render, so typing keeps focus */
+  var q=gqCollect();
+  var rw=q.rows.find(function(x){return x.size===size;});if(!rw)return;
+  var set=function(id,v,isInput){
+    var e=document.getElementById(id);if(!e)return;
+    if(isInput){if(document.activeElement!==e)e.value=(v!=null?v:"");}
+    else e.textContent=(v!=null?fmt(v):"—");
+  };
+  set("gqc_pp_"+size,rw.perPerson,true);
+  set("gqc_tot_"+size,rw.total,true);
+  set("gqc_dep_"+size,rw.deposit,true);
+  set("gqc_pen_"+size,(rw.total!=null&&rw.deposit!=null)?rw.total-rw.deposit:null,false);
+  var rb=document.getElementById("gqResetBtn");if(rb)rb.style.display=Object.keys(gqOverrides).length?"":"none";
+}
+function setGqType(t){gqType=(t==="foreign")?"foreign":"indian";gqResetEdits();renderGroupQuote();}
 /* Views are mounted once at startup, so a mode flip re-renders just its section. */
 function rebuildView(id,fn){
   var el=document.getElementById("v-"+id);if(!el)return;
@@ -4630,6 +4668,7 @@ function rebuildView(id,fn){
 function setGqMode(m){
   gqMode=(m==="session")?"session":"group";
   gqTierId="early";
+  gqResetEdits();gqEditMode=false;
   if(gqMode==="session")gqSessPP=String(sessRateFor(gqSession).price||""); /* prefill from the Session Tours rate card */
   rebuildView("groupquote",viewGroupQuote);
   renderGroupQuote();
@@ -4637,6 +4676,7 @@ function setGqMode(m){
 /* Session picked on the quotation form → pull its saved rate + pricing basis. */
 function gqPickSession(v){
   gqSession=v;
+  gqResetEdits();
   gqSessPP=String(sessRateFor(v).price||"");
   var l=document.getElementById("gqPPLbl");if(l)l.textContent=gqPPLabel();
   var h=document.getElementById("gqPPHint");if(h)h.textContent=gqPPHint();
@@ -4668,6 +4708,7 @@ function gqReadSizes(){
   out.sort(function(a,b){return a-b;});
   gqSizes=out.slice(0,6);
   if(!gqSizes.length)gqSizes=[2,4,6,8];
+  gqResetEdits();
 }
 function gqSetTier(id){
   gqTierId=id;
@@ -4702,7 +4743,7 @@ function gqCollect(){
       }
       return {size:n,perPerson:pp||null,total:pp?pp*n:null,deposit:pp?Math.round(pp*n*pct/100):null};
     });
-    return {mode:"session",key:s.id,label:sessionLabel(s),title:s.name,durLabel:s.dur,basis:rate.basis,type:gqType,rows:srows,tier:tier,tiers:tiers,pct:pct,nights:0,
+    return {mode:"session",key:s.id,label:sessionLabel(s),title:s.name,durLabel:s.dur,basis:rate.basis,type:gqType,rows:applyGqOverrides(srows,pct),tier:tier,tiers:tiers,pct:pct,nights:0,
       departure:depEl?depEl.value:"",end:endEl?endEl.value:""};
   }
   if(!gqTour)gqTour=CALC_ORDER[0];
@@ -4714,7 +4755,7 @@ function gqCollect(){
     return {size:n,d:d,total:d?d.total:null,perPerson:d?d.perPerson:null,deposit:d?Math.round(d.total*pct/100):null};
   });
   var nights=(rows[0]&&rows[0].d?rows[0].d.nights:(src&&src[gqType]&&src[gqType]["1"]?src[gqType]["1"].nights:0));
-  return {mode:"group",key:gqTour,label:label,title:title,durLabel:nights+" nights",type:gqType,rows:rows,tier:tier,tiers:tiers,pct:pct,
+  return {mode:"group",key:gqTour,label:label,title:title,durLabel:nights+" nights",type:gqType,rows:applyGqOverrides(rows,pct),tier:tier,tiers:tiers,pct:pct,
     nights:nights,departure:depEl?depEl.value:"",end:endEl?endEl.value:""};
 }
 function renderGroupQuote(){
@@ -4736,24 +4777,35 @@ function renderGroupQuote(){
 
   var q=gqCollect();
   var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px'>"+rw.size+" pax</th>";}).join("");
-  var perRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums'>"+(rw.perPerson!=null?fmt(rw.perPerson):"—")+"</td>";}).join("");
-  var totRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums'>"+(rw.total!=null?fmt(rw.total):"—")+"</td>";}).join("");
-  var depRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;color:var(--sea)'>"+(rw.deposit!=null?fmt(rw.deposit):"—")+"</td>";}).join("");
-  var pendRowL=q.rows.map(function(rw){var pv=(rw.total!=null&&rw.deposit!=null)?rw.total-rw.deposit:null;return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums;color:#b45309'>"+(pv!=null?fmt(pv):"—")+"</td>";}).join("");
+  /* read-only text cell, or a live-math input in edit mode */
+  var txtCell=function(v,color,id){return "<td style='text-align:right;padding:10px 12px;font-variant-numeric:tabular-nums"+(color?";color:"+color:"")+"'"+(id?" id='"+id+"'":"")+">"+(v!=null?fmt(v):"—")+"</td>";};
+  var editCell=function(rw,field,color){
+    var v=rw[field];
+    return "<td style='text-align:right;padding:6px 8px'><input type='number' class='input mono' id='gqc_"+(field==="perPerson"?"pp":field==="total"?"tot":"dep")+"_"+rw.size+"' value='"+(v!=null?v:"")+"' oninput='gqCellEdit("+rw.size+",\""+field+"\",this.value)' style='width:104px;text-align:right;padding:7px 9px;font-size:12.5px"+(color?";color:"+color:"")+"'></td>";
+  };
+  var mkRow=function(field,color){
+    return q.rows.map(function(rw){
+      if(gqEditMode)return editCell(rw,field,color);
+      return txtCell(rw[field],color);
+    }).join("");
+  };
+  var pendRowL=q.rows.map(function(rw){var pv=(rw.total!=null&&rw.deposit!=null)?rw.total-rw.deposit:null;return txtCell(pv,"#b45309","gqc_pen_"+rw.size);}).join("");
   r.innerHTML="<div class='card-pad'>"+
     "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px'>"+
       "<div><div class='h-sec'>"+(q.mode==="session"?q.label:q.title)+"</div><div style='font-size:12px;color:var(--ink-soft)'>"+q.durLabel+" · "+(q.type==="foreign"?"Foreign":"Indian")+" clients</div></div>"+
       "<div class='btn-pair'>"+
-        (q.mode==="session"?"":"<button class='btn btn-ghost' onclick='csTour=gqTour;csType=(gqType===\"foreign\"?\"foreign\":\"indian\");go(\"costsheet\")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit rates</button>")+
+        "<button class='btn "+(gqEditMode?"btn-primary":"btn-ghost")+"' onclick='gqToggleEdit()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>"+(gqEditMode?"Done editing":"Edit rates")+"</button>"+
+        "<button class='btn btn-ghost' id='gqResetBtn' style='"+(Object.keys(gqOverrides).length?"":"display:none")+"' onclick='gqResetEdits();renderGroupQuote()' title='Discard the edits and go back to the saved rates'>Reset edits</button>"+
         "<button class='btn btn-primary' onclick='generateGroupQuotation()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><path d='M14 2v6h6'/></svg>Generate quotation</button>"+
       "</div>"+
     "</div>"+
+    (gqEditMode?"<p style='font-size:12px;color:var(--ink-soft);margin:0 0 8px'>Type over any figure — the column recalculates live: price per person ↔ total stay linked, deposit defaults to "+q.pct+"% of the total (or type your own), pending is always total − deposit. Edits apply to <b>this quotation only</b> — the saved cost sheet is untouched.</p>":"")+
     "<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px;min-width:420px'>"+
       "<thead><tr style='border-bottom:2px solid var(--line)'><th style='text-align:left;padding:10px 12px'>Group size</th>"+headCells+"</tr></thead>"+
       "<tbody>"+
-        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;color:var(--ink-soft)'>Price per person</td>"+perRow+"</tr>"+
-        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;font-weight:600'>Total tour price</td>"+totRow+"</tr>"+
-        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px'>Deposit ("+q.pct+"%)</td>"+depRow+"</tr>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;color:var(--ink-soft)'>Price per person</td>"+mkRow("perPerson","")+"</tr>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;font-weight:600'>Total tour price</td>"+mkRow("total","")+"</tr>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px'>Deposit ("+q.pct+"%)</td>"+mkRow("deposit","var(--sea)")+"</tr>"+
         "<tr><td style='padding:10px 12px'>Pending amount</td>"+pendRowL+"</tr>"+
       "</tbody>"+
     "</table></div>"+
