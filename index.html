@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 204</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 205</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 204</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 205</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3076,6 +3076,7 @@ function tourCard(t){
     "<div class='tc-top'><span class='tc-id' title='Tour ID'>"+tourCode(t)+"</span>"+
       "<button class='tc-chip' onclick='event.stopPropagation();togglePubTour(\""+t.id+"\")' title='"+(t.pub?"Shown on the public departures page — click to unlist":"Not on the public page — click to show it")+"' style='cursor:pointer;border:1px solid "+(t.pub?"var(--sea)":"var(--line)")+";"+(t.pub?"background:var(--sea-soft);color:var(--sea);font-weight:700":"color:var(--ink-soft)")+"'>"+(t.pub?"🌐 Public":"🌐 Private")+"</button>"+
       "<button class='tc-chip' onclick='event.stopPropagation();ebirdReport(\""+t.id+"\")' title='Build a branded species-list trip report from eBird checklists' style='cursor:pointer;border:1px solid var(--line);color:var(--ink-soft)'>🐦 eBird</button>"+
+      "<button class='tc-chip' onclick='event.stopPropagation();pullGuestsDlg(\""+t.id+"\")' title='Pull participants from another tour card into this one' style='cursor:pointer;border:1px solid var(--line);color:var(--ink-soft)'>👥 Pull</button>"+
       (when.label?"<span class='tc-when "+when.cls+"'>"+when.label+"</span>":"")+"</div>"+
     "<div class='tc-name' title='"+nm+"'>"+shortName(t)+"</div>"+
     "<div class='tc-dates'>"+CAL+"<span>"+dRangeNice(t.start,t.end)+"</span><span class='tc-nights'>"+durNights(t)+"N</span></div>"+
@@ -3091,6 +3092,61 @@ function tourCard(t){
       (status(t)==="completed"?"<button class='btn btn-ghost btn-sm' style='padding:3px 10px;font-size:11px' onclick='event.stopPropagation();archiveTour(\""+t.id+"\")' title='Move to the Archived tab'>📦 Archive</button>":"")+
       "<span class='tc-pct'>"+pct+"% full</span></span></div>"+
   "</div>";
+}
+/* ===== Pull participants from another tour card ==============================
+   Copies bookings (guest, party, contacts, notes) from a source tour into the
+   target tour — all of them or a checked subset. The copies are NEW bookings on
+   the target tour (dates from the target, payment reset to Deposit/₹0) so the
+   source tour is untouched. Guests already booked on the target are skipped. */
+function _pgEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;").replace(/"/g,"&quot;");}
+function pullGuestsDlg(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  var srcs=tours.filter(function(x){return x.id!==id&&bookings.some(function(b){return b.tour===x.id;});});
+  if(!srcs.length){alert("No other tour card has participants to pull from yet.");return;}
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>"+tourCode(t)+" · "+dRangeNice(t.start,t.end)+"</span><h2 class='display' style='font-size:20px;margin-top:6px'>Pull participants — "+shortName(t)+"</h2></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<div class='field full'><label>Pull from tour</label><select class='input' id='pg_src' onchange=\"pullGuestsRender('"+id+"')\">"+srcs.map(function(s){var n=bookings.filter(function(b){return b.tour===s.id;}).length;return "<option value='"+s.id+"'>"+_pgEsc(tourCode(s)+" · "+shortName(s)+" ("+dRangeNice(s.start,s.end)+") — "+n+" booking"+(n===1?"":"s"))+"</option>";}).join("")+"</select></div>"+
+      "<div class='field full' style='margin-top:8px'><label style='display:flex;justify-content:space-between;align-items:center'><span>Participants</span><span style='font-weight:400;font-size:12px'><input type='checkbox' id='pg_all' onchange=\"document.querySelectorAll('.pg-chk').forEach(function(c){c.checked=document.getElementById('pg_all').checked;})\" style='vertical-align:middle'> Select all</span></label>"+
+        "<div id='pg_list' style='max-height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:6px 10px'></div></div>"+
+      "<div style='display:flex;gap:8px;margin-top:14px;flex-wrap:wrap'>"+
+        "<button class='btn btn-primary' onclick=\"pullGuestsDo('"+id+"',false)\">Pull selected</button>"+
+        "<button class='btn btn-sea' onclick=\"pullGuestsDo('"+id+"',true)\">Pull all</button>"+
+      "</div>"+
+    "</div>";
+  openScrim();
+  pullGuestsRender(id);
+}
+function pullGuestsRender(id){
+  var srcId=(document.getElementById("pg_src")||{}).value;
+  var have={};bookings.forEach(function(b){if(b.tour===id)have[(b.guest||"").toLowerCase()]=1;});
+  var list=bookings.filter(function(b){return b.tour===srcId;});
+  var box=document.getElementById("pg_list");if(!box)return;
+  box.innerHTML=list.map(function(b){
+    var dupe=have[(b.guest||"").toLowerCase()];
+    var meta=[(b.party?b.party+" pax":""),(b.country&&b.country!=="—"?b.country:""),(b.members?"with "+b.members:"")].filter(Boolean).join(" · ");
+    return "<label style='display:flex;gap:9px;align-items:flex-start;padding:7px 2px;border-bottom:1px solid var(--line);cursor:pointer;"+(dupe?"opacity:.45":"")+"'>"+
+      "<input type='checkbox' class='pg-chk' data-bid='"+b.id+"' "+(dupe?"disabled":"")+" style='margin-top:3px'>"+
+      "<span style='min-width:0'><b>"+_pgEsc(b.guest||"—")+"</b>"+(dupe?" <span style='font-size:11px;color:var(--ink-soft)'>(already on this tour)</span>":"")+(meta?"<br><span style='font-size:12px;color:var(--ink-soft)'>"+_pgEsc(meta)+"</span>":"")+"</span></label>";
+  }).join("")||"<div class='empty' style='padding:14px'>No bookings on that tour.</div>";
+  var all=document.getElementById("pg_all");if(all)all.checked=false;
+}
+function pullGuestsDo(id,all){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  var picked=[];
+  document.querySelectorAll(".pg-chk").forEach(function(c){if(!c.disabled&&(all||c.checked))picked.push(c.dataset.bid);});
+  if(!picked.length){alert(all?"Everyone on that tour is already on this one.":"Tick at least one participant first (or use Pull all).");return;}
+  var added=0;
+  picked.forEach(function(bid){
+    var b=bookings.find(function(x){return x.id===bid;});if(!b)return;
+    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100000),bookingDate:dShort(new Date()),tour:id,customTour:"",
+      guest:b.guest||"—",members:b.members||"",party:b.party||1,country:b.country||"—",email:b.email||"",phone:b.phone||"",
+      status:"Confirmed",pay:"Deposit",notes:b.notes||"",start:t.start||"",end:t.end||"",deposit:0,lastPendingDate:""};
+    bookings.unshift(nb);pushBooking(nb);added++;
+  });
+  audit("booking","pulled",added+" participant(s) into "+tourCode(t)+" from another tour");
+  persistData();renderBookings();renderTours();renderCalendar();
+  closeModal();
+  alert("Pulled "+added+" participant"+(added===1?"":"s")+" into "+tourCode(t)+" · "+shortName(t)+". Payment is reset to Deposit ₹0 on the copies — the source tour is unchanged.");
 }
 /* Which tab does a tour belong to (archived tours live only in Archived). */
 function tourTabOf(t){
