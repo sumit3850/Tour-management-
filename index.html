@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 203</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 204</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 203</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 204</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5514,7 +5514,7 @@ function shareTourForm(id,type){
   var t=tours.find(function(x){return x.id===id;});if(!t)return;
   var url=formLink(type)+"&tour="+encodeURIComponent(tourLabel(t))+"&cat="+encodeURIComponent(t.cat||"")+"&tid="+id+"&tcode="+encodeURIComponent(tourCode(t))+"&start="+(t.start||"")+"&end="+(t.end||"");
   if(navigator.clipboard)navigator.clipboard.writeText(url);
-  var intro=type==="client"?"Please complete your guest details for "+tourLabel(t)+":\n":"Register your interest for "+tourLabel(t)+":\n";
+  var intro=type==="client"?"Please complete your guest details for "+tourLabel(t)+":\n":"Please complete your session registration for "+tourLabel(t)+":\n";
   if(confirm("Link copied:\n\n"+url+"\n\nOpen WhatsApp to share it now?"))waShare(intro+url,t.phone);
 }
 function viewRequests(){
@@ -5596,11 +5596,11 @@ function renderRequests(){
     });
   }
   if(!subs.length){body.innerHTML="<div class='empty'>"+((reqFrom||reqTo)?"No submissions in this date range.":"No submissions yet. Share the forms from <b>Forms, Review &amp; Feedback</b> — entries appear here automatically.")+"</div>";return;}
-  var TYPEN={interest:"Tour interest",client:"Guest details",guide:"Guide request",guidedir:"Guide registration",driver:"Driver registration"};
+  var TYPEN={interest:"Session registration",client:"Guest details",guide:"Guide request",guidedir:"Guide registration",driver:"Driver registration"};
   body.innerHTML=subs.map(function(s){
     var d=s.data||{};
     var rows="";
-    var LBL={idNo:"ID number",licenseDoc:"Document",idDoc:"ID document",vehicles:"Vehicles",vehicle:"Vehicle",reg:"Reg. no.",seats:"Seats",license:"Licence no.",address:"Address",expertise:"Expertise",clientType:"Client type",organisation:"Organisation",notes:"Notes",message:"Message",tourCode:"Tour ID",tourId:"Tour ID"};
+    var LBL={idNo:"ID number",licenseDoc:"Document",idDoc:"ID document",vehicles:"Vehicles",vehicle:"Vehicle",reg:"Reg. no.",seats:"Seats",license:"Licence no.",address:"Address",expertise:"Expertise",clientType:"Client type",organisation:"Organisation",notes:"Notes",message:"Message",tourCode:"Tour ID",tourId:"Tour ID",hotel:"Hotel / pickup point",participants:"Participants"};
     Object.keys(d).forEach(function(k){
       var v=d[k];
       if(k==="documents"||v===null||v===undefined||v==="")return;
@@ -5609,6 +5609,7 @@ function renderRequests(){
         html="<a href='#' onclick=\"event.preventDefault();openSubDocKey('"+s.id+"','"+k+"')\">View document ↗</a>"; /* opened via blob URL — data: URIs are blocked as direct links */
       }else if(Array.isArray(v)){
         if(k==="vehicles")html=v.map(function(x){return x&&(x.name||"")+(x.reg?" ("+x.reg+")":"")+(x.seats?" · "+x.seats+" seats":"");}).filter(Boolean).join(", ")||"—";
+        else if(k==="participants")html=v.map(function(x){if(!x)return "";var bits=[x.gender,x.phone,x.email,x.hotel].filter(Boolean).join(" · ");return (x.name||"—")+(bits?" ("+bits+")":"");}).filter(Boolean).join("<br>")||"—";
         else html=v.map(function(x){return (x&&typeof x==="object")?(x.name||"item"):String(x);}).join(", ");
       }else if(typeof v==="object"){
         html=(v.name||JSON.stringify(v));
@@ -5776,7 +5777,7 @@ function makeBookingFromSub(s){
           bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
   if(!dup){
     var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
-    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:"",party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""};
+    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:(s.data&&Array.isArray(s.data.participants)?s.data.participants.map(function(p){return p&&p.name;}).filter(Boolean).join(", "):""),party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""};
     bookings.unshift(nb);
     addOrUpdateCustomer(s);
     pushBooking(nb);
@@ -6378,7 +6379,7 @@ function viewReviews(){
 /* Public form links (register.html) shared from the Forms card. */
 var FORM_SHARE={
   client:   {label:"Guest details form",       desc:"Full guest particulars for a confirmed booking — auto-creates the booking + customer."},
-  interest: {label:"Guest interest form",      desc:"Tour enquiry — auto-creates a booking, customer and CRM lead."},
+  interest: {label:"Session registration form",desc:"Guided session registration with participants — auto-creates a booking, customer and CRM lead."},
   driver:   {label:"Driver registration form", desc:"Driver self-registration — lands in Logistics → Vehicles & Drivers."},
   driverops:{label:"Driver ops form",          desc:"Driver's daily app — trip logs & assignments. They sign in with their phone + login code.",page:"driver-app.html"},
   guidedir: {label:"Guide registration form",  desc:"Guide self-registration — lands in Logistics → External Guides."},
@@ -7354,7 +7355,7 @@ function openTour(id){
       (function(){var sp=String(t.species||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);if(!sp.length)return "";
         return "<div style='margin-bottom:12px'><div style='font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px'>Target species ("+sp.length+")</div><div style='display:flex;gap:6px;flex-wrap:wrap'>"+sp.map(function(s){return "<span class='pill plain' style='font-size:11.5px'>🐦 "+s.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";})()+
       "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px'>"+
-        "<button class='btn btn-sea btn-sm' onclick=\"shareTourForm('"+id+"','interest')\">Share interest form</button>"+
+        "<button class='btn btn-sea btn-sm' onclick=\"shareTourForm('"+id+"','interest')\">Share session registration form</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourForm('"+id+"','client')\">Send guest form (after advance)</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourReservation('"+id+"')\">Guide reservation link</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"openTripReport('"+id+"')\">🐦 Trip report</button>"+
