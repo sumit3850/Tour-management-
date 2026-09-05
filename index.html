@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 211</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 212</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 211</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 212</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8138,6 +8138,11 @@ function initAuth(){
       else{showLogin();resolve(false);}
     }).catch(function(){showLogin();resolve(false);});  /* couldn't confirm a session -> don't sync to a saved workspace */
     cl.auth.onAuthStateChange(function(_e,session){
+      /* Arriving via the "Forgot password" email link: Supabase signs the user
+         in with a one-time recovery session. Without this step the user was
+         signed in ONCE but never got to set a new password — locked out again
+         on the next visit. */
+      if(_e==="PASSWORD_RECOVERY")setTimeout(function(){handlePasswordRecovery(cl);},400);
       if(session&&session.user){
         /* A DIFFERENT user signing in on a page that already loaded a company
            must get a clean boot — reload so nothing (workspace, data, brand)
@@ -8244,6 +8249,18 @@ function authSignUp(){
     if(res.data&&res.data.session){applyUser(res.data.user);hideLogin();}
     else{lgMsg("ok","Account created. Check your email to confirm, then sign in.");authToggleMode();}
   }).catch(function(e){lgEl("lgBtn").disabled=false;authNetErr(e);});
+}
+/* Ask for and save the new password after a reset-link arrival. Retries until
+   a valid password is given or the user cancels (they stay signed in either
+   way for this session — but only a saved password survives to the next one). */
+function handlePasswordRecovery(cl){
+  var p1=prompt("You opened a password-reset link.\n\nSet your NEW password (at least 6 characters):");
+  if(p1===null){alert("Password unchanged. You are signed in for now, but you'll need the reset email again next time.");return;}
+  if(!p1||p1.length<6){alert("The password must be at least 6 characters — let's try again.");handlePasswordRecovery(cl);return;}
+  cl.auth.updateUser({password:p1}).then(function(r){
+    if(r.error){alert("Couldn't save the new password: "+r.error.message+"\n\nTry again from the reset email link.");return;}
+    alert("Password updated ✓\n\nYou're signed in — use the new password from now on.");
+  }).catch(function(){alert("Network error saving the password — try the reset email link again.");});
 }
 function authForgot(){
   var cl=authClient();if(!cl){lgMsg("err","Auth service unavailable.");return;}
