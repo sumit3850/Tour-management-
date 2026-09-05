@@ -721,7 +721,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 206</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 207</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +730,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 206</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 207</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -870,6 +870,22 @@ var DOC_SESSIONS=[
 var gqSession=DOC_SESSIONS[0].id;   /* selected session for session-mode quotes */
 var gqSessPP="";                     /* manual per-person price for session quotes */
 function sessionById(id){return DOC_SESSIONS.find(function(s){return s.id===id;})||DOC_SESSIONS[0];}
+/* Session rate card (editable in Cost Sheet → Session Tours, synced). Birding
+   sessions are priced PER SESSION (flat charge for the whole group); herping
+   sessions PER PERSON — from the operator's Session_Rates sheet. */
+let sessRates={
+  SB_FD:{basis:"session",price:9000, size:2,loc:"South Andaman"},
+  SB_HD:{basis:"session",price:6500, size:2,loc:"South Andaman"},
+  SB_N:  {basis:"session",price:4500, size:2,loc:"South Andaman"},
+  SB_FDN:{basis:"session",price:11000,size:2,loc:"South Andaman"},
+  SB_HDN:{basis:"session",price:8500, size:2,loc:"South Andaman"},
+  SH_FD:{basis:"person",price:9000, size:2,loc:"South Andaman"},
+  SH_HD:{basis:"person",price:4500, size:2,loc:"South Andaman"},
+  SH_N:  {basis:"person",price:5500, size:2,loc:"South Andaman"},
+  SH_FDN:{basis:"person",price:13000,size:2,loc:"South Andaman"},
+  SH_HDN:{basis:"person",price:10000,size:2,loc:"South Andaman"}
+};
+function sessRateFor(id){return sessRates[id]||{basis:"person",price:0,size:2,loc:""};}
 function sessionLabel(s){return s.name+" ("+s.dur+")";}
 function sessionOptions(sel){return DOC_SESSIONS.map(function(s){return "<option value='"+s.id+"' "+(s.id===sel?"selected":"")+">"+sessionLabel(s)+"</option>";}).join("");}
 function gqTiers(){return gqMode==="session"?SQ_TIERS:GQ_TIERS;}
@@ -1010,6 +1026,7 @@ const STORE=[
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
   {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
+  {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
   {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}}
 ];
@@ -3623,8 +3640,8 @@ function viewInvoices(){
           "<button class='btn btn-sm "+(invMode==="session"?"btn-primary":"btn-ghost")+"' onclick='setInvMode(\"session\")'>Session tour</button>"+
         "</div></div>"+
         (invMode==="session"
-          ?"<div class='field'><label>Session</label><select class='input' id='inv_cat'>"+sessionOptions(gqSession)+"</select></div>"+
-           "<div class='field'><label>Price per person (₹)</label><input class='input mono' type='number' id='inv_pp' min='0' placeholder='e.g. 3250'></div>"
+          ?"<div class='field'><label>Session</label><select class='input' id='inv_cat' onchange='invPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"+
+           "<div class='field'><label id='invPPLbl'>"+(sessRateFor(gqSession).basis==="session"?"Session charge (₹ · whole group)":"Price per person (₹)")+"</label><input class='input mono' type='number' id='inv_pp' min='0' value='"+(sessRateFor(gqSession).price||"")+"' placeholder='auto from Session Tours rates'></div>"
           :"<div class='field'><label>Tour</label><select class='input' id='inv_cat'>"+tourOpts+"</select></div>")+
         "<div class='field'><label>Group size</label><select class='input mono' id='inv_pax'>"+groupOpts+"</select></div>"+
         "<div class='field'><label>Client type</label><select class='input' id='inv_type'><option value='indian'>Indian</option><option value='foreign'>Foreigner</option></select></div>"+
@@ -3650,7 +3667,7 @@ function invSelection(){
   if(invMode==="session"){
     var s=sessionById(key);
     var pp=Math.max(0,parseFloat((document.getElementById("inv_pp")||{}).value)||0);
-    return {mode:"session",key:s.id,pax:pax,type:type,d:null,session:s,pp:pp,label:sessionLabel(s)};
+    return {mode:"session",key:s.id,pax:pax,type:type,d:null,session:s,pp:pp,basis:sessRateFor(s.id).basis,label:sessionLabel(s)};
   }
   var src=SHEET_DATA[key];
   return {mode:"group",key:key,pax:pax,type:type,d:src&&src[type]?src[type][pax]:null,label:calcTourLabel(key)};
@@ -4094,6 +4111,30 @@ function viewCostSheet(){
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:10px'>Edit any amount and press <b>Save cost sheet</b>. The Cost Calculator and both quotation generators then use these saved rates. Total = ship + accommodation + vehicle + guide + entry + food; per-person = total ÷ group size.</p>"+
       "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'><b>Import rates (.xlsx)</b> migrates a reference sheet straight into this database — name each tab with the tour + client type (e.g. <i>South Andaman 5N Indian</i>, <i>Narcondam A V1 Foreigner</i>) with columns Pax · Nights · Rooms · Ship/Boat · Accommodation · Vehicle · Guide · Entry · Food (per-head or total). From a Google Sheet: <b>File → Download → Microsoft Excel (.xlsx)</b>, then upload it here.</p>"+
     "</div>"+
+    "<div class='card card-pad' style='margin-bottom:16px'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:6px'>"+
+        "<div><div class='eyebrow'>Guided sessions rate card</div><div class='h-sec'>Session Tours</div></div>"+
+        "<button class='btn btn-primary btn-sm' id='srSaveBtn' onclick='saveSessRates()'>Save session rates</button>"+
+      "</div>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin-bottom:10px;max-width:760px'>These rates drive the <b>Session tour</b> quotations and invoices. <b>Per session</b> = one flat charge for the whole group; <b>Per person</b> = charge × number of guests.</p>"+
+      "<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px;min-width:680px' id='srTable'>"+
+        "<thead><tr style='border-bottom:2px solid var(--line)'>"+
+          "<th style='text-align:left;padding:9px 10px'>Session</th><th style='text-align:left;padding:9px 10px'>Type</th>"+
+          "<th style='text-align:left;padding:9px 10px'>Location</th><th style='text-align:right;padding:9px 10px'>Base group</th>"+
+          "<th style='text-align:left;padding:9px 10px'>Pricing</th><th style='text-align:right;padding:9px 10px'>Charge (₹)</th>"+
+        "</tr></thead>"+
+        "<tbody>"+DOC_SESSIONS.map(function(s){var r=sessRateFor(s.id);
+          return "<tr style='border-bottom:1px solid var(--line-soft)'>"+
+            "<td style='padding:8px 10px;font-weight:600'>"+s.name+"</td>"+
+            "<td style='padding:8px 10px;color:var(--ink-soft)'>"+s.dur+"</td>"+
+            "<td style='padding:8px 10px'><input class='input' id='sr_loc_"+s.id+"' value='"+String(r.loc||"").replace(/'/g,"&#39;")+"' style='min-width:120px;padding:7px 9px;font-size:12.5px'></td>"+
+            "<td style='padding:8px 10px;text-align:right'><input class='input mono' type='number' id='sr_size_"+s.id+"' value='"+(r.size||2)+"' min='1' style='width:64px;padding:7px 9px;font-size:12.5px;text-align:right'></td>"+
+            "<td style='padding:8px 10px'><select class='input' id='sr_basis_"+s.id+"' style='padding:7px 9px;font-size:12.5px'><option value='session' "+(r.basis==="session"?"selected":"")+">Per session</option><option value='person' "+(r.basis==="person"?"selected":"")+">Per person</option></select></td>"+
+            "<td style='padding:8px 10px;text-align:right'><input class='input mono' type='number' id='sr_price_"+s.id+"' value='"+(r.price||0)+"' min='0' style='width:100px;padding:7px 9px;font-size:12.5px;text-align:right'></td>"+
+          "</tr>";}).join("")+
+        "</tbody>"+
+      "</table></div>"+
+    "</div>"+
     "<div class='card' style='margin-bottom:16px'>"+
       "<div class='card-pad' style='padding-bottom:0'><div style='display:flex;justify-content:space-between;align-items:flex-start;gap:10px'><div><div class='eyebrow'>History</div><div class='h-sec' style='margin-bottom:6px'>Saved changes log</div></div>"+
         "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='clearCsLog()'>Clear history</button></div></div>"+
@@ -4101,8 +4142,35 @@ function viewCostSheet(){
     "</div>"+
   "</section>";
 }
+/* Session Tours rate card <-> sessRates (synced). Inputs are refreshed on each
+   cost-sheet render so a cloud sync from another device shows up. */
+function fillSessRates(){
+  DOC_SESSIONS.forEach(function(s){
+    var r=sessRateFor(s.id);
+    [["sr_loc_",r.loc||""],["sr_size_",r.size||2],["sr_basis_",r.basis||"person"],["sr_price_",r.price||0]].forEach(function(p){
+      var e=document.getElementById(p[0]+s.id);
+      if(e&&document.activeElement!==e)e.value=p[1];
+    });
+  });
+}
+function saveSessRates(){
+  DOC_SESSIONS.forEach(function(s){
+    var g=function(pre){var e=document.getElementById(pre+s.id);return e?e.value:null;};
+    sessRates[s.id]={
+      basis:(g("sr_basis_")==="session")?"session":"person",
+      price:Math.max(0,parseFloat(g("sr_price_"))||0),
+      size:Math.max(1,parseInt(g("sr_size_"),10)||2),
+      loc:String(g("sr_loc_")||"").trim()
+    };
+  });
+  audit("costsheet","session-rates","updated");
+  persistData();
+  var btn=document.getElementById("srSaveBtn");
+  if(btn){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1300);}
+}
 function csSetType(t){csType=(t==="foreign")?"foreign":"indian";renderCostSheet();}
 function renderCostSheet(){
+  if(typeof fillSessRates==="function")fillSessRates();
   var sel=document.getElementById("csTour");
   if(sel){
     if(!csTour||tourKeys().indexOf(csTour)<0)csTour=CALC_ORDER[0];
@@ -4475,13 +4543,13 @@ function viewGroupQuote(){
           "<button class='btn btn-sm "+(gqMode==="session"?"btn-primary":"btn-ghost")+"' onclick='setGqMode(\"session\")'>Session tour</button>"+
         "</div></div>"+
         (gqMode==="session"
-          ?"<div class='field full'><label>Session</label><select class='input' id='gqSession' onchange='gqSession=this.value;renderGroupQuote()'>"+sessionOptions(gqSession)+"</select></div>"
+          ?"<div class='field full'><label>Session</label><select class='input' id='gqSession' onchange='gqPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"
           :"<div class='field full'><label>Tour</label><select class='input' id='gqTour' onchange='gqTour=this.value;renderGroupQuote()'></select></div>")+
         "<div class='field'><label>Client type</label><div class='tourist-toggle' id='gqTypeToggle'>"+
           "<button class='btn btn-sm' data-gqt='indian' onclick='setGqType(\"indian\")'>Indian</button>"+
           "<button class='btn btn-sm' data-gqt='foreign' onclick='setGqType(\"foreign\")'>Foreign</button>"+
         "</div></div>"+
-        (gqMode==="session"?"<div class='field'><label>Price per person (₹)</label><input class='input mono' type='number' id='gqPP' min='0' value='"+String(gqSessPP).replace(/'/g,"")+"' placeholder='e.g. 3250' oninput='gqSessPP=this.value;renderGroupQuote()'></div>":"")+
+        (gqMode==="session"?"<div class='field'><label id='gqPPLbl'>"+gqPPLabel()+"</label><input class='input mono' type='number' id='gqPP' min='0' value='"+String(gqSessPP).replace(/'/g,"")+"' placeholder='auto from Session Tours rates' oninput='gqSessPP=this.value;renderGroupQuote()'><div class='hint' id='gqPPHint'>"+gqPPHint()+"</div></div>":"")+
         "<div class='field'><label>Group sizes (comma separated)</label><input class='input mono' id='gqSizes' value='"+(gqSizes.join(", ")||"2, 4, 6, 8")+"' placeholder='2, 4, 6, 8' onchange='gqReadSizes();renderGroupQuote()'></div>"+
       "</div>"+
       "<div class='cost-grid' style='margin-top:12px'>"+
@@ -4562,13 +4630,34 @@ function rebuildView(id,fn){
 function setGqMode(m){
   gqMode=(m==="session")?"session":"group";
   gqTierId="early";
+  if(gqMode==="session")gqSessPP=String(sessRateFor(gqSession).price||""); /* prefill from the Session Tours rate card */
   rebuildView("groupquote",viewGroupQuote);
   renderGroupQuote();
+}
+/* Session picked on the quotation form → pull its saved rate + pricing basis. */
+function gqPickSession(v){
+  gqSession=v;
+  gqSessPP=String(sessRateFor(v).price||"");
+  var l=document.getElementById("gqPPLbl");if(l)l.textContent=gqPPLabel();
+  var h=document.getElementById("gqPPHint");if(h)h.textContent=gqPPHint();
+  var i=document.getElementById("gqPP");if(i)i.value=gqSessPP;
+  renderGroupQuote();
+}
+function gqPPLabel(){return sessRateFor(gqSession).basis==="session"?"Session charge (₹ · whole group)":"Price per person (₹)";}
+function gqPPHint(){
+  var r=sessRateFor(gqSession);
+  return (r.basis==="session"?"Flat charge per session":"Charged per person")+(r.loc?" · "+r.loc:"")+" — saved in Cost Sheet → Session Tours.";
 }
 function setInvMode(m){
   invMode=(m==="session")?"session":"group";
   rebuildView("invoices",viewInvoices);
   if(typeof renderSavedInvoices==="function")renderSavedInvoices();
+}
+/* Session picked on the invoice form → pull its saved rate + pricing basis. */
+function invPickSession(v){
+  var r=sessRateFor(v);
+  var l=document.getElementById("invPPLbl");if(l)l.textContent=(r.basis==="session"?"Session charge (₹ · whole group)":"Price per person (₹)");
+  var i=document.getElementById("inv_pp");if(i)i.value=r.price||"";
 }
 function gqReadSizes(){
   var el=document.getElementById("gqSizes");if(!el)return;
@@ -4605,11 +4694,15 @@ function gqCollect(){
   var endEl=document.getElementById("gqEnd");
   if(gqMode==="session"){
     var s=sessionById(gqSession);
+    var rate=sessRateFor(s.id);
     var pp=Math.max(0,parseFloat(gqSessPP)||0);
     var srows=gqSizes.map(function(n){
+      if(rate.basis==="session"){ /* flat charge for the whole group */
+        return {size:n,total:pp||null,perPerson:pp?Math.round(pp/n):null,deposit:pp?Math.round(pp*pct/100):null};
+      }
       return {size:n,perPerson:pp||null,total:pp?pp*n:null,deposit:pp?Math.round(pp*n*pct/100):null};
     });
-    return {mode:"session",key:s.id,label:sessionLabel(s),title:s.name,durLabel:s.dur,type:gqType,rows:srows,tier:tier,tiers:tiers,pct:pct,nights:0,
+    return {mode:"session",key:s.id,label:sessionLabel(s),title:s.name,durLabel:s.dur,basis:rate.basis,type:gqType,rows:srows,tier:tier,tiers:tiers,pct:pct,nights:0,
       departure:depEl?depEl.value:"",end:endEl?endEl.value:""};
   }
   if(!gqTour)gqTour=CALC_ORDER[0];
@@ -5003,7 +5096,7 @@ function generateInvoice(src){
   var startD=_ds?dmy(new Date(_ds+"T00:00:00")):(linkTour?dmy(new Date(linkTour.start+"T00:00:00")):"");
   var endD=_de?dmy(new Date(_de+"T00:00:00")):(linkTour?dmy(new Date(linkTour.end+"T00:00:00")):"");
   var accommodation=isSess?0:(d.accommodation||0),travel=isSess?0:(d.vehicle||0),food=isSess?0:(d.food||0),entry=isSess?0:(d.entry||0),ship=isSess?0:(d.ship||0),guide=isSess?0:(d.guide||0),referral=0;
-  var sessTotal=isSess?Math.round(sel.pp*(parseInt(pax,10)||1)):0;
+  var sessTotal=isSess?(sel.basis==="session"?Math.round(sel.pp):Math.round(sel.pp*(parseInt(pax,10)||1))):0;
   var total=isSess?sessTotal:(accommodation+travel+food+entry+ship+guide+referral);
   var gst=gstBreakup(total,qClient&&qClient.gst);
   var grand=gst?gst.grand:total;
@@ -5034,7 +5127,7 @@ function generateInvoice(src){
           "<thead><tr><th style='text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Description</th><th style='text-align:right;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Amount</th></tr></thead>"+
           "<tbody>"+
             (isSess
-              ?row('Guided session charges — guide, vehicle, hotel pick-up & drop ('+pax+' × '+fmt(sel.pp)+')',sessTotal)
+              ?row('Guided session charges — guide, vehicle, hotel pick-up & drop '+(sel.basis==="session"?'(flat, whole group)':'('+pax+' × '+fmt(sel.pp)+')'),sessTotal)
               :row('Accommodation',accommodation)+
                row('Travel and Logistics',travel)+
                row('Food',food)+
