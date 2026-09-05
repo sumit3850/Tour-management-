@@ -11,12 +11,12 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v85"; /* v85: Edit rates edits the live quotation preview with linked math (both group and session modes) */
+var CACHE = "ie-ops-v86"; /* v86: app icon is now the bird on white (favicon, PWA icons, apple-touch) */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
   "manifest.json", "driver-manifest.json", "guide-manifest.json",
-  "assets/logo.png", "assets/logo.jpg", "assets/icon.svg", "assets/icon-192.png", "assets/icon-512.png",
+  "assets/logo.png", "assets/logo.jpg", "assets/icon.svg", "assets/icon-192.png", "assets/icon-512.png", "assets/apple-touch-icon.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
 ];
 
