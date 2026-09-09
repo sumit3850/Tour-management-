@@ -294,26 +294,27 @@ function applyLiveTour(t){
     var is=document.getElementById("i_start");if(is&&t.start)is.value=t.start;
   }
 }
-(function liveTourSync(){
+(async function liveTourSync(){
   var tid=params.get("tid");
   if(!sb||!tid||(type!=="client"&&type!=="interest"))return;
-  /* 1) The public RPC (works for real anonymous guests once form-tour-sync.sql
-        is run). 2) If it's not there, read the workspace blob directly — this
-        succeeds when the person opening the form is ALSO signed in to the
-        console in the same browser (e.g. the owner testing it), no SQL needed. */
-  sb.rpc("get_tour_for_form",{p_workspace:WORKSPACE,p_tid:tid}).then(function(r){
-    if(r&&!r.error&&r.data){applyLiveTour(r.data);return;}
-    return directTourRead(tid);
-  }).catch(function(){directTourRead(tid);});
+  /* Wait for any existing console session to be restored from this browser
+     BEFORE reading — otherwise the read fires as anon and the DB blocks it,
+     so the form silently keeps the link's stale activity. */
+  try{ await sb.auth.getSession(); }catch(e){}
+  /* 1) The public RPC — works for real anonymous guests once form-tour-sync.sql
+        is run. */
+  try{ var r=await sb.rpc("get_tour_for_form",{p_workspace:WORKSPACE,p_tid:tid}); if(r&&!r.error&&r.data){applyLiveTour(r.data);return;} }catch(e){}
+  /* 2) Direct workspace read — works when the person opening the form is signed
+        in to the console in the same browser (the owner testing it), no SQL. */
+  await directTourRead(tid);
 })();
-function directTourRead(tid){
+async function directTourRead(tid){
   try{
-    return sb.from("workspaces").select("data").eq("id",WORKSPACE).maybeSingle().then(function(res){
-      var blob=res&&res.data&&res.data.data;var tours=blob&&blob.tours;
-      if(!Array.isArray(tours))return;
-      var t=tours.find(function(x){return x&&x.id===tid;});
-      if(t)applyLiveTour({name:t.name,cat:t.cat,activity:t.activity,tourType:t.tourType,start:t.start,end:t.end,sessionDates:t.sessionDates});
-    }).catch(function(){});
+    var res=await sb.from("workspaces").select("data").eq("id",WORKSPACE).maybeSingle();
+    var blob=res&&res.data&&res.data.data;var tours=blob&&blob.tours;
+    if(!Array.isArray(tours))return;
+    var t=tours.find(function(x){return x&&x.id===tid;});
+    if(t)applyLiveTour({name:t.name,cat:t.cat,activity:t.activity,tourType:t.tourType,start:t.start,end:t.end,sessionDates:t.sessionDates});
   }catch(e){}
 }
 
