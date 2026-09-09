@@ -244,3 +244,17 @@ create policy "logo upload" on storage.objects for insert to anon, authenticated
 drop policy if exists "logo public read" on storage.objects;
 create policy "logo public read" on storage.objects for select to anon, authenticated
   using (bucket_id = 'logos');
+
+-- ---- Subscription end date (optional) ---------------------------------------
+-- The admin page stores each company's subscription-end date in the admin's
+-- browser by default. Run this block once to also persist it server-side, so the
+-- date is shared across devices and admins.
+alter table orgs add column if not exists subscription_end date;
+create or replace function public.admin_set_org_subscription(p_org uuid, p_end date)
+returns jsonb language plpgsql security definer set search_path = public as $$
+begin
+  if not is_saas_admin() then return jsonb_build_object('error','not_admin'); end if;
+  update orgs set subscription_end = p_end where id = p_org;
+  return jsonb_build_object('ok', true);
+end $$;
+grant execute on function public.admin_set_org_subscription(uuid, date) to authenticated;

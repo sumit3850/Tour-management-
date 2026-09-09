@@ -80,7 +80,10 @@
   .msg.err{display:block;background:#fde4e5;color:#b23b32;border:1px solid #f4c7c2}
   .row{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:12px;background:#fbfdff;transition:box-shadow .15s}
   .row:hover{box-shadow:0 14px 34px -24px rgba(20,40,80,.4)}
-  .logo{width:60px;height:60px;border-radius:12px;background:#fff center/contain no-repeat;border:1px solid var(--line);flex-shrink:0}
+  .logo{width:60px;height:60px;border-radius:12px;background:#fff;border:1px solid var(--line);flex-shrink:0;object-fit:contain;padding:4px}
+  .subrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+  .subinput{width:auto;padding:7px 10px;font-size:13px}
+  .subok{font-size:11.5px;color:#1b7f4d;font-weight:600}
   .meta{flex:1;min-width:0;font-size:13px;color:var(--ink-soft);line-height:1.6}
   .meta b{color:var(--ink);font-size:15.5px;font-weight:700}
   .pill{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700;margin-left:8px;vertical-align:2px;text-transform:capitalize}
@@ -197,6 +200,28 @@ function backToLogin(msg){
   $('loginOverlay').classList.remove('hide');
   if(msg)showErr('lerr',msg);
 }
+/* DD-MM-YYYY from an ISO timestamp/date. */
+function fmtDMY(iso){var s=String(iso||'').slice(0,10);var p=s.split('-');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:'—';}
+/* Subscription-end dates. Primary store is the browser (works with no DB change);
+   if the optional admin_set_org_subscription RPC + subscription_end column exist,
+   the value also syncs server-side and is preferred when present. */
+function subLocal(){try{return JSON.parse(localStorage.getItem('admin_sub_dates')||'{}');}catch(e){return {};}}
+function subLocalSet(id,val){var m=subLocal();if(val)m[id]=val;else delete m[id];try{localStorage.setItem('admin_sub_dates',JSON.stringify(m));}catch(e){}}
+function subEndOf(o){return (o&&o.subscription_end)?String(o.subscription_end).slice(0,10):(subLocal()[o.id]||'');}
+async function saveSubEnd(id,val){
+  subLocalSet(id,val);                                  /* immediate, device-local */
+  var mark=document.getElementById('subok_'+id);if(mark)mark.textContent='Saved \u2713';
+  try{ var r=await sb.rpc('admin_set_org_subscription',{p_org:id,p_end:val||null}); if(r&&r.error&&mark)mark.textContent='Saved on this device'; }
+  catch(e){ if(mark)mark.textContent='Saved on this device'; }
+  var badge=document.getElementById('subbadge_'+id);if(badge)badge.outerHTML=subBadge(id,val);
+}
+function subBadge(id,val){
+  if(!val)return '<span id="subbadge_'+id+'"></span>';
+  var days=Math.round((new Date(val+'T00:00:00')-new Date().setHours(0,0,0,0))/864e5);
+  var st=days<0?'rejected':(days<=15?'pending':'approved');
+  var txt=days<0?('Expired '+(-days)+'d ago'):(days+'d left');
+  return '<span id="subbadge_'+id+'" class="pill '+st+'" style="margin-left:0">'+txt+'</span>';
+}
 async function loadOrgs(){
   var r=await sb.rpc('admin_list_orgs');
   if(r.error){showErr('err',r.error.message);return;}
@@ -206,12 +231,18 @@ async function loadOrgs(){
   $('count').textContent=orgs.filter(function(o){return o.status==='pending';}).length+' pending · '+orgs.length+' total';
   var h='';
   orgs.forEach(function(o){
+    var sub=subEndOf(o);
     h+='<div class="row">'
-      +'<div class="logo" style="background-image:url('+(o.logo_url?esc(o.logo_url):'assets/favicon.png')+')"></div>'
+      +'<img class="logo" src="'+(o.logo_url?esc(o.logo_url):'assets/favicon.png')+'" alt="" onerror="this.onerror=null;this.src=\'assets/favicon.png\'">'
       +'<div class="meta"><b>'+esc(o.company)+'</b><span class="pill '+esc(o.status)+'">'+esc(o.status)+'</span><br>'
       +esc(o.contact_person||o.username||'')+' · '+esc(o.email)+' · '+esc(o.phone||'—')+'<br>'
       +'CIN: '+esc(o.cin||'—')+(o.website?' · '+esc(o.website):'')+(o.domain?' · '+esc(o.domain):'')+'<br>'
-      +esc(o.address||'')+'<br><span style="font-size:11.5px">Workspace: '+esc(o.workspace)+' · Registered: '+esc((o.created_at||'').slice(0,10))+'</span></div>'
+      +esc(o.address||'')+'<br><span style="font-size:11.5px">Workspace: '+esc(o.workspace)+' · Registered: '+fmtDMY(o.created_at)+'</span>'
+      +'<div class="subrow"><label style="margin:0;font-size:11.5px">Subscription ends</label>'
+        +'<input type="date" class="subinput" value="'+esc(sub)+'" onchange="saveSubEnd(\''+o.id+'\',this.value)">'
+        +subBadge(o.id,sub)
+        +'<span class="subok" id="subok_'+o.id+'"></span></div>'
+      +'</div>'
       +'<div class="acts">'
       +(o.status!=='approved'?'<button class="btn btn-ok" onclick="setStatus(\''+o.id+'\',\'approved\')">Approve</button>':'')
       +(o.status!=='rejected'?'<button class="btn btn-no" onclick="setStatus(\''+o.id+'\',\'rejected\')">Reject</button>':'')
