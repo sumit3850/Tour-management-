@@ -134,9 +134,26 @@ tbody tr{transition:background .12s}tbody tr:hover{background:var(--surface-2)}
 th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
 td.nowrap,th.nowrap{white-space:nowrap}
 td{vertical-align:middle}
+/* Fit-to-width tables: data tables compress to the card instead of scrolling
+   sideways — cells wrap, inline min-widths are neutralised, dense font. The
+   printable quotation/invoice documents (inside #quotationBody) keep their own
+   fixed layout. */
+.card table{width:100%;min-width:0 !important}
+.card td,.card th{white-space:normal;overflow-wrap:break-word;word-break:break-word}
+.card td{font-size:12.5px;padding:9px 7px}
+.card th{padding:9px 7px;word-break:normal;overflow-wrap:normal} /* headers wrap between words, never inside one */
+.card td.nowrap,.card th.nowrap{white-space:normal;word-break:normal;overflow-wrap:normal} /* dates & phones wrap between words, never inside one */
+.card td.num,.card td.mono,.card td .mono{word-break:normal;overflow-wrap:normal;white-space:nowrap} /* ₹ figures never split */
+.card .pill{white-space:nowrap}
+#quotationBody table{width:100%}
+#quotationBody td,#quotationBody th{word-break:normal}
 .sb-status{font-size:13px;color:var(--ink-soft)}.sb-status.ok{color:var(--forest)}.sb-status.err{color:var(--coral)}
 .tour-cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;align-items:start} /* wide enough for ID + Public + eBird + countdown on one row */
 .tour-col{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+/* Session tours: very light green cards in their own column. */
+.tour-card.tc-session{background:#f1faf2;border:1px solid #cfe8d4}
+.tour-col-sess{background:#f6fcf7;border-color:#d8ecdc}
+.tour-col-sess .tour-col-head{color:#1b7a4d}
 .tour-col-head{font-weight:700;font-size:13px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;color:var(--ink);text-transform:uppercase;letter-spacing:.04em}
 .tour-col-head .ct{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1px 9px;font-size:11px;color:var(--ink-soft);font-weight:600}
 .tour-col .tour-card{margin-bottom:10px}
@@ -721,7 +738,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 212</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 213</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -730,7 +747,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 212</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 213</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -758,6 +775,9 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* Custom-domain hardening: if the console is opened over plain http on the
+   company domain, bounce to https before anything loads (auth requires it). */
+try{if(location.protocol==="http:"&&/islandexplorer\.in$/i.test(location.hostname))location.replace(String(location.href).replace(/^http:/,"https:"));}catch(e){}
 
 const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
 /* Real current date (local time) — was hardcoded to a sample date, which froze
@@ -985,6 +1005,11 @@ let auditLog=[]; /* who did what, when — rendered in Settings → Activity log
 var csTour="",csType="indian"; /* Cost Sheet editor selection */
 const RES_STAGES=[["proposed","Proposed dates"],["review","In review"],["confirmed","Accepted / confirmed"],["declined","Declined"]];
 let leads=[];
+/* Synced tombstones for deleted submissions. The old guard lived ONLY in this
+   device's localStorage, so on any other device / browser / freshly-installed
+   app the "self-healing" sync re-created every deleted lead & booking from the
+   surviving submission rows. This list travels with the workspace instead. */
+let deletedSubs=[];
 const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
 let customers=[];
 let vehicles=[];
@@ -1006,6 +1031,7 @@ const STORE=[
   {k:"accommodations",arr:1,get:function(){return accommodations;},set:function(v){accommodations=v;}},
   {k:"accBookings",arr:1,get:function(){return accBookings;},set:function(v){accBookings=v;}},
   {k:"leads",arr:1,get:function(){return leads;},set:function(v){leads=v;}},
+  {k:"deletedSubs",arr:1,get:function(){return deletedSubs;},set:function(v){if(Array.isArray(v))deletedSubs=v;}},
   {k:"customers",arr:1,get:function(){return customers;},set:function(v){customers=v;}},
   {k:"vehicles",arr:1,get:function(){return vehicles;},set:function(v){vehicles=v;}},
   {k:"drivers",arr:1,get:function(){return drivers;},set:function(v){drivers=v;}},
@@ -3132,7 +3158,11 @@ function tourCard(t){
   var rev=(typeof tourRevenue==="function")?tourRevenue(t):0;
   var nm=(t.name||"").replace(/'/g,"&#39;");
   var CAL="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><rect x='3' y='4' width='18' height='18' rx='2'/><path d='M16 2v4M8 2v4M3 10h18'/></svg>";
-  return "<div class='card tour-card' data-action='openTour' data-arg='"+t.id+"'>"+
+  var isSess=t.tourType==="session";
+  var dateLine=isSess
+    ?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]).map(function(d){return dShort(d);}).join(" · ")
+    :dRangeNice(t.start,t.end);
+  return "<div class='card tour-card"+(isSess?" tc-session":"")+"' data-action='openTour' data-arg='"+t.id+"'>"+
     "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
     "<div class='tc-top'><span class='tc-id' title='Tour ID'>"+tourCode(t)+"</span>"+
       "<button class='tc-chip' onclick='event.stopPropagation();togglePubTour(\""+t.id+"\")' title='"+(t.pub?"Shown on the public departures page — click to unlist":"Not on the public page — click to show it")+"' style='cursor:pointer;border:1px solid "+(t.pub?"var(--sea)":"var(--line)")+";"+(t.pub?"background:var(--sea-soft);color:var(--sea);font-weight:700":"color:var(--ink-soft)")+"'>"+(t.pub?"🌐 Public":"🌐 Private")+"</button>"+
@@ -3140,7 +3170,7 @@ function tourCard(t){
       "<button class='tc-chip' onclick='event.stopPropagation();pullGuestsDlg(\""+t.id+"\")' title='Pull participants from another tour card into this one' style='cursor:pointer;border:1px solid var(--line);color:var(--ink-soft)'>👥 Pull</button>"+
       (when.label?"<span class='tc-when "+when.cls+"'>"+when.label+"</span>":"")+"</div>"+
     "<div class='tc-name' title='"+nm+"'>"+shortName(t)+"</div>"+
-    "<div class='tc-dates'>"+CAL+"<span>"+dRangeNice(t.start,t.end)+"</span><span class='tc-nights'>"+durNights(t)+"N</span></div>"+
+    "<div class='tc-dates'>"+CAL+"<span>"+dateLine+"</span><span class='tc-nights'>"+(isSess?((t.sessionDates||[t.start]).length+" day"+((t.sessionDates||[t.start]).length===1?"":"s")):durNights(t)+"N")+"</span></div>"+
     "<div class='tc-cap'><span><b>"+b+"</b> / "+cap+" booked</span><span class='"+(left===0&&cap>0?"tc-full":"")+"'>"+left+" seat"+(left===1?"":"s")+" left</span></div>"+
     "<div class='tc-bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     "<div class='tc-metarow'>"+
@@ -3358,12 +3388,14 @@ function renderTours(filter=curTab){
     if(filter==="Upcoming")return s!=="completed"&&new Date(t.start)>new Date(todayISO);
     if(filter==="Ongoing")return s!=="completed"&&new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO);
     return true;});
-  const order=["southandaman","littleandaman","nicobar","narcondam","session","guided-half","custom"];
-  const groups={};list.forEach(function(t){(groups[t.cat]=groups[t.cat]||[]).push(t);});
-  const cats=Object.keys(groups).sort(function(a,b){var ia=order.indexOf(a),ib=order.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
+  const order=["southandaman","littleandaman","nicobar","narcondam","session","guided-half","custom","__sessions"];
+  /* Session tours get their OWN column, regardless of category. */
+  const groups={};list.forEach(function(t){var key=(t.tourType==="session")?"__sessions":t.cat;(groups[key]=groups[key]||[]).push(t);});
+  const cats=Object.keys(groups).sort(function(a,b){var ia=order.indexOf(a),ib=order.indexOf(b);return (ia<0?98:ia)-(ib<0?98:ib);});
   grid.innerHTML=cats.map(function(cat){
     var items=groups[cat].slice().sort(function(a,b){return (a.start||"").localeCompare(b.start||"");});
-    return "<div class='tour-col'><div class='tour-col-head'>"+(CATS[cat]||cat)+"<span class='ct'>"+items.length+"</span></div>"+
+    var head=(cat==="__sessions")?"Session Tours":(CATS[cat]||cat);
+    return "<div class='tour-col"+(cat==="__sessions"?" tour-col-sess":"")+"'><div class='tour-col-head'>"+head+"<span class='ct'>"+items.length+"</span></div>"+
       items.map(tourCard).join("")+"</div>";
   }).join("")||"<div class='empty'>No tours in this view.</div>";
   applyTourZoom();
@@ -5878,8 +5910,12 @@ function markSubProcessed(id){if(!id)return;var a=_procSet();if(a.indexOf(id)===
 /* Deleted-submissions guard: a submission the user removed stays gone, even if its
    cloud row can't be deleted (legacy rows live inside a shared blob). */
 function _delSet(){try{return JSON.parse(localStorage.getItem("ieo_deleted_subs")||"[]");}catch(e){return [];}}
-function subDeleted(id){if(!id)return false;return _delSet().indexOf(id)>-1;}
-function markSubDeleted(id){if(!id)return;var a=_delSet();if(a.indexOf(id)===-1){a.push(id);try{localStorage.setItem("ieo_deleted_subs",JSON.stringify(a));}catch(e){}}}
+function subDeleted(id){if(!id)return false;return _delSet().indexOf(id)>-1||(deletedSubs||[]).indexOf(id)>-1;}
+function markSubDeleted(id){
+  if(!id)return;
+  var a=_delSet();if(a.indexOf(id)===-1){a.push(id);try{localStorage.setItem("ieo_deleted_subs",JSON.stringify(a));}catch(e){}}
+  if((deletedSubs||[]).indexOf(id)===-1){deletedSubs.push(id);if(typeof persistData==="function")persistData();} /* synced — the delete sticks on every device */
+}
 function loadSubmissions(force){
   var cl=(typeof sbClient==="function")?sbClient():null;
   var body=document.getElementById("reqBody");
@@ -7278,13 +7314,43 @@ function modalForm(eyebrow,title,body,saveFn,saveLabel){
 }
 const opt=(v,sel)=>"<option value='"+v+"' "+(v===sel?"selected":"")+">"+v+"</option>";
 
+/* Group tours run start→end; session tours run on individual SESSION DATES
+   (one or many). The date controls swap with the Tour type. */
+function tourTypeField(pre,cur){
+  return "<div class='field'><label>Tour type</label><select class='input' id='"+pre+"_ttype' onchange='ttypeSwap(\""+pre+"\")'>"+
+    "<option value='group' "+(cur!=="session"?"selected":"")+">Group tour</option>"+
+    "<option value='session' "+(cur==="session"?"selected":"")+">Session tour</option>"+
+  "</select></div>";
+}
+function sessDatesField(pre,dates){
+  return "<div class='field full' id='"+pre+"_sesswrap' style='display:"+((dates&&dates.length)?"block":"none")+"'><label>Session dates</label><div id='"+pre+"_sessdates'>"+
+    (dates||[]).map(function(d){return sessDateRowHtml(d);}).join("")+
+    "</div><button type='button' onclick='addSessDate(\""+pre+"\")' style='margin-top:2px;padding:8px 13px;border:1px dashed var(--sea);border-radius:10px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:12.5px;cursor:pointer'>+ Add another date</button><div class='hint'>One row per session day — add as many dates as the client books.</div></div>";
+}
+function sessDateRowHtml(val){
+  return "<div class='sess-row' style='display:flex;gap:8px;align-items:center;margin-bottom:8px'><input type='date' class='input sess-date' value='"+(val||"")+"' style='flex:1'><button type='button' onclick='this.closest(\".sess-row\").remove()' style='padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button></div>";
+}
+function addSessDate(pre,val){var box=document.getElementById(pre+"_sessdates");if(!box)return;var d=document.createElement("div");d.innerHTML=sessDateRowHtml(val||"");box.appendChild(d.firstChild);}
+function ttypeSwap(pre){
+  var sess=(document.getElementById(pre+"_ttype")||{}).value==="session";
+  var sw=document.getElementById(pre+"_sesswrap");if(sw)sw.style.display=sess?"block":"none";
+  ["_startwrap","_endwrap"].forEach(function(sfx){var e=document.getElementById(pre+sfx);if(e)e.style.display=sess?"none":"block";});
+  if(sess){var box=document.getElementById(pre+"_sessdates");if(box&&!box.children.length)addSessDate(pre);}
+}
+function collectSessDates(){
+  var out=[];document.querySelectorAll(".sess-date").forEach(function(i){if(i.value)out.push(i.value);});
+  out=out.filter(function(v,i){return out.indexOf(v)===i;}).sort();
+  return out;
+}
 function openCreateTour(){
   modalForm("New tour","Create a tour","<div class='form-grid'>"+
     "<div class='field full'><label>Tour name</label><input class='input' id='nt_name' placeholder='e.g. North Andaman Endemic 4-Night'></div>"+
+    tourTypeField("nt","group")+
     "<div class='field'><label>Category</label><select class='input' id='nt_cat'>"+Object.entries(CATS).map(([k,v])=>"<option value='"+k+"'>"+v+"</option>").join("")+"</select></div>"+
     "<div class='field'><label>Status</label><select class='input' id='nt_status'>"+["open","full","closed","completed"].map(s=>"<option value='"+s+"'>"+s[0].toUpperCase()+s.slice(1)+"</option>").join("")+"</select></div>"+
-    "<div class='field'><label>Start date</label><input class='input' type='date' id='nt_start' value='2026-07-01'></div>"+
-    "<div class='field'><label>End date</label><input class='input' type='date' id='nt_end' value='2026-07-05'></div>"+
+    "<div class='field' id='nt_startwrap'><label>Start date</label><input class='input' type='date' id='nt_start' value='2026-07-01'></div>"+
+    "<div class='field' id='nt_endwrap'><label>End date</label><input class='input' type='date' id='nt_end' value='2026-07-05'></div>"+
+    sessDatesField("nt",null)+
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='nt_cap' value='8'></div>"+
     "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Kumar'></div>"+
     "<div class='field'><label>External Guides</label><select class='input' id='nt_guideAlloted'>"+guideOptions("")+"</select></div>"+
@@ -7299,9 +7365,17 @@ function openCreateTour(){
 }
 function saveTour(){
   const name=document.getElementById("nt_name").value.trim();
-  const start=document.getElementById("nt_start").value,end=document.getElementById("nt_end").value;
-  if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
-  var nt={id:"T"+Date.now(),name,cat:document.getElementById("nt_cat").value,start:start,end:end,
+  var ttype=(document.getElementById("nt_ttype")||{}).value==="session"?"session":"group";
+  var start,end,sessDates=null;
+  if(ttype==="session"){
+    sessDates=collectSessDates();
+    if(!name||!sessDates.length){alert("Enter a name and at least one session date.");return;}
+    start=sessDates[0];end=sessDates[sessDates.length-1];
+  }else{
+    start=document.getElementById("nt_start").value;end=document.getElementById("nt_end").value;
+    if(!name||!start||!end||end<start){alert("Enter a name and a valid start/end date.");return;}
+  }
+  var nt={id:"T"+Date.now(),name,tourType:ttype,sessionDates:sessDates||undefined,cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
     guide:document.getElementById("nt_guide").value||"—",guideAlloted:document.getElementById("nt_guideAlloted").value||"",sessionType:document.getElementById("nt_session").value,pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
     tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||"",
@@ -7322,12 +7396,15 @@ function editTour(id){
   var _agEmail=t.guideEmail||(_ag&&_ag.email)||"";
   const catOpts=Object.entries(CATS).map(([k,v])=>"<option value='"+k+"' "+(k===t.cat?"selected":"")+">"+v+"</option>").join("");
   const statOpts=["open","full","closed","completed"].map(s=>"<option value='"+s+"' "+(s===t.status?"selected":"")+">"+s[0].toUpperCase()+s.slice(1)+"</option>").join("");
+  var _isSess=t.tourType==="session";
   modalForm("Edit tour","Update tour","<div class='form-grid'>"+
     "<div class='field full'><label>Tour name</label><input class='input' id='et_name' value='"+(t.name||"")+"'></div>"+
+    tourTypeField("et",t.tourType||"group")+
     "<div class='field'><label>Category</label><select class='input' id='et_cat'>"+catOpts+"</select></div>"+
     "<div class='field'><label>Status</label><select class='input' id='et_status'>"+statOpts+"</select></div>"+
-    "<div class='field'><label>Start date</label><input class='input' type='date' id='et_start' value='"+(t.start||"")+"'></div>"+
-    "<div class='field'><label>End date</label><input class='input' type='date' id='et_end' value='"+(t.end||"")+"'></div>"+
+    "<div class='field' id='et_startwrap' style='display:"+(_isSess?"none":"block")+"'><label>Start date</label><input class='input' type='date' id='et_start' value='"+(t.start||"")+"'></div>"+
+    "<div class='field' id='et_endwrap' style='display:"+(_isSess?"none":"block")+"'><label>End date</label><input class='input' type='date' id='et_end' value='"+(t.end||"")+"'></div>"+
+    sessDatesField("et",_isSess?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]):null)+
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='et_cap' value='"+t.cap+"'></div>"+
     "<div class='field'><label>Team leader / guide</label><input class='input' id='et_guide' value='"+(t.guide||"")+"'></div>"+
     "<div class='field'><label>External Guides</label><select class='input' id='et_guideAlloted' onchange='etGuidePick()'>"+guideOptions(t.guideAlloted||"")+"</select></div>"+
@@ -7350,8 +7427,18 @@ function editTour(id){
 function saveEditTour(){
   const id=document.getElementById("modal").dataset.tid;
   const t=tours.find(x=>x.id===id);if(!t)return;
-  const start=document.getElementById("et_start").value,end=document.getElementById("et_end").value;
-  if(!start||!end||end<start){alert("Enter a valid start/end date.");return;}
+  var ttype=(document.getElementById("et_ttype")||{}).value==="session"?"session":"group";
+  var start,end;
+  if(ttype==="session"){
+    var sd=collectSessDates();
+    if(!sd.length){alert("Add at least one session date.");return;}
+    t.sessionDates=sd;start=sd[0];end=sd[sd.length-1];
+  }else{
+    start=document.getElementById("et_start").value;end=document.getElementById("et_end").value;
+    if(!start||!end||end<start){alert("Enter a valid start/end date.");return;}
+    delete t.sessionDates;
+  }
+  t.tourType=ttype;
   t.name=document.getElementById("et_name").value.trim()||t.name;
   t.cat=document.getElementById("et_cat").value;
   t.status=document.getElementById("et_status").value;
