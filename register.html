@@ -105,7 +105,7 @@ const presetEnd=params.get("end")||"";
 
 const TITLES={
   interest:["Session Registration",""],
-  client:["Guest Details","Please share the details below so we can finalise your booking and travel arrangements."],
+  client:["Tour Registration","Please share the details below so we can finalise your booking and travel arrangements."],
   guide:["Guide Reservation Request","Propose dates to reserve Island Explorer's guiding services."],
   guidedir:["Guide / Naturalist Registration","Register as a bird guide / naturalist with Island Explorer."],
   driver:["Driver Registration","Register your vehicle and details to drive for Island Explorer."]
@@ -273,6 +273,31 @@ if(presetAct)renderDecl(presetAct); /* activity carried in the share link → sh
 
 var sb=null;
 try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
+
+/* Live tour sync: pull the tour's CURRENT details (activity, dates, category,
+   session dates) straight from the console by its tour id, so the form always
+   mirrors the latest tour even if the share link was copied earlier. Falls back
+   silently to the link's own params when the lookup isn't available. */
+(function liveTourSync(){
+  var tid=params.get("tid");
+  if(!sb||!tid||(type!=="client"&&type!=="interest"))return;
+  sb.rpc("get_tour_for_form",{p_workspace:WORKSPACE,p_tid:tid}).then(function(r){
+    if(!r||r.error||!r.data)return;
+    var t=r.data;var pre=(type==="client")?"c":"i";
+    /* activity → select + declaration */
+    if(t.activity){var a=document.getElementById(pre+"_activity");if(a){a.value=t.activity;renderDecl(t.activity);}}
+    /* tour category label */
+    if(t.name){var sel=document.getElementById(pre+"_tour");if(sel){var found=false;for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===t.name){sel.value=t.name;found=true;break;}}if(!found){var o=document.createElement("option");o.value=t.name;o.textContent=t.name;o.selected=true;sel.insertBefore(o,sel.options[1]||null);}}}
+    /* dates */
+    var isSess=t.tourType==="session"&&t.sessionDates&&t.sessionDates.length;
+    if(type==="client"){
+      var cs=document.getElementById("c_start");if(cs&&t.start)cs.value=t.start;
+      var ce=document.getElementById("c_end");if(ce&&t.end)ce.value=t.end;
+    }else if(!isSess){
+      var is=document.getElementById("i_start");if(is&&t.start)is.value=t.start;
+    }
+  }).catch(function(){});
+})();
 
 function val(id){var el=document.getElementById(id);return el?el.value.trim():"";}
 function showErr(m){var b=document.getElementById("errBox");b.textContent=m;b.style.display="block";}
