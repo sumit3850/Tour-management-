@@ -5,15 +5,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Company approvals · Operation Console</title>
 <link rel="icon" type="image/png" href="assets/favicon.png">
-<link rel="apple-touch-icon" href="assets/favicon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--ink:#1b2a4a;--ink-soft:#5a6a86;--sea:#0a6ed1;--sea-soft:#e7f1fb;--line:#e2e8f1;--surface:#fff;--coral:#ed232a}
+  :root{--ink:#1b2a4a;--ink-soft:#5a6a86;--sea:#0a6ed1;--sea-soft:#e7f1fb;--forest:#0a6ed1;--line:#e2e8f1;--surface:#fff;--coral:#ed232a}
   *{box-sizing:border-box}
-  body{margin:0;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:var(--ink);min-height:100dvh;padding:32px 16px;overflow-x:hidden;
-       background:radial-gradient(1100px 620px at 100% -8%,rgba(10,110,209,.08),transparent 60%),radial-gradient(900px 520px at -8% 108%,rgba(16,127,77,.06),transparent 55%),linear-gradient(180deg,#f1f5fc 0%,#e9eef7 100%)}
+  body{margin:0;font-family:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:var(--ink);min-height:100dvh;overflow-x:hidden;background:#eef4fc}
+
+  /* ===== Split hero login (mirrors the console sign-in) ===== */
+  .login-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:stretch;justify-content:flex-end;overflow:hidden;background:linear-gradient(120deg,#eef4fc 0%,#f7fafe 46%,#e8f1fb 100%)}
+  .login-overlay.hide{display:none}
+  .login-overlay::before,.login-overlay::after{content:"";position:absolute;border-radius:50%;filter:blur(64px);opacity:.55;z-index:0;pointer-events:none}
+  .login-overlay::before{width:540px;height:540px;left:-140px;top:-160px;background:radial-gradient(circle,#bcd8f7,transparent 70%);animation:lgFloat1 20s ease-in-out infinite}
+  .login-overlay::after{width:480px;height:480px;left:20%;bottom:-180px;background:radial-gradient(circle,#cfe8dc,transparent 70%);animation:lgFloat2 26s ease-in-out infinite}
+  @keyframes lgFloat1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
+  @keyframes lgFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-40px)}}
+  @media (prefers-reduced-motion:reduce){.login-overlay::before,.login-overlay::after{animation:none}}
+  .login-hero{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:56px clamp(32px,5vw,84px);max-width:760px}
+  .lh-wordmark{display:flex;align-items:center;justify-content:center;gap:12px;font-family:'Calistoga',Georgia,serif;font-size:clamp(20px,2vw,26px);letter-spacing:.02em;color:var(--ink);text-transform:uppercase}
+  .lh-wordmark img{height:42px;width:auto}
+  .lh-eyebrow{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sea);margin-bottom:12px}
+  .login-hero h1{font-family:'Geist',sans-serif;font-weight:800;font-size:clamp(30px,4.2vw,52px);line-height:1.04;letter-spacing:-.025em;color:var(--ink);margin:0}
+  .login-hero h1 .accent{color:var(--sea)}
+  .lh-sub{font-size:clamp(15px,1.35vw,18px);line-height:1.6;color:var(--ink-soft);max-width:540px;margin:0}
+  .lh-feats{display:flex;flex-direction:column;gap:11px;margin-top:2px}
+  .lh-feat{display:flex;align-items:center;gap:12px;font-size:14.5px;font-weight:600;color:var(--ink)}
+  .lh-feat svg{width:20px;height:20px;color:#1b7f4d;flex:none}
+  .login-card-wrap{position:relative;z-index:1;flex:none;width:min(46%,540px);display:flex;align-items:center;justify-content:center;padding:24px}
+  .login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 70px -30px rgba(20,40,80,.35);padding:32px 30px}
+  .lgc-logo{display:block;max-width:210px;max-height:74px;object-fit:contain;margin:0 auto 16px}
+  .login-card h2{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px}
+  .lg-sub{font-size:13px;color:var(--ink-soft);margin:0 0 16px}
+  .login-card label{display:block;font-size:12px;font-weight:600;margin:12px 0 5px}
+  .login-card input{width:100%;font-size:16px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-family:inherit;color:var(--ink)}
+  .login-card input:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(10,110,209,.12)}
+  .lg-btn{width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;background:linear-gradient(180deg,#0f7bdc,#0a6ed1);color:#fff;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 10px 22px -12px rgba(10,110,209,.7)}
+  .lg-btn:disabled{opacity:.6;cursor:default}
+  .lg-err{display:none;background:#fbe7e4;color:#c0392b;border:1px solid #f0c2bb;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:6px}
+  .lg-err.show{display:block}
+  .lg-ok{display:none;background:#e4f3ea;color:#1b7a4d;border:1px solid #b6e0c6;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:6px}
+  .lg-ok.show{display:block}
+  .lg-links{display:flex;justify-content:center;margin-top:16px;font-size:13px}
+  .lg-links a{color:var(--sea);font-weight:600;text-decoration:none;cursor:pointer}
+  .lg-links a:hover{text-decoration:underline}
+  .lg-foot{text-align:center;margin-top:18px;font-size:11.5px;color:var(--ink-soft)}
+  @media(max-width:860px){
+    .login-overlay{flex-direction:column;justify-content:flex-start;align-items:stretch;overflow:auto}
+    .login-hero{flex:none;max-width:none;justify-content:flex-start;padding:36px 26px 6px;gap:16px}
+    .lh-sub,.lh-feats{display:none}
+    .login-hero h1{font-size:27px}
+    .login-card-wrap{width:100%;padding:18px 22px 42px}
+    .login-card{max-width:460px;margin:0 auto}
+  }
+
+  /* ===== Approvals list (after sign-in) ===== */
+  .app{display:none;padding:32px 16px;background:radial-gradient(1100px 620px at 100% -8%,rgba(10,110,209,.08),transparent 60%),radial-gradient(900px 520px at -8% 108%,rgba(16,127,77,.06),transparent 55%),linear-gradient(180deg,#f1f5fc 0%,#e9eef7 100%);min-height:100dvh}
+  .app.show{display:block}
   .wrap{max-width:1000px;margin:0 auto}
   .brandbar{display:flex;align-items:center;gap:12px;margin:0 auto 18px;max-width:1000px}
   .brandbar img{height:40px;width:auto}
@@ -21,19 +70,12 @@
   .card{background:var(--surface);border:1px solid rgba(20,40,80,.06);border-radius:20px;box-shadow:0 24px 60px -30px rgba(20,40,80,.35);padding:26px 28px;margin-bottom:18px}
   h1{margin:0 0 4px;font-size:22px;font-weight:800;letter-spacing:-.01em}
   .sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 6px}
-  label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin:12px 0 5px}
-  input{width:100%;max-width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:#fbfdff;font-family:inherit;color:var(--ink)}
-  input:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px rgba(10,110,209,.12);background:#fff}
   .btn{padding:10px 16px;border:0;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;transition:transform .12s,box-shadow .15s,background .15s}
   .btn:hover{transform:translateY(-1px)}
-  .btn-primary{background:linear-gradient(180deg,#0f7bdc,#0a6ed1);color:#fff;width:100%;margin-top:16px;padding:13px;box-shadow:0 10px 22px -12px rgba(10,110,209,.7)}
-  .btn-ok{background:#e5f6ec;color:#1b7f4d;border:1px solid #b9e6ca}
-  .btn-ok:hover{background:#d7f0e0}
+  .btn-ok{background:#e5f6ec;color:#1b7f4d;border:1px solid #b9e6ca}.btn-ok:hover{background:#d7f0e0}
   .btn-no{background:#fde4e5;color:#b23b32;border:1px solid #f4c7c2}
-  .btn-del{background:#fff;color:var(--coral);border:1px solid #f4c7c2}
-  .btn-del:hover{background:#fde4e5}
-  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
-  .btn-ghost:hover{border-color:rgba(20,40,80,.2)}
+  .btn-del{background:#fff;color:var(--coral);border:1px solid #f4c7c2}.btn-del:hover{background:#fde4e5}
+  .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn-ghost:hover{border-color:rgba(20,40,80,.2)}
   .msg{padding:10px 13px;border-radius:10px;font-size:13px;display:none;margin-top:10px}
   .msg.err{display:block;background:#fde4e5;color:#b23b32;border:1px solid #f4c7c2}
   .row{display:flex;gap:14px;align-items:flex-start;border:1px solid var(--line);border-radius:15px;padding:15px;margin-top:12px;background:#fbfdff;transition:box-shadow .15s}
@@ -51,55 +93,115 @@
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="brandbar"><img src="assets/favicon.png" alt="logo"><span class="wm">Operation Console</span></div>
 
-  <div class="card" id="loginCard">
-    <h1>Company approvals</h1>
-    <p class="sub">Platform owner sign-in. Approve, reject or remove registered companies.</p>
-    <div class="msg" id="lerr"></div>
-    <label>Email</label><input id="aemail" type="email" autocomplete="username">
-    <label>Password</label><input id="apw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
-    <button class="btn btn-primary" onclick="adminLogin()">Sign in</button>
-  </div>
-
-  <div class="card" id="listCard" style="display:none">
-    <div class="top">
-      <div><h1>Registered companies</h1><p class="sub" id="count"></p></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost" onclick="loadOrgs()">Refresh</button>
-        <button class="btn btn-ghost" onclick="adminOut()">Sign out</button>
-      </div>
+<!-- ===== Split hero sign-in ===== -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-hero">
+    <div class="lh-wordmark"><img src="assets/favicon.png" alt="">Operation Console</div>
+    <div>
+      <div class="lh-eyebrow">Platform administration</div>
+      <h1>Approve operators.<br><span class="accent">Keep the platform clean.</span><br>Stay in control.</h1>
     </div>
-    <div class="msg" id="err"></div>
-    <div id="rows"></div>
+    <p class="lh-sub">The owner console for the Operation Console platform — review every company that registers, and approve, reject or remove them from one secure place.</p>
+    <div class="lh-feats">
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Approve or reject new company sign-ups</div>
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>See each operator's CIN, contact &amp; workspace</div>
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Remove a company and its data in one click</div>
+      <div class="lh-feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Owner-only access, secured by your login</div>
+    </div>
+  </div>
+  <div class="login-card-wrap">
+    <div class="login-card">
+      <img src="assets/favicon.png" alt="Operation Console" class="lgc-logo">
+      <h2 id="lgTitle">Company approvals</h2>
+      <p class="lg-sub" id="lgSub">Platform owner sign-in. Approve, reject or remove registered companies.</p>
+      <div class="lg-err" id="lerr"></div>
+      <div class="lg-ok" id="lok"></div>
+      <label>Email</label>
+      <input id="aemail" type="email" placeholder="you@email.com" autocomplete="username">
+      <label>Password</label>
+      <input id="apw" type="password" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="lg-btn" id="lgBtn" onclick="adminLogin()">Sign in</button>
+      <div class="lg-links">
+        <a id="lgForgot" onclick="adminForgot();return false">Forgot password?</a>
+      </div>
+      <div class="lg-foot">Operation Console · Platform admin</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Approvals list ===== -->
+<div class="app" id="appView">
+  <div class="wrap">
+    <div class="brandbar"><img src="assets/favicon.png" alt="logo"><span class="wm">Operation Console</span></div>
+    <div class="card">
+      <div class="top">
+        <div><h1>Registered companies</h1><p class="sub" id="count"></p></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="loadOrgs()">Refresh</button>
+          <button class="btn btn-ghost" onclick="adminOut()">Sign out</button>
+        </div>
+      </div>
+      <div class="msg" id="err"></div>
+      <div id="rows"></div>
+    </div>
   </div>
 </div>
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* islandexplorer.in over plain http → https before anything loads */
+try{if(location.protocol==="http:"&&/islandexplorer\.in$/i.test(location.hostname))location.replace(String(location.href).replace(/^http:/,"https:"));}catch(e){}
 var C=(window.APP_CONFIG&&window.APP_CONFIG.supabase)||{};
 var sb=null;try{sb=window.supabase.createClient(C.url,C.key);}catch(e){}
 var $=function(id){return document.getElementById(id);};
 function esc(s){var d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
-function showErr(id,m){var e=$(id);e.className='msg err';e.textContent=m;setTimeout(function(){e.className='msg';},7000);}
+function showErr(id,m){var e=$(id);e.className=(id==='lerr')?'lg-err show':'msg err';e.textContent=m;setTimeout(function(){e.className=(id==='lerr')?'lg-err':'msg';},7000);}
+function showOk(m){var e=$('lok');e.className='lg-ok show';e.textContent=m;}
 
 async function adminLogin(){
   if(!sb){showErr('lerr','Cannot reach the server.');return;}
+  var btn=$('lgBtn');btn.disabled=true;btn.textContent='Signing in…';
   var r=await sb.auth.signInWithPassword({email:$('aemail').value.trim(),password:$('apw').value});
+  btn.disabled=false;btn.textContent='Sign in';
   if(r.error){showErr('lerr',r.error.message);return;}
   enter();
 }
-async function enter(){
-  $('loginCard').style.display='none';$('listCard').style.display='block';
+/* Send a password-reset link to the email in the box. */
+async function adminForgot(){
+  if(!sb){showErr('lerr','Cannot reach the server.');return;}
+  var email=$('aemail').value.trim();
+  if(!email){showErr('lerr','Enter your email above first, then tap Forgot password.');return;}
+  var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
+  if(r.error){showErr('lerr',r.error.message);return;}
+  showOk('Password reset link sent to '+email+'. Open it, then set a new password here.');
+}
+/* Arriving via the reset link → let the admin set a new password. */
+function handleRecovery(){
+  var p1=prompt('You opened a password-reset link.\n\nSet your NEW password (at least 6 characters):');
+  if(p1===null){showOk('Password unchanged. You are signed in for now.');return;}
+  if(!p1||p1.length<6){alert('The password must be at least 6 characters — let\u0027s try again.');handleRecovery();return;}
+  sb.auth.updateUser({password:p1}).then(function(r){
+    if(r.error){showErr('lerr','Couldn\u0027t save the new password: '+r.error.message);return;}
+    showOk('Password updated \u2713 — you can sign in with it now.');
+  });
+}
+function enter(){
+  $('loginOverlay').classList.add('hide');
+  $('appView').classList.add('show');
   loadOrgs();
+}
+function backToLogin(msg){
+  $('appView').classList.remove('show');
+  $('loginOverlay').classList.remove('hide');
+  if(msg)showErr('lerr',msg);
 }
 async function loadOrgs(){
   var r=await sb.rpc('admin_list_orgs');
   if(r.error){showErr('err',r.error.message);return;}
   var d=r.data;
-  if(d&&d.error==='not_admin'){$('listCard').style.display='none';$('loginCard').style.display='block';showErr('lerr','This account is not a platform admin.');await sb.auth.signOut();return;}
+  if(d&&d.error==='not_admin'){backToLogin('This account is not a platform admin.');await sb.auth.signOut();return;}
   var orgs=Array.isArray(d)?d:[];
   $('count').textContent=orgs.filter(function(o){return o.status==='pending';}).length+' pending · '+orgs.length+' total';
   var h='';
@@ -125,7 +227,7 @@ async function setStatus(id,st){
   loadOrgs();
 }
 async function deleteOrg(id,name){
-  if(!confirm('Delete "'+name+'"?\n\nThis permanently removes the company, its console data and its inbox submissions. The account’s email stays in Auth (remove it in the Supabase dashboard if needed). This cannot be undone.'))return;
+  if(!confirm('Delete "'+name+'"?\n\nThis permanently removes the company, its console data and its inbox submissions. The account\u2019s email stays in Auth (remove it in the Supabase dashboard if needed). This cannot be undone.'))return;
   var r=await sb.rpc('admin_delete_org',{p_org:id});
   if(r.error){
     var m=r.error.message||'';
@@ -136,8 +238,11 @@ async function deleteOrg(id,name){
   loadOrgs();
 }
 async function adminOut(){await sb.auth.signOut();location.reload();}
-/* auto-enter if already signed in */
-if(sb)sb.auth.getSession().then(function(r){if(r&&r.data&&r.data.session)enter();});
+/* recovery-link + already-signed-in handling */
+if(sb){
+  sb.auth.onAuthStateChange(function(ev){ if(ev==='PASSWORD_RECOVERY')setTimeout(handleRecovery,400); });
+  sb.auth.getSession().then(function(r){if(r&&r.data&&r.data.session)enter();});
+}
 </script>
 </body>
 </html>
