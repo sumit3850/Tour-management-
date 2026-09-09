@@ -104,14 +104,35 @@ const presetStart=params.get("start")||"";
 const presetEnd=params.get("end")||"";
 
 const TITLES={
-  interest:["Session Registration","Register for a guided session with your preferred dates — we'll confirm availability."],
+  interest:["Session Registration",""],
   client:["Guest Details","Please share the details below so we can finalise your booking and travel arrangements."],
   guide:["Guide Reservation Request","Propose dates to reserve Island Explorer's guiding services."],
   guidedir:["Guide / Naturalist Registration","Register as a bird guide / naturalist with Island Explorer."],
   driver:["Driver Registration","Register your vehicle and details to drive for Island Explorer."]
 };
 document.getElementById("formTitle").textContent=TITLES[type]?TITLES[type][0]:TITLES.interest[0];
-document.getElementById("formIntro").textContent=TITLES[type]?TITLES[type][1]:TITLES.interest[1];
+(function(){var _in=TITLES[type]?TITLES[type][1]:TITLES.interest[1];var _el=document.getElementById("formIntro");_el.textContent=_in;if(!_in)_el.style.display="none";})();
+/* Tour activity (Birding / Herping / Mixed) — preset via the share link's &act= param. */
+const presetAct=params.get("act")||"";
+const ACTIVITIES=["Birding tour","Herping tour","Mixed tour"];
+const DECL={
+  "Birding tour":["I understand that birding involves outdoor activities in natural environments and may involve varying terrain and weather conditions. I agree to follow the instructions of the tour leader, respect wildlife and their habitats, and comply with all applicable safety guidelines and regulations."],
+  "Herping tour":["I understand that herping involves exploring natural habitats where encounters with potentially dangerous wildlife may occur. I agree to follow the tour leader’s instructions, maintain safe practices, respect wildlife, and accept the inherent risks associated with the activity."]
+};
+DECL["Mixed tour"]=DECL["Birding tour"].concat(DECL["Herping tour"]);
+function activityField(id){
+  var sel=ACTIVITIES.indexOf(presetAct)>-1?presetAct:"";
+  return "<div class='field'><label>Tour activity <span class='req'>*</span></label><select id='"+id+"' required onchange='renderDecl(this.value)'><option value=''>Select activity…</option>"+ACTIVITIES.map(function(a){return "<option "+(a===sel?"selected":"")+">"+a+"</option>";}).join("")+"</select></div>";
+}
+/* Declaration checkboxes follow the chosen activity; every shown box is mandatory. */
+function renderDecl(act){
+  var box=document.getElementById("decl_wrap");if(!box)return;
+  var list=DECL[act]||[];
+  box.innerHTML=list.length?"<label style='font-weight:700;font-size:13px'>Declaration <span class='req'>*</span></label>"+list.map(function(t,i){
+    return "<label style='display:flex;gap:10px;align-items:flex-start;margin-top:8px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fafcfb;cursor:pointer;font-size:12.5px;line-height:1.55'><input type='checkbox' class='decl-chk' style='margin-top:2px;flex:none'><span>"+t+"</span></label>";
+  }).join(""):"";
+  box.style.display=list.length?"block":"none";
+}
 
 function inp(id,label,opts){opts=opts||{};var req=opts.req?" <span class='req'>*</span>":"";var t=opts.type||"text";
   var ctrl;
@@ -209,6 +230,7 @@ if(type==="guide"){
   html+="<div class='field'><label>Vehicles <span class='req'>*</span></label><div id='veh_list'></div><button type='button' onclick='addVehRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add another vehicle</button><div class='hint'>Add every vehicle you drive — name, registration number and seats for each.</div></div>";
 }else if(type==="client"){
   html+=inp("c_tour","Tour category",{tour:1});
+  html+=activityField("c_activity");
   html+=rowOf(inp("c_start","Tour start date",{type:"date",val:presetStart}),inp("c_end","Tour end date",{type:"date",val:presetEnd}));
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
@@ -224,7 +246,9 @@ if(type==="guide"){
   html+=inp("c_med","Medical notes / mobility",{type:"textarea",ph:"Anything we should know to keep you safe & comfortable"});
 }else{
   html+=inp("i_tour","Session category",{sessions:1,req:1});
-  html+=rowOf(inp("i_start","Preferred start date",{type:"date",val:presetStart}),inp("i_end","Preferred end date",{type:"date",val:presetEnd}));
+  html+=activityField("i_activity");
+  html+=inp("i_start","Preferred start date",{type:"date",val:presetStart,req:1});
+  html+="<div class='field'><label>More session dates <span style='color:var(--ink-soft,#7a8b82);font-weight:400'>(optional)</span></label><div id='date_list'></div><button type='button' onclick='addDateRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add another date</button><div class='hint'>Booking more than one session day? Add each extra date here.</div></div>";
   html+=inp("i_name","Your name",{req:1});
   html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_hotel","Hotel / Pickup point",{ph:"Hotel name or where we should pick you up"}));
@@ -234,8 +258,17 @@ if(type==="guide"){
   html+=docField("i_docs","Upload documents (optional)");
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
 }
+if(type==="interest"||type==="client")html+="<div class='field' id='decl_wrap' style='display:none'></div>";
 document.getElementById("fields").innerHTML=html;
 if(type==="driver")addVehRow(); /* seed the first vehicle row */
+if(presetAct)renderDecl(presetAct); /* activity carried in the share link → show its declaration immediately */
+/* One extra session-date row (date + remove) for multi-day session registrations. */
+function addDateRow(val){
+  var box=document.getElementById("date_list");if(!box)return;
+  var d=document.createElement("div");d.className="date-row";d.style.cssText="display:flex;gap:8px;align-items:center;margin-bottom:8px";
+  d.innerHTML="<input type='date' class='extra-date' value='"+(val||"")+"' style='flex:1'><button type='button' onclick='this.closest(\".date-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
+  box.appendChild(d);
+}
 
 var sb=null;
 try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
@@ -266,22 +299,31 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
     rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;
-    rec.data={address:val("c_address"),gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med")};
+    rec.data={address:val("c_address"),gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med"),activity:val("c_activity")};
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
-    rec.tour=val("i_tour");rec.start_date=val("i_start")||null;rec.end_date=val("i_end")||null;
+    rec.tour=val("i_tour");
+    /* one preferred date + any extra rows → sorted unique list; start/end derived */
+    var dts=[val("i_start")];document.querySelectorAll(".extra-date").forEach(function(i){if(i.value)dts.push(i.value);});
+    dts=dts.filter(function(v,ix){return v&&dts.indexOf(v)===ix;}).sort();
+    rec.start_date=dts[0]||null;rec.end_date=dts[dts.length-1]||null;
     var paxs=[];document.querySelectorAll(".pax-row").forEach(function(r){
       function pv(cls){var el=r.querySelector(cls);return el?el.value.trim():"";}
       var pn=pv(".pax-name"),pg=pv(".pax-gender"),pe=pv(".pax-email"),pp=pv(".pax-phone"),ph=pv(".pax-hotel");
       if(pn||pe||pp)paxs.push({name:pn,gender:pg,email:pe,phone:pp,hotel:ph});
     });
     rec.party=1+paxs.length; /* registrant + additional participants */
-    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel")};
+    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel"),activity:val("i_activity")};
+    if(dts.length>1)rec.data.dates=dts;
     if(paxs.length)rec.data.participants=paxs;
   }
   if(params.get("tid"))rec.data.tourId=params.get("tid");
   if(presetTourCode)rec.data.tourCode=presetTourCode;
   if(!rec.name||!rec.phone){showErr("Please fill in at least your name and phone number.");return;}
+  /* Declaration is mandatory: every checkbox shown for the chosen activity must be ticked. */
+  var _decl=document.querySelectorAll(".decl-chk");
+  if(_decl.length&&Array.prototype.some.call(_decl,function(c){return !c.checked;})){showErr("Please read and tick the declaration to continue.");return;}
+  if((type==="interest"||type==="client")&&_decl.length){rec.data.declAccepted=true;}
   if(type==="driver"){
     if(!val("d_license")){showErr("Driving licence number is required.");return;}
     var _de=document.getElementById("d_docs");
