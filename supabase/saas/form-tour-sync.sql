@@ -33,7 +33,8 @@ begin
     'tourType',     t->>'tourType',
     'start',        t->>'start',
     'end',          t->>'end',
-    'sessionDates', t->'sessionDates'
+    'sessionDates', t->'sessionDates',
+    'updatedAt',    t->>'updatedAt'
   );
 end; $$;
 revoke all on function public.get_tour_for_form(text, text) from public;

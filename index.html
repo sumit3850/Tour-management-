@@ -738,7 +738,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 222</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 223</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -747,7 +747,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 222</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 223</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5878,7 +5878,7 @@ function copyLink(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURICom
 function shareWhatsApp(type,tour){var url=formLink(type)+(tour?("&tour="+encodeURIComponent(tour)):"");var msg=encodeURIComponent("Please register here for Island Explorer Birding Tours:\n"+url);window.open("https://wa.me/?text="+msg,"_blank");}
 function shareTourForm(id,type){
   var t=tours.find(function(x){return x.id===id;});if(!t)return;
-  var url=formLink(type)+"&tour="+encodeURIComponent(tourLabel(t))+"&cat="+encodeURIComponent(t.cat||"")+"&tid="+id+"&tcode="+encodeURIComponent(tourCode(t))+"&start="+(t.start||"")+"&end="+(t.end||"")+(t.activity?"&act="+encodeURIComponent(t.activity):"")+(t.sessionDates&&t.sessionDates.length?"&dates="+encodeURIComponent(t.sessionDates.join(",")):"");
+  var url=formLink(type)+"&tour="+encodeURIComponent(tourLabel(t))+"&cat="+encodeURIComponent(t.cat||"")+"&tid="+id+"&tcode="+encodeURIComponent(tourCode(t))+"&start="+(t.start||"")+"&end="+(t.end||"")+(t.activity?"&act="+encodeURIComponent(t.activity):"")+(t.sessionDates&&t.sessionDates.length?"&dates="+encodeURIComponent(t.sessionDates.join(",")):"")+(t.updatedAt?"&ts="+encodeURIComponent(t.updatedAt):"");
   if(navigator.clipboard)navigator.clipboard.writeText(url);
   var intro=type==="client"?"Please complete your tour registration for "+tourLabel(t)+":\n":"Please complete your session registration for "+tourLabel(t)+":\n";
   if(confirm("Link copied:\n\n"+url+"\n\nOpen WhatsApp to share it now?"))waShare(intro+url,t.phone);
@@ -7394,6 +7394,7 @@ function saveTour(){
     tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||"",
     species:(document.getElementById("nt_species")||{}).value||""};
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
+  nt.updatedAt=new Date().toISOString(); /* stamp for form live-sync freshness */
   audit("tour","created",tourCode(nt)+" · "+name);
   opFromTour(nt); /* mirror into Operations so driver/guide can be assigned */
   closeModal();renderTours();renderCalendar();
@@ -7453,6 +7454,7 @@ function saveEditTour(){
     delete t.sessionDates;
   }
   t.tourType=ttype;
+  t.updatedAt=new Date().toISOString(); /* stamp for form live-sync freshness */
   t.activity=(document.getElementById("et_activity")||{}).value||t.activity||"Birding tour";
   t.name=document.getElementById("et_name").value.trim()||t.name;
   t.cat=document.getElementById("et_cat").value;
