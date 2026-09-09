@@ -114,6 +114,9 @@ document.getElementById("formTitle").textContent=TITLES[type]?TITLES[type][0]:TI
 (function(){var _in=TITLES[type]?TITLES[type][1]:TITLES.interest[1];var _el=document.getElementById("formIntro");_el.textContent=_in;if(!_in)_el.style.display="none";})();
 /* Tour activity (Birding / Herping / Mixed) — preset via the share link's &act= param. */
 const presetAct=params.get("act")||"";
+/* Session tours carry ALL their session dates in the share link (&dates=…). */
+const presetDates=(params.get("dates")||"").split(",").map(function(s){return s.trim();}).filter(function(s){return /^\d{4}-\d{2}-\d{2}$/.test(s);}).sort();
+function niceD(iso){var p=iso.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
 const ACTIVITIES=["Birding tour","Herping tour","Mixed tour"];
 const DECL={
   "Birding tour":["I understand that birding involves outdoor activities in natural environments and may involve varying terrain and weather conditions. I agree to follow the instructions of the tour leader, respect wildlife and their habitats, and comply with all applicable safety guidelines and regulations."],
@@ -248,8 +251,11 @@ if(type==="guide"){
 }else{
   html+=inp("i_tour","Session category",{sessions:1,req:1});
   html+=activityField("i_activity");
-  html+=inp("i_start","Preferred start date",{type:"date",val:presetStart,req:1});
-  html+="<div class='field'><label>More session dates <span style='color:var(--ink-soft,#7a8b82);font-weight:400'>(optional)</span></label><div id='date_list'></div><button type='button' onclick='addDateRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add another date</button><div class='hint'>Booking more than one session day? Add each extra date here.</div></div>";
+  if(presetDates.length){ /* session tour link → show every session date, read-only */
+    html+="<div class='field'><label>Session dates</label><input value='"+presetDates.map(niceD).join("  ·  ")+"' readonly style='background:#eef3f0'><div class='hint'>Auto-filled from your tour — please don't change.</div></div>";
+  }else{
+    html+=inp("i_start","Preferred start date",{type:"date",val:presetStart,req:1});
+  }
   html+=inp("i_name","Your name",{req:1});
   html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_hotel","Hotel / Pickup point",{ph:"Hotel name or where we should pick you up"}));
@@ -263,13 +269,6 @@ if(type==="interest"||type==="client")html+="<div class='field' id='decl_wrap' s
 document.getElementById("fields").innerHTML=html;
 if(type==="driver")addVehRow(); /* seed the first vehicle row */
 if(presetAct)renderDecl(presetAct); /* activity carried in the share link → show its declaration immediately */
-/* One extra session-date row (date + remove) for multi-day session registrations. */
-function addDateRow(val){
-  var box=document.getElementById("date_list");if(!box)return;
-  var d=document.createElement("div");d.className="date-row";d.style.cssText="display:flex;gap:8px;align-items:center;margin-bottom:8px";
-  d.innerHTML="<input type='date' class='extra-date' value='"+(val||"")+"' style='flex:1'><button type='button' onclick='this.closest(\".date-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--err);font-weight:700;cursor:pointer'>✕</button>";
-  box.appendChild(d);
-}
 
 var sb=null;
 try{ sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){}
@@ -304,9 +303,8 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
     rec.tour=val("i_tour");
-    /* one preferred date + any extra rows → sorted unique list; start/end derived */
-    var dts=[val("i_start")];document.querySelectorAll(".extra-date").forEach(function(i){if(i.value)dts.push(i.value);});
-    dts=dts.filter(function(v,ix){return v&&dts.indexOf(v)===ix;}).sort();
+    /* session-tour links carry every session date; generic links take one preferred date */
+    var dts=presetDates.length?presetDates.slice():[val("i_start")].filter(Boolean);
     rec.start_date=dts[0]||null;rec.end_date=dts[dts.length-1]||null;
     var paxs=[];document.querySelectorAll(".pax-row").forEach(function(r){
       function pv(cls){var el=r.querySelector(cls);return el?el.value.trim():"";}
