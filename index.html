@@ -738,7 +738,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 216</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 217</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -747,7 +747,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 216</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 217</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3432,8 +3432,9 @@ function renderCalendar(){
   for(let i=0;i<startDow;i++)html+="<div class='cell dim'></div>";
   for(let d=1;d<=days;d++){
     const date=iso(d);
-    const spans=monthTours.filter(t=>date>=t.start&&date<=t.end).map(t=>{
-      const isStart=date===t.start;
+    /* session tours occupy only their listed dates; group tours span start→end */
+    const spans=monthTours.filter(t=>(t.tourType==="session"&&t.sessionDates&&t.sessionDates.length)?t.sessionDates.indexOf(date)>-1:(date>=t.start&&date<=t.end)).map(t=>{
+      const isStart=(t.tourType==="session")?true:(date===t.start);
       return "<div class='span "+(isStart?"":"cont")+"' style='background:"+tourColor(t.id)+"' title='"+t.name+" ("+dShort(t.start)+"–"+dShort(t.end)+")' data-action='openTour' data-arg='"+t.id+"'>"+(isStart?shortName(t):"·")+"</div>";
     }).join("");
     html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+spans+"</div>";
@@ -7755,8 +7756,13 @@ function openTour(id){
   var poc=bs.find(function(x){return x.id===t.pocId;});
   var payStatus=tourPayStatus(t);
   var _md=document.getElementById("modal");if(_md)_md.style.maxWidth="780px"; /* roomier tour dialog on desktop */
+  /* Session tours list their individual dates; group tours show the range + nights. */
+  var _isSess=t.tourType==="session";
+  var _dateLine=_isSess
+    ?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]).map(function(d){return dShort(d);}).join(" · ")+" · "+((t.sessionDates||[t.start]).length)+" day"+(((t.sessionDates||[t.start]).length)===1?"":"s")
+    :dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights";
   document.getElementById("modal").innerHTML=
-    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span><h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span>"+(t.activity?" <span class='pill plain'>"+t.activity+"</span>":"")+"<h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+_dateLine+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
       "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Pax</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
