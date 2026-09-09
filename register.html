@@ -261,6 +261,7 @@ if(type==="guide"){
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_hotel","Hotel / Pickup point",{ph:"Hotel name or where we should pick you up"}));
   html+=inp("i_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner","Other"]});
+  html+=rowOf(inp("i_emname","Emergency contact name",{}),inp("i_emphone","Emergency contact phone",{type:"tel"}));
   html+="<div class='field'><label>Additional participants</label><div id='pax_list'></div><button type='button' onclick='addPaxRow()' style='margin-top:2px;padding:9px 14px;border:1px dashed var(--sea);border-radius:11px;background:#eef5fd;color:var(--sea);font-weight:700;font-size:13px;cursor:pointer'>+ Add participant</button><div class='hint'>Joining as a group? Add each additional participant with their gender, email, phone / WhatsApp and hotel / pickup point.</div></div>";
   html+=docField("i_docs","Upload documents (optional)");
   html+=inp("i_msg","Message / special interests",{type:"textarea",ph:"Target species, experience level, questions…"});
@@ -312,7 +313,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
       if(pn||pe||pp)paxs.push({name:pn,gender:pg,email:pe,phone:pp,hotel:ph});
     });
     rec.party=1+paxs.length; /* registrant + additional participants */
-    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel"),activity:val("i_activity")};
+    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel"),activity:val("i_activity"),emergencyName:val("i_emname"),emergencyPhone:val("i_emphone")};
     if(dts.length>1)rec.data.dates=dts;
     if(paxs.length)rec.data.participants=paxs;
   }
