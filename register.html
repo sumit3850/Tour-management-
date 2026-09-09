@@ -294,16 +294,26 @@ function applyLiveTour(t){
     var is=document.getElementById("i_start");if(is&&t.start)is.value=t.start;
   }
 }
+/* Only let the live cloud read override the link's own values when the cloud
+   copy is genuinely NEWER than the link. The link carries &ts= (the tour's last
+   edit time at share time); a just-edited-and-reshared link is therefore at
+   least as fresh as the cloud, whose sync may still be catching up — so we must
+   NOT clobber it with a stale cloud read. Older links (no ts) always defer to
+   the live tour, which is the whole point of the sync. */
+const presetTs=params.get("ts")||"";
+function cloudIsNewer(cloudUpdatedAt){
+  if(!presetTs)return true;               /* old link → trust live tour */
+  if(!cloudUpdatedAt)return false;        /* cloud has no stamp → keep the fresh link */
+  return String(cloudUpdatedAt) > String(presetTs);
+}
 (async function liveTourSync(){
   var tid=params.get("tid");
   if(!sb||!tid||(type!=="client"&&type!=="interest"))return;
   /* Wait for any existing console session to be restored from this browser
-     BEFORE reading — otherwise the read fires as anon and the DB blocks it,
-     so the form silently keeps the link's stale activity. */
+     BEFORE reading — otherwise the read fires as anon and the DB blocks it. */
   try{ await sb.auth.getSession(); }catch(e){}
-  /* 1) The public RPC — works for real anonymous guests once form-tour-sync.sql
-        is run. */
-  try{ var r=await sb.rpc("get_tour_for_form",{p_workspace:WORKSPACE,p_tid:tid}); if(r&&!r.error&&r.data){applyLiveTour(r.data);return;} }catch(e){}
+  /* 1) The public RPC — works for real anonymous guests once form-tour-sync.sql is run. */
+  try{ var r=await sb.rpc("get_tour_for_form",{p_workspace:WORKSPACE,p_tid:tid}); if(r&&!r.error&&r.data){ if(cloudIsNewer(r.data.updatedAt))applyLiveTour(r.data); return; } }catch(e){}
   /* 2) Direct workspace read — works when the person opening the form is signed
         in to the console in the same browser (the owner testing it), no SQL. */
   await directTourRead(tid);
@@ -314,7 +324,7 @@ async function directTourRead(tid){
     var blob=res&&res.data&&res.data.data;var tours=blob&&blob.tours;
     if(!Array.isArray(tours))return;
     var t=tours.find(function(x){return x&&x.id===tid;});
-    if(t)applyLiveTour({name:t.name,cat:t.cat,activity:t.activity,tourType:t.tourType,start:t.start,end:t.end,sessionDates:t.sessionDates});
+    if(t&&cloudIsNewer(t.updatedAt))applyLiveTour({name:t.name,cat:t.cat,activity:t.activity,tourType:t.tourType,start:t.start,end:t.end,sessionDates:t.sessionDates});
   }catch(e){}
 }
 
