@@ -738,7 +738,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 224</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 225</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -747,7 +747,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 224</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 225</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3719,30 +3719,33 @@ function renderAcceptedQuotes(){
   }).join("");
 }
 function esc0(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
-/* Seed the invoice generator from an accepted quotation, then open the invoice. */
+/* Build an invoice straight FROM an accepted quotation — its own tour, dates,
+   client, pax and total — never the cost-sheet defaults. The amount is the
+   quote's own total as a single line; the operator can itemise it further with
+   "Edit line items" if they want. */
 function invoiceFromQuote(id){
   var r=(quotationLog||[]).find(function(x){return x.id===id;});if(!r){alert("Quotation not found.");return;}
   go("invoices");
-  setTimeout(function(){
-    var mode=(r.invMode==="session")?"session":"group";
-    if(invMode!==mode)setInvMode(mode);
-    setTimeout(function(){
-      var set=function(idv,val){var e=document.getElementById(idv);if(e!=null&&val!=null)e.value=val;};
-      if(mode==="session"){
-        if(r.costKey){gqSession=r.costKey;set("inv_cat",r.costKey);if(typeof invPickSession==="function")invPickSession(r.costKey);}
-        if(r.pp!=null)set("inv_pp",r.pp);
-      }else{
-        if(r.costKey)set("inv_cat",r.costKey);
-      }
-      set("inv_pax",String(r.pax||r.participants||2));
-      var ty=document.getElementById("inv_type");if(ty)ty.value=(r.typeRaw==="foreign"||r.clientType==="Foreigner")?"foreign":"indian";
-      set("inv_name",r.guest||"");set("inv_addr",r.address||"");set("inv_gst",r.gst||"");
-      set("inv_start",r.startISO||"");set("inv_end",r.endISO||"");
-      generateInvoice("inv");
-      /* tag the invoice back to its source quote so we can show "Invoiced" */
-      if(_curInvoice)_curInvoice.fromQuote=id;
-    },60);
-  },40);
+  var vid=peekInvoiceNo();
+  var today=dmy(new Date());
+  var pax=parseInt(r.pax||r.participants,10)||1;
+  /* dates: prefer the quote's stored ISO dates; else its printed dmy strings */
+  var startD=r.startISO?dmy(new Date(r.startISO+"T00:00:00")):(r.departure||"");
+  var endD=r.endISO?dmy(new Date(r.endISO+"T00:00:00")):(r.endDate||"");
+  var qTotal=(r.total!=null)?r.total:((r.perPerson!=null)?r.perPerson*pax:0);
+  var perP=(r.perPerson!=null)?r.perPerson:(qTotal&&pax?Math.round(qTotal/pax):qTotal);
+  var isSess=(r.invMode==="session")||(r.kind==="session");
+  var lineLabel=(r.tour||"Tour package")+(pax>1&&perP?" ("+pax+" × "+fmt(perP)+")":"");
+  _curInvoice={
+    invid:vid, tour:(r.tour||"Tour"), title:(r.tour||"Tour"),
+    clientType:(r.clientType||((r.typeRaw==="foreign")?"Foreigner":"Indian")),
+    client:{name:r.guest||"",address:r.address||"",gst:r.gst||"",country:""},
+    date:today, startDate:startD, endDate:endD, participants:pax,
+    isSess:isSess, sessDur:"",
+    lines:[{label:lineLabel, amount:qTotal||0}],
+    fromQuote:id, savedId:null
+  };
+  showInvoiceModal();
 }
 /* Selection for the standalone Invoices module (mirrors calcSelection). */
 function invSelection(){
@@ -5243,11 +5246,17 @@ function generateInvoice(src){
     :[{label:'Accommodation',amount:d.accommodation||0},{label:'Travel and Logistics',amount:d.vehicle||0},{label:'Food',amount:d.food||0},{label:'Entry tickets',amount:d.entry||0},{label:'Ship tickets',amount:d.ship||0},{label:'Guide Fee',amount:d.guide||0},{label:'Referral amount',amount:0}];
   _curInvoice={invid:vid,tour:tourName,title:tourName,clientType:clientType,client:JSON.parse(JSON.stringify(qClient)),date:today,
     startDate:startD,endDate:endD,participants:pax,isSess:isSess,sessDur:(isSess?sel.session.dur:""),lines:lines,savedId:null};
+  showInvoiceModal();
+}
+/* Build (or rebuild) the invoice modal around the current _curInvoice. Shared by
+   the cost-sheet generator and the "Create invoice from accepted quote" path. */
+function showInvoiceModal(){
+  var inv=_curInvoice;if(!inv)return;
   _invEditLines=false;
   renderInvoiceDoc();
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'>"+
-      "<div><div class='eyebrow'>Invoice</div><div class='h-sec'>"+tourName+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+vid+"</span> · "+today+"</div></div>"+XBTN+
+      "<div><div class='eyebrow'>Invoice</div><div class='h-sec'>"+esc0(inv.tour)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+esc0(inv.invid)+"</span> · "+esc0(inv.date)+"</div></div>"+XBTN+
     "</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'></div></div>"+
     "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
@@ -5255,10 +5264,9 @@ function generateInvoice(src){
       "<button class='btn btn-ghost' id='invLinesBtn' onclick='invToggleLines()'>Edit line items</button>"+
       "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit text</button>"+
       "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentInvoice()'>Save invoice</button>"+
-      "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(vid)+","+JSON.stringify(tourName)+","+(_curInvoice.grandTotal||0)+","+pax+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
+      "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(inv.invid)+","+JSON.stringify(inv.tour)+","+(inv.grandTotal||0)+","+(inv.participants||1)+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
       "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z'/></svg>PDF / Print</button>"+
     "</div>";
-  /* the body was rendered before the modal shell existed; render it in now */
   var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
   openScrim();
 }
