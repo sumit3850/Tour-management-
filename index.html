@@ -738,7 +738,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 223</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 224</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -747,7 +747,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 223</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 224</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2653,7 +2653,7 @@ function renderView(v){
   else if(v==="settings")refreshSettings();
   else if(v==="logistics"){logTab(_logTab);loadSubmissions(false);startSubPoll();}
   else if(v==="calc")calc();
-  else if(v==="invoices")renderSavedInvoices();
+  else if(v==="invoices"){renderSavedInvoices();if(typeof renderAcceptedQuotes==="function")renderAcceptedQuotes();}
   else if(v==="profit")renderProfitCalc();
   else if(v==="groupquote")renderGroupQuote();
   else if(v==="costsheet")renderCostSheet();
@@ -3694,11 +3694,55 @@ function viewInvoices(){
       "</div>"+
       "<button class='btn btn-primary' onclick=\"generateInvoice('inv')\" style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6'/></svg>Generate invoice</button>"+
     "</div>"+
+    "<div class='card' style='margin-bottom:16px'>"+
+      "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>From your quotations</div><div class='h-sec' style='margin-bottom:6px'>Accepted quotations — ready to invoice</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Mark a quotation <b>Accepted</b> in the Group Quotation folder and it appears here. Click <b>Create invoice</b> to turn it into an invoice, pre-filled from the quote.</p></div>"+
+      "<div id='acceptedQuotes'></div>"+
+    "</div>"+
     "<div class='card'>"+
       "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Folder</div><div class='h-sec' style='margin-bottom:6px'>Saved invoices</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Generate above, press <b>Save invoice</b> in the preview, and it lands here and in the workbook's Invoice tab.</p></div>"+
       "<div id='savedInvoices'></div>"+
     "</div>"+
   "</section>";
+}
+/* Accepted quotations, listed in the Invoices module → one click to invoice. */
+function renderAcceptedQuotes(){
+  var el=document.getElementById("acceptedQuotes");if(!el)return;
+  var list=(quotationLog||[]).filter(function(q){return q&&q.status==="Accepted";});
+  if(!list.length){el.innerHTML="<div style='padding:16px 4px;text-align:center;color:var(--ink-soft);font-size:13px'>No accepted quotations yet. In <b>Group Quotation → Your quotation folder</b>, set a quote's status to <b>Accepted</b>.</div>";return;}
+  el.innerHTML=list.map(function(r){
+    var invoiced=(invoiceLog||[]).some(function(v){return v.fromQuote===r.id;});
+    return "<div class='list-row' style='display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line-soft)'>"+
+      "<div style='flex:1;min-width:0'><div style='font-weight:600;font-size:13.5px'>"+esc0(r.qid||"")+" · "+esc0(r.tour||"")+(invoiced?" <span class='pill completed' style='font-size:10px'>Invoiced</span>":"")+"</div>"+
+        "<div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+esc0(r.guest||"—")+" · "+(r.pax||r.participants||"")+" pax · "+(r.clientType||"")+(r.total!=null?" · "+fmt(r.total):"")+"</div></div>"+
+      "<button class='btn btn-primary btn-sm' onclick=\"invoiceFromQuote('"+r.id+"')\" style='background:var(--forest);white-space:nowrap'>Create invoice</button>"+
+    "</div>";
+  }).join("");
+}
+function esc0(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
+/* Seed the invoice generator from an accepted quotation, then open the invoice. */
+function invoiceFromQuote(id){
+  var r=(quotationLog||[]).find(function(x){return x.id===id;});if(!r){alert("Quotation not found.");return;}
+  go("invoices");
+  setTimeout(function(){
+    var mode=(r.invMode==="session")?"session":"group";
+    if(invMode!==mode)setInvMode(mode);
+    setTimeout(function(){
+      var set=function(idv,val){var e=document.getElementById(idv);if(e!=null&&val!=null)e.value=val;};
+      if(mode==="session"){
+        if(r.costKey){gqSession=r.costKey;set("inv_cat",r.costKey);if(typeof invPickSession==="function")invPickSession(r.costKey);}
+        if(r.pp!=null)set("inv_pp",r.pp);
+      }else{
+        if(r.costKey)set("inv_cat",r.costKey);
+      }
+      set("inv_pax",String(r.pax||r.participants||2));
+      var ty=document.getElementById("inv_type");if(ty)ty.value=(r.typeRaw==="foreign"||r.clientType==="Foreigner")?"foreign":"indian";
+      set("inv_name",r.guest||"");set("inv_addr",r.address||"");set("inv_gst",r.gst||"");
+      set("inv_start",r.startISO||"");set("inv_end",r.endISO||"");
+      generateInvoice("inv");
+      /* tag the invoice back to its source quote so we can show "Invoiced" */
+      if(_curInvoice)_curInvoice.fromQuote=id;
+    },60);
+  },40);
 }
 /* Selection for the standalone Invoices module (mirrors calcSelection). */
 function invSelection(){
@@ -4888,7 +4932,9 @@ function generateGroupQuotation(){
   }
   var _v0=valid[0]||{};var _pend0=(_v0.total!=null&&_v0.deposit!=null)?_v0.total-_v0.deposit:null;
   _curQuote={qid:qid,kind:(isSess?"session":"group"),tour:q.key,title:(isSess?q.label:q.title),clientType:(q.type==="foreign"?"Foreigner":"Indian"),client:JSON.parse(JSON.stringify(qClient)),date:today,validUntil:validUntil,departure:depText,endDate:endText,savedId:null,
-    participants:_v0.size,total:_v0.total,perPerson:_v0.perPerson,depositPct:q.pct,deposit:_v0.deposit,pending:_pend0};
+    participants:_v0.size,total:_v0.total,perPerson:_v0.perPerson,depositPct:q.pct,deposit:_v0.deposit,pending:_pend0,
+    /* carried so an accepted quote can seed a matching invoice */
+    costKey:q.key,typeRaw:q.type,invMode:q.mode,basis:(q.basis||""),pp:(isSess?(parseFloat(gqSessPP)||0):null),pax:_v0.size,startISO:(q.departure||""),endISO:(q.end||"")};
   var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>"+rw.size+" guest"+(rw.size===1?"":"s")+"</th>";}).join("");
   var cell=function(v){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums'>"+(v!=null?fmt(v):"—")+"</td>";};
   var perRow=q.rows.map(function(rw){return cell(rw.perPerson);}).join("");
@@ -5030,6 +5076,9 @@ function saveCurrentQuote(){
       date:_curQuote.date, validUntil:_curQuote.validUntil, departure:_curQuote.departure||"", endDate:_curQuote.endDate||"",
       participants:_curQuote.participants, total:_curQuote.total, perPerson:_curQuote.perPerson,
       depositPct:_curQuote.depositPct, pending:_curQuote.pending,
+      costKey:_curQuote.costKey||"", typeRaw:_curQuote.typeRaw||"indian", invMode:_curQuote.invMode||"group",
+      basis:_curQuote.basis||"", pp:_curQuote.pp||null, pax:_curQuote.pax||_curQuote.participants||2,
+      startISO:_curQuote.startISO||"", endISO:_curQuote.endISO||"",
       status:"Draft",
       html:docHtml, savedAt:new Date().toISOString()
     });
@@ -5070,7 +5119,7 @@ var QUOTE_STATUSES=["Draft","Sent","Accepted","Lost"];
 function setQuoteStatus(id,val){
   var r=quotationLog.find(function(x){return x.id===id;});if(!r)return;
   r.status=val;audit("quotation",val.toLowerCase(),r.qid+" · "+(r.tour||""));
-  persistData();renderSavedQuotes();
+  persistData();renderSavedQuotes();if(typeof renderAcceptedQuotes==="function")renderAcceptedQuotes();
 }
 function quoteConversion(){
   var c={Draft:0,Sent:0,Accepted:0,Lost:0};
@@ -5188,82 +5237,105 @@ function generateInvoice(src){
   var linkTour=(tours||[]).find(function(x){return tourCode(x)===sel.key;});
   var startD=_ds?dmy(new Date(_ds+"T00:00:00")):(linkTour?dmy(new Date(linkTour.start+"T00:00:00")):"");
   var endD=_de?dmy(new Date(_de+"T00:00:00")):(linkTour?dmy(new Date(linkTour.end+"T00:00:00")):"");
-  var accommodation=isSess?0:(d.accommodation||0),travel=isSess?0:(d.vehicle||0),food=isSess?0:(d.food||0),entry=isSess?0:(d.entry||0),ship=isSess?0:(d.ship||0),guide=isSess?0:(d.guide||0),referral=0;
-  var sessTotal=isSess?(sel.basis==="session"?Math.round(sel.pp):Math.round(sel.pp*(parseInt(pax,10)||1))):0;
-  var total=isSess?sessTotal:(accommodation+travel+food+entry+ship+guide+referral);
-  var gst=gstBreakup(total,qClient&&qClient.gst);
-  var grand=gst?gst.grand:total;
+  /* Line items as data so rows can be edited / deleted with live totals. */
+  var lines=isSess
+    ?[{label:'Guided session charges — guide, vehicle, hotel pick-up & drop '+(sel.basis==="session"?'(flat, whole group)':'('+pax+' × '+fmt(sel.pp)+')'),amount:isSess?(sel.basis==="session"?Math.round(sel.pp):Math.round(sel.pp*(parseInt(pax,10)||1))):0}]
+    :[{label:'Accommodation',amount:d.accommodation||0},{label:'Travel and Logistics',amount:d.vehicle||0},{label:'Food',amount:d.food||0},{label:'Entry tickets',amount:d.entry||0},{label:'Ship tickets',amount:d.ship||0},{label:'Guide Fee',amount:d.guide||0},{label:'Referral amount',amount:0}];
   _curInvoice={invid:vid,tour:tourName,title:tourName,clientType:clientType,client:JSON.parse(JSON.stringify(qClient)),date:today,
-    startDate:startD,endDate:endD,participants:pax,
-    accommodation:accommodation,travel:travel,food:food,entry:entry,ship:ship,guide:guide,referral:referral,total:total,
-    gstRate:gst?gst.rate:0,gstAmount:gst?gst.tax:0,grandTotal:grand,savedId:null};
-  var row=function(label,val){return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:9px 12px'>"+label+"</td><td style='padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums'>"+fmt(val||0)+"</td></tr>";};
-  var html=
+    startDate:startD,endDate:endD,participants:pax,isSess:isSess,sessDur:(isSess?sel.session.dur:""),lines:lines,savedId:null};
+  _invEditLines=false;
+  renderInvoiceDoc();
+  document.getElementById('modal').innerHTML=
     "<div class='modal-head'>"+
       "<div><div class='eyebrow'>Invoice</div><div class='h-sec'>"+tourName+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+vid+"</span> · "+today+"</div></div>"+XBTN+
     "</div>"+
-    "<div class='modal-body' style='padding:0'>"+
-      "<div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+
-        "<style>#quotationBody .itbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden;border-collapse:collapse}#quotationBody .itbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}</style>"+
-        quoteHeaderHTML()+
-        invoiceMetaRow(vid,today,qClient,startD,endD)+
-        "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
-          "<div style='font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c'>"+tourName+"</div>"+
-          "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>"+
-            "<div><span style='color:#5a6b62'>Participants:</span> <b>"+pax+"</b></div>"+
-            "<div><span style='color:#5a6b62'>Client type:</span> <b>"+clientType+"</b></div>"+
-            (isSess?"<div><span style='color:#5a6b62'>Duration:</span> <b>"+sel.session.dur+"</b></div>"+
-                    "<div><span style='color:#5a6b62'>Guide:</span> <b>Will be allotted</b></div>":"")+
-          "</div>"+
-        "</div>"+
-        "<table class='itbl' style='width:100%;font-size:13px;margin-bottom:16px'>"+
-          "<thead><tr><th style='text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Description</th><th style='text-align:right;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Amount</th></tr></thead>"+
-          "<tbody>"+
-            (isSess
-              ?row('Guided session charges — guide, vehicle, hotel pick-up & drop '+(sel.basis==="session"?'(flat, whole group)':'('+pax+' × '+fmt(sel.pp)+')'),sessTotal)
-              :row('Accommodation',accommodation)+
-               row('Travel and Logistics',travel)+
-               row('Food',food)+
-               row('Entry tickets',entry)+
-               row('Ship tickets',ship)+
-               row('Guide Fee',guide)+
-               row('Referral amount',referral))+
-          "</tbody>"+
-          "<tfoot>"+
-            (gst?("<tr><td style='padding:9px 12px;color:#5a6b62'>Taxable value"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":"")+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(total)+"</td></tr>"+
-              (gst.inter
-                ?"<tr><td style='padding:9px 12px;color:#5a6b62'>IGST @ "+gst.rate+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.igst)+"</td></tr>"
-                :"<tr><td style='padding:9px 12px;color:#5a6b62'>CGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.cgst)+"</td></tr>"+
-                 "<tr><td style='padding:9px 12px;color:#5a6b62'>SGST/UTGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.sgst)+"</td></tr>")):"")+
-            "<tr style='background:#eaf4ee'><td style='padding:11px 12px;font-size:14px'><b>"+(gst?"Grand Total (incl. GST)":"Total Amount")+"</b></td><td style='padding:11px 12px;text-align:right;font-size:16px;font-weight:700;font-family:\"Calistoga\",serif;color:#15563c'>"+fmt(grand)+"</td></tr>"+
-          "</tfoot>"+
-        "</table>"+
-        payNowHTML(grand)+
-        "<div style='font-size:11px;color:#5a6b62;background:#fafcfb;border:1px solid #e6efe9;border-radius:10px;padding:11px 14px;line-height:1.7'>"+
-          "<div style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px'>Terms &amp; Cancellation Policy</div>"+
-          (gst?"• Amounts are in Indian Rupees (INR) · GST charged as itemised above<br>":"• Amounts are in Indian Rupees (INR) · Inclusive of applicable taxes unless stated<br>")+
-          (isSess
-            ?"• Balance due should be cleared before the session<br>"+
-             "• Cancellation: Full refund on 5+ days (excluding transaction charges) · 50% refund 2-5 days · No refund &lt;2 days<br>"
-            :"• Balance due 30 days before departure<br>"+
-             "• Cancellation: Full refund 60+ days · 50% refund 30-60 days · No refund &lt;30 days<br>")+
-          "• Thank you for travelling with us."+
-        "</div>"+
-        "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
-          "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>"+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours")+"</div>"+
-          "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India</div>"+
-        "</div>"+
-      "</div>"+
-    "</div>"+
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'></div></div>"+
     "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
       "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
-      "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit invoice</button>"+
+      "<button class='btn btn-ghost' id='invLinesBtn' onclick='invToggleLines()'>Edit line items</button>"+
+      "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit text</button>"+
       "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentInvoice()'>Save invoice</button>"+
-      "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(vid)+","+JSON.stringify(tourName)+","+grand+","+pax+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
+      "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(vid)+","+JSON.stringify(tourName)+","+(_curInvoice.grandTotal||0)+","+pax+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
       "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z'/></svg>PDF / Print</button>"+
     "</div>";
-  document.getElementById('modal').innerHTML=html;
+  /* the body was rendered before the modal shell existed; render it in now */
+  var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
   openScrim();
+}
+/* ===== Data-driven invoice document (editable / deletable line items) ===== */
+var _invEditLines=false;
+var _invBodyHTML="";
+function invLinesTotal(){return (_curInvoice.lines||[]).reduce(function(s,l){return s+(parseFloat(l.amount)||0);},0);}
+function renderInvoiceDoc(){
+  var inv=_curInvoice;if(!inv)return;
+  var total=invLinesTotal();
+  var gst=gstBreakup(total,inv.client&&inv.client.gst);
+  var grand=gst?gst.grand:total;
+  /* keep the saved figures in step with the (possibly edited) lines */
+  inv.total=total;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;
+  inv.accommodation=lineAmt(inv,"Accommodation");inv.travel=lineAmt(inv,"Travel and Logistics");inv.food=lineAmt(inv,"Food");inv.entry=lineAmt(inv,"Entry tickets");inv.ship=lineAmt(inv,"Ship tickets");inv.guide=lineAmt(inv,"Guide Fee");inv.referral=lineAmt(inv,"Referral amount");
+  var edit=_invEditLines;
+  var bodyRows=(inv.lines||[]).map(function(l,i){
+    if(edit){
+      return "<tr style='border-bottom:1px solid #eef4f0'>"+
+        "<td style='padding:6px 8px'><input value=\""+String(l.label||"").replace(/"/g,"&quot;")+"\" onchange='invLineLabel("+i+",this.value)' style='width:100%;padding:7px 9px;border:1px solid #d3e7db;border-radius:8px;font-size:12.5px'></td>"+
+        "<td style='padding:6px 8px;text-align:right;white-space:nowrap'><input type='number' value='"+(parseFloat(l.amount)||0)+"' onchange='invLineAmt("+i+",this.value)' style='width:110px;padding:7px 9px;border:1px solid #d3e7db;border-radius:8px;font-size:12.5px;text-align:right'>"+
+        " <button type='button' onclick='invDeleteLine("+i+")' title='Delete row' style='padding:6px 9px;border:1px solid #f0c2bb;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer'>✕</button></td>"+
+      "</tr>";
+    }
+    return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:9px 12px'>"+esc0(l.label||"")+"</td><td style='padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums'>"+fmt(parseFloat(l.amount)||0)+"</td></tr>";
+  }).join("");
+  var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  _invBodyHTML=
+    "<style>#quotationBody .itbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden;border-collapse:collapse}#quotationBody .itbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}</style>"+
+    quoteHeaderHTML()+
+    invoiceMetaRow(inv.invid,inv.date,inv.client,inv.startDate,inv.endDate)+
+    "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
+      "<div style='font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c'>"+esc0(inv.tour)+"</div>"+
+      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>"+
+        "<div><span style='color:#5a6b62'>Participants:</span> <b>"+esc0(inv.participants)+"</b></div>"+
+        "<div><span style='color:#5a6b62'>Client type:</span> <b>"+esc0(inv.clientType)+"</b></div>"+
+        (inv.isSess?"<div><span style='color:#5a6b62'>Duration:</span> <b>"+esc0(inv.sessDur)+"</b></div><div><span style='color:#5a6b62'>Guide:</span> <b>Will be allotted</b></div>":"")+
+      "</div>"+
+    "</div>"+
+    (edit?"<div style='font-size:11.5px;color:#5a6b62;margin:0 0 8px'>Editing line items — change any description or amount, ✕ to delete a row, or add a new one. Totals and GST recalculate automatically.</div>":"")+
+    "<table class='itbl' style='width:100%;font-size:13px;margin-bottom:"+(edit?"8px":"16px")+"'>"+
+      "<thead><tr><th style='text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Description</th><th style='text-align:right;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Amount</th></tr></thead>"+
+      "<tbody>"+bodyRows+"</tbody>"+
+      "<tfoot>"+
+        (gst?("<tr><td style='padding:9px 12px;color:#5a6b62'>Taxable value"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":"")+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(total)+"</td></tr>"+
+          (gst.inter
+            ?"<tr><td style='padding:9px 12px;color:#5a6b62'>IGST @ "+gst.rate+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.igst)+"</td></tr>"
+            :"<tr><td style='padding:9px 12px;color:#5a6b62'>CGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.cgst)+"</td></tr>"+
+             "<tr><td style='padding:9px 12px;color:#5a6b62'>SGST/UTGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.sgst)+"</td></tr>")):"")+
+        "<tr style='background:#eaf4ee'><td style='padding:11px 12px;font-size:14px'><b>"+(gst?"Grand Total (incl. GST)":"Total Amount")+"</b></td><td style='padding:11px 12px;text-align:right;font-size:16px;font-weight:700;font-family:\"Calistoga\",serif;color:#15563c'>"+fmt(grand)+"</td></tr>"+
+      "</tfoot>"+
+    "</table>"+
+    (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:16px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
+    payNowHTML(grand)+
+    "<div style='font-size:11px;color:#5a6b62;background:#fafcfb;border:1px solid #e6efe9;border-radius:10px;padding:11px 14px;line-height:1.7'>"+
+      "<div style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px'>Terms &amp; Cancellation Policy</div>"+
+      (gst?"• Amounts are in Indian Rupees (INR) · GST charged as itemised above<br>":"• Amounts are in Indian Rupees (INR) · Inclusive of applicable taxes unless stated<br>")+
+      (inv.isSess
+        ?"• Balance due should be cleared before the session<br>• Cancellation: Full refund on 5+ days (excluding transaction charges) · 50% refund 2-5 days · No refund &lt;2 days<br>"
+        :"• Balance due 30 days before departure<br>• Cancellation: Full refund 60+ days · 50% refund 30-60 days · No refund &lt;30 days<br>")+
+      "• Thank you for travelling with us."+
+    "</div>"+
+    "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
+      "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>"+esc0(company)+"</div>"+
+      "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India</div>"+
+    "</div>";
+  var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
+}
+function lineAmt(inv,label){var l=(inv.lines||[]).find(function(x){return x.label===label;});return l?(parseFloat(l.amount)||0):0;}
+function invLineLabel(i,v){if(_curInvoice&&_curInvoice.lines[i])_curInvoice.lines[i].label=v;}
+function invLineAmt(i,v){if(_curInvoice&&_curInvoice.lines[i]){_curInvoice.lines[i].amount=Math.max(0,parseFloat(v)||0);renderInvoiceDoc();}}
+function invDeleteLine(i){if(_curInvoice&&_curInvoice.lines){_curInvoice.lines.splice(i,1);renderInvoiceDoc();}}
+function invAddLine(){if(_curInvoice){_curInvoice.lines.push({label:"New line item",amount:0});renderInvoiceDoc();}}
+function invToggleLines(){
+  _invEditLines=!_invEditLines;
+  var b=document.getElementById("invLinesBtn");if(b){b.textContent=_invEditLines?"Done editing lines":"Edit line items";b.classList.toggle("btn-primary",_invEditLines);}
+  renderInvoiceDoc();
 }
 function saveCurrentInvoice(){
   if(!_curInvoice)return;
@@ -5292,8 +5364,10 @@ function saveCurrentInvoice(){
       food:_curInvoice.food, entry:_curInvoice.entry, ship:_curInvoice.ship, guide:_curInvoice.guide,
       referral:_curInvoice.referral, total:_curInvoice.total,
       gstRate:_curInvoice.gstRate||0, gstAmount:_curInvoice.gstAmount||0, grandTotal:_curInvoice.grandTotal||_curInvoice.total,
+      fromQuote:_curInvoice.fromQuote||"",
       html:docHtml, savedAt:new Date().toISOString()
     });
+    if(typeof renderAcceptedQuotes==="function")renderAcceptedQuotes();
     _curInvoice.savedId=id;
     audit("invoice","saved",_curInvoice.invid+" · "+(_curInvoice.title||"")+" · "+fmt(_curInvoice.grandTotal||_curInvoice.total));
   }
