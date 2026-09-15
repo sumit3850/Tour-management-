@@ -751,7 +751,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 226</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 227</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -760,7 +760,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 226</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 227</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -6661,10 +6661,21 @@ function viewProfitCalc(){
   if(!tours.length)return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+"<div class='empty'>Create a tour first to use the profit calculator.</div></section>";
   return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+
     "<div class='section-head'><div><div class='eyebrow'>Finance</div><div class='h-sec'>Profit Calculator</div></div>"+
-      "<select class='input' style='width:auto' id='pc_tour' onchange='renderProfitCalc()'>"+tours.map(function(t){return "<option value='"+t.id+"'>"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"</select>"+
+      "<select class='input' style='width:auto' id='pc_tour' onchange='pcTourChanged()'>"+tours.map(function(t){return "<option value='"+t.id+"'>"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"</select>"+
     "</div>"+
     "<div id='pcBody'></div>"+
   "</section>";
+}
+/* Switching the tour while editing a saved calc must NOT let "Update" overwrite
+   the other tour's row — exit edit mode so it becomes a fresh Save for the new
+   tour. This is the bug that put T3's numbers inside the T6 row. */
+function pcTourChanged(){
+  if(window._pcEditId){
+    var l=profitLogs.find(function(x){return x.id===window._pcEditId;});
+    var sel=document.getElementById("pc_tour");
+    if(l&&sel&&l.tourId!==sel.value){window._pcEditId=null;window._pcEditExp=null;}
+  }
+  renderProfitCalc();
 }
 function renderProfitCalc(){
   var el=document.getElementById("pcBody");if(!el)return;
@@ -6692,8 +6703,12 @@ function profitLogsCard(){
   var logs=(profitLogs||[]).slice().sort(function(a,b){return (b.savedAt||"").localeCompare(a.savedAt||"");});
   var body=logs.length?logs.map(function(l){
     var prof=(l.cost||0)-(l.totalExp||0);
-    return "<div class='list-row'><div class='meta'><div class='t'>"+(l.name||"Saved calculation")+"</div>"+
-      "<div class='s'>"+(l.tourCode||"")+(l.tourLabel?" · "+l.tourLabel:"")+(l.savedAt?" · saved "+dShort(l.savedAt):"")+"</div></div>"+
+    /* Title is always the ACTUAL saved tour, so a row can never mislabel its
+       tour; a custom name (if it differs) shows underneath. */
+    var tourTitle=(l.tourCode||"")+(l.tourLabel?" · "+l.tourLabel:"")||(l.name||"Saved calculation");
+    var custom=(l.name&&l.name!==tourTitle&&l.name!==l.tourLabel&&l.name!==(l.tourCode+" · "+dShort(l.savedAt)))?"“"+l.name+"” · ":"";
+    return "<div class='list-row'><div class='meta'><div class='t'>"+tourTitle+"</div>"+
+      "<div class='s'>"+custom+(l.savedAt?"saved "+dShort(l.savedAt):"")+"</div></div>"+
       "<div style='display:flex;gap:12px;align-items:center;flex-shrink:0'>"+
         "<span class='mono' title='Profit' style='font-weight:700;min-width:80px;text-align:right;color:"+(prof>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(prof)+"</span>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"editProfitLog('"+l.id+"')\">Edit</button>"+
@@ -6716,7 +6731,11 @@ function saveProfitCalc(){
   t.profitExp=e;                                          /* keep per-tour expenses in sync */
   if(window._pcEditId){
     var ex=profitLogs.find(function(x){return x.id===window._pcEditId;});
-    if(ex){ex.exp=e;ex.cost=cost;ex.totalExp=tot;ex.tourId=t.id;ex.tourCode=tourCode(t);ex.tourLabel=tourLabel(t);ex.savedAt=new Date().toISOString();}
+    if(ex){
+      /* if the tour was changed during the edit, refresh the name to match */
+      if(ex.tourId!==t.id&&(!ex.name||ex.name===(ex.tourCode+" · "+ex.tourLabel)||ex.name===ex.tourLabel))ex.name=tourCode(t)+" · "+tourLabel(t);
+      ex.exp=e;ex.cost=cost;ex.totalExp=tot;ex.tourId=t.id;ex.tourCode=tourCode(t);ex.tourLabel=tourLabel(t);ex.savedAt=new Date().toISOString();
+    }
     window._pcEditId=null;window._pcEditExp=null;persistData();renderProfitCalc();return;
   }
   var def=tourCode(t)+" · "+dShort(t.start);
