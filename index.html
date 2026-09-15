@@ -751,7 +751,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 227</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 228</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -760,7 +760,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 227</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 228</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -6706,7 +6706,11 @@ function profitLogsCard(){
     /* Title is always the ACTUAL saved tour, so a row can never mislabel its
        tour; a custom name (if it differs) shows underneath. */
     var tourTitle=(l.tourCode||"")+(l.tourLabel?" · "+l.tourLabel:"")||(l.name||"Saved calculation");
-    var custom=(l.name&&l.name!==tourTitle&&l.name!==l.tourLabel&&l.name!==(l.tourCode+" · "+dShort(l.savedAt)))?"“"+l.name+"” · ":"";
+    /* A custom name that starts with a DIFFERENT tour code than this row's is
+       stale (left over from a merged/overwritten calc) — don't show it. */
+    var nmeta=(l.name||"").match(/^(T\d+)\b/);
+    var staleName=!!(nmeta&&l.tourCode&&nmeta[1]!==l.tourCode);
+    var custom=(l.name&&!staleName&&l.name!==tourTitle&&l.name!==l.tourLabel&&l.name!==(l.tourCode+" · "+dShort(l.savedAt)))?"“"+l.name+"” · ":"";
     return "<div class='list-row'><div class='meta'><div class='t'>"+tourTitle+"</div>"+
       "<div class='s'>"+custom+(l.savedAt?"saved "+dShort(l.savedAt):"")+"</div></div>"+
       "<div style='display:flex;gap:12px;align-items:center;flex-shrink:0'>"+
@@ -6732,8 +6736,11 @@ function saveProfitCalc(){
   if(window._pcEditId){
     var ex=profitLogs.find(function(x){return x.id===window._pcEditId;});
     if(ex){
-      /* if the tour was changed during the edit, refresh the name to match */
-      if(ex.tourId!==t.id&&(!ex.name||ex.name===(ex.tourCode+" · "+ex.tourLabel)||ex.name===ex.tourLabel))ex.name=tourCode(t)+" · "+tourLabel(t);
+      /* refresh the name to match the tour when it was changed, OR when the old
+         name is stale (references a different tour code than the saved tour) */
+      var nm=(ex.name||"").match(/^(T\d+)\b/);
+      var stale=!!(nm&&ex.tourCode&&nm[1]!==tourCode(t));
+      if(stale||(ex.tourId!==t.id&&(!ex.name||ex.name===(ex.tourCode+" · "+ex.tourLabel)||ex.name===ex.tourLabel)))ex.name=tourCode(t)+" · "+tourLabel(t);
       ex.exp=e;ex.cost=cost;ex.totalExp=tot;ex.tourId=t.id;ex.tourCode=tourCode(t);ex.tourLabel=tourLabel(t);ex.savedAt=new Date().toISOString();
     }
     window._pcEditId=null;window._pcEditExp=null;persistData();renderProfitCalc();return;
