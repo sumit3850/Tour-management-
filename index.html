@@ -248,6 +248,9 @@ td.strong{white-space:nowrap}
 th.ctr,td.ctr{text-align:center}
 td.strong{font-weight:600;color:var(--ink)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* Saved profit calcs: Excel-style row selection. */
+.pc-log-row{display:flex;align-items:center;transition:background .12s}
+.pc-log-row.sel{background:#eaf3ff;box-shadow:inset 3px 0 0 #0a6ed1;border-radius:8px}
 /* Bookings table: many columns → nowrap short cells, cap the long text
    columns and let the table scroll on small screens instead of stacking
    every word into one-word-wide columns. */
@@ -751,7 +754,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 228</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 229</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -760,7 +763,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 228</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 229</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -6643,7 +6646,8 @@ function ensureAccBookingForOp(o,accId){
   if(existing)Object.assign(existing,rec);else{rec.id="AB"+Date.now();accBookings.unshift(rec);}
 }
 /* ===== PROFIT CALCULATOR — per-tour revenue, expenses by category, profit ===== */
-var PROFIT_EXP_FIELDS=[["accom","Accommodation"],["travel","Travel and Logistics"],["food","Food"],["entry","Entry tickets"],["ship","Ship tickets"],["guide","External guide charges"],["referral","Referral amount"]];
+/* keys are kept stable (existing saved calcs use them); "guidefee" is new. */
+var PROFIT_EXP_FIELDS=[["accom","Accommodation"],["travel","Transport and Logistics"],["ship","Ship Charges"],["food","Food"],["entry","Entry Fee"],["guidefee","Guide Fee"],["guide","Ext. Guide Fee"],["referral","Referral amount"]];
 /* The tour's own "Total tour cost" (entered on the tour form) is authoritative
    when set — return it directly so it can't be double-counted across bookings.
    Otherwise sum the per-booking totals as before. */
@@ -6711,15 +6715,65 @@ function profitLogsCard(){
     var nmeta=(l.name||"").match(/^(T\d+)\b/);
     var staleName=!!(nmeta&&l.tourCode&&nmeta[1]!==l.tourCode);
     var custom=(l.name&&!staleName&&l.name!==tourTitle&&l.name!==l.tourLabel&&l.name!==(l.tourCode+" · "+dShort(l.savedAt)))?"“"+l.name+"” · ":"";
-    return "<div class='list-row'><div class='meta'><div class='t'>"+tourTitle+"</div>"+
+    var checked=_pcSelected[l.id]?" checked":"";
+    return "<div class='list-row pc-log-row"+(_pcSelected[l.id]?" sel":"")+"' data-id='"+l.id+"'>"+
+      "<input type='checkbox' class='pc-chk' "+checked+" onchange=\"pcToggleSel('"+l.id+"',this.checked)\" style='width:17px;height:17px;flex:none;margin-right:12px;accent-color:#0a6ed1;cursor:pointer'>"+
+      "<div class='meta'><div class='t'>"+tourTitle+"</div>"+
       "<div class='s'>"+custom+(l.savedAt?"saved "+dShort(l.savedAt):"")+"</div></div>"+
       "<div style='display:flex;gap:12px;align-items:center;flex-shrink:0'>"+
-        "<span class='mono' title='Profit' style='font-weight:700;min-width:80px;text-align:right;color:"+(prof>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(prof)+"</span>"+
+        "<div style='text-align:right;min-width:92px'><div style='font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)'>Profit</div><span class='mono' style='font-weight:700;color:"+(prof>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(prof)+"</span></div>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"editProfitLog('"+l.id+"')\">Edit</button>"+
         "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteProfitLog('"+l.id+"')\">Delete</button>"+
       "</div></div>";
   }).join(""):"<div class='empty'>No saved calculations yet — fill in the expenses above and tap <b>Save calculation</b>.</div>";
-  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Saved</div><div class='h-sec' style='font-size:15px'>Saved profit calculations</div></div><span class='pill plain'>"+logs.length+"</span></div>"+body+"</div>";
+  var nSel=Object.keys(_pcSelected).filter(function(k){return _pcSelected[k];}).length;
+  var toolbar=logs.length?"<div style='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px'>"+
+    "<label style='display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;cursor:pointer'><input type='checkbox' id='pcSelAll' "+(nSel&&nSel===logs.length?"checked":"")+" onchange='pcSelectAll(this.checked)' style='width:16px;height:16px;accent-color:#0a6ed1'> Select all</label>"+
+    "<span style='font-size:12px;color:var(--ink-soft)'>"+(nSel?nSel+" selected":"")+"</span>"+
+    "<span style='flex:1'></span>"+
+    "<button class='btn btn-ghost btn-sm' id='pcExpSelBtn' onclick='exportProfitXlsx(true)'"+(nSel?"":" disabled style='opacity:.5'")+"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export selected (.xlsx)</button>"+
+    "<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export all (.xlsx)</button>"+
+  "</div>":"";
+  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Saved</div><div class='h-sec' style='font-size:15px'>Saved profit calculations</div></div><span class='pill plain'>"+logs.length+"</span></div>"+toolbar+body+"</div>";
+}
+/* Excel-like row selection for the saved profit calcs. */
+var _pcSelected={};
+function pcToggleSel(id,on){_pcSelected[id]=!!on;renderProfitCalc();}
+function pcSelectAll(on){(profitLogs||[]).forEach(function(l){_pcSelected[l.id]=!!on;});renderProfitCalc();}
+/* Export saved profit calcs to a formatted .xlsx with the full column set. */
+function exportProfitXlsx(selectedOnly){
+  var logs=(profitLogs||[]).slice().sort(function(a,b){return (b.savedAt||"").localeCompare(a.savedAt||"");});
+  if(selectedOnly)logs=logs.filter(function(l){return _pcSelected[l.id];});
+  if(!logs.length){alert(selectedOnly?"Tick at least one calculation first.":"No saved calculations to export.");return;}
+  var expCols=PROFIT_EXP_FIELDS.map(function(f){return f[1];});
+  var HEAD=["Sl. No.","Tour Code","Tour Name","Tour Start Date","Tour End Date"].concat(expCols).concat(["Total Expenses","Total Tour Cost","Profit"]);
+  loadExcelJS().then(function(ExcelJS){
+    var wb=new ExcelJS.Workbook();
+    wb.creator=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Operation Console";
+    var ws=wb.addWorksheet("Profit calculations",{views:[{state:"frozen",ySplit:1}]});
+    var hr=ws.getRow(1);HEAD.forEach(function(h,i){var c=hr.getCell(i+1);c.value=h;c.font={name:"Arial",size:10,bold:true,color:{argb:"FF15563C"}};c.alignment={horizontal:(i>=5?"right":"left"),vertical:"middle"};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE9F4EE"}};});
+    logs.forEach(function(l,idx){
+      var t=(tours||[]).find(function(x){return x.id===l.tourId;});
+      var startD=t&&t.start?dmy(new Date(t.start+"T00:00:00")):(l.startDate||"");
+      var endD=t&&t.end?dmy(new Date(t.end+"T00:00:00")):(l.endDate||"");
+      var e=l.exp||{};
+      var totExp=PROFIT_EXP_FIELDS.reduce(function(s,f){return s+(+e[f[0]]||0);},0);
+      var cost=(+l.cost||0);
+      var vals=[idx+1,l.tourCode||"",l.tourLabel||l.name||"",startD,endD]
+        .concat(PROFIT_EXP_FIELDS.map(function(f){return +e[f[0]]||0;}))
+        .concat([totExp,cost,cost-totExp]);
+      var row=ws.getRow(idx+2);
+      vals.forEach(function(v,i){var c=row.getCell(i+1);c.value=v;c.font={name:"Arial",size:10};if(i>=5){c.numFmt="#,##0";c.alignment={horizontal:"right"};}});
+    });
+    ws.columns.forEach(function(col,i){col.width=i===0?7:(i===2?30:(i>=3&&i<=4?14:(i>=5?14:12)));});
+    return wb.xlsx.writeBuffer();
+  }).then(function(buf){
+    var blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    var url=URL.createObjectURL(blob);var a=document.createElement("a");
+    a.href=url;a.download="Profit-calculations-"+new Date().toISOString().slice(0,10)+".xlsx";
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    audit("profit","exported",logs.length+" calculation(s) .xlsx");
+  }).catch(function(e){alert("Couldn't build the Excel file: "+((e&&e.message)||e)+"\n\n(The formatter needs a network connection the first time.)");});
 }
 function pcRecalc(){
   var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:"");});if(!t)return;
