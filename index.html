@@ -711,6 +711,21 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   .list-row .meta{flex:1 1 200px;min-width:0}
   .section-head{flex-wrap:wrap;gap:10px}
 }
+/* ===== Phone: show the WHOLE month (all 7 days) instead of a 660px scroll ==== */
+@media(max-width:600px){
+  .cal{min-width:0;gap:3px}
+  .cal-scroll{overflow-x:visible}
+  .cal .cell{min-height:46px;padding:3px 2px;border-radius:7px}
+  .cal .dow{font-size:9px;padding-bottom:2px;letter-spacing:0}
+  .cal .dn{font-size:10px}
+  .cal .span{font-size:8px;padding:1px 2px;margin-top:2px;border-radius:4px;line-height:1.15}
+  /* Cost sheet grid: tighter so more fits before it scrolls, numbers unbroken */
+  .cs-table{font-size:11px;min-width:660px !important}
+  .cs-table td,.cs-table th{padding:4px 6px !important}
+  .cs-table input{width:62px !important;padding:5px 6px !important}
+}
+/* Per-person / total-quoted figures never split across lines */
+.cs-table td[id^="cs_pp_"],.cs-table td[id^="cs_total_"]{white-space:nowrap}
 </style>
 <script src="config.js"></script>
 </head>
@@ -754,7 +769,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 229</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 230</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -763,7 +778,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 229</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 230</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4325,7 +4340,7 @@ function renderCostSheet(){
       "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--sea)' id='cs_pp_"+n+"'>"+fmt(pp)+"</td>"+
       "<td style='padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700' id='cs_total_"+n+"'>"+fmt(pp*n)+"</td></tr>";
   }
-  body.innerHTML="<table style='width:100%;border-collapse:collapse;font-size:12px;min-width:820px'><thead>"+head+"</thead><tbody>"+rows+"</tbody></table>";
+  body.innerHTML="<table class='cs-table' style='width:100%;border-collapse:collapse;font-size:12px;min-width:820px'><thead>"+head+"</thead><tbody>"+rows+"</tbody></table>";
   renderCsLog();
 }
 function csRecalc(n){
