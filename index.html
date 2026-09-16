@@ -769,7 +769,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 232</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 233</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -778,7 +778,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 232</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 233</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -7979,15 +7979,14 @@ function openTour(id){
     ?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]).map(function(d){return dShort(d);}).join(" · ")+" · "+((t.sessionDates||[t.start]).length)+" day"+(((t.sessionDates||[t.start]).length)===1?"":"s")
     :dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights";
   document.getElementById("modal").innerHTML=
-    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span>"+(t.activity?" <span class='pill plain'>"+t.activity+"</span>":"")+"<h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+_dateLine+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span>"+(t.activity?" <span class='pill plain'>"+t.activity+"</span>":"")+"<h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+_dateLine+"</div></div><div style='display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none'>"+XBTN+"<button class='btn btn-primary btn-sm' style='white-space:nowrap' onclick=\"editTour('"+id+"')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit tour</button></div></div>"+
     "<div class='modal-body'>"+
-      "<div style='margin-bottom:14px'><button class='btn btn-primary' onclick=\"editTour('"+id+"')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit tour</button></div>"+
       "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Pax</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
       "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
         "<div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+(_isSess?((t.sessionDates&&t.sessionDates.length?t.sessionDates[0]:t.start)?dmy(t.sessionDates&&t.sessionDates.length?t.sessionDates[0]:t.start):"—"):(t.start?dmy(t.start):"—"))+"</b></div><div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+(t.pickup||"—")+"</b></div>"+
-        "<div><span style='color:var("+"ink-soft)'>Start point</span><br><b>"+(t.startLoc||"—")+"</b></div><div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+(t.stay||"—")+"</b></div>"+
+        "<div><span style='color:var("+"ink-soft)'>Tour End</span><br><b>"+(_isSess?((t.sessionDates&&t.sessionDates.length?t.sessionDates[t.sessionDates.length-1]:t.end)?dmy(t.sessionDates&&t.sessionDates.length?t.sessionDates[t.sessionDates.length-1]:t.end):"—"):(t.end?dmy(t.end):"—"))+"</b></div><div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+(t.stay||"—")+"</b></div>"+
         "<div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(seatStatus(t))+(payStatus?" "+payPill(payStatus):"")+"</div>"+
       "</div>"+
       (function(){var sp=String(t.species||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);if(!sp.length)return "";
