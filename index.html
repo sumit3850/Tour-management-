@@ -1018,7 +1018,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 246</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 247</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1027,7 +1027,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 246</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 247</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3377,9 +3377,17 @@ var _colW=(function(){try{return JSON.parse(localStorage.getItem("ieo_colw")||"{
 function saveColW(){try{localStorage.setItem("ieo_colw",JSON.stringify(_colW));}catch(e){}}
 function toggleRuler(){_rulerOn=!_rulerOn;try{localStorage.setItem("ieo_ruler",_rulerOn?"1":"0");}catch(e){}applyRulers();}
 function tableKey(tb){return (typeof curView!=="undefined"?curView:"")+"|"+[].slice.call(tb.querySelectorAll("thead th")).map(function(th){return th.textContent.trim();}).join("|");}
+function clearColWidths(tb){
+  if(!tb.dataset.ruled)return;
+  tb.querySelectorAll("thead th").forEach(function(th){th.style.width="";th.style.minWidth="";th.style.maxWidth="";});
+  tb.style.tableLayout="";tb.classList.remove("ruled");delete tb.dataset.ruled;
+}
+/* Saved widths are a ruler feature: they apply only while the ruler is ON.
+   Ruler off = the natural fit-to-width layout, so a column dragged wide once
+   can never leave a table stuck with a sideways scroll. */
 function applyColWidths(tb){
   var w=_colW[tableKey(tb)];var ths=tb.querySelectorAll("thead th");
-  if(!w||!Object.keys(w).length){if(tb.dataset.ruled){ths.forEach(function(th){th.style.width="";th.style.minWidth="";th.style.maxWidth="";});tb.style.tableLayout="";tb.classList.remove("ruled");delete tb.dataset.ruled;}return;}
+  if(!_rulerOn||window.innerWidth<768||!w||!Object.keys(w).length){clearColWidths(tb);return;}
   ths.forEach(function(th,i){if(w[i]){th.style.width=w[i]+"px";th.style.minWidth=w[i]+"px";th.style.maxWidth=w[i]+"px";}});
   tb.style.tableLayout="fixed";tb.classList.add("ruled");tb.dataset.ruled="1";
 }
