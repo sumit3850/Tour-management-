@@ -791,6 +791,22 @@ th.bk-quick,td.bk-quick{display:none}
 .pill.tc-ready.bad{background:var(--coral-soft);color:var(--coral);border-color:transparent}
 @media(max-width:600px){.chk-item{flex-wrap:wrap}.chk-item .chk-when{flex-basis:100%;padding-left:27px;margin-top:-4px}}
 
+/* ===== Column ruler (desktop) · pipeline tabs · top-bar theme/ruler buttons ===== */
+.tbl-ruler{position:relative;height:24px;background:var(--surface-2);border:1px solid var(--line);border-bottom:none;border-radius:8px 8px 0 0;overflow:visible;user-select:none;margin-top:4px}
+.tbl-ruler .tk{position:absolute;bottom:0;width:1px;height:5px;background:var(--ink-soft);opacity:.55}
+.tbl-ruler .tk.hf{height:9px}.tbl-ruler .tk.mj{height:13px;opacity:.9}
+.tbl-ruler .tk b{position:absolute;bottom:13px;left:3px;font-size:9px;font-weight:600;color:var(--ink-soft);font-family:var(--font-mono);line-height:1}
+.tbl-ruler .hd{position:absolute;top:0;bottom:0;width:11px;margin-left:-6px;cursor:col-resize;z-index:2}
+.tbl-ruler .hd::before{content:"";position:absolute;left:3px;top:3px;width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:8px solid var(--sea)}
+.tbl-ruler .hd::after{content:"";position:absolute;left:5px;top:10px;bottom:0;width:1px;background:var(--sea)}
+.tbl-ruler .hd:hover::before{border-top-color:var(--forest)}
+table.ruled td{overflow-wrap:anywhere}
+body.ruler-drag{cursor:col-resize}body.ruler-drag *{user-select:none}
+.topbar .iconbtn.rulerbtn.on{background:var(--sea-soft);border-color:var(--sea)}.topbar .iconbtn.rulerbtn.on svg{stroke:var(--sea)}
+@media(max-width:767px){.topbar .iconbtn.rulerbtn{display:none}}
+.kanban.kanban-single .kcol{flex:1 1 auto;width:auto;max-width:720px}
+.kanban.kanban-single .kcol .lead{max-width:none}
+
 /* ===== Global search (Ctrl/Cmd+K) ===== */
 .gs-wrap{padding:10px 10px 12px}
 .gs-box{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
@@ -854,6 +870,7 @@ html.dark .kpi .lab svg{stroke:var(--sea)}
 html.dark .iconbtn{background:var(--surface);border-color:var(--line)}html.dark .iconbtn svg{stroke:var(--ink)}
 html.dark .gs-box kbd,html.dark .gs-kind{background:var(--surface)}
 html.dark ::selection{background:#3b2f0e}
+select.input,html.dark select.input{background-repeat:no-repeat !important;background-position:right 12px center !important;background-size:12px 12px !important}
 /* printed documents keep their own light styling on purpose */
 html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
 
@@ -989,7 +1006,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 243</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 244</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -998,7 +1015,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 243</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 244</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1010,6 +1027,8 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
+      <button class="iconbtn rulerbtn" id="rulerBtn" onclick="toggleRuler()" title="Column ruler — drag to resize table columns" aria-label="Toggle column ruler"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1.5"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></svg></button>
+      <button class="iconbtn themebtn" id="themeBtn" onclick="cycleTheme()" title="Theme: auto" aria-label="Switch theme"><svg id="themeIco" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
       <button class="iconbtn gsbtn" onclick="openSearch()" title="Search (Ctrl+K)" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><kbd>⌘K</kbd></button>
       <button class="iconbtn" id="viewRefreshBtn" onclick="refreshCurrentView()" title="Refresh this section" aria-label="Refresh this section"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>
     </header>
@@ -3336,7 +3355,55 @@ function labelTables(root){
   });
 }
 var _lblTimer=null;
-function scheduleLabelTables(){clearTimeout(_lblTimer);_lblTimer=setTimeout(function(){labelTables();},30);}
+function scheduleLabelTables(){clearTimeout(_lblTimer);_lblTimer=setTimeout(function(){labelTables();applyRulers();},30);}
+/* ===== COLUMN RULER (desktop) ==================================================
+   Top-bar 📏 toggles a Word/Excel-style ruler above every table: tick marks in
+   cm and a handle at each column edge — drag to resize the column, double-click
+   to reset. Widths persist per table (per device). */
+var _rulerOn=(function(){try{return localStorage.getItem("ieo_ruler")==="1";}catch(e){return false;}})();
+var _colW=(function(){try{return JSON.parse(localStorage.getItem("ieo_colw")||"{}")||{};}catch(e){return {};}})();
+function saveColW(){try{localStorage.setItem("ieo_colw",JSON.stringify(_colW));}catch(e){}}
+function toggleRuler(){_rulerOn=!_rulerOn;try{localStorage.setItem("ieo_ruler",_rulerOn?"1":"0");}catch(e){}applyRulers();}
+function tableKey(tb){return (typeof curView!=="undefined"?curView:"")+"|"+[].slice.call(tb.querySelectorAll("thead th")).map(function(th){return th.textContent.trim();}).join("|");}
+function applyColWidths(tb){
+  var w=_colW[tableKey(tb)];var ths=tb.querySelectorAll("thead th");
+  if(!w||!Object.keys(w).length){if(tb.dataset.ruled){ths.forEach(function(th){th.style.width="";th.style.minWidth="";th.style.maxWidth="";});tb.style.tableLayout="";tb.classList.remove("ruled");delete tb.dataset.ruled;}return;}
+  ths.forEach(function(th,i){if(w[i]){th.style.width=w[i]+"px";th.style.minWidth=w[i]+"px";th.style.maxWidth=w[i]+"px";}});
+  tb.style.tableLayout="fixed";tb.classList.add("ruled");tb.dataset.ruled="1";
+}
+function applyRulers(){
+  var b=document.getElementById("rulerBtn");if(b)b.classList.toggle("on",_rulerOn);
+  var desktop=window.innerWidth>=768;
+  document.querySelectorAll(".tbl-wrap table").forEach(function(tb){
+    applyColWidths(tb);
+    var wrap=tb.parentElement;var r=wrap.querySelector(":scope > .tbl-ruler");
+    if(!_rulerOn||!desktop){if(r)r.remove();return;}
+    if(!r){r=document.createElement("div");r.className="tbl-ruler";wrap.insertBefore(r,tb);}
+    buildRuler(r,tb);
+  });
+}
+function buildRuler(r,tb){
+  var W=tb.offsetWidth,CM=37.8;var html="";
+  for(var x=0;x<=W;x+=CM/4){var cm=x/CM,major=Math.abs(cm-Math.round(cm))<1e-6,half=!major&&Math.abs(cm*2-Math.round(cm*2))<1e-6;html+="<i class='tk"+(major?" mj":(half?" hf":""))+"' style='left:"+x+"px'>"+(major&&Math.round(cm)%1===0&&Math.round(cm)>0?"<b>"+Math.round(cm)+"</b>":"")+"</i>";}
+  var ths=[].slice.call(tb.querySelectorAll("thead th"));
+  ths.forEach(function(th,i){if(i===ths.length-1)return;var x=th.offsetLeft+th.offsetWidth;html+="<span class='hd' data-i='"+i+"' style='left:"+x+"px' title='Drag to resize \u201c"+(th.textContent.trim()||"column "+(i+1))+"\u201d \u00b7 double-click to reset'></span>";});
+  r.style.width=W+"px";r.innerHTML=html;
+  r.querySelectorAll(".hd").forEach(function(h){
+    h.addEventListener("mousedown",function(e){e.preventDefault();rulerDragStart(tb,r,parseInt(h.dataset.i,10),e.clientX);});
+    h.addEventListener("dblclick",function(){var k=tableKey(tb);if(_colW[k]){delete _colW[k][h.dataset.i];if(!Object.keys(_colW[k]).length)delete _colW[k];}saveColW();applyColWidths(tb);buildRuler(r,tb);});
+  });
+}
+function rulerDragStart(tb,r,i,x0){
+  var ths=tb.querySelectorAll("thead th");var th=ths[i];if(!th)return;
+  var w0=th.offsetWidth;var k=tableKey(tb);
+  /* freeze every column at its current width first so only this one moves */
+  if(!_colW[k]){_colW[k]={};ths.forEach(function(t,j){_colW[k][j]=t.offsetWidth;});applyColWidths(tb);}
+  document.body.classList.add("ruler-drag");
+  var move=function(e){var w=Math.max(40,w0+(e.clientX-x0));_colW[k][i]=w;th.style.width=w+"px";th.style.minWidth=w+"px";th.style.maxWidth=w+"px";tb.style.tableLayout="fixed";buildRuler(r,tb);};
+  var up=function(){document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up);document.body.classList.remove("ruler-drag");saveColW();};
+  document.addEventListener("mousemove",move);document.addEventListener("mouseup",up);
+}
+window.addEventListener("resize",function(){clearTimeout(_lblTimer);_lblTimer=setTimeout(applyRulers,120);});
 (function(){
   var start=function(){try{var mo=new MutationObserver(scheduleLabelTables);["content","modal"].forEach(function(id){var el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true});});labelTables();}catch(e){}};
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
@@ -3554,8 +3621,13 @@ function applyTheme(){
   document.documentElement.classList.toggle("dark",dark);
   var meta=document.querySelector("meta[name=theme-color]");if(meta)meta.setAttribute("content",dark?"#0f1520":"#143a2e");
   document.querySelectorAll("[data-theme-opt]").forEach(function(b){b.classList.toggle("btn-primary",b.dataset.themeOpt===p);b.classList.toggle("btn-ghost",b.dataset.themeOpt!==p);});
+  if(typeof paintThemeBtn==="function")paintThemeBtn();
 }
 function setTheme(p){try{localStorage.setItem("ieo_theme",p);}catch(e){}applyTheme();}
+/* Top-bar button cycles Auto → Light → Dark and shows the current mode. */
+var THEME_ICONS={auto:"<circle cx='12' cy='12' r='9'/><path d='M12 3a9 9 0 0 1 0 18z' fill='currentColor' stroke='none'/>",light:"<circle cx='12' cy='12' r='4'/><path d='M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'/>",dark:"<path d='M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z'/>"};
+function cycleTheme(){var order=["auto","light","dark"];var p=themePref();setTheme(order[(order.indexOf(p)+1)%order.length]);}
+function paintThemeBtn(){var p=themePref();var b=document.getElementById("themeBtn"),i=document.getElementById("themeIco");if(i)i.innerHTML=THEME_ICONS[p]||THEME_ICONS.auto;if(b)b.title="Theme: "+(p==="auto"?"auto (follows the device)":p)+" — click to switch";}
 try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);}catch(e){}
 applyTheme();
 function savePrefs(){
@@ -4062,17 +4134,25 @@ function pullGuestsDo(id,all){
   document.querySelectorAll(".pg-chk").forEach(function(c){if(!c.disabled&&(all||c.checked))picked.push(c.dataset.bid);});
   if(!picked.length){alert(all?"Everyone on that tour is already on this one.":"Tick at least one participant first (or use Pull all).");return;}
   var added=0;
+  var srcSel=document.getElementById("pg_src");var srcTour=srcSel?tours.find(function(x){return x.id===srcSel.value;}):null;
+  var newPoc=null,firstNew=null;
   picked.forEach(function(bid){
     var b=bookings.find(function(x){return x.id===bid;});if(!b)return;
     var nb={id:"B"+Date.now()+Math.floor(Math.random()*100000),bookingDate:dShort(new Date()),tour:id,customTour:"",
       guest:b.guest||"—",members:b.members||"",party:b.party||1,country:b.country||"—",email:b.email||"",phone:b.phone||"",
-      status:"Confirmed",pay:"Deposit",notes:b.notes||"",start:t.start||"",end:t.end||"",deposit:0,lastPendingDate:""};
+      status:"Confirmed",pay:"Deposit",notes:b.notes||"",start:t.start||"",end:t.end||"",deposit:0,lastPendingDate:"",documents:b.documents||[]};
     bookings.unshift(nb);pushBooking(nb);added++;
+    if(srcTour&&srcTour.pocId===b.id)newPoc=nb;
+    if(!firstNew)firstNew=nb;
   });
+  /* Keep the group together: the bookings list shows one row per tour (its
+     POC) with the others listed underneath, so the pulled group needs a POC
+     on the target tour too — the source tour's POC, else the first guest. */
+  if(!t.pocId&&(newPoc||firstNew)){t.pocId=(newPoc||firstNew).id;t.updatedAt=new Date().toISOString();}
   audit("booking","pulled",added+" participant(s) into "+tourCode(t)+" from another tour");
   persistData();renderBookings();renderTours();renderCalendar();
   closeModal();
-  alert("Pulled "+added+" participant"+(added===1?"":"s")+" into "+tourCode(t)+" · "+shortName(t)+". Payment is reset to Deposit ₹0 on the copies — the source tour is unchanged.");
+  alert("Pulled "+added+" participant"+(added===1?"":"s")+" into "+tourCode(t)+" · "+shortName(t)+". Payment is reset to Deposit ₹0 on the copies — the source tour is unchanged."+(t.pocId?"\n\nThey appear as one group under "+((bookings.find(function(b){return b.id===t.pocId;})||{}).guest||"the POC")+" in Bookings.":""));
 }
 /* Which tab does a tour belong to (archived tours live only in Archived). */
 function tourTabOf(t){
@@ -6701,8 +6781,16 @@ function viewCRM(){
   const conv=leads.length?Math.round(leads.filter(l=>l.stage==="Confirmed").length/leads.length*100):0;
   return "<section class='view' id='v-crm'>"+
     "<div class='section-head'><div><div class='eyebrow'>Pipeline · "+conv+"% conversion</div><div class='h-sec'>"+leads.length+" leads</div></div><button class='btn btn-primary' onclick='openAddLead()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Lead</button></div>"+
+    "<div class='tabs' id='crmTabs' style='margin-bottom:12px'>"+[["All","All"]].concat(STAGES).map(function(st,i){return "<button class='tab "+(st[0]===_crmStage?"active":"")+"' onclick=\"crmFilter('"+st[0]+"',this)\">"+st[1]+"</button>";}).join("")+"</div>"+
     "<div class='kanban' id='kanban'></div>"+
   "</section>";
+}
+var _crmStage="All";
+function crmFilter(k,el){_crmStage=k;document.querySelectorAll("#crmTabs .tab").forEach(function(t){t.classList.remove("active");});if(el)el.classList.add("active");renderCRM();}
+function refreshCrmTabCounts(){
+  var tabs=document.querySelectorAll("#crmTabs .tab");if(!tabs.length)return;
+  var all=[["All","All"]].concat(STAGES);
+  tabs.forEach(function(b,i){var st=all[i];if(!st)return;var n=st[0]==="All"?leads.length:leads.filter(function(l){return l.stage===st[0];}).length;b.textContent=st[1]+" ("+n+")";});
 }
 /* ===== Lead capture filter (which emails / WhatsApp numbers to accept) ===== */
 var _lfLoaded=false;
@@ -6766,7 +6854,9 @@ function leadCard(l){
 }
 function renderCRM(){
   const k=document.getElementById("kanban");if(!k)return;
-  k.innerHTML=STAGES.map(function(st){
+  refreshCrmTabCounts();
+  k.classList.toggle("kanban-single",_crmStage!=="All");
+  k.innerHTML=STAGES.filter(function(st){return _crmStage==="All"||st[0]===_crmStage;}).map(function(st){
     var key=st[0],label=st[1];
     var items=leads.filter(function(l){return l.stage===key;});
     return "<div class='kcol' style='--kc:"+(KAN_COLORS[key]||"var(--ink-soft)")+"' ondragover='kanOver(event)' ondragleave='kanLeave(event)' ondrop=\"kanDrop(event,'"+key+"')\">"+
@@ -7812,7 +7902,7 @@ function deleteReservation(id){if(!confirm("Delete this reservation?"))return;re
 function viewCustomers(){
   return "<section class='view' id='v-customers'>"+
     "<div class='section-head'><div class='h-sec'>Customer database</div><div style='display:flex;gap:8px;flex-wrap:wrap'>"+dlBtn('exportCustomersCSV')+"<button class='btn btn-ghost btn-sm' id='wbDlBtn' onclick='downloadWorkbookXlsx()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Excel</button><button class='btn btn-sea btn-sm' onclick='openSheet()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M3 3h18v18H3zM3 9h18M9 3v18'/></svg>Open Google Sheet</button><button class='btn btn-primary btn-sm' onclick='openAddCustomer()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Customer</button></div></div>"+
-    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th>Phone</th><th>Email</th><th class='num'>Past tours</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
+    "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Name</th><th>Country</th><th>Phone</th><th>Email</th><th>Payment</th><th>Preferences</th><th></th></tr></thead><tbody id='custBody'></tbody></table></div></div>"+
   "</section>";
 }
 /* Forms, Review & Feedback — its own sidebar module (moved out of the Customer database). */
@@ -7969,7 +8059,7 @@ function cascadeAllCustomerPayments(){(tours||[]).forEach(function(t){cascadeTou
 function renderCustomers(){
   const b=document.getElementById("custBody");if(!b)return;
   cascadeAllCustomerPayments();
-  b.innerHTML=customers.map(c=>{var dt=c.details||{};var _pc=c.pay==="Paid"?"completed":(c.pay==="Deposit"?"open":(c.pay?"full":"plain"));return "<tr><td class='strong' style='cursor:pointer' data-action='viewCustomer' data-arg='"+c.name+"'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+(c.country||"—")+"</td><td class='nowrap'>"+(c.phone||dt.phone||"—")+"</td><td class='nowrap'>"+(c.email||dt.email||"—")+"</td><td class='num mono'>"+(c.tours||0)+"</td><td><span class='pill "+_pc+"'>"+(c.pay||"—")+"</span></td><td style='color:var(--ink-soft)'>"+(c.pref||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='viewCustomer' data-arg='"+c.name+"' title='View full details'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='8' class='empty'>No customers yet.</td></tr>";
+  b.innerHTML=customers.map(c=>{var dt=c.details||{};var _pc=c.pay==="Paid"?"completed":(c.pay==="Deposit"?"open":(c.pay?"full":"plain"));return "<tr><td class='strong' style='cursor:pointer' data-action='viewCustomer' data-arg='"+c.name+"'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+(c.country||"—")+"</td><td class='nowrap'>"+(c.phone||dt.phone||"—")+"</td><td class='nowrap'>"+(c.email||dt.email||"—")+"</td><td><span class='pill "+_pc+"'>"+(c.pay||"—")+"</span></td><td style='color:var(--ink-soft)'>"+(c.pref||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='viewCustomer' data-arg='"+c.name+"' title='View full details'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='7' class='empty'>No customers yet.</td></tr>";
   persistData();
 }
 function editCustomer(name){
