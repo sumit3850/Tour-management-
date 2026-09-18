@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v112"; /* v112: mobile cleanup for Tour Cost Sheet (session rate table one-line labels + horizontal scroll, compact action buttons) and Profit Calculator saved rows (aligned profit/edit/delete) */
+var CACHE = "ie-ops-v113"; /* v113: dashboard insights — Money due (receivables ageing + WhatsApp), Underbooked early warning + break-even, Today var CACHE = "ie-ops-v112"; /* v112: mobile cleanup for Tour Cost Sheet (session rate table one-line labels + horizontal scroll, compact action buttons) and Profit Calculator saved rows (aligned profit/edit/delete) */ next 7 days; risk chip on tour cards; Settings → Preferences thresholds */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",

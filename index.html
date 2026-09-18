@@ -727,6 +727,38 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 /* Per-person / total-quoted figures never split across lines */
 .cs-table td[id^="cs_pp_"],.cs-table td[id^="cs_total_"]{white-space:nowrap}
 
+/* ===== Dashboard insight cards: Money due · Underbooked · Today ===== */
+.md-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px}
+.md-k{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.md-k b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.md-k span{font-size:11px;color:var(--ink-soft)}
+.md-k.md-overdue b{color:var(--coral)}.md-k.md-week b{color:#b45309}
+.md-sec{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;margin:10px 0 0;display:flex;justify-content:space-between;gap:8px}
+.md-row .md-amt{font-weight:700;flex:none;min-width:84px;text-align:right}
+.md-row.md-overdue .md-amt{color:var(--coral)}.md-row.md-week .md-amt{color:#b45309}
+.md-act{display:flex;gap:6px;flex:none}
+.fr-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.fr-dot.red{background:var(--coral);box-shadow:0 0 0 4px rgba(237,35,42,.14)}
+.fr-dot.amber{background:#e8843c;box-shadow:0 0 0 4px rgba(232,132,60,.16)}
+.fr-bar{width:64px;height:6px;background:var(--line);border-radius:4px;overflow:hidden;flex:none;display:block}
+.fr-bar span{display:block;height:100%;background:linear-gradient(90deg,#e8843c,var(--coral))}
+.td-tag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft);flex:none;min-width:78px;text-align:center;white-space:nowrap}
+.td-tag.dep{background:var(--sea-soft);color:#0c5760;border-color:transparent}
+.td-tag.pick{background:#fff4e0;color:#8a5a00;border-color:transparent}
+.td-tag.ret{background:#e5f6ec;color:#1b7f4d;border-color:transparent}
+.td-tag.pay{background:#fff4e0;color:#b45309;border-color:transparent}
+.td-tag.over{background:var(--coral-soft);color:var(--coral);border-color:transparent}
+.td-row .t{white-space:normal}
+.tour-card .tc-risk{border-color:transparent;font-weight:700}
+.tour-card .tc-risk.red{background:var(--coral-soft);color:var(--coral)}
+.tour-card .tc-risk.amber{background:#fff4e0;color:#b45309}
+.tour-card.tc-risk-red{box-shadow:inset 3px 0 0 var(--coral)}
+.tour-card.tc-risk-amber{box-shadow:inset 3px 0 0 #e8843c}
+@media(max-width:600px){
+  .md-row{flex-wrap:wrap;row-gap:6px}.md-row .meta{flex:1 1 100%}.md-row .md-amt{margin-left:auto;order:2}.md-act{order:3}
+  .md-kpis{gap:6px}.md-k{padding:7px 8px}.md-k b{font-size:13px}
+  .td-tag{min-width:64px;font-size:10px}
+}
+
 /* ===== Tour Cost Sheet & Profit Calculator — clean mobile layout ===== */
 /* Session rate card: labels stay on one line so the table reads cleanly and
    scrolls sideways instead of stacking letters ("Nigh t") or names over 3 lines. */
@@ -795,7 +827,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 235</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 236</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -804,7 +836,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 235</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 236</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1052,6 +1084,10 @@ let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",revie
    sheets off → no Google-Sheet pushes; whatsapp/email off → those share/send
    buttons explain instead of opening; maps is informational. */
 let integCfg={sheets:true,maps:true,whatsapp:true,email:true};
+/* Console preferences (synced): thresholds that drive the dashboard early-warning
+   cards and the analytics margin alert. Editable in Settings → Preferences. */
+var PREFS_DEFAULT={marginMin:20,fillWarnDays:45,fillWarnPct:50};
+let prefs=Object.assign({},PREFS_DEFAULT);
 function toggleInteg(k){
   integCfg[k]=integCfg[k]===false;
   audit("settings","integration",k+" "+(integCfg[k]?"on":"off"));
@@ -1111,7 +1147,8 @@ const STORE=[
   {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
   {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
-  {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}}
+  {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}},
+  {k:"prefs",get:function(){return prefs;},set:function(v){if(v&&typeof v==="object")prefs=Object.assign({},PREFS_DEFAULT,v);}}
 ];
 /* One line per meaningful action. Capped so the blob never bloats. */
 function audit(cat,action,detail){
@@ -2860,6 +2897,124 @@ function referralRollup(){
 function upcomingDepartures(){
   return tours.filter(function(t){return t.start>=todayISO;}).sort(function(a,b){return a.start.localeCompare(b.start);}).slice(0,6);
 }
+/* ===== INSIGHTS — receivables ageing, fill-risk / break-even, today panel ======
+   All three read live data and render as dashboard cards; nothing is stored. */
+function daysBetween(a,b){return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5);}
+/* One row per outstanding balance (POC booking per tour, or unlinked booking),
+   bucketed by due date: overdue / due within 7 days / later / no due date. */
+function receivables(){
+  var out=[];
+  (typeof billableBookings==="function"?billableBookings():(bookings||[])).forEach(function(b){
+    if(!b||b.status==="Cancelled")return;
+    var pend=bookingPending(b);if(pend<=0)return;
+    var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
+    if(t&&t.archived)return;
+    var due=bookingDueDate(b)||"";
+    var d=due?daysBetween(todayISO,due):null;      /* +n = days left · −n = overdue */
+    var bucket=(d==null)?"nodate":(d<0?"overdue":(d<=7?"week":"later"));
+    out.push({b:b,t:t,pend:pend,due:due,days:d,bucket:bucket});
+  });
+  var rank={overdue:0,week:1,later:2,nodate:3};
+  out.sort(function(a,c){return (rank[a.bucket]-rank[c.bucket])||((a.due||"9").localeCompare(c.due||"9"));});
+  return out;
+}
+function moneyDueCard(){
+  var rs=receivables();
+  var sum=function(k){return rs.filter(function(r){return r.bucket===k;}).reduce(function(s,r){return s+r.pend;},0);};
+  var total=rs.reduce(function(s,r){return s+r.pend;},0),over=sum("overdue"),week=sum("week");
+  var esc=function(s){return String(s||"").replace(/</g,"&lt;");};
+  var row=function(r){
+    var b=r.b,t=r.t;
+    var col=r.bucket==="overdue"?"var(--coral)":(r.bucket==="week"?"#b45309":"var(--ink-soft)");
+    var when=r.bucket==="overdue"?(-r.days)+" day"+(r.days===-1?"":"s")+" overdue"
+      :(r.bucket==="week"?(r.days===0?"Due today":"Due in "+r.days+" day"+(r.days===1?"":"s"))
+      :(r.due?"Due "+dShort(r.due):"No due date"));
+    return "<div class='list-row md-row md-"+r.bucket+"'>"+
+      "<div class='meta'><div class='t'>"+esc(b.guest)+" <span style='color:var(--ink-soft);font-weight:500'>· "+esc(t?shortName(t):(b.customTour||"—"))+"</span></div>"+
+      "<div class='s' style='color:"+col+";font-weight:600'>"+when+(t&&t.start?" · departs "+dShort(t.start):"")+"</div></div>"+
+      "<div class='md-amt mono'>"+fmt(r.pend)+"</div>"+
+      "<div class='md-act'><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\" title='Send WhatsApp reminder'>WA</button>"+
+      (b.email?"<button class='btn btn-ghost btn-sm' onclick=\"paymentReminderEmail('"+b.id+"')\" title='Email reminder'>✉</button>":"")+"</div></div>";
+  };
+  var section=function(k,label){var list=rs.filter(function(r){return r.bucket===k;});if(!list.length)return "";
+    return "<div class='md-sec'><span>"+label+" · "+list.length+"</span><span class='mono'>"+fmt(list.reduce(function(s,r){return s+r.pend;},0))+"</span></div>"+list.map(row).join("");};
+  return "<div class='card card-pad' id='moneyDueCard'>"+
+    "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Receivables</div><div class='h-sec' style='font-size:15px'>Money due</div></div><span class='pill "+(over>0?"full":(total>0?"open":"completed"))+"'>"+fmt(total)+"</span></div>"+
+    (rs.length?"<div class='md-kpis'><div class='md-k md-overdue'><b class='mono'>"+fmt(over)+"</b><span>Overdue</span></div><div class='md-k md-week'><b class='mono'>"+fmt(week)+"</b><span>Due in 7 days</span></div><div class='md-k'><b class='mono'>"+fmt(total-over-week)+"</b><span>Later / no date</span></div></div>"+
+      section("overdue","Overdue")+section("week","Due this week")+section("later","Later")+section("nodate","No due date set")
+    :"<div class='empty'>All payments are settled. 🎉</div>")+
+  "</div>";
+}
+/* Smallest group size at which the tour's actual per-person price covers the
+   cost-sheet cost for that size. Null when there is no matching rate row. */
+function breakEvenPax(t){
+  var est=(typeof estimateTourCost==="function")?estimateTourCost(t):null;if(!est)return null;
+  var rows=SHEET_DATA[est.key]&&SHEET_DATA[est.key][est.type];if(!rows)return null;
+  var rev=tourRevenue(t),pax=Math.max(tourPaxBooked(t),1);
+  var ppRev=rev>0?rev/pax:null;
+  for(var n=1;n<=10;n++){var d=rows[String(n)];if(!d||!d.total)continue;var pp=(ppRev!=null)?ppRev:(d.perPerson||0);if(pp*n>=d.total)return n;}
+  return null;
+}
+/* Forward-looking fill risk for an upcoming group tour: under the % threshold
+   inside the warning window, or below cost-sheet break-even. */
+function fillRisk(t){
+  if(!t||t.archived||status(t)==="completed"||t.tourType==="session")return null;
+  if(!t.start||t.start<todayISO)return null;
+  var cap=parseInt(t.cap,10)||0;if(!cap)return null;
+  var b=booked(t.id),pct=Math.round(b/cap*100),days=daysBetween(todayISO,t.start);
+  var warnDays=+prefs.fillWarnDays||45,warnPct=+prefs.fillWarnPct||50;
+  if(days>warnDays)return null;
+  var be=breakEvenPax(t),level=null;
+  if(pct<warnPct)level=days<=21?"red":"amber";
+  if(be!=null&&b<be)level="red";
+  if(!level)return null;
+  return {level:level,pct:pct,days:days,booked:b,cap:cap,breakEven:be};
+}
+function underbookedCard(){
+  var list=tours.map(function(t){var r=fillRisk(t);return r?{t:t,r:r}:null;}).filter(Boolean).sort(function(a,b){return a.r.days-b.r.days;});
+  var anyRed=list.some(function(x){return x.r.level==="red";});
+  return "<div class='card card-pad' id='fillRiskCard'>"+
+    "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Early warning</div><div class='h-sec' style='font-size:15px'>Underbooked departures</div></div><span class='pill "+(anyRed?"full":(list.length?"open":"completed"))+"'>"+list.length+"</span></div>"+
+    (list.length?list.map(function(x){var t=x.t,r=x.r;
+      return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'>"+
+        "<span class='fr-dot "+r.level+"'></span>"+
+        "<div class='meta'><div class='t'>"+shortName(t)+" <span class='mono' style='font-size:11px;color:var(--ink-soft)'>"+tourCode(t)+"</span></div>"+
+        "<div class='s'>"+dShort(t.start)+" · in "+r.days+" day"+(r.days===1?"":"s")+" · <b>"+r.booked+"/"+r.cap+" booked ("+r.pct+"%)</b>"+(r.breakEven!=null?" · needs "+r.breakEven+" pax to break even":"")+"</div></div>"+
+        "<span class='fr-bar'><span style='width:"+r.pct+"%'></span></span></div>";
+    }).join("")+"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Flags group tours under "+(+prefs.fillWarnPct||50)+"% full within "+(+prefs.fillWarnDays||45)+" days, or below their cost-sheet break-even. Thresholds: Settings → Preferences.</p>"
+    :"<div class='empty'>No underbooked departures in the warning window. ✓</div>")+
+  "</div>";
+}
+/* Today & next 7 days: departures, pickups, returns and payments falling due. */
+function todayCard(){
+  var in7=function(d){if(!d)return false;var n=daysBetween(todayISO,d);return n>=0&&n<=7;};
+  var live=tours.filter(function(t){return !t.archived;});
+  var deps=live.filter(function(t){return in7(t.start);}).sort(function(a,b){return a.start.localeCompare(b.start);});
+  var rets=live.filter(function(t){return in7(t.end)&&t.end!==t.start;}).sort(function(a,b){return a.end.localeCompare(b.end);});
+  var picks=(ops||[]).filter(opActive).filter(function(o){return in7(o.pickupDate);}).sort(function(a,b){return String(a.pickupDate).localeCompare(String(b.pickupDate));});
+  var pays=receivables().filter(function(r){return r.bucket==="overdue"||r.bucket==="week";});
+  var lab=function(d){var n=daysBetween(todayISO,d);return n===0?"Today":(n===1?"Tomorrow":dShort(d));};
+  var esc=function(s){return String(s||"").replace(/</g,"&lt;");};
+  var item=function(txt,tag,act,arg,cls){return "<div class='list-row td-row' "+(act?"data-action='"+act+"' data-arg='"+arg+"' style='cursor:pointer'":"")+"><span class='td-tag "+(cls||"")+"'>"+tag+"</span><div class='meta'><div class='t' style='font-weight:500'>"+txt+"</div></div></div>";};
+  var rows=[]
+    .concat(deps.map(function(t){return item("Departs · "+esc(shortName(t))+" · "+booked(t.id)+"/"+t.cap+" pax"+(t.guide?" · "+esc(t.guide):""),lab(t.start),"openTour",t.id,"dep");}))
+    .concat(picks.map(function(o){return item("Pickup · "+esc(o.tour)+(o.pickupLoc?" · "+esc(o.pickupLoc):"")+(o.driver&&o.driver!=="—"?" · "+esc(o.driver):""),lab(o.pickupDate),"gotoAlert","op|"+o.id,"pick");}))
+    .concat(rets.map(function(t){return item("Returns · "+esc(shortName(t)),lab(t.end),"openTour",t.id,"ret");}))
+    .concat(pays.slice(0,5).map(function(r){return item("Payment · "+esc(r.b.guest)+" · "+fmt(r.pend),r.bucket==="overdue"?"Overdue":(r.days===0?"Today":"in "+r.days+"d"),"gotoAlert","booking|"+r.b.id,r.bucket==="overdue"?"over":"pay");}));
+  return "<div class='card card-pad' id='todayCard'>"+
+    "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>"+new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})+"</div><div class='h-sec' style='font-size:15px'>Today &amp; next 7 days</div></div><span class='pill plain'>"+rows.length+"</span></div>"+
+    (rows.length?rows.join(""):"<div class='empty'>Nothing scheduled in the next 7 days.</div>")+
+  "</div>";
+}
+function savePrefs(){
+  var g=function(id,d){var e=document.getElementById(id);var v=e?parseFloat(e.value):NaN;return isFinite(v)?v:d;};
+  prefs.marginMin=Math.max(0,Math.min(100,g("pf_margin",PREFS_DEFAULT.marginMin)));
+  prefs.fillWarnDays=Math.max(1,Math.min(365,g("pf_days",PREFS_DEFAULT.fillWarnDays)));
+  prefs.fillWarnPct=Math.max(1,Math.min(100,g("pf_pct",PREFS_DEFAULT.fillWarnPct)));
+  audit("settings","prefs","margin "+prefs.marginMin+"% · fill "+prefs.fillWarnPct+"% within "+prefs.fillWarnDays+"d");
+  persistData();
+  var ok=document.getElementById("pf_ok");if(ok){ok.style.display="inline";setTimeout(function(){ok.style.display="none";},1800);}
+}
 function qaTile(label,icon,onclick){return "<button class='qa-tile' onclick=\""+onclick+"\"><span class='qa-ic'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg></span><span class='qa-lbl'>"+label+"</span></button>";}
 var payFrom="",payTo="";
 function firstBookingDate(){var ds=bookings.map(function(b){return b.start;}).filter(Boolean).sort();return ds.length?ds[0]:"";}
@@ -2930,10 +3085,7 @@ function viewDashboard(){
   const deps=upcomingDepartures();
   const rollup=referralRollup();
   var alerts="";
-  alerts+="<div class='card card-pad'>"+
-    "<div class='section-head'><div class='h-sec' style='font-size:15px'>Pending payments</div><span class='pill "+(totalPending>0?"full":"completed")+"'>"+fmt(totalPending)+"</span></div>"+
-    (pend.length?pend.slice(0,6).map(function(b){var t=tours.find(function(x){return x.id===b.tour;});return "<div class='list-row'><div class='meta'><div class='t'>"+b.guest+" · "+(t?tourLabel(t):(b.customTour||"—"))+"</div><div class='s'>Pending "+fmt(bookingPending(b))+(b.lastPendingDate?" · due "+dShort(b.lastPendingDate):"")+"</div></div><div style='display:flex;gap:6px'><button class='btn btn-primary btn-sm' onclick=\"paymentReminder('"+b.id+"')\" title='WhatsApp'>WA</button>"+(b.email?"<button class='btn btn-ghost btn-sm' onclick=\"paymentReminderEmail('"+b.id+"')\" title='Email'>Email</button>":"")+"</div></div>";}).join(""):"<div class='empty'>All payments are settled. 🎉</div>")+
-  "</div>";
+  alerts+=moneyDueCard();
   alerts+="<div class='card card-pad'>"+
     "<div class='h-sec' style='font-size:15px;margin-bottom:8px'>Upcoming departures</div>"+
     (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+tourLabel(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
@@ -2956,6 +3108,7 @@ function viewDashboard(){
       kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
       kpi("Confirmed Bookings",visibleConfirmed,"confirmed","up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+todayCard()+underbookedCard()+"</div>"+
     "<div class='card card-pad' id='dashOpsBoard' style='margin-top:16px'>"+opsBoardMarkup()+"</div>"+
     alertsCard()+
     "<div id='payPanel' style='margin-top:16px'></div>"+
@@ -3227,7 +3380,9 @@ function tourCard(t){
   var dateLine=isSess
     ?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]).map(function(d){return dShort(d);}).join(" · ")
     :dRangeNice(t.start,t.end);
-  return "<div class='card tour-card"+(isSess?" tc-session":"")+"' data-action='openTour' data-arg='"+t.id+"'>"+
+  var risk=(typeof fillRisk==="function")?fillRisk(t):null;
+  var riskChip=risk?"<span class='tc-chip tc-risk "+risk.level+"' title='Underbooked: "+risk.pct+"% full, departs in "+risk.days+" days"+(risk.breakEven!=null?" · needs "+risk.breakEven+" pax to break even":"")+"'>⚠ "+risk.pct+"% · "+risk.days+"d"+(risk.breakEven!=null?" · BE "+risk.breakEven:"")+"</span>":"";
+  return "<div class='card tour-card"+(isSess?" tc-session":"")+(risk?" tc-risk-"+risk.level:"")+"' data-action='openTour' data-arg='"+t.id+"'>"+
     "<button class='tour-del' title='Delete tour' onclick='event.stopPropagation();deleteTour(\""+t.id+"\")'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button>"+
     "<div class='tc-top'><span class='tc-id' title='Tour ID'>"+tourCode(t)+"</span>"+
       "<button class='tc-chip' onclick='event.stopPropagation();togglePubTour(\""+t.id+"\")' title='"+(t.pub?"Shown on the public departures page — click to unlist":"Not on the public page — click to show it")+"' style='cursor:pointer;border:1px solid "+(t.pub?"var(--sea)":"var(--line)")+";"+(t.pub?"background:var(--sea-soft);color:var(--sea);font-weight:700":"color:var(--ink-soft)")+"'>"+(t.pub?"🌐 Public":"🌐 Private")+"</button>"+
@@ -3241,7 +3396,7 @@ function tourCard(t){
     "<div class='tc-metarow'>"+
       "<span class='tc-chip tc-rev' title='Booked revenue (set per-person rates in the Cost Calculator)'>"+fmt(rev)+"</span>"+
       (t.guide?"<span class='tc-chip' title='Guide'>"+String(t.guide).replace(/'/g,"&#39;")+"</span>":"")+
-      "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+
+      "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+riskChip+
     "</div>"+
     (gArr.length?"<div class='tc-guests'><span>Guests</span>"+gArr.join(", ")+"</div>":"")+
     "<div class='tc-foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+"</span><span style='display:flex;gap:8px;align-items:center'>"+
@@ -7431,6 +7586,16 @@ function viewSettings(){
       ((auditLog||[]).slice(0,60).map(function(a){var d=new Date(a.at);return "<div style='display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft)'><span class='mono' style='color:var(--ink-soft);white-space:nowrap'>"+d.toLocaleDateString("en-GB",{day:"2-digit",month:"short"})+" "+d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+"</span><span><b>"+a.cat+"</b> "+a.action+" · "+String(a.detail||"").replace(/</g,"&lt;")+" <span style='color:var(--ink-soft)'>· "+String(a.who||"").replace(/</g,"&lt;")+"</span></span></div>";}).join("")||"<div class='empty'>Nothing logged yet — actions like creating tours, bookings, quotes and deletes appear here.</div>")+
     "</div>"+
     ((auditLog||[]).length?"<button class='btn btn-ghost btn-sm' style='margin-top:8px;color:var(--coral)' onclick=\"if(confirm('Clear the activity log?')){auditLog=[];persistData();refreshSettings();}\">Clear log</button>":"")+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Preferences</div><div class='h-sec' style='margin-bottom:6px'>Warning thresholds</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Drive the dashboard's <b>Underbooked departures</b> card, the ⚠ chip on tour cards and the margin alert in Analytics. Saved to your workspace.</p>"+
+    "<div class='cost-grid' style='max-width:720px'>"+
+      "<div class='field'><label>Flag tours under (% full)</label><input class='input mono' type='number' id='pf_pct' min='1' max='100' value='"+(+prefs.fillWarnPct||50)+"'></div>"+
+      "<div class='field'><label>…within (days before departure)</label><input class='input mono' type='number' id='pf_days' min='1' max='365' value='"+(+prefs.fillWarnDays||45)+"'></div>"+
+      "<div class='field'><label>Minimum profit margin (%)</label><input class='input mono' type='number' id='pf_margin' min='0' max='100' value='"+(+prefs.marginMin||20)+"'></div>"+
+    "</div>"+
+    "<div style='display:flex;gap:10px;align-items:center'><button class='btn btn-primary btn-sm' onclick='savePrefs()'>Save preferences</button><span id='pf_ok' style='display:none;font-size:12.5px;color:var(--forest);font-weight:600'>Saved ✓</span></div>"+
   "</div>"+
   "</section>";
 }
