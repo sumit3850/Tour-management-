@@ -755,7 +755,16 @@ th.bk-quick,td.bk-quick{display:none}
 }
 
 /* ===== Pre-departure checklist (tour modal) + readiness pill (tour card) ===== */
-.chk-box{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.chk-box{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.chk-dd summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;padding:4px 0;user-select:none}
+.chk-dd summary::-webkit-details-marker{display:none}
+.chk-dd summary .chk-sum{margin-left:auto}
+.chk-dd .chk-chev{width:16px;height:16px;color:var(--ink-soft);transition:transform .18s;flex:none}
+.chk-dd[open] .chk-chev{transform:rotate(180deg)}
+.chk-dd .chk-bar{margin:6px 0 4px}
+.tc-chk{margin-top:10px;padding-top:6px;border-top:1px solid var(--line-soft);cursor:default}
+.tc-chk .chk-title{font-size:10.5px}.tc-chk .chk-sum{font-size:12px}
+.tc-chk .chk-item{font-size:12.5px;padding:5px 0}.tc-chk .chk-add #chkNew,.tc-chk .chk-add input{font-size:12px}
 .chk-head{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
 .chk-head>div{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .chk-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700}
@@ -980,7 +989,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 242</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 243</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -989,7 +998,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 242</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 243</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3269,25 +3278,22 @@ function chkToggle(tid,key,on){
   if(on)t.chk.done[key]=true;else delete t.chk.done[key];
   t.updatedAt=new Date().toISOString();
   persistData();
-  var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
-  renderTours();refreshDashboardIfActive();
+  chkRefresh(tid);refreshDashboardIfActive();
 }
 function chkAdd(tid){
   var t=tours.find(function(x){return x.id===tid;});if(!t)return;
-  var inp=document.getElementById("chkNew");var lab=inp?inp.value.trim():"";if(!lab)return;
-  var offEl=document.getElementById("chkNewOff");var off=offEl?parseInt(offEl.value,10):7;if(!isFinite(off))off=7;
+  var inp=document.getElementById("chkNew_"+tid);var lab=inp?inp.value.trim():"";if(!lab)return;
+  var offEl=document.getElementById("chkNewOff_"+tid);var off=offEl?parseInt(offEl.value,10):7;if(!isFinite(off))off=7;
   t.chk=t.chk||{done:{},extra:[]};t.chk.extra=t.chk.extra||[];
   t.chk.extra.push({k:"x"+Date.now(),label:lab.slice(0,80),offset:Math.max(0,off)});
   t.updatedAt=new Date().toISOString();persistData();
-  var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
-  renderTours();
+  chkRefresh(tid);
 }
 function chkRemove(tid,key){
   var t=tours.find(function(x){return x.id===tid;});if(!t||!t.chk)return;
   t.chk.extra=(t.chk.extra||[]).filter(function(x){return x.k!==key;});if(t.chk.done)delete t.chk.done[key];
   t.updatedAt=new Date().toISOString();persistData();
-  var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
-  renderTours();
+  chkRefresh(tid);
 }
 /* Quick actions on a booking row (phone cards): WhatsApp — a payment reminder
    when a balance is pending, otherwise a plain hello — and one-tap Mark paid. */
@@ -3344,12 +3350,18 @@ function installHintCard(){
 }
 function dismissInstallHint(){try{localStorage.setItem("ieo_install_hint","1");}catch(e){}var e=document.getElementById("installHint");if(e)e.remove();}
 function refreshDashboardIfActive(){var d=document.getElementById("v-dashboard");if(d&&d.classList.contains("active")&&typeof refreshDashboard==="function")refreshDashboard();}
+/* Collapsible checklist. The same markup is hosted in the tour modal and on
+   every tour card (<div class="chk-host" data-chk="tourId">); open/closed is
+   remembered per tour for the session so ticking an item never collapses it. */
+var _chkOpen={};
+function chkRefresh(tid){var t=tours.find(function(x){return x.id===tid;});if(!t)return;document.querySelectorAll("[data-chk='"+tid+"']").forEach(function(h){h.innerHTML=checklistMarkup(t);});}
 function checklistMarkup(t){
   var items=tourChecklist(t);if(!items.length)return "";
   var r=readiness(t);var esc=function(s){return String(s||"").replace(/</g,"&lt;");};
   var col=r.pct>=100?"var(--forest)":(r.overdue?"var(--coral)":(r.pct>=60?"#b45309":"var(--ink-soft)"));
-  return "<div class='chk-head'><div><span class='chk-title'>Pre-departure checklist</span><span class='chk-sum' style='color:"+col+"'>"+r.done+"/"+r.total+" ready"+(r.overdue?" · "+r.overdue+" overdue":"")+"</span></div>"+
-    "<div class='chk-bar'><span style='width:"+r.pct+"%;background:"+col+"'></span></div></div>"+
+  return "<details class='chk-dd'"+(_chkOpen[t.id]?" open":"")+" ontoggle=\"_chkOpen['"+t.id+"']=this.open\">"+
+    "<summary><span class='chk-title'>Pre-departure checklist</span><span class='chk-sum' style='color:"+col+"'>\u2713 "+r.done+"/"+r.total+(r.overdue?" \u00b7 "+r.overdue+" overdue":"")+"</span><svg class='chk-chev' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg></summary>"+
+    "<div class='chk-bar'><span style='width:"+r.pct+"%;background:"+col+"'></span></div>"+
     "<div class='chk-list'>"+items.map(function(i){
       var when=i.due?(i.overdue?"overdue · was due "+dShort(i.due):(i.done?"":"by "+dShort(i.due)+" (T−"+i.offset+")")):"";
       return "<label class='chk-item"+(i.done?" done":"")+(i.overdue?" over":"")+"'><input type='checkbox' "+(i.done?"checked":"")+" onchange=\"chkToggle('"+t.id+"','"+i.k+"',this.checked)\">"+
@@ -3357,7 +3369,8 @@ function checklistMarkup(t){
         "<span class='chk-when'>"+when+"</span>"+
         (i.custom?"<button class='chk-x' title='Remove item' onclick=\"event.preventDefault();chkRemove('"+t.id+"','"+i.k+"')\">×</button>":"")+"</label>";
     }).join("")+"</div>"+
-    "<div class='chk-add'><input class='input' id='chkNew' placeholder='Add an item…' onkeydown=\"if(event.key==='Enter'){chkAdd('"+t.id+"');}\"><input class='input mono' id='chkNewOff' type='number' min='0' value='7' title='Days before departure'><span class='chk-add-l'>days before</span><button class='btn btn-ghost btn-sm' onclick=\"chkAdd('"+t.id+"')\">Add</button></div>";
+    "<div class='chk-add'><input class='input' id='chkNew_"+t.id+"' placeholder='Add an item…' onkeydown=\"if(event.key==='Enter'){chkAdd('"+t.id+"');}\"><input class='input mono' id='chkNewOff_"+t.id+"' type='number' min='0' value='7' title='Days before departure'><span class='chk-add-l'>days before</span><button class='btn btn-ghost btn-sm' onclick=\"chkAdd('"+t.id+"')\">Add</button></div>"+
+  "</details>";
 }
 /* ===== MESSAGE TEMPLATES ======================================================
    Reusable guest messages built from the booking + tour, sent as WhatsApp deep
@@ -4000,9 +4013,10 @@ function tourCard(t){
       "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+riskChip+
     "</div>"+
     (gArr.length?"<div class='tc-guests'><span>Guests</span>"+gArr.join(", ")+"</div>":"")+
-    "<div class='tc-foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+(function(){var r=(!isSess&&status(t)!=="completed"&&typeof readiness==="function")?readiness(t):null;if(!r)return "";var cls=r.pct>=100?"ok":(r.overdue?"bad":(r.pct>=60?"mid":""));return "<span class='pill tc-ready "+cls+"' title='Pre-departure checklist: "+r.done+" of "+r.total+" done"+(r.overdue?", "+r.overdue+" overdue":"")+"'>✓ "+r.done+"/"+r.total+"</span>";})()+"</span><span style='display:flex;gap:8px;align-items:center'>"+
+    "<div class='tc-foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+"</span><span style='display:flex;gap:8px;align-items:center'>"+
       (status(t)==="completed"?"<button class='btn btn-ghost btn-sm' style='padding:3px 10px;font-size:11px' onclick='event.stopPropagation();archiveTour(\""+t.id+"\")' title='Move to the Archived tab'>📦 Archive</button>":"")+
       "<span class='tc-pct'>"+pct+"% full</span></span></div>"+
+    ((!isSess&&status(t)!=="completed")?"<div class='chk-host tc-chk' data-chk='"+t.id+"' onclick='event.stopPropagation()'>"+checklistMarkup(t)+"</div>":"")+
   "</div>";
 }
 /* ===== Pull participants from another tour card ==============================
@@ -8870,7 +8884,7 @@ function openTour(id){
         "<button class='btn btn-ghost btn-sm' onclick=\"openItinerary('"+id+"')\">"+((t.itinerary||[]).some(function(d){return d.title||d.plan;})?"Itinerary \u2713":"Itinerary")+"</button>"+
       "</div>"+
       (function(){var h=itineraryHTML(t);return h?"<div class='itin-box'><div class='chk-title' style='margin-bottom:4px'>Day-by-day itinerary</div>"+h+"</div>":"";})()+
-      (_isSess?"":"<div class='chk-box' id='chkBox'>"+checklistMarkup(t)+"</div>")+
+      (_isSess?"":"<div class='chk-box chk-host' data-chk='"+id+"'>"+checklistMarkup(t)+"</div>")+
       "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='"+id+"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
       "<div class='tbl-wrap'><table><thead><tr><th>PoC</th><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th><th></th></tr></thead><tbody>"+(bs.map(x=>"<tr><td><button class='poc-star "+(t.pocId===x.id?"on":"")+"' title='Mark as point of contact' onclick=\"markPoc('"+id+"','"+x.id+"')\">"+(t.pocId===x.id?"★":"☆")+"</button></td><td class='strong nowrap'>"+x.guest+((x.documents&&x.documents.length)?" <a href='#' title='"+x.documents.length+" document(s) uploaded on the registration form' onclick=\"event.preventDefault();event.stopPropagation();openDoc('"+String((x.documents[0]&&(x.documents[0].url||x.documents[0]))||"").replace(/'/g,"")+"')\" style='color:var(--sea);font-size:12px;font-weight:700;text-decoration:none'>\ud83d\udcc4</a>":"")+((x.members&&String(x.members).trim())?"<div class='s' style='font-size:11px;color:var(--ink-soft);font-weight:400;white-space:normal'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Modify booking'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No bookings yet.</td></tr>")+"</tbody></table></div>"+
       (wl.length?"<div class='h-sec' style='font-size:14px;margin:16px 0 6px'>Waitlist</div>"+wl.map(w=>"<div class='list-row'><div class='meta'><div class='t'>"+w.guest+"</div></div><span class='pill plain'>"+w.party+" pax</span></div>").join(""):
