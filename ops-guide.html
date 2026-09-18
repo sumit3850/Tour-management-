@@ -345,6 +345,7 @@ function renderList(){
       (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       opLegsSummaryHtml(o)+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
+      ((o.itinerary&&o.itinerary.length)?"<div class='remarks'><b>Itinerary</b>"+o.itinerary.map(function(d){return "<div style='margin-top:6px'><b>Day "+d.day+(d.date?" \u00b7 "+dmy(d.date):"")+"</b>"+(d.title?" \u2014 "+String(d.title).replace(/</g,'&lt;'):"")+(d.plan?"<div style='opacity:.85;margin-top:2px;line-height:1.45'>"+String(d.plan).replace(/</g,'&lt;').replace(/\n/g,'<br>')+"</div>":"")+"</div>";}).join("")+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
         "<button class='"+(o.status==='In progress'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
