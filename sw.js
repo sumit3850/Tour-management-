@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v129"; /* v129: label : value rows (inbox, customer detail), DD/MM/YYYY everywhere, nowrap group-quote table, cost-sheet buttons no longer float, help text removed, phone top bar puts the heading above the buttons */
+var CACHE = "ie-ops-v130"; /* v130: phone heading "Section : Page" on one line, bigger tap targets, tour delete button always visible on touch, zoom control hidden on phones */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
