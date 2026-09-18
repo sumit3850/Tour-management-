@@ -727,6 +727,34 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 /* Per-person / total-quoted figures never split across lines */
 .cs-table td[id^="cs_pp_"],.cs-table td[id^="cs_total_"]{white-space:nowrap}
 
+/* ===== Pre-departure checklist (tour modal) + readiness pill (tour card) ===== */
+.chk-box{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.chk-head{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.chk-head>div{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.chk-title{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700}
+.chk-sum{font-size:12.5px;font-weight:700}
+.chk-bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden}.chk-bar span{display:block;height:100%;border-radius:4px;transition:width .2s}
+.chk-list{display:flex;flex-direction:column}
+.chk-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:13px;cursor:pointer}
+.chk-item:last-child{border-bottom:none}
+.chk-item input{width:17px;height:17px;flex:none;accent-color:#0a6ed1;cursor:pointer;margin:0}
+.chk-item .chk-lab{flex:1;min-width:0}
+.chk-item .chk-lab em{font-style:normal;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--sea);background:var(--sea-soft);border-radius:4px;padding:0 5px;margin-left:6px}
+.chk-item.done .chk-lab{color:var(--ink-soft);text-decoration:line-through}
+.chk-item .chk-when{font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
+.chk-item.over .chk-when{color:var(--coral);font-weight:700}
+.chk-item .chk-x{border:none;background:transparent;color:var(--ink-soft);font-size:16px;line-height:1;padding:0 4px;cursor:pointer}.chk-item .chk-x:hover{color:var(--coral)}
+.chk-add{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.chk-add #chkNew{flex:1 1 160px;padding:7px 10px;font-size:13px}
+.chk-add #chkNewOff{width:60px;padding:7px 8px;font-size:13px;text-align:right}
+.chk-add-l{font-size:11.5px;color:var(--ink-soft)}
+.pill.tc-ready{background:var(--surface-2);color:var(--ink-soft);border:1px solid var(--line)}
+.pill.tc-ready::before{display:none}
+.pill.tc-ready.mid{background:#fff4e0;color:#b45309;border-color:transparent}
+.pill.tc-ready.ok{background:#e4ece6;color:#3f6d57;border-color:transparent}
+.pill.tc-ready.bad{background:var(--coral-soft);color:var(--coral);border-color:transparent}
+@media(max-width:600px){.chk-item{flex-wrap:wrap}.chk-item .chk-when{flex-basis:100%;padding-left:27px;margin-top:-4px}}
+
 /* ===== Dashboard insight cards: Money due · Underbooked · Today ===== */
 .md-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px}
 .md-k{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;min-width:0}
@@ -827,7 +855,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 236</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 237</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -836,7 +864,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 236</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 237</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1103,6 +1131,10 @@ let leads=[];
    app the "self-healing" sync re-created every deleted lead & booking from the
    surviving submission rows. This list travels with the workspace instead. */
 let deletedSubs=[];
+/* Recently deleted (30-day trash): soft-deleted tours (with their bookings) and
+   bookings, restorable from Tours → Trash. Purged automatically after 30 days. */
+let trash=[];
+var TRASH_DAYS=30;
 const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
 let customers=[];
 let vehicles=[];
@@ -1148,7 +1180,8 @@ const STORE=[
   {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
   {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}},
-  {k:"prefs",get:function(){return prefs;},set:function(v){if(v&&typeof v==="object")prefs=Object.assign({},PREFS_DEFAULT,v);}}
+  {k:"prefs",get:function(){return prefs;},set:function(v){if(v&&typeof v==="object")prefs=Object.assign({},PREFS_DEFAULT,v);}},
+  {k:"trash",arr:1,get:function(){return trash;},set:function(v){if(Array.isArray(v))trash=v;}}
 ];
 /* One line per meaningful action. Capped so the blob never bloats. */
 function audit(cat,action,detail){
@@ -2877,6 +2910,11 @@ function buildAlerts(){
   });
   tours.filter(function(t){return t.start>=todayISO;}).forEach(function(t){
     if(!t.pocId&&bookings.some(function(b){return b.tour===t.id;}))A.push({level:"warn",text:"No point-of-contact set for "+shortName(t),kind:"tour",arg:t.id});
+    /* checklist items past their T-minus date on tours inside the next 30 days */
+    if(!t.archived&&typeof tourChecklist==="function"&&daysBetween(todayISO,t.start)<=30){
+      var over=tourChecklist(t).filter(function(i){return i.overdue;});
+      if(over.length)A.push({level:over.length>2?"err":"warn",text:shortName(t)+" ("+dShort(t.start)+"): "+over.length+" checklist item"+(over.length===1?"":"s")+" overdue — "+over.slice(0,3).map(function(i){return i.label;}).join(", ")+(over.length>3?"…":""),kind:"tour",arg:t.id});
+    }
   });
   return A;
 }
@@ -3005,6 +3043,83 @@ function todayCard(){
     "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>"+new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})+"</div><div class='h-sec' style='font-size:15px'>Today &amp; next 7 days</div></div><span class='pill plain'>"+rows.length+"</span></div>"+
     (rows.length?rows.join(""):"<div class='empty'>Nothing scheduled in the next 7 days.</div>")+
   "</div>";
+}
+/* ===== PRE-DEPARTURE CHECKLIST ================================================
+   One list per group tour, built from a template with T-minus deadlines. Items
+   marked `auto` derive their state live from the tour/booking/ops data (they can
+   still be ticked by hand); the rest are ticked manually. Ticks and custom items
+   live on the tour as t.chk = {done:{key:true}, extra:[{k,label,offset}]}. */
+var CHK_TEMPLATE=[
+  {k:"deposit",  label:"Advance / deposit received",          offset:60, auto:function(t){return (parseFloat(t.tourDeposit)||0)>0||(t.pocId&&bookings.some(function(b){return b.id===t.pocId&&bookingDeposit(b)>0;}));}},
+  {k:"guide",    label:"Guide confirmed",                     offset:30, auto:function(t){return !!(t.guide&&t.guide!=="—");}},
+  {k:"stay",     label:"Accommodation confirmed",             offset:30, auto:function(t){return !!(t.stay&&t.stay!=="—");}},
+  {k:"tickets",  label:"Ship / ferry / flight tickets booked", offset:21},
+  {k:"permits",  label:"Permits arranged (RAP / forest / island)", offset:14},
+  {k:"vehicle",  label:"Vehicle & driver assigned",           offset:14, auto:function(t){return (ops||[]).some(function(o){return o.fromTour===t.id&&opActive(o)&&o.veh&&o.veh!=="—"&&o.driver&&o.driver!=="—";});}},
+  {k:"docs",     label:"Guest IDs / documents collected",     offset:14},
+  {k:"balance",  label:"Balance payment cleared",             offset:15, auto:function(t){return tourPayStatus(t)==="Paid";}},
+  {k:"brief",    label:"Pre-departure info sent to guests",   offset:7},
+  {k:"pickup",   label:"Pickup time confirmed with driver & POC", offset:2}
+];
+function tourChecklist(t){
+  if(!t||t.tourType==="session")return [];
+  var chk=t.chk||{done:{},extra:[]};var done=chk.done||{};
+  var start=t.start||"";
+  var mk=function(def,custom){
+    var due=start?(function(){var d=new Date(start+"T00:00:00");d.setDate(d.getDate()-(+def.offset||0));return d.toISOString().slice(0,10);})():"";
+    var manual=!!done[def.k];
+    var auto=(!custom&&typeof def.auto==="function")?!!def.auto(t):false;
+    var isDone=manual||auto;
+    return {k:def.k,label:def.label,offset:+def.offset||0,due:due,done:isDone,auto:auto&&!manual,custom:!!custom,overdue:!isDone&&!!due&&due<todayISO&&status(t)!=="completed"};
+  };
+  return CHK_TEMPLATE.map(function(d){return mk(d,false);}).concat((chk.extra||[]).map(function(d){return mk(d,true);}));
+}
+function readiness(t){
+  var items=tourChecklist(t);if(!items.length)return null;
+  var done=items.filter(function(i){return i.done;}).length,over=items.filter(function(i){return i.overdue;}).length;
+  return {done:done,total:items.length,pct:Math.round(done/items.length*100),overdue:over};
+}
+function chkToggle(tid,key,on){
+  var t=tours.find(function(x){return x.id===tid;});if(!t)return;
+  t.chk=t.chk||{done:{},extra:[]};t.chk.done=t.chk.done||{};
+  if(on)t.chk.done[key]=true;else delete t.chk.done[key];
+  t.updatedAt=new Date().toISOString();
+  persistData();
+  var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
+  renderTours();refreshDashboardIfActive();
+}
+function chkAdd(tid){
+  var t=tours.find(function(x){return x.id===tid;});if(!t)return;
+  var inp=document.getElementById("chkNew");var lab=inp?inp.value.trim():"";if(!lab)return;
+  var offEl=document.getElementById("chkNewOff");var off=offEl?parseInt(offEl.value,10):7;if(!isFinite(off))off=7;
+  t.chk=t.chk||{done:{},extra:[]};t.chk.extra=t.chk.extra||[];
+  t.chk.extra.push({k:"x"+Date.now(),label:lab.slice(0,80),offset:Math.max(0,off)});
+  t.updatedAt=new Date().toISOString();persistData();
+  var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
+  renderTours();
+}
+function chkRemove(tid,key){
+  var t=tours.find(function(x){return x.id===tid;});if(!t||!t.chk)return;
+  t.chk.extra=(t.chk.extra||[]).filter(function(x){return x.k!==key;});if(t.chk.done)delete t.chk.done[key];
+  t.updatedAt=new Date().toISOString();persistData();
+  var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
+  renderTours();
+}
+function refreshDashboardIfActive(){var d=document.getElementById("v-dashboard");if(d&&d.classList.contains("active")&&typeof refreshDashboard==="function")refreshDashboard();}
+function checklistMarkup(t){
+  var items=tourChecklist(t);if(!items.length)return "";
+  var r=readiness(t);var esc=function(s){return String(s||"").replace(/</g,"&lt;");};
+  var col=r.pct>=100?"var(--forest)":(r.overdue?"var(--coral)":(r.pct>=60?"#b45309":"var(--ink-soft)"));
+  return "<div class='chk-head'><div><span class='chk-title'>Pre-departure checklist</span><span class='chk-sum' style='color:"+col+"'>"+r.done+"/"+r.total+" ready"+(r.overdue?" · "+r.overdue+" overdue":"")+"</span></div>"+
+    "<div class='chk-bar'><span style='width:"+r.pct+"%;background:"+col+"'></span></div></div>"+
+    "<div class='chk-list'>"+items.map(function(i){
+      var when=i.due?(i.overdue?"overdue · was due "+dShort(i.due):(i.done?"":"by "+dShort(i.due)+" (T−"+i.offset+")")):"";
+      return "<label class='chk-item"+(i.done?" done":"")+(i.overdue?" over":"")+"'><input type='checkbox' "+(i.done?"checked":"")+" onchange=\"chkToggle('"+t.id+"','"+i.k+"',this.checked)\">"+
+        "<span class='chk-lab'>"+esc(i.label)+(i.auto?" <em title='Detected automatically from the tour data'>auto</em>":"")+"</span>"+
+        "<span class='chk-when'>"+when+"</span>"+
+        (i.custom?"<button class='chk-x' title='Remove item' onclick=\"event.preventDefault();chkRemove('"+t.id+"','"+i.k+"')\">×</button>":"")+"</label>";
+    }).join("")+"</div>"+
+    "<div class='chk-add'><input class='input' id='chkNew' placeholder='Add an item…' onkeydown=\"if(event.key==='Enter'){chkAdd('"+t.id+"');}\"><input class='input mono' id='chkNewOff' type='number' min='0' value='7' title='Days before departure'><span class='chk-add-l'>days before</span><button class='btn btn-ghost btn-sm' onclick=\"chkAdd('"+t.id+"')\">Add</button></div>";
 }
 function savePrefs(){
   var g=function(id,d){var e=document.getElementById(id);var v=e?parseFloat(e.value):NaN;return isFinite(v)?v:d;};
@@ -3360,7 +3475,7 @@ let curTab="All";
 function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
-      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed","Archived"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
+      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed","Archived","Trash"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
       "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button>"+
       "<span style='display:inline-flex;gap:4px;align-items:center'><button class='btn btn-ghost btn-sm' onclick='tourZoom(-1)' title='Zoom out' style='min-width:34px;font-weight:800'>−</button><span class='mono' id='tzPct' style='font-size:11px;color:var(--ink-soft);min-width:36px;text-align:center'>100%</span><button class='btn btn-ghost btn-sm' onclick='tourZoom(1)' title='Zoom in' style='min-width:34px;font-weight:800'>+</button></span>"+
       "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
@@ -3399,7 +3514,7 @@ function tourCard(t){
       "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+riskChip+
     "</div>"+
     (gArr.length?"<div class='tc-guests'><span>Guests</span>"+gArr.join(", ")+"</div>":"")+
-    "<div class='tc-foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+"</span><span style='display:flex;gap:8px;align-items:center'>"+
+    "<div class='tc-foot'><span class='pills'>"+pill(seatStatus(t))+payPill(tourPayStatus(t))+(function(){var r=(!isSess&&status(t)!=="completed"&&typeof readiness==="function")?readiness(t):null;if(!r)return "";var cls=r.pct>=100?"ok":(r.overdue?"bad":(r.pct>=60?"mid":""));return "<span class='pill tc-ready "+cls+"' title='Pre-departure checklist: "+r.done+" of "+r.total+" done"+(r.overdue?", "+r.overdue+" overdue":"")+"'>✓ "+r.done+"/"+r.total+"</span>";})()+"</span><span style='display:flex;gap:8px;align-items:center'>"+
       (status(t)==="completed"?"<button class='btn btn-ghost btn-sm' style='padding:3px 10px;font-size:11px' onclick='event.stopPropagation();archiveTour(\""+t.id+"\")' title='Move to the Archived tab'>📦 Archive</button>":"")+
       "<span class='tc-pct'>"+pct+"% full</span></span></div>"+
   "</div>";
@@ -3469,7 +3584,7 @@ function tourTabOf(t){
   return "All";
 }
 function refreshTourTabCounts(){
-  var c={All:0,Upcoming:0,Ongoing:0,Completed:0,Archived:0};
+  var c={All:0,Upcoming:0,Ongoing:0,Completed:0,Archived:0,Trash:(trash||[]).length};
   (tours||[]).forEach(function(t){var tab=tourTabOf(t);if(tab!=="Archived")c.All++;if(c[tab]!=null&&tab!=="All")c[tab]++;});
   document.querySelectorAll("#tourTabs .tab").forEach(function(b){
     var k=b.dataset.arg;if(c[k]==null)return;
@@ -3603,6 +3718,7 @@ function renderTours(filter=curTab){
   const grid=document.getElementById("tourGrid");if(!grid)return;
   refreshTourTabCounts();
   if(filter==="Archived"){renderArchive(grid);applyTourZoom();persistData();return;}
+  if(filter==="Trash"){renderTrash(grid);applyTourZoom();return;}
   const list=tours.filter(t=>{if(t.archived)return false;const s=status(t);
     if(filter==="Completed")return s==="completed";
     if(filter==="Upcoming")return s!=="completed"&&new Date(t.start)>new Date(todayISO);
@@ -3621,7 +3737,67 @@ function renderTours(filter=curTab){
   applyTourZoom();
   persistData();
 }
-function deleteTour(id){if(!confirm("Delete this tour?"))return;var _t=tours.find(function(t){return t.id===id;});if(_t)audit("tour","deleted",tourCode(_t)+" · "+(_t.name||""));tours=tours.filter(function(t){return t.id!==id;});renderTours();renderCalendar();}
+/* Soft delete: the tour and its bookings move to the trash (restorable for 30
+   days from Tours → Trash) instead of vanishing on one tap. */
+function deleteTour(id){
+  var _t=tours.find(function(t){return t.id===id;});if(!_t)return;
+  if(!confirm("Move this tour to the trash?\n\nIt (and its bookings) can be restored from Tours → Trash for "+TRASH_DAYS+" days."))return;
+  var bs=bookings.filter(function(b){return b.tour===id;});
+  trash.unshift({id:"TR"+Date.now(),kind:"tour",at:new Date().toISOString(),label:tourCode(_t)+" · "+(_t.name||shortName(_t)),sub:dRangeNice(_t.start,_t.end)+" · "+bs.length+" booking"+(bs.length===1?"":"s"),data:JSON.parse(JSON.stringify(_t)),bookings:JSON.parse(JSON.stringify(bs))});
+  audit("tour","trashed",tourCode(_t)+" · "+(_t.name||""));
+  tours=tours.filter(function(t){return t.id!==id;});
+  bookings=bookings.filter(function(b){return b.tour!==id;});
+  persistData();renderTours();renderCalendar();renderBookings();
+}
+function restoreTrash(tid){
+  var i=trash.findIndex(function(x){return x.id===tid;});if(i<0)return;
+  var e=trash[i];
+  if(e.kind==="tour"){
+    if(tours.some(function(t){return t.id===e.data.id;})){alert("A tour with this ID already exists — restore skipped.");return;}
+    tours.push(e.data);
+    (e.bookings||[]).forEach(function(b){if(!bookings.some(function(x){return x.id===b.id;}))bookings.push(b);});
+    ensureTourCodes();
+  }else if(e.kind==="booking"){
+    if(bookings.some(function(b){return b.id===e.data.id;})){alert("This booking already exists — restore skipped.");return;}
+    bookings.push(e.data);
+  }
+  trash.splice(i,1);
+  audit(e.kind,"restored",e.label);
+  persistData();renderTours();renderCalendar();renderBookings();if(typeof renderCustomers==="function")renderCustomers();
+}
+function purgeTrash(tid){
+  var e=trash.find(function(x){return x.id===tid;});if(!e)return;
+  if(!confirm("Delete \""+e.label+"\" permanently? This cannot be undone."))return;
+  trash=trash.filter(function(x){return x.id!==tid;});
+  audit(e.kind,"deleted",e.label);
+  persistData();renderTours();
+}
+function emptyTrash(){
+  if(!trash.length)return;
+  if(!confirm("Permanently delete all "+trash.length+" item"+(trash.length===1?"":"s")+" in the trash?"))return;
+  audit("trash","emptied",trash.length+" items");trash=[];persistData();renderTours();
+}
+/* Auto-purge anything older than TRASH_DAYS (runs at boot). */
+function purgeOldTrash(){
+  var cut=Date.now()-TRASH_DAYS*864e5;var n=trash.length;
+  trash=trash.filter(function(x){var t=Date.parse(x.at||"");return !(t&&t<cut);});
+  if(trash.length!==n)persistData();
+}
+function renderTrash(grid){
+  var esc=function(s){return String(s||"").replace(/</g,"&lt;");};
+  var rows=trash.slice().sort(function(a,b){return (b.at||"").localeCompare(a.at||"");});
+  grid.innerHTML="<div class='card' style='grid-column:1/-1'>"+
+    "<div class='card-pad' style='padding-bottom:8px'><div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Recently deleted</div><div class='h-sec' style='font-size:15px'>"+rows.length+" item"+(rows.length===1?"":"s")+" in the trash</div></div>"+
+      (rows.length?"<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='emptyTrash()'>Empty trash</button>":"")+"</div>"+
+      "<p style='font-size:12px;color:var(--ink-soft);margin:0'>Deleted tours (with their bookings) and bookings stay here for "+TRASH_DAYS+" days, then are removed automatically. Restore puts them back exactly as they were.</p></div>"+
+    "<div class='tbl-wrap'><table><thead><tr><th>Type</th><th>Item</th><th>Details</th><th>Deleted</th><th>Expires</th><th></th></tr></thead><tbody>"+
+    (rows.map(function(e){
+      var at=Date.parse(e.at||"")||Date.now();var left=Math.max(0,Math.ceil((at+TRASH_DAYS*864e5-Date.now())/864e5));
+      return "<tr><td><span class='pill "+(e.kind==="tour"?"open":"plain")+"'>"+(e.kind==="tour"?"Tour":"Booking")+"</span></td><td class='strong'>"+esc(e.label)+"</td><td style='color:var(--ink-soft)'>"+esc(e.sub||"")+"</td><td class='nowrap'>"+dShort(String(e.at||"").slice(0,10))+"</td><td class='nowrap "+(left<=5?"strong":"")+"' style='"+(left<=5?"color:var(--coral)":"")+"'>in "+left+" day"+(left===1?"":"s")+"</td>"+
+        "<td><div class='tbl-actions'><button class='btn btn-primary btn-sm' onclick=\"restoreTrash('"+e.id+"')\">Restore</button><button class='btn btn-ghost btn-sm' style='color:var(--coral)' title='Delete permanently' onclick=\"purgeTrash('"+e.id+"')\">Delete</button></div></td></tr>";
+    }).join("")||"<tr><td colspan='6' class='empty'>The trash is empty. Deleted tours and bookings will appear here for "+TRASH_DAYS+" days.</td></tr>")+
+    "</tbody></table></div></div>";
+}
 function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");renderTours(f);}
 
 /* ===== CALENDAR ===== */
@@ -3860,13 +4036,15 @@ function ebRecalc(){
   penEl.value=Math.max(total-dep,0);
 }
 function deleteBooking(id){
-  if(!confirm("Delete this booking?"))return;
-  var b=bookings.find(function(x){return x.id===id;});
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  if(!confirm("Move this booking to the trash?\n\nIt can be restored from Tours → Trash for "+TRASH_DAYS+" days."))return;
   /* If this booking was auto-created from a guest submission, retire that
      submission too — otherwise auto-processing regenerates the booking on the
      next sync. The guest's details remain in the Customer record. */
-  if(b&&b.fromSub)retireSourceSub(b.fromSub);
-  if(b)audit("booking","deleted",b.guest+" · "+(b.customTour||b.tour||""));
+  if(b.fromSub)retireSourceSub(b.fromSub);
+  var _bt=b.tour?tours.find(function(t){return t.id===b.tour;}):null;
+  trash.unshift({id:"TR"+Date.now(),kind:"booking",at:new Date().toISOString(),label:b.guest+" · "+(_bt?tourCode(_bt)+" · "+shortName(_bt):(b.customTour||"—")),sub:(b.start?dRangeNice(b.start,b.end)+" · ":"")+(b.party||1)+" pax",data:JSON.parse(JSON.stringify(b))});
+  audit("booking","trashed",b.guest+" · "+(b.customTour||b.tour||""));
   bookings=bookings.filter(function(x){return x.id!==id;});
   persistData();renderBookings();renderTours();renderCalendar();
 }
@@ -8192,6 +8370,7 @@ function openTour(id){
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourReservation('"+id+"')\">Guide Reservation</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"openTripReport('"+id+"')\">Trip report</button>"+
       "</div>"+
+      (_isSess?"":"<div class='chk-box' id='chkBox'>"+checklistMarkup(t)+"</div>")+
       "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='"+id+"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
       "<div class='tbl-wrap'><table><thead><tr><th>PoC</th><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th><th></th></tr></thead><tbody>"+(bs.map(x=>"<tr><td><button class='poc-star "+(t.pocId===x.id?"on":"")+"' title='Mark as point of contact' onclick=\"markPoc('"+id+"','"+x.id+"')\">"+(t.pocId===x.id?"★":"☆")+"</button></td><td class='strong nowrap'>"+x.guest+((x.members&&String(x.members).trim())?"<div class='s' style='font-size:11px;color:var(--ink-soft);font-weight:400;white-space:normal'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Modify booking'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No bookings yet.</td></tr>")+"</tbody></table></div>"+
       (wl.length?"<div class='h-sec' style='font-size:14px;margin:16px 0 6px'>Waitlist</div>"+wl.map(w=>"<div class='list-row'><div class='meta'><div class='t'>"+w.guest+"</div></div><span class='pill plain'>"+w.party+" pax</span></div>").join(""):
@@ -8317,6 +8496,7 @@ function dedupeBookings(){
 function boot(keepView){
   dedupeBookings();
   ensureTourCodes();
+  if(typeof purgeOldTrash==="function")purgeOldTrash();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
