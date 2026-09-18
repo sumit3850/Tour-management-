@@ -1006,7 +1006,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 244</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 245</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1015,7 +1015,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 244</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 245</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4154,6 +4154,26 @@ function pullGuestsDo(id,all){
   closeModal();
   alert("Pulled "+added+" participant"+(added===1?"":"s")+" into "+tourCode(t)+" · "+shortName(t)+". Payment is reset to Deposit ₹0 on the copies — the source tour is unchanged."+(t.pocId?"\n\nThey appear as one group under "+((bookings.find(function(b){return b.id===t.pocId;})||{}).guest||"the POC")+" in Bookings.":""));
 }
+/* Every tour with bookings should have a point of contact — the bookings list
+   shows ONE row per tour (its POC) with the rest of the group underneath, and
+   without a POC each guest appears as a separate row. Runs at boot and before
+   the bookings list renders, so groups pulled/registered earlier fold up too.
+   Preference: a guest who already leads another tour (a pulled group keeps its
+   leader), else the earliest-created booking. */
+function ensureTourPocs(){
+  var changed=false;
+  var leaders={};(tours||[]).forEach(function(t){if(t.pocId){var pb=bookings.find(function(b){return b.id===t.pocId;});if(pb&&pb.guest)leaders[String(pb.guest).trim().toLowerCase()]=1;}});
+  (tours||[]).forEach(function(t){
+    if(t.archived||t.pocId)return;
+    var bs=bookings.filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";});
+    if(!bs.length)return;
+    var pick=bs.find(function(b){return leaders[String(b.guest||"").trim().toLowerCase()];});
+    if(!pick)pick=bs.slice().sort(function(a,b){var ta=parseInt(String(a.id).replace(/\D/g,""),10)||0,tb=parseInt(String(b.id).replace(/\D/g,""),10)||0;return ta-tb;})[0];
+    t.pocId=pick.id;t.updatedAt=new Date().toISOString();changed=true;
+    audit("tour","poc-auto",tourCode(t)+" \u2192 "+pick.guest);
+  });
+  return changed;
+}
 /* Which tab does a tour belong to (archived tours live only in Archived). */
 function tourTabOf(t){
   if(t.archived)return "Archived";
@@ -4451,6 +4471,7 @@ function viewBookings(){
 }
 function renderBookings(){
   const b=document.getElementById("bkBody");if(!b)return;
+  if(typeof ensureTourPocs==="function")ensureTourPocs();
   /* When a tour has a Point of Contact marked, only the POC shows here — the other
      team members who submitted forms stay in the Customer Database but drop off the
      bookings list (their names are listed under the POC instead). */
@@ -9101,6 +9122,7 @@ function boot(keepView){
   dedupeBookings();
   ensureTourCodes();
   if(typeof purgeOldTrash==="function")purgeOldTrash();
+  if(typeof ensureTourPocs==="function")ensureTourPocs();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
