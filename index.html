@@ -782,6 +782,72 @@ th.bk-quick,td.bk-quick{display:none}
 .pill.tc-ready.bad{background:var(--coral-soft);color:var(--coral);border-color:transparent}
 @media(max-width:600px){.chk-item{flex-wrap:wrap}.chk-item .chk-when{flex-basis:100%;padding-left:27px;margin-top:-4px}}
 
+/* ===== Global search (Ctrl/Cmd+K) ===== */
+.gs-wrap{padding:10px 10px 12px}
+.gs-box{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.gs-box svg{width:18px;height:18px;color:var(--ink-soft);flex:none}
+.gs-box input{flex:1;border:none;background:transparent;font:inherit;font-size:15px;color:var(--ink);outline:none;min-width:0}
+.gs-box kbd{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-soft);border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:var(--surface)}
+.gs-results{max-height:min(60vh,520px);overflow-y:auto;margin-top:8px}
+.gs-item{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;cursor:pointer}
+.gs-item.sel,.gs-item:hover{background:var(--sea-soft)}
+.gs-kind{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;min-width:78px;text-align:center;flex:none}
+.gs-meta{min-width:0}.gs-t{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gs-s{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .iconbtn.gsbtn svg{width:18px;height:18px}
+.topbar .iconbtn.gsbtn kbd{position:absolute;right:-4px;bottom:-6px;font-family:var(--font-mono);font-size:9px;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:0 4px}
+@media(max-width:768px){.topbar .iconbtn.gsbtn kbd{display:none}}
+
+/* ===== Dark mode: html.dark (Settings → Appearance, or OS setting on "auto") ===== */
+html.dark{color-scheme:dark;
+  --ink:#e8eef8;--ink-soft:#9fb0c8;--forest:#8ab8ff;--forest-deep:#b1ccff;
+  --sea:#4ea3ff;--sea-soft:#15304c;--amber:#f0a400;--amber-soft:#3b2f0e;
+  --coral:#ff5f66;--coral-soft:#40191d;--paper:#0e131c;--surface:#161d29;--surface-2:#1d2735;
+  --line:#2a3649;--line-soft:#222d3e;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);--shadow-lg:0 12px 40px -12px rgba(0,0,0,.7)}
+html.dark body{background:var(--paper)}
+html.dark .sidebar{background:linear-gradient(180deg,#121a26 0%,#0f1621 100%);border-right-color:var(--line)}
+html.dark .nav-item{color:var(--ink-soft)}html.dark .nav-item:hover{background:rgba(78,163,255,.1);color:var(--ink)}
+html.dark .nav-item.active{background:#1f2b3d;color:var(--ink);box-shadow:none}
+html.dark .nav-group{color:#6f83a0}html.dark .nav-foot .who{color:var(--ink)}
+html.dark .topbar{background:rgba(14,19,28,.85);border-bottom-color:var(--line)}
+html.dark .bottom-nav{background:rgba(22,29,41,.94);border-top-color:var(--line)}
+html.dark .btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}html.dark .btn-ghost:hover{background:var(--surface-2);border-color:#3a4a62}
+html.dark .btn-primary{color:#241a02}
+html.dark .input{background-color:var(--surface);border-color:var(--line);color:var(--ink)}html.dark .input:focus{background-color:var(--surface);border-color:var(--sea)}
+html.dark .backbtn,html.dark .hamburger,html.dark .sidecollapse{background:var(--surface);border-color:var(--line);color:var(--ink)}html.dark .backbtn svg,html.dark .hamburger svg{stroke:var(--ink)}
+html.dark .input::placeholder{color:#6f83a0}
+html.dark select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239fb0c8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+html.dark .tab.active{background:var(--surface);box-shadow:none}
+html.dark tbody tr:hover{background:var(--surface-2)}
+html.dark .pill.completed{background:#173326;color:#8fd3ad}html.dark .pill.plain{background:#2a3040;color:#b8c2d3}html.dark .pill.closed{background:#2b2a24;color:#c9bfa5}
+html.dark .pill.open{color:#8fd0ff}html.dark .pill.full{color:#ff9aa0}
+html.dark .cat.southandaman{background:#173326;color:#9ad7b6}html.dark .cat.littleandaman{background:#12343a;color:#8fd6de}
+html.dark .cat.nicobar{background:#1d2a44;color:#a9bde6}html.dark .cat.session{background:#3b2f0e;color:#f0c96a}html.dark .cat.custom{background:#332a1f;color:#d9b995}
+html.dark .tour-card.tc-session{background:#142419;border-color:#234631}html.dark .tour-col-sess{background:#111b15;border-color:#1f3a29}html.dark .tour-col-sess .tour-col-head{color:#7fd3a3}
+html.dark .tour-card .tc-id{background:var(--sea-soft);color:#8fd0ff}
+html.dark .tour-card .tc-when.soon{background:var(--sea-soft);color:#8fd0ff}html.dark .tour-card .tc-when.live{background:#173326;color:#8fd3ad}
+html.dark .tour-card .tc-risk.amber,html.dark .td-tag.pick,html.dark .td-tag.pay,html.dark .pill.tc-ready.mid{background:#3b2f0e;color:#f0c96a}
+html.dark .td-tag.dep{background:var(--sea-soft);color:#8fd0ff}html.dark .td-tag.ret,html.dark .pill.tc-ready.ok{background:#173326;color:#8fd3ad}
+html.dark .td-tag.over,html.dark .tour-card .tc-risk.red,html.dark .pill.tc-ready.bad{background:var(--coral-soft);color:#ff9aa0}
+html.dark .md-k.md-week b,html.dark .md-row.md-week .md-amt{color:#f0b95c}
+html.dark .team-card{background:var(--sea-soft)}html.dark .driver-note{background:#3b2f0e;border-color:#5a4715;color:#f0c96a}
+html.dark .kcol{background:var(--surface-2)}html.dark .lead{background:var(--surface)}
+html.dark .stat-strip .s,html.dark .chk-box,html.dark .itin-box,html.dark .md-k,html.dark .op-card,html.dark .install-hint{background:var(--surface-2);border-color:var(--line)}
+html.dark .pc-log-row.sel{background:#1a2c44}
+html.dark .chart .stk.prev,html.dark .yoy-sw.prev{background:linear-gradient(180deg,#3a4a62,#2c3a50)}
+html.dark .modal{background:var(--surface);border-color:var(--line)}html.dark .modal-foot{background:rgba(22,29,41,.9)}
+html.dark .modal-head .x{border-color:var(--line)}html.dark .modal-head .x svg{stroke:var(--ink)}
+html.dark .sticky-actions{background:rgba(22,29,41,.94);border-color:var(--line)}
+html.dark .m-cards tbody tr{background:var(--surface)}html.dark .m-cards td:first-child,html.dark .m-cards td.bk-quick{background:var(--surface-2)}
+html.dark .qa-tile{background:var(--surface);border-color:var(--line)}html.dark .qa-ic{background:var(--sea-soft)}
+html.dark .card.kpi .val{color:var(--ink)}
+html.dark .kpi .lab svg{stroke:var(--sea)}
+html.dark .iconbtn{background:var(--surface);border-color:var(--line)}html.dark .iconbtn svg{stroke:var(--ink)}
+html.dark .gs-box kbd,html.dark .gs-kind{background:var(--surface)}
+html.dark ::selection{background:#3b2f0e}
+/* printed documents keep their own light styling on purpose */
+html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
+
 /* ===== Message templates panel · Itinerary builder ===== */
 .msg-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
 @media(max-width:600px){.msg-grid{grid-template-columns:1fr}}
@@ -914,7 +980,7 @@ th.bk-quick,td.bk-quick{display:none}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 240</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 241</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -923,7 +989,7 @@ th.bk-quick,td.bk-quick{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 240</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 241</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -935,6 +1001,7 @@ th.bk-quick,td.bk-quick{display:none}
       <button class="hamburger" onclick="toggleNav(true)" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <button class="backbtn" id="backBtn" onclick="goBack()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
+      <button class="iconbtn gsbtn" onclick="openSearch()" title="Search (Ctrl+K)" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><kbd>⌘K</kbd></button>
       <button class="iconbtn" id="viewRefreshBtn" onclick="refreshCurrentView()" title="Refresh this section" aria-label="Refresh this section"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>
     </header>
     <main class="content" id="content"></main>
@@ -3358,6 +3425,71 @@ function sendItinerary(id){
   var txt=itineraryText(t);if(!txt){alert("Fill in at least one day first.");return;}
   waShare("Hello "+(poc?poc.guest:"")+",\n\nYour day-by-day plan for "+shortName(t)+":\n\n"+txt+"\n\nTimings may shift with weather and tides — your guide will keep you posted."+msgSignature(),poc&&poc.phone);
 }
+/* ===== GLOBAL SEARCH (Ctrl/Cmd+K) =============================================
+   One box that finds tours, bookings, customers, quotations, invoices, leads,
+   operations, stays, guides and drivers, and opens the record. */
+function searchIndex(){
+  var esc=function(v){return String(v==null?"":v);};
+  var out=[];
+  (tours||[]).forEach(function(t){if(t.archived)return;out.push({kind:"Tour",title:tourCode(t)+" · "+(t.name||shortName(t)),sub:dRangeNice(t.start,t.end)+(t.guide?" · "+t.guide:""),hay:[tourCode(t),t.name,shortName(t),t.guide,t.stay,t.pickup,t.cat].map(esc).join(" "),open:function(){openTour(t.id);}});});
+  (bookings||[]).forEach(function(b){var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;out.push({kind:"Booking",title:esc(b.guest)+(b.party>1?" +"+(b.party-1):""),sub:(t?tourCode(t)+" · "+shortName(t):(b.customTour||"—"))+(b.start?" · "+dShort(b.start):"")+" · "+bookingPaymentStatus(b),hay:[b.guest,b.members,b.phone,b.email,b.country,b.customTour,t&&tourCode(t),t&&shortName(t)].map(esc).join(" "),open:function(){go("bookings");setTimeout(function(){editBooking(b.id);},60);}});});
+  (customers||[]).forEach(function(c){var d=c.details||{};out.push({kind:"Customer",title:esc(c.name),sub:[c.country,c.phone||d.phone,c.email||d.email].filter(Boolean).join(" · "),hay:[c.name,c.country,c.phone,d.phone,c.email,d.email,d.lastTour].map(esc).join(" "),open:function(){go("customers");setTimeout(function(){viewCustomerDetail(c.name);},60);}});});
+  (quotationLog||[]).forEach(function(q){out.push({kind:"Quotation",title:esc(q.qid)+" · "+esc(q.tour||q.title),sub:[q.guest,q.total!=null?fmt(q.total):"",q.status,q.date].filter(Boolean).join(" · "),hay:[q.qid,q.tour,q.title,q.guest,q.status].map(esc).join(" "),open:function(){go("groupquote");setTimeout(function(){openSavedQuote(q.id);},60);}});});
+  (invoiceLog||[]).forEach(function(r){if(!r||!r.html)return;out.push({kind:"Invoice",title:esc(r.invid)+" · "+esc(r.title),sub:[r.guest,r.total!=null?fmt(r.total):"",r.date].filter(Boolean).join(" · "),hay:[r.invid,r.title,r.guest].map(esc).join(" "),open:function(){go("invoices");setTimeout(function(){openSavedInvoice(r.id);},60);}});});
+  (leads||[]).forEach(function(l){out.push({kind:"Lead",title:esc(l.name),sub:[l.country,l.tour,(STAGES.find(function(s){return s[0]===l.stage;})||[])[1]].filter(Boolean).join(" · "),hay:[l.name,l.country,l.tour,l.phone,l.email,l.src].map(esc).join(" "),open:function(){go("crm");setTimeout(function(){openEditLead(l.id);},60);}});});
+  (ops||[]).forEach(function(o){out.push({kind:"Operation",title:esc(o.tour),sub:[o.dateDisplay||dShort(o.startISO),o.veh,o.driver,o.guide,o.status].filter(function(x){return x&&x!=="—";}).join(" · "),hay:[o.tour,o.tourId,o.veh,o.reg,o.driver,o.guide,o.pickupLoc,o.stay].map(esc).join(" "),open:function(){go("logistics");logTab("Operations Board");setTimeout(function(){editOp(o.id);},80);}});});
+  (accommodations||[]).forEach(function(a){out.push({kind:"Stay",title:esc(a.name),sub:[a.location,a.type].filter(Boolean).join(" · "),hay:[a.name,a.location,a.type].map(esc).join(" "),open:function(){go("accommodation");}});});
+  (externalGuides||[]).forEach(function(g){out.push({kind:"Guide",title:esc(g.name),sub:[g.gid,g.expertise,g.phone].filter(Boolean).join(" · "),hay:[g.name,g.gid,g.expertise,g.phone].map(esc).join(" "),open:function(){go("reservations");}});});
+  (drivers||[]).forEach(function(d){out.push({kind:"Driver",title:esc(d.name),sub:[d.phone,d.license].filter(Boolean).join(" · "),hay:[d.name,d.phone,d.license].map(esc).join(" "),open:function(){go("logistics");logTab("Vehicles & Drivers");}});});
+  (vehicles||[]).forEach(function(v){out.push({kind:"Vehicle",title:esc(v.name),sub:[v.reg,v.type,v.driver].filter(Boolean).join(" · "),hay:[v.name,v.reg,v.type,v.driver].map(esc).join(" "),open:function(){go("logistics");logTab("Vehicles & Drivers");}});});
+  return out;
+}
+var _searchItems=null;
+function openSearch(){
+  _searchItems=searchIndex();
+  document.getElementById("modal").innerHTML="<div class='gs-wrap'><div class='gs-box'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M21 21l-4.3-4.3'/></svg><input id='gsInput' placeholder='Search tours, guests, phone, quote no., invoice, lead, vehicle…' autocomplete='off' oninput='searchRender()' onkeydown='searchKey(event)'><kbd>Esc</kbd></div><div id='gsResults' class='gs-results'></div></div>";
+  var m=document.getElementById("modal");if(m)m.style.maxWidth="640px";
+  openScrim();
+  searchRender();
+  setTimeout(function(){var i=document.getElementById("gsInput");if(i)i.focus();},30);
+}
+var _gsSel=0;
+function searchRender(){
+  var q=((document.getElementById("gsInput")||{}).value||"").trim().toLowerCase();
+  var box=document.getElementById("gsResults");if(!box)return;
+  var esc=function(v){return String(v||"").replace(/</g,"&lt;");};
+  var items=_searchItems||[];
+  var hits;
+  if(!q){hits=items.filter(function(x){return x.kind==="Tour";}).slice(0,8);}
+  else{var terms=q.split(/\s+/).filter(Boolean);hits=items.filter(function(x){var h=x.hay.toLowerCase();return terms.every(function(w){return h.indexOf(w)>-1;});}).slice(0,40);}
+  _gsSel=0;
+  window._gsHits=hits;
+  box.innerHTML=hits.length?hits.map(function(x,i){return "<div class='gs-item"+(i===0?" sel":"")+"' data-i='"+i+"' onmousedown=\"searchOpen("+i+")\"><span class='gs-kind'>"+x.kind+"</span><div class='gs-meta'><div class='gs-t'>"+esc(x.title)+"</div><div class='gs-s'>"+esc(x.sub)+"</div></div></div>";}).join(""):"<div class='empty'>"+(q?"No matches for “"+esc(q)+"”.":"Start typing…")+"</div>";
+}
+function searchKey(e){
+  var hits=window._gsHits||[];
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();if(!hits.length)return;_gsSel=(_gsSel+(e.key==="ArrowDown"?1:-1)+hits.length)%hits.length;document.querySelectorAll(".gs-item").forEach(function(el,i){el.classList.toggle("sel",i===_gsSel);if(i===_gsSel)el.scrollIntoView({block:"nearest"});});}
+  else if(e.key==="Enter"){e.preventDefault();searchOpen(_gsSel);}
+  else if(e.key==="Escape"){closeModal();}
+}
+function searchOpen(i){var h=(window._gsHits||[])[i];if(!h)return;closeModal();setTimeout(function(){h.open();},20);}
+document.addEventListener("keydown",function(e){
+  if((e.ctrlKey||e.metaKey)&&(e.key==="k"||e.key==="K")){e.preventDefault();if(document.getElementById("gsInput"))closeModal();else openSearch();}
+});
+/* ===== THEME (light / dark / auto) ============================================
+   Per device. "auto" follows the OS setting; the effective theme toggles
+   html.dark, which the dark-mode CSS keys off. */
+function themePref(){try{return localStorage.getItem("ieo_theme")||"auto";}catch(e){return "auto";}}
+function applyTheme(){
+  var p=themePref();var sys=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var dark=p==="dark"||(p==="auto"&&sys);
+  document.documentElement.classList.toggle("dark",dark);
+  var meta=document.querySelector("meta[name=theme-color]");if(meta)meta.setAttribute("content",dark?"#0f1520":"#143a2e");
+  document.querySelectorAll("[data-theme-opt]").forEach(function(b){b.classList.toggle("btn-primary",b.dataset.themeOpt===p);b.classList.toggle("btn-ghost",b.dataset.themeOpt!==p);});
+}
+function setTheme(p){try{localStorage.setItem("ieo_theme",p);}catch(e){}applyTheme();}
+try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);}catch(e){}
+applyTheme();
 function savePrefs(){
   var g=function(id,d){var e=document.getElementById(id);var v=e?parseFloat(e.value):NaN;return isFinite(v)?v:d;};
   prefs.marginMin=Math.max(0,Math.min(100,g("pf_margin",PREFS_DEFAULT.marginMin)));
@@ -8076,6 +8208,12 @@ function viewSettings(){
       "<div class='field'><label>Minimum profit margin (%)</label><input class='input mono' type='number' id='pf_margin' min='0' max='100' value='"+(+prefs.marginMin||20)+"'></div>"+
     "</div>"+
     "<div style='display:flex;gap:10px;align-items:center'><button class='btn btn-primary btn-sm' onclick='savePrefs()'>Save preferences</button><span id='pf_ok' style='display:none;font-size:12.5px;color:var(--forest);font-weight:600'>Saved ✓</span></div>"+
+  "</div>"+
+  "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Appearance</div><div class='h-sec' style='margin-bottom:6px'>Theme</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:680px'>Light, dark, or follow this device's system setting. Remembered per device. Printed quotations and invoices always stay light.</p>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+[["auto","Auto (system)"],["light","Light"],["dark","Dark"]].map(function(o){return "<button class='btn btn-sm "+(themePref()===o[0]?"btn-primary":"btn-ghost")+"' data-theme-opt='"+o[0]+"' onclick=\"setTheme('"+o[0]+"')\">"+o[1]+"</button>";}).join("")+"</div>"+
+    "<p style='font-size:12px;color:var(--ink-soft);margin-top:12px'>Tip: press <b>Ctrl+K</b> (\u2318K on Mac) anywhere to search tours, guests, quotes, invoices, leads and vehicles.</p>"+
   "</div>"+
   "</section>";
 }
