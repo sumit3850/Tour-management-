@@ -1000,6 +1000,21 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   .pc-log-row>div:last-child>div:first-child{min-width:0 !important;text-align:left !important}
   .pc-log-row>div:last-child>div:first-child span{font-size:15px}
 }
+/* ===== Uniform detail text: one size, medium weight (no bold values) ===== */
+.req-name{font-size:14px;font-weight:600;margin-top:4px}
+.req-sub{font-size:12.5px}
+.req-kv{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:5px 16px}
+.req-kv .kv{font-size:13px;line-height:1.45}.req-kv .kv b{font-weight:500;color:var(--ink)}
+.req-meta{font-size:12px}
+.kv-val{font-size:13px;font-weight:500;line-height:1.45}
+.kv-grid b{font-weight:500}
+.m-cards td:first-child{font-weight:600}
+@media(max-width:600px){
+  .req-card{padding:12px}.req-name{font-size:13.5px}.req-sub,.req-kv .kv,.kv-val{font-size:12.5px}
+  .req-kv{grid-template-columns:1fr;gap:4px;margin:10px 0;padding:10px 0}
+  .m-cards td:first-child{font-size:13.5px}
+}
+
 /* ===== Phone type scale: compact everywhere (matches the ops-card density) ===== */
 @media(max-width:600px){
   body{font-size:13px}
@@ -1069,7 +1084,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 250</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 251</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1078,7 +1093,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 250</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 251</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -7322,7 +7337,7 @@ function viewCustomerDetail(name){
   var finRows=[];
   if(finB){var _tc=bookingTotalCost(finB);if(_tc>0){var _dd=bookingDueDate(finB);finRows=[["Tour total cost",fmt(_tc)],["Deposit / advance",fmt(bookingDeposit(finB))],["Pending amount",fmt(bookingPending(finB))],["Payment due date",_dd?dShort(_dd):""]];}}
   var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
-  var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div style='font-weight:600;font-size:14px'>"+r[1]+"</div></div>";}).join("");
+  var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div class='kv-val'>"+r[1]+"</div></div>";}).join("");
   var lifers=String(d.lifeList||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
   if(lifers.length)html+="<div class='field full'><label>Life list · "+lifers.length+" lifers with us 🐦</label><div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:4px'>"+lifers.map(function(s){return "<span class='pill plain' style='font-size:11.5px'>"+s.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";
   if(d.documents&&d.documents.length)html+="<div class='field full'><label>Documents</label><div>"+d.documents.map(function(doc){var u=(typeof doc==="string")?doc:doc.url;var nm=(typeof doc==="string")?"file":(doc.name||"file");return u?"<a href='"+u+"' target='_blank' style='color:var(--sea);margin-right:10px'>"+nm+"</a>":nm;}).join("")+"</div></div>";
@@ -9075,7 +9090,7 @@ function openTour(id){
       "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Pax</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
       "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
-      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
+      "<div class='kv-grid' style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
         "<div><span style='color:var("+"ink-soft)'>Tour Start</span><br><b>"+(_isSess?((t.sessionDates&&t.sessionDates.length?t.sessionDates[0]:t.start)?dmy(t.sessionDates&&t.sessionDates.length?t.sessionDates[0]:t.start):"—"):(t.start?dmy(t.start):"—"))+"</b></div><div><span style='color:var("+"ink-soft)'>Pickup</span><br><b>"+(t.pickup||"—")+"</b></div>"+
         "<div><span style='color:var("+"ink-soft)'>Tour End</span><br><b>"+(_isSess?((t.sessionDates&&t.sessionDates.length?t.sessionDates[t.sessionDates.length-1]:t.end)?dmy(t.sessionDates&&t.sessionDates.length?t.sessionDates[t.sessionDates.length-1]:t.end):"—"):(t.end?dmy(t.end):"—"))+"</b></div><div><span style='color:var("+"ink-soft)'>Accommodation</span><br><b>"+(t.stay||"—")+"</b></div>"+
         "<div><span style='color:var("+"ink-soft)'>Status</span><br>"+pill(seatStatus(t))+(payStatus?" "+payPill(payStatus):"")+"</div>"+
