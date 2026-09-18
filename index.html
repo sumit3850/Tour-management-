@@ -1004,13 +1004,25 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
 .req-name{font-size:14px;font-weight:600;margin-top:4px}
 .req-sub{font-size:12.5px}
 .req-kv{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:5px 16px}
-.req-kv .kv{font-size:13px;line-height:1.45}.req-kv .kv b{font-weight:500;color:var(--ink)}
+.req-kv .kv{display:grid;grid-template-columns:118px 8px minmax(0,1fr);gap:0 6px;align-items:start;font-size:13px;line-height:1.45}
+.req-kv .kv span{overflow-wrap:break-word;min-width:0;text-transform:none}
+.req-kv .kv em{font-style:normal;color:var(--ink-soft)}
+.req-kv .kv b{font-weight:500;color:var(--ink);margin-left:0;min-width:0;overflow-wrap:break-word}
 .req-meta{font-size:12px}
 .kv-val{font-size:13px;font-weight:500;line-height:1.45}
+/* "Label : value" rows (customer detail) — two pairs per row on desktop, one on phones */
+.kv-list{display:grid;grid-template-columns:max-content 8px minmax(0,1fr) max-content 8px minmax(0,1fr);gap:7px 6px;align-items:start;font-size:13px;line-height:1.45}
+.kv-list .k{color:var(--ink-soft);font-weight:500;white-space:nowrap;padding-right:6px}
+.kv-list .c{color:var(--ink-soft)}
+.kv-list .v{font-weight:500;min-width:0;overflow-wrap:break-word;padding-right:14px}
+.gq-table th,.gq-table td{white-space:nowrap}
+@media(max-width:600px){.kv-list{grid-template-columns:max-content 8px minmax(0,1fr);gap:6px 6px}.kv-list .v{padding-right:0}}
 .kv-grid b{font-weight:500}
 .m-cards td:first-child{font-weight:600}
 @media(max-width:600px){
-  .req-card{padding:12px}.req-name{font-size:13.5px}.req-sub,.req-kv .kv,.kv-val{font-size:12.5px}
+  .req-card{padding:12px}.req-name{font-size:13.5px}.req-sub,.req-kv .kv,.kv-val,.kv-list{font-size:12.5px}
+  .req-kv .kv{grid-template-columns:104px 8px minmax(0,1fr)}
+  .req-meta{text-align:left;flex-basis:100%}
   .req-kv{grid-template-columns:1fr;gap:4px;margin:10px 0;padding:10px 0}
   .m-cards td:first-child{font-size:13.5px}
 }
@@ -1018,6 +1030,11 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
 /* ===== Phone type scale: compact everywhere (matches the ops-card density) ===== */
 @media(max-width:600px){
   body{font-size:13px}
+  .topbar{flex-wrap:wrap;gap:8px 8px;padding:10px 16px 8px}
+  .topbar .page-title{order:-1;flex:1 1 100% !important;min-width:0}
+  .topbar .page-title b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topbar .themebtn{margin-left:auto}
+  .topbar .iconbtn,.topbar .hamburger,.topbar .backbtn{width:36px;height:36px}
   .page-title b{font-size:17px}.page-title span,#crumb{font-size:11.5px}
   .h-sec{font-size:15px}.eyebrow{font-size:10px}
   .card-pad{padding:14px}
@@ -1084,7 +1101,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 251</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 252</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1093,7 +1110,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 251</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 252</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2719,6 +2736,9 @@ function tourWhenLabel(t){
   return {label:"",cls:""};
 }
 const dmy=dShort;
+/* Display rule: the database keeps ISO (YYYY-MM-DD, sortable) but the console
+   always SHOWS DD/MM/YYYY — run free-text values through this before printing. */
+const fmtVal=v=>(typeof v==="string"&&/^\d{4}-\d{2}-\d{2}(T[\d:.+\-]*Z?)?$/.test(v.trim()))?dShort(v.trim()):v;
 const tourColor=id=>TOURCOLORS[Math.abs(tours.findIndex(t=>t.id===id))%TOURCOLORS.length];
 const accColor=i=>TOURCOLORS[Math.abs(i)%TOURCOLORS.length];
 /* Exact short codes for each tour (used on cards, calendar, etc.) */
@@ -5309,15 +5329,13 @@ function viewCostSheet(){
         "<div class='field'><label>Migrate prebuilt rates → this tour</label><div style='display:flex;gap:8px'><select class='input' id='csCopyFrom' style='flex:1;min-width:0'></select><button class='btn btn-ghost' onclick='copyRatesFrom()' style='white-space:nowrap'>Copy rates</button></div></div>"+
       "</div>"+
       "<div id='csBody' style='overflow-x:auto;margin-top:14px'></div>"+
-      "<div class='cs-botbtns sticky-actions' style='display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'>"+
+      "<div class='cs-botbtns' style='display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'>"+
         "<button class='btn btn-primary' onclick='saveCostSheet()'>Save cost sheet</button>"+
         "<button class='btn btn-ghost' onclick='renderCostSheet()'>Reload saved</button>"+
         "<button class='btn btn-ghost' id='csDeleteBtn' style='display:none;color:var(--coral)' onclick='deleteCustomTour()'>Delete custom tour</button>"+
         "<button class='btn btn-ghost' onclick='document.getElementById(\"csImportFile\").click()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><path d='M7 10l5 5 5-5'/><path d='M12 15V3'/></svg>Import rates (.xlsx)</button>"+
         "<input type='file' id='csImportFile' accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' style='display:none' onchange='importRatesXlsx(this)'>"+
       "</div>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:10px'>Edit any amount and press <b>Save cost sheet</b>. The Cost Calculator and both quotation generators then use these saved rates. Total = ship + accommodation + vehicle + guide + entry + food; per-person = total ÷ group size.</p>"+
-      "<p style='font-size:12px;color:var(--ink-soft);margin-top:6px'><b>Import rates (.xlsx)</b> migrates a reference sheet straight into this database — name each tab with the tour + client type (e.g. <i>South Andaman 5N Indian</i>, <i>Narcondam A V1 Foreigner</i>) with columns Pax · Nights · Rooms · Ship/Boat · Accommodation · Vehicle · Guide · Entry · Food (per-head or total). From a Google Sheet: <b>File → Download → Microsoft Excel (.xlsx)</b>, then upload it here.</p>"+
     "</div>"+
     "<div class='card card-pad' style='margin-bottom:16px'>"+
       "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:6px'>"+
@@ -5474,7 +5492,7 @@ function renderCsLog(){
   el.innerHTML=sheetChangeLog.slice(0,60).map(function(r){
     var d=new Date(r.ts);var when=isNaN(d.getTime())?(r.ts||""):(dmy(d)+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2));
     return "<div style='display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line-soft);font-size:13px'>"+
-      "<div><b>"+(r.tourName||r.tour||"")+"</b> · "+(r.type||"")+" rates updated"+(r.via?" <span style='color:var(--ink-soft)'>· "+r.via+"</span>":"")+"</div>"+
+      "<div style='font-weight:500'>"+(r.tourName||r.tour||"")+" · "+(r.type||"")+" rates updated"+(r.via?" <span style='color:var(--ink-soft);font-weight:400'>· "+r.via+"</span>":"")+"</div>"+
       "<div style='color:var(--ink-soft);white-space:nowrap'>"+when+"</div></div>";
   }).join("");
 }
@@ -6012,11 +6030,11 @@ function renderGroupQuote(){
       "</div>"+
     "</div>"+
     (gqEditMode?"<p style='font-size:12px;color:var(--ink-soft);margin:0 0 8px'>Type over any figure — the column recalculates live: price per person ↔ total stay linked, deposit defaults to "+q.pct+"% of the total (or type your own), pending is always total − deposit. Edits apply to <b>this quotation only</b> — the saved cost sheet is untouched.</p>":"")+
-    "<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse;font-size:13px;min-width:420px'>"+
+    "<div style='overflow-x:auto;-webkit-overflow-scrolling:touch'><table class='gq-table' style='width:100%;border-collapse:collapse;font-size:13px;min-width:420px'>"+
       "<thead><tr style='border-bottom:2px solid var(--line)'><th style='text-align:left;padding:10px 12px'>Group size</th>"+headCells+"</tr></thead>"+
       "<tbody>"+
         "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;color:var(--ink-soft)'>Price per person</td>"+mkRow("perPerson","")+"</tr>"+
-        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px;font-weight:600'>Total tour price</td>"+mkRow("total","")+"</tr>"+
+        "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px'>Total tour price</td>"+mkRow("total","")+"</tr>"+
         "<tr style='border-bottom:1px solid var(--line-soft)'><td style='padding:10px 12px'>Deposit ("+q.pct+"%)</td>"+mkRow("deposit","var(--sea)")+"</tr>"+
         "<tr><td style='padding:10px 12px'>Pending amount</td>"+pendRowL+"</tr>"+
       "</tbody>"+
@@ -7187,7 +7205,7 @@ function renderRequests(){
   body.innerHTML=subs.map(function(s){
     var d=s.data||{};
     var rows="";
-    var LBL={idNo:"ID number",licenseDoc:"Document",idDoc:"ID document",vehicles:"Vehicles",vehicle:"Vehicle",reg:"Reg. no.",seats:"Seats",license:"Licence no.",address:"Address",expertise:"Expertise",clientType:"Client type",organisation:"Organisation",notes:"Notes",message:"Message",tourCode:"Tour ID",tourId:"Tour ID",hotel:"Hotel / pickup point",participants:"Participants",activity:"Tour activity",dates:"Preferred dates",declAccepted:"Declaration accepted",emergencyName:"Emergency contact name",emergencyPhone:"Emergency contact phone"};
+    var LBL={idNo:"ID number",licenseDoc:"Document",idDoc:"ID document",vehicles:"Vehicles",vehicle:"Vehicle",reg:"Reg. no.",seats:"Seats",license:"Licence no.",address:"Address",expertise:"Expertise",clientType:"Client type",organisation:"Organisation",notes:"Notes",message:"Message",tourCode:"Tour ID",tourId:"Tour ID",hotel:"Hotel / pickup point",participants:"Participants",activity:"Tour activity",dates:"Preferred dates",declAccepted:"Declaration accepted",emergencyName:"Emergency contact name",emergencyPhone:"Emergency contact phone",dob:"Date of birth",gender:"Gender",idType:"ID type",idExpiry:"ID expiry",arrival:"Arrival",departure:"Departure",diet:"Dietary",room:"Room preference",medical:"Medical / mobility",nationality:"Nationality",lifeList:"Life list",tourId:"Tour ID",start_date:"Start date",end_date:"End date",party:"Party size",name:"Name",phone:"Phone",email:"Email",country:"Country"};
     Object.keys(d).forEach(function(k){
       var v=d[k];
       if(k==="documents"||v===null||v===undefined||v==="")return;
@@ -7203,12 +7221,12 @@ function renderRequests(){
       }else if(v===true){
         html="Yes";
       }else{
-        html=String(v);if(html.length>140)html=html.slice(0,140)+"…";
+        html=String(fmtVal(v));if(html.length>140)html=html.slice(0,140)+"…";
       }
-      rows+="<div class='kv'><span>"+(LBL[k]||k)+"</span><b>"+html+"</b></div>";
+      rows+="<div class='kv'><span>"+(LBL[k]||k)+"</span><em>:</em><b>"+html+"</b></div>";
     });
     if(d.documents&&d.documents.length){
-      rows+="<div class='kv' style='grid-column:1/-1'><span>documents</span><b>"+d.documents.map(function(doc,di){
+      rows+="<div class='kv' style='grid-column:1/-1'><span>Documents</span><em>:</em><b>"+d.documents.map(function(doc,di){
         var nm=(typeof doc==="string")?"file":(doc.name||"file");
         var has=(typeof doc==="string")?doc:doc.url;
         if(has)return "<a href='#' onclick=\"event.preventDefault();openSubDocIdx('"+s.id+"',"+di+")\">"+nm+"</a>";
@@ -7225,7 +7243,7 @@ function renderRequests(){
     if(s.email)acts+="<button class='btn btn-ghost btn-sm' onclick=\"replySub('"+s.id+"','email')\">Email</button>";
     return "<div class='card req-card'><div class='req-top'><div><span class='req-type'>"+(TYPEN[s.type]||s.type)+"</span> "+statusPill+"<div class='req-name'>"+(s.name||"—")+"</div>"+
       "<div class='req-sub'>"+[s.phone,s.email,s.country].filter(Boolean).join(" · ")+"</div></div>"+
-      "<div class='req-meta'>"+(s.tour?"<div><b>"+s.tour+"</b></div>":"")+(dates?"<div>"+dates+"</div>":"")+(s.party?"<div>"+s.party+" pax</div>":"")+"</div></div>"+
+      "<div class='req-meta'>"+(s.tour?"<div>"+s.tour+"</div>":"")+(dates?"<div>"+dates+"</div>":"")+(s.party?"<div>"+s.party+" pax</div>":"")+"</div></div>"+
       (rows?"<div class='req-kv'>"+rows+"</div>":"")+
       "<div class='req-acts'>"+acts+"<button class='btn btn-ghost btn-sm' onclick=\"deleteSub('"+s.id+"')\" style='color:var(--coral)'>Delete</button></div></div>";
   }).join("");
@@ -7336,8 +7354,8 @@ function viewCustomerDetail(name){
   var finB=(cTour&&cTour.pocId)?bookings.find(function(x){return x.id===cTour.pocId;}):(rel[0]||null);
   var finRows=[];
   if(finB){var _tc=bookingTotalCost(finB);if(_tc>0){var _dd=bookingDueDate(finB);finRows=[["Tour total cost",fmt(_tc)],["Deposit / advance",fmt(bookingDeposit(finB))],["Pending amount",fmt(bookingPending(finB))],["Payment due date",_dd?dShort(_dd):""]];}}
-  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",d.dob],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",d.arrival],["Departure",d.departure],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
-  var html="<div class='form-grid'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<div class='field'><label>"+r[0]+"</label><div class='kv-val'>"+r[1]+"</div></div>";}).join("");
+  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",fmtVal(d.dob)],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",fmtVal(d.arrival)],["Departure",fmtVal(d.departure)],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
+  var html="<div class='kv-list'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<span class='k'>"+r[0]+"</span><span class='c'>:</span><span class='v'>"+r[1]+"</span>";}).join("")+"</div><div class='form-grid' style='margin-top:14px'>";
   var lifers=String(d.lifeList||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
   if(lifers.length)html+="<div class='field full'><label>Life list · "+lifers.length+" lifers with us 🐦</label><div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:4px'>"+lifers.map(function(s){return "<span class='pill plain' style='font-size:11.5px'>"+s.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";
   if(d.documents&&d.documents.length)html+="<div class='field full'><label>Documents</label><div>"+d.documents.map(function(doc){var u=(typeof doc==="string")?doc:doc.url;var nm=(typeof doc==="string")?"file":(doc.name||"file");return u?"<a href='"+u+"' target='_blank' style='color:var(--sea);margin-right:10px'>"+nm+"</a>":nm;}).join("")+"</div></div>";
@@ -7799,7 +7817,7 @@ function renderProfitCalc(){
       "<div class='s'><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div><div class='l'>Total Expenses</div></div>"+
       "<div class='s'><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div><div class='l'>Profit</div></div>"+
     "</div>"+
-    "<div class='sticky-actions' style='display:flex;gap:8px;flex-wrap:wrap;margin-top:14px'>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:14px'>"+
       "<button class='btn btn-primary btn-sm' onclick='saveProfitCalc()'>"+(window._pcEditId?"Update saved calculation":"Save calculation")+"</button>"+
       (window._pcEditId?"<button class='btn btn-ghost btn-sm' onclick='cancelProfitEdit()'>Cancel</button>":"")+
     "</div>"+
