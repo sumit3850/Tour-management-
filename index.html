@@ -257,8 +257,9 @@ td.strong{font-weight:600;color:var(--ink)}
 /* Bookings table fits the width it has (no sideways scroll on desktop): text
    columns wrap, money/dates/pills never do. */
 .card table.bk-table{width:100%;min-width:0 !important;table-layout:auto}
-.bk-table th,.bk-table td{white-space:normal;overflow-wrap:anywhere;vertical-align:top;padding:9px 6px;font-size:12.5px}
-.bk-table th{font-size:10.5px;padding-left:6px;padding-right:6px}
+.bk-table th,.bk-table td{white-space:normal;overflow-wrap:break-word;word-break:normal;vertical-align:top;padding:9px 6px;font-size:12.5px}
+.bk-table th{font-size:10.5px;padding-left:6px;padding-right:6px;white-space:nowrap}
+.bk-table td.bk-guest{min-width:96px}.bk-table td.bk-tour{min-width:112px}.bk-table td.bk-notes{max-width:130px}
 .bk-table td.num,.bk-table th.num{padding-left:8px}
 .bk-table .tbl-actions{gap:4px}.bk-table .tbl-actions button{width:28px;height:28px}
 .bk-table .pill{font-size:11px;padding:2px 8px}
@@ -266,7 +267,9 @@ td.strong{font-weight:600;color:var(--ink)}
 .bk-table td.bk-tour{min-width:0}
 .bk-table td.bk-tour .bk-code{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#0c5760;background:var(--sea-soft);border-radius:5px;padding:1px 6px;margin-right:6px;white-space:nowrap}
 .bk-table td.bk-notes{overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-.bk-table .bk-dates{font-size:12px;line-height:1.5;white-space:normal;font-variant-numeric:tabular-nums}
+.bk-table .bk-dates{font-size:12px;line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:1400px){.content{padding-left:16px;padding-right:16px}.bk-table th,.bk-table td{padding-left:5px;padding-right:5px}}
+@media(max-width:1180px){.bk-table .bk-dates{white-space:normal}}
 .bk-table .bk-dates .bk-d{white-space:nowrap}
 .bk-table .bk-dates .bk-sess{display:block;font-size:12px;color:var(--ink-soft)}
 .bk-table .bk-sub{font-size:11px;color:var(--ink-soft);font-weight:400;margin-top:2px}
