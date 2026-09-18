@@ -1,0 +1,24 @@
+name: tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  money-math:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax-check inline scripts
+        run: |
+          node -e '
+          const fs=require("fs"),vm=require("vm");
+          for(const f of ["index.html","ops-guide.html","driver-app.html","register.html","admin.html"]){
+            if(!fs.existsSync(f))continue;const html=fs.readFileSync(f,"utf8");
+            const re=/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;let m;
+            while((m=re.exec(html))){try{new vm.Script(m[1]);}catch(e){console.error(f+": "+e.message);process.exit(1);}}
+            console.log(f+" ok");}'
+      - name: Money-math tests
+        run: node --test tests/*.test.js

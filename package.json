@@ -1,0 +1,9 @@
+{
+  "name": "island-explorer-ops-console",
+  "private": true,
+  "description": "Single-file operations console for Island Explorer Birding Tours. `npm test` runs the money-math regression tests against index.html.",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": { "node": ">=18" }
+}

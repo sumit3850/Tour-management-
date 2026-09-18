@@ -980,7 +980,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 241</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 242</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -989,7 +989,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 241</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 242</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1464,6 +1464,27 @@ function exportData(){
   var url=URL.createObjectURL(blob);var a=document.createElement("a");
   a.href=url;a.download="island-explorer-backup-"+new Date().toISOString().slice(0,10)+".json";
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+/* Weekly automatic backup: downloads the .json and, when the Google Sheet
+   webhook is configured, also posts it so the Apps Script can file a copy in
+   Drive (see docs/SHEET_SYNC.md → "Backups"). Manual: Settings → Backup now. */
+function lastBackupAt(){try{return parseInt(localStorage.getItem("ieo_last_backup")||"0",10)||0;}catch(e){return 0;}}
+function backupNow(auto){
+  if(window.__DEMO__)return;
+  var payload={version:DATA_KEY,exportedAt:new Date().toISOString(),data:collectStore(),trips:(typeof tripLogs!=="undefined"?tripLogs:[])};
+  var json=JSON.stringify(payload);
+  var name="ops-console-backup-"+(typeof wsTag==="function"?wsTag():"workspace")+"-"+new Date().toISOString().slice(0,10)+".json";
+  try{var hook=(typeof sheetHook==="function")?sheetHook():"";if(hook)fetch(hook,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({mode:"backup",filename:name,json:json,at:payload.exportedAt})});}catch(e){}
+  try{var blob=new Blob([json],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}catch(e){}
+  try{localStorage.setItem("ieo_last_backup",String(Date.now()));}catch(e){}
+  audit("backup",auto?"weekly":"manual",name);
+  var el=document.getElementById("bkLast");if(el)el.textContent="Last backup: just now";
+}
+function autoBackupCheck(){
+  if(window.__DEMO__||prefs.autoBackup===false)return;
+  if(!((tours||[]).length||(bookings||[]).length))return;
+  if(Date.now()-lastBackupAt()<7*864e5)return;
+  setTimeout(function(){backupNow(true);},6000);
 }
 function importData(input){
   var file=input.files&&input.files[0];if(!file)return;
@@ -2423,7 +2444,11 @@ async function pushRecordsForKey(key){
     var id=recId(key,item);if(!id)return;
     seen[id]=1;
     var json=JSON.stringify(item);
-    if(prev[id]!==json)upserts.push({id:id,data:item,updated_at:new Date().toISOString()});
+    if(prev[id]!==json){
+      /* record-level clock for cross-device merging (see mergeRecords) */
+      if(item&&typeof item==="object"&&!Array.isArray(item)){item.updatedAt=new Date().toISOString();json=JSON.stringify(item);}
+      upserts.push({id:id,data:item,updated_at:new Date().toISOString()});
+    }
   });
   var deletedIds=Object.keys(prev).filter(function(id){return !seen[id];});
   try{
@@ -2446,6 +2471,30 @@ async function fetchRecordsForKey(key){
   if(res.error)throw res.error;
   return (res.data||[]).map(function(r){return r.data;});
 }
+/* Per-record merge (two phones editing at once): for every id present on both
+   sides the newer `updatedAt` wins; a record that exists only locally is kept
+   when it is genuinely new here (created since the last sync, or — on the very
+   first pull after a reload — edited in the last 24h while a push was still
+   pending), and dropped when the cloud once had it (deleted elsewhere). */
+function mergeRecords(key,remote,local,prev){
+  var pending=false;try{pending=localStorage.getItem("ieo_record_pending")==="1"||_localDirty;}catch(e){}
+  var byId={};(local||[]).forEach(function(l){var id=recId(key,l);if(id)byId[id]=l;});
+  var seen={},kept=false;
+  var out=(remote||[]).map(function(r){
+    var id=recId(key,r);seen[id]=1;var l=byId[id];
+    if(l&&l.updatedAt&&l!==r){
+      var localWins=r.updatedAt?(l.updatedAt>r.updatedAt):pending;
+      if(localWins&&JSON.stringify(l)!==JSON.stringify(r)){kept=true;return l;}
+    }
+    return r;
+  });
+  (local||[]).forEach(function(l){
+    var id=recId(key,l);if(!id||seen[id])return;
+    var fresh=l.updatedAt&&(Date.now()-Date.parse(l.updatedAt))<864e5;
+    if((prev&&!prev[id])||(!prev&&pending&&fresh)){out.push(l);kept=true;}
+  });
+  return {items:out,kept:kept};
+}
 /* Returns true only if EVERY table exists and was read successfully. Fetches
    everything FIRST and only applies it once all fetches succeed — if any table is
    missing partway through, nothing gets mutated, so a partial read can never leave
@@ -2461,16 +2510,22 @@ async function pullAllRecords(){
     var fetched={};
     for(var i=0;i<_recordKeys.length;i++)fetched[_recordKeys[i]]=await fetchRecordsForKey(_recordKeys[i]);
     var changed=false;
+    var keptLocal=false;
     _recordKeys.forEach(function(key){
       var entry=recStoreEntry(key);if(!entry)return;
       var items=fetched[key];
       var snap={};items.forEach(function(item){var id=recId(key,item);if(id)snap[id]=JSON.stringify(item);});
       var prev=_lastRecordSnapshot[key];
       if(!prev||Object.keys(prev).length!==Object.keys(snap).length||Object.keys(snap).some(function(id){return prev[id]!==snap[id];}))changed=true;
-      entry.set(items);
+      var m=mergeRecords(key,items,entry.get()||[],prev);
+      if(m.kept)keptLocal=true;
+      entry.set(m.items);
+      /* the snapshot mirrors the CLOUD, so anything local that won the merge
+         differs from it and goes up on the next push */
       _lastRecordSnapshot[key]=snap;
     });
     _recordsChanged=changed;
+    if(keptLocal){_localDirty=true;try{localStorage.setItem("ieo_record_pending","1");}catch(e){}if(typeof scheduleRecordPush==="function")setTimeout(scheduleRecordPush,50);}
     return true;
   }catch(e){return false;}
 }
@@ -3495,6 +3550,7 @@ function savePrefs(){
   prefs.marginMin=Math.max(0,Math.min(100,g("pf_margin",PREFS_DEFAULT.marginMin)));
   prefs.fillWarnDays=Math.max(1,Math.min(365,g("pf_days",PREFS_DEFAULT.fillWarnDays)));
   prefs.fillWarnPct=Math.max(1,Math.min(100,g("pf_pct",PREFS_DEFAULT.fillWarnPct)));
+  var bk=document.getElementById("pf_backup");prefs.autoBackup=bk?bk.value!=="off":prefs.autoBackup!==false;
   audit("settings","prefs","margin "+prefs.marginMin+"% · fill "+prefs.fillWarnPct+"% within "+prefs.fillWarnDays+"d");
   persistData();
   var ok=document.getElementById("pf_ok");if(ok){ok.style.display="inline";setTimeout(function(){ok.style.display="none";},1800);}
@@ -8073,7 +8129,8 @@ function viewSettings(){
     "<div class='eyebrow'>Storage</div><div class='h-sec' style='margin-bottom:6px'>Data &amp; Backup</div>"+
     "<p style='font-size:13px;color:var(--ink-soft);margin-bottom:14px;max-width:640px'>All your tours, bookings, accommodation, leads and customers are saved automatically on <b>this device</b> (offline, in the browser). There is no cloud server yet, so data does not sync between devices on its own. To move data to another device — phone, laptop — export a backup here and import it there.</p>"+
     "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
-      "<button class='btn btn-primary btn-sm' onclick='exportData()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export backup</button>"+
+      "<button class='btn btn-primary btn-sm' onclick='backupNow(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Backup now</button>"+
+      "<span id='bkLast' style='font-size:12px;color:var(--ink-soft)'>"+(lastBackupAt()?"Last backup: "+new Date(lastBackupAt()).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}):"No backup taken yet on this device")+(prefs.autoBackup===false?" \u00b7 weekly auto-backup off":" \u00b7 runs weekly")+"</span>"+
       "<label class='btn btn-sea btn-sm' style='cursor:pointer'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 8l5-5 5 5M12 3v12'/></svg>Import backup<input type='file' accept='application/json,.json' style='display:none' onchange='importData(this)'></label>"+
       "<button class='btn btn-ghost btn-sm' onclick='clearAllData()' style='color:var(--coral)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>Clear ALL data (device + cloud)</button>"+
     "</div>"+
@@ -8206,6 +8263,7 @@ function viewSettings(){
       "<div class='field'><label>Flag tours under (% full)</label><input class='input mono' type='number' id='pf_pct' min='1' max='100' value='"+(+prefs.fillWarnPct||50)+"'></div>"+
       "<div class='field'><label>…within (days before departure)</label><input class='input mono' type='number' id='pf_days' min='1' max='365' value='"+(+prefs.fillWarnDays||45)+"'></div>"+
       "<div class='field'><label>Minimum profit margin (%)</label><input class='input mono' type='number' id='pf_margin' min='0' max='100' value='"+(+prefs.marginMin||20)+"'></div>"+
+      "<div class='field'><label>Weekly automatic backup</label><select class='input' id='pf_backup'><option value='on' "+(prefs.autoBackup!==false?"selected":"")+">On \u2014 download a .json copy every week (and file it in Drive via the Sheet script)</option><option value='off' "+(prefs.autoBackup===false?"selected":"")+">Off</option></select></div>"+
     "</div>"+
     "<div style='display:flex;gap:10px;align-items:center'><button class='btn btn-primary btn-sm' onclick='savePrefs()'>Save preferences</button><span id='pf_ok' style='display:none;font-size:12.5px;color:var(--forest);font-weight:600'>Saved ✓</span></div>"+
   "</div>"+
@@ -8955,6 +9013,7 @@ function boot(keepView){
   }else{
     go("dashboard");
     navStack=[];document.getElementById("backBtn").classList.remove("show");
+    if(typeof autoBackupCheck==="function")autoBackupCheck();
   }
 }
 /* Background sync used to re-run boot(), which always ended in go("dashboard") — so
