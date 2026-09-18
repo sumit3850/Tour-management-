@@ -923,7 +923,9 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
 /* ===== Alerts dropdown + nudge toast ===== */
 .alert-dd summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;user-select:none}
 .alert-dd summary::-webkit-details-marker{display:none}
-.alert-dd .alert-sum{margin-left:auto;font-size:11.5px;color:var(--ink-soft)}
+.alert-dd .alert-sum{margin-left:auto;font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
+.alert-dd .chk-chev{width:16px;height:16px;flex:none;color:var(--ink-soft);transition:transform .18s}
+.alert-dd summary .h-sec{white-space:nowrap}
 .alert-dd[open] .chk-chev{transform:rotate(180deg)}
 .nudge{position:fixed;left:12px;right:12px;bottom:16px;z-index:2000;display:flex;align-items:center;gap:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--coral);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow-lg);transform:translateY(120%);opacity:0;transition:transform .25s,opacity .25s;max-width:560px;margin:0 auto}
 .nudge.show{transform:none;opacity:1}
@@ -968,7 +970,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
 .tour-card.tc-risk-red{box-shadow:inset 3px 0 0 var(--coral)}
 .tour-card.tc-risk-amber{box-shadow:inset 3px 0 0 #e8843c}
 @media(max-width:600px){
-  .md-row{flex-wrap:wrap;row-gap:6px}.md-row .meta{flex:1 1 100%}.md-row .md-amt{margin-left:auto;order:2}.md-act{order:3}
+  .md-row{flex-wrap:wrap;row-gap:6px}.md-row .meta{flex:1 1 100%}.md-row .md-amt{margin-left:0;order:0;font-size:13px;min-width:0}.md-row .md-act{margin-left:auto;order:0}
   .md-kpis{gap:6px}.md-k{padding:7px 8px}.md-k b{font-size:13px}
   .td-tag{min-width:64px;font-size:10px}
 }
@@ -3213,7 +3215,7 @@ function alertNudge(){
   var urgent=al.filter(function(x){return x.level==="err";}).length;
   var el=document.getElementById("alertNudge");
   if(!el){el=document.createElement("div");el.id="alertNudge";el.className="nudge";document.body.appendChild(el);}
-  el.innerHTML="<span class='nudge-ic'>\u26a0</span><div class='nudge-t'><b>"+al.length+" alert"+(al.length===1?"":"s")+" need attention</b><span>"+(urgent?urgent+" urgent \u00b7 ":"")+String(al[0].text).replace(/</g,"&lt;").slice(0,70)+(al[0].text.length>70?"\u2026":"")+"</span></div><button class='btn btn-primary btn-sm' onclick='nudgeView()'>View</button><button class='nudge-x' title='Snooze for 30 min' onclick='nudgeSnooze()'>\u00d7</button>";
+  el.innerHTML="<span class='nudge-ic'>\u26a0</span><div class='nudge-t'><b>"+al.length+" alert"+(al.length===1?" needs":"s need")+" attention</b><span>"+(urgent?urgent+" urgent \u00b7 ":"")+String(al[0].text).replace(/</g,"&lt;").slice(0,70)+(al[0].text.length>70?"\u2026":"")+"</span></div><button class='btn btn-primary btn-sm' onclick='nudgeView()'>View</button><button class='nudge-x' title='Snooze for 30 min' onclick='nudgeSnooze()'>\u00d7</button>";
   el.classList.add("show");
   clearTimeout(el._t);el._t=setTimeout(hideNudge,12000);
 }
