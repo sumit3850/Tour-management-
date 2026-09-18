@@ -254,12 +254,24 @@ td.strong{font-weight:600;color:var(--ink)}
 /* Bookings table: many columns → nowrap short cells, cap the long text
    columns and let the table scroll on small screens instead of stacking
    every word into one-word-wide columns. */
-.card table.bk-table{width:100%;min-width:980px !important}
-.bk-table th,.bk-table td{white-space:nowrap;word-break:normal;overflow-wrap:normal;vertical-align:top;padding:10px 9px}
-.bk-table td.bk-guest{white-space:normal;overflow-wrap:break-word;max-width:140px;min-width:112px}
-.bk-table td.bk-tour{white-space:normal;overflow-wrap:break-word;max-width:160px;min-width:130px}
-.bk-table td.bk-notes{white-space:normal;max-width:150px;min-width:130px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-.bk-table .bk-dates{font-size:12px;line-height:1.5}
+/* Bookings table fits the width it has (no sideways scroll on desktop): text
+   columns wrap, money/dates/pills never do. */
+.card table.bk-table{width:100%;min-width:0 !important;table-layout:auto}
+.bk-table th,.bk-table td{white-space:normal;overflow-wrap:break-word;word-break:normal;vertical-align:top;padding:9px 6px;font-size:12.5px}
+.bk-table th{font-size:10.5px;padding-left:6px;padding-right:6px;white-space:nowrap}
+.bk-table td.bk-guest{min-width:96px}.bk-table td.bk-tour{min-width:112px}.bk-table td.bk-notes{max-width:130px}
+.bk-table td.num,.bk-table th.num{padding-left:8px}
+.bk-table .tbl-actions{gap:4px}.bk-table .tbl-actions button{width:28px;height:28px}
+.bk-table .pill{font-size:11px;padding:2px 8px}
+.bk-table td.bk-guest{font-size:13.5px}
+.bk-table td.bk-tour{min-width:0}
+.bk-table td.bk-tour .bk-code{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#0c5760;background:var(--sea-soft);border-radius:5px;padding:1px 6px;margin-right:6px;white-space:nowrap}
+.bk-table td.bk-notes{overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.bk-table .bk-dates{font-size:12px;line-height:1.5;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:1400px){.content{padding-left:16px;padding-right:16px}.bk-table th,.bk-table td{padding-left:5px;padding-right:5px}}
+@media(max-width:1180px){.bk-table .bk-dates{white-space:normal}}
+.bk-table .bk-dates .bk-d{white-space:nowrap}
+.bk-table .bk-dates .bk-sess{display:block;font-size:12px;color:var(--ink-soft)}
 .bk-table .bk-sub{font-size:11px;color:var(--ink-soft);font-weight:400;margin-top:2px}
 .bk-table .pill{white-space:nowrap}
 .bk-table td.num,.bk-table th.num{text-align:right;padding-left:14px}
@@ -1006,7 +1018,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 245</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 246</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1015,7 +1027,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 245</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 246</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4481,11 +4493,14 @@ function renderBookings(){
     if(t&&t.pocId===x.id)names=names.concat(bookings.filter(function(o){return o.tour===x.tour&&o.id!==x.id;}).map(function(o){return o.guest;}));
     names=names.map(function(s){return (s||"").trim();}).filter(Boolean);
     var mem=names.length?"<div class='bk-sub'>+ "+names.join(", ")+"</div>":"";
-    var dateCell=x.start?dShort(x.start)+"<div class='bk-sub'>→ "+dShort(x.end)+"</div>":"—";
+    /* group tours: one line DD/MM/YYYY → DD/MM/YYYY; session tours: first date, then each further session date stacked */
+    var dateCell;
+    if(t&&t.tourType==="session"){var sd=(t.sessionDates&&t.sessionDates.length?t.sessionDates:[x.start||t.start]).filter(Boolean);dateCell=sd.length?dShort(sd[0])+sd.slice(1).map(function(d){return "<span class='bk-sess'>"+dShort(d)+"</span>";}).join(""):"—";}
+    else dateCell=x.start?"<span class='bk-d'>"+dShort(x.start)+"</span> → <span class='bk-d'>"+dShort(x.end)+"</span>":"—";
     var pend=bookingPending(x);
     return "<tr>"+
       "<td class='bk-guest strong'>"+x.guest+mem+"</td>"+
-      "<td class='bk-tour'>"+(t?tourLabel(t)+"<div class='bk-sub' style='font-family:var(--font-mono)'>"+tourCode(t)+"</div>":(x.customTour||"—"))+"</td>"+
+      "<td class='bk-tour'>"+(t?"<span class='bk-code'>"+tourCode(t)+"</span>"+tourLabel(t):(x.customTour||"—"))+"</td>"+
       "<td class='bk-dates'>"+dateCell+"</td>"+
       "<td class='num mono'>"+x.party+"</td>"+
       "<td>"+x.country+"</td>"+
