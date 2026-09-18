@@ -727,6 +727,33 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
 /* Per-person / total-quoted figures never split across lines */
 .cs-table td[id^="cs_pp_"],.cs-table td[id^="cs_total_"]{white-space:nowrap}
 
+/* ===== Mobile: tables become stacked label/value cards; sticky action bars;
+   booking quick actions; install nudge ===== */
+th.bk-quick,td.bk-quick{display:none}
+.bk-quick-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.bk-quick-row .btn{padding:7px 10px;font-size:12.5px}
+.install-hint{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;border-left:3px solid var(--sea);flex-wrap:wrap}
+@media(max-width:600px){
+  .tbl-wrap table.m-cards{min-width:0 !important;width:100%;border-collapse:separate;border-spacing:0}
+  .m-cards thead{display:none}
+  .m-cards tbody tr{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 10px;box-shadow:var(--shadow);overflow:hidden}
+  .m-cards tbody tr:hover{background:var(--surface)}
+  .m-cards td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:7px 12px !important;border-bottom:1px solid var(--line-soft);font-size:13.5px;text-align:right;white-space:normal !important;max-width:none !important;min-width:0 !important;width:auto !important;line-height:1.4}
+  .m-cards td:last-child{border-bottom:none}
+  .m-cards td::before{content:attr(data-label);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;flex:0 0 36%;text-align:left;padding-top:2px}
+  .m-cards td.m-nolabel::before,.m-cards td:first-child::before{display:none}
+  .m-cards td.m-nolabel{justify-content:flex-end}
+  .m-cards td.empty{display:block;text-align:center;padding:16px 12px !important}
+  .m-cards td:first-child{font-size:15px;font-weight:700;background:var(--surface-2);padding:10px 12px !important;text-align:left;justify-content:flex-start}
+  .m-cards td .tbl-actions{justify-content:flex-end;width:100%}
+  .m-cards .bk-stack{align-items:flex-end}
+  .m-cards td.bk-notes{display:flex !important;-webkit-line-clamp:unset;overflow:visible}
+  .m-cards td.bk-quick{display:flex;background:var(--surface-2)}
+  .m-cards td.bk-guest{max-width:none !important}
+  .sticky-actions{position:sticky;bottom:80px;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px;border:1px solid var(--line);border-radius:12px;box-shadow:0 -6px 20px -12px rgba(20,40,80,.4)}
+  .install-hint>div:last-child{width:100%;justify-content:flex-end}
+}
+
 /* ===== Pre-departure checklist (tour modal) + readiness pill (tour card) ===== */
 .chk-box{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
 .chk-head{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
@@ -855,7 +882,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 237</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 238</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -864,7 +891,7 @@ input[type=date].input,input[type=number].input{font-variant-numeric:tabular-num
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 237</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 238</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3105,6 +3132,60 @@ function chkRemove(tid,key){
   var box=document.getElementById("chkBox");if(box)box.innerHTML=checklistMarkup(t);
   renderTours();
 }
+/* Quick actions on a booking row (phone cards): WhatsApp — a payment reminder
+   when a balance is pending, otherwise a plain hello — and one-tap Mark paid. */
+function quickWA(id){
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  if(bookingPending(b)>0)paymentReminder(id);
+  else waShare("Hello "+b.guest+", this is "+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours")+".",b.phone);
+}
+function markBookingPaid(id){
+  var b=bookings.find(function(x){return x.id===id;});if(!b)return;
+  var tot=bookingTotalCost(b);if(!(tot>0)){alert("Set this booking's total first (Edit booking).");return;}
+  if(!confirm("Mark "+b.guest+" as fully paid ("+fmt(tot)+")?"))return;
+  b.deposit=tot;b.pay="Paid";b.lastPendingDate="";
+  var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
+  /* the POC booking carries the tour's figures — keep the tour in step so the
+     card, payment roll-ups and other bookings on the tour agree */
+  if(t&&t.pocId===b.id){if(!(parseFloat(t.tourCost)>0))t.tourCost=tot;t.tourDeposit=parseFloat(t.tourCost)||tot;t.updatedAt=new Date().toISOString();}
+  audit("booking","paid",b.guest+" · "+fmt(tot));
+  persistData();renderBookings();renderTours();refreshDashboardIfActive();if(typeof renderCustomers==="function")renderCustomers();
+}
+/* ===== Mobile table → card pattern ============================================
+   Every `.tbl-wrap table` gets `.m-cards` and each cell a data-label copied from
+   its column header; under 600px the CSS stacks rows into label/value cards.
+   Runs after every render via a MutationObserver, so no renderer needs editing.
+   Opt a table out with class `no-cards`. */
+function labelTables(root){
+  (root||document).querySelectorAll(".tbl-wrap table:not(.no-cards)").forEach(function(tb){
+    tb.classList.add("m-cards");
+    var ths=[].slice.call(tb.querySelectorAll("thead th")).map(function(th){return th.textContent.trim();});
+    if(!ths.length)return;
+    tb.querySelectorAll("tbody tr").forEach(function(tr){
+      var ci=0;
+      [].slice.call(tr.children).forEach(function(td){
+        if(td.tagName!=="TD")return;
+        var span=td.colSpan||1,lab=ths[ci]||"";ci+=span;
+        if(span>1||td.classList.contains("empty")||td.querySelector(".tbl-actions")||!lab){td.classList.add("m-nolabel");td.removeAttribute("data-label");return;}
+        td.setAttribute("data-label",lab);
+      });
+    });
+  });
+}
+var _lblTimer=null;
+function scheduleLabelTables(){clearTimeout(_lblTimer);_lblTimer=setTimeout(function(){labelTables();},30);}
+(function(){
+  var start=function(){try{var mo=new MutationObserver(scheduleLabelTables);["content","modal"].forEach(function(id){var el=document.getElementById(id);if(el)mo.observe(el,{childList:true,subtree:true});});labelTables();}catch(e){}};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+})();
+/* One-time "install the app" nudge on phones running inside a browser tab. */
+function installHintCard(){
+  try{if(localStorage.getItem("ieo_install_hint")==="1")return "";}catch(e){}
+  if(typeof isStandaloneApp==="function"&&isStandaloneApp())return "";
+  if(!/Android|iPhone|iPad/i.test(navigator.userAgent||""))return "";
+  return "<div class='card card-pad install-hint' id='installHint'><div><b>Install the console as an app</b><div style='font-size:12.5px;color:var(--ink-soft);margin-top:2px'>Full screen, no browser bar, opens from your home screen.</div></div><div style='display:flex;gap:8px;flex:none'><button class='btn btn-primary btn-sm' onclick='installApp()'>Install</button><button class='btn btn-ghost btn-sm' onclick='dismissInstallHint()'>Not now</button></div></div>";
+}
+function dismissInstallHint(){try{localStorage.setItem("ieo_install_hint","1");}catch(e){}var e=document.getElementById("installHint");if(e)e.remove();}
 function refreshDashboardIfActive(){var d=document.getElementById("v-dashboard");if(d&&d.classList.contains("active")&&typeof refreshDashboard==="function")refreshDashboard();}
 function checklistMarkup(t){
   var items=tourChecklist(t);if(!items.length)return "";
@@ -3206,6 +3287,7 @@ function viewDashboard(){
     (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+tourLabel(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
   "</div>";
   return "<section class='view' id='v-dashboard'>"+
+    (typeof installHintCard==="function"?installHintCard():"")+
     "<div class='qa-grid'>"+
       qaTile("Create tour","M12 5v14M5 12h14","openCreateTour()")+
       qaTile("Add booking","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11","openAddBooking()")+
@@ -3865,7 +3947,7 @@ function viewBookings(){
         "</div>"+
       "</div>"+
     "</div>"+
-    "<div class='card'><div class='tbl-wrap'><table class='bk-table'><thead><tr><th class='bk-guest'>Guest</th><th class='bk-tour'>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total</th><th class='num'>Deposit</th><th class='num'>Pending</th><th class='bk-notes'>Notes</th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
+    "<div class='card'><div class='tbl-wrap'><table class='bk-table'><thead><tr><th class='bk-guest'>Guest</th><th class='bk-tour'>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total</th><th class='num'>Deposit</th><th class='num'>Pending</th><th class='bk-notes'>Notes</th><th class='bk-quick'></th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
 }
 function renderBookings(){
@@ -3892,6 +3974,7 @@ function renderBookings(){
       "<td class='num mono'>"+fmt(bookingDeposit(x))+"</td>"+
       "<td class='num mono' style='color:var(--coral)'>"+fmt(pend)+(lp!=="—"?"<div class='bk-sub' style='color:var(--ink-soft)'>due "+lp+"</div>":"")+"</td>"+
       "<td class='bk-notes' style='color:var(--ink-soft)' title=\""+String(x.notes||"").replace(/"/g,"&quot;")+"\">"+(x.notes||"—")+"</td>"+
+      "<td class='bk-quick m-nolabel'><div class='bk-quick-row'>"+(x.phone?"<a class='btn btn-ghost btn-sm' href='tel:"+String(x.phone).replace(/[^\d+]/g,"")+"'>📞 Call</a><button class='btn btn-sea btn-sm' onclick=\"quickWA('"+x.id+"')\">WhatsApp</button>":"")+(pend>0?"<button class='btn btn-primary btn-sm' onclick=\"markBookingPaid('"+x.id+"')\">Mark paid</button>":"")+"</div></td>"+
       "<td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td>"+
     "</tr>"}).join("");
   renderBulkTourSelect();
@@ -4595,7 +4678,7 @@ function viewCostSheet(){
         "<div class='field'><label>Migrate prebuilt rates → this tour</label><div style='display:flex;gap:8px'><select class='input' id='csCopyFrom' style='flex:1;min-width:0'></select><button class='btn btn-ghost' onclick='copyRatesFrom()' style='white-space:nowrap'>Copy rates</button></div></div>"+
       "</div>"+
       "<div id='csBody' style='overflow-x:auto;margin-top:14px'></div>"+
-      "<div class='cs-botbtns' style='display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'>"+
+      "<div class='cs-botbtns sticky-actions' style='display:flex;gap:10px;margin-top:14px;flex-wrap:wrap'>"+
         "<button class='btn btn-primary' onclick='saveCostSheet()'>Save cost sheet</button>"+
         "<button class='btn btn-ghost' onclick='renderCostSheet()'>Reload saved</button>"+
         "<button class='btn btn-ghost' id='csDeleteBtn' style='display:none;color:var(--coral)' onclick='deleteCustomTour()'>Delete custom tour</button>"+
@@ -7074,7 +7157,7 @@ function renderProfitCalc(){
       "<div class='s'><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div><div class='l'>Total Expenses</div></div>"+
       "<div class='s'><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div><div class='l'>Profit</div></div>"+
     "</div>"+
-    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:14px'>"+
+    "<div class='sticky-actions' style='display:flex;gap:8px;flex-wrap:wrap;margin-top:14px'>"+
       "<button class='btn btn-primary btn-sm' onclick='saveProfitCalc()'>"+(window._pcEditId?"Update saved calculation":"Save calculation")+"</button>"+
       (window._pcEditId?"<button class='btn btn-ghost btn-sm' onclick='cancelProfitEdit()'>Cancel</button>":"")+
     "</div>"+
@@ -7465,7 +7548,7 @@ function cascadeAllCustomerPayments(){(tours||[]).forEach(function(t){cascadeTou
 function renderCustomers(){
   const b=document.getElementById("custBody");if(!b)return;
   cascadeAllCustomerPayments();
-  b.innerHTML=customers.map(c=>{var dt=c.details||{};var _pc=c.pay==="Paid"?"completed":(c.pay==="Deposit"?"open":"full");return "<tr><td class='strong' style='cursor:pointer' data-action='viewCustomer' data-arg='"+c.name+"'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+(c.country||"—")+"</td><td class='nowrap'>"+(c.phone||dt.phone||"—")+"</td><td class='nowrap'>"+(c.email||dt.email||"—")+"</td><td class='num mono'>"+c.tours+"</td><td><span class='pill "+_pc+"'>"+c.pay+"</span></td><td style='color:var(--ink-soft)'>"+(c.pref||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='viewCustomer' data-arg='"+c.name+"' title='View full details'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='8' class='empty'>No customers yet.</td></tr>";
+  b.innerHTML=customers.map(c=>{var dt=c.details||{};var _pc=c.pay==="Paid"?"completed":(c.pay==="Deposit"?"open":(c.pay?"full":"plain"));return "<tr><td class='strong' style='cursor:pointer' data-action='viewCustomer' data-arg='"+c.name+"'>"+c.name+(c.repeat?"<span class='cat endemic' style='margin-left:6px'>Repeat</span>":"")+"</td><td>"+(c.country||"—")+"</td><td class='nowrap'>"+(c.phone||dt.phone||"—")+"</td><td class='nowrap'>"+(c.email||dt.email||"—")+"</td><td class='num mono'>"+(c.tours||0)+"</td><td><span class='pill "+_pc+"'>"+(c.pay||"—")+"</span></td><td style='color:var(--ink-soft)'>"+(c.pref||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' data-action='viewCustomer' data-arg='"+c.name+"' title='View full details'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg></button><button class='edit-btn' data-action='editCustomer' data-arg='"+c.name+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteCustomer' data-arg='"+c.name+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='8' class='empty'>No customers yet.</td></tr>";
   persistData();
 }
 function editCustomer(name){
