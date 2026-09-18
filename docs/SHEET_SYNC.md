@@ -289,3 +289,21 @@ function doPost(e){
 
 ### 3. Connect
 Paste that URL in **Settings → Google Sheet auto-push → Save webhook**. Click **Push all now** once. From then on the **`Booking`** and **`Customer Database`** tabs are kept **in mirror-sync with the console**: whenever you add, edit or delete a booking/customer, the whole tab is rebuilt to match — so deletions disappear, edits update, and old/stale rows are wiped. The `Booking` tab lists **one row per tour (the POC)**; the other party members are summarised in the **Member (s)** column. (No duplicate lowercase tabs are created.)
+
+## Backups (weekly, automatic)
+
+The console takes a backup once a week (Settings → Preferences → *Weekly automatic backup*, on by default) and whenever you press **Settings → Data & Backup → Backup now**. Each backup downloads a `.json` file to the device **and**, if the Sheet webhook above is configured, POSTs the same file to it as `{mode:"backup", filename, json}` so the script can file a copy in your Google Drive. Add this branch near the top of `doPost`, right after `var body = JSON.parse(...)`:
+
+```javascript
+  // --- Backup mode: keep a dated copy of the whole console in Drive -------------
+  if (body.mode === "backup") {
+    var folderName = "Ops Console backups";
+    var it = DriveApp.getFoldersByName(folderName);
+    var folder = it.hasNext() ? it.next() : DriveApp.createFolder(folderName);
+    folder.createFile(body.filename || ("ops-console-backup-" + new Date().toISOString().slice(0,10) + ".json"),
+                      body.json, MimeType.PLAIN_TEXT);
+    return ContentService.createTextOutput("backup ok");
+  }
+```
+
+Redeploy the web app after pasting (Deploy → Manage deployments → Edit → New version). Restore any backup from Settings → Data & Backup → **Import backup**.
