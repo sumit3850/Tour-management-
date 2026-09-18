@@ -920,6 +920,27 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
 .cf-net{font-size:11.5px;font-weight:700}
 @media(max-width:600px){.cf-grid{grid-template-columns:repeat(3,1fr);row-gap:16px}.cf-bars{height:80px}}
 
+/* ===== Alerts dropdown + nudge toast ===== */
+.alert-dd summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;user-select:none}
+.alert-dd summary::-webkit-details-marker{display:none}
+.alert-dd .alert-sum{margin-left:auto;font-size:11.5px;color:var(--ink-soft)}
+.alert-dd[open] .chk-chev{transform:rotate(180deg)}
+.nudge{position:fixed;left:12px;right:12px;bottom:16px;z-index:2000;display:flex;align-items:center;gap:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--coral);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow-lg);transform:translateY(120%);opacity:0;transition:transform .25s,opacity .25s;max-width:560px;margin:0 auto}
+.nudge.show{transform:none;opacity:1}
+.nudge-ic{font-size:18px;color:var(--coral);flex:none}
+.nudge-t{flex:1;min-width:0;font-size:12.5px;line-height:1.3}.nudge-t b{display:block}.nudge-t span{color:var(--ink-soft);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.nudge-x{border:none;background:transparent;color:var(--ink-soft);font-size:20px;line-height:1;padding:0 4px;cursor:pointer}
+@media(max-width:768px){.nudge{bottom:82px}}
+@media(max-width:600px){
+  .md-row{padding:8px 0}.md-row .meta .t{font-size:12.5px;line-height:1.3}.md-row .meta .s{font-size:11px}
+  .md-row .md-amt{font-size:13px;min-width:0;margin-left:0;order:0}
+  .md-row .meta{flex:1 1 100%}.md-row .md-act{margin-left:auto;order:0}
+  .md-act .btn{padding:5px 9px;font-size:11.5px}
+  .md-sec{font-size:10.5px;margin-top:8px}.md-kpis{gap:6px}.md-k{padding:6px 8px}.md-k b{font-size:12.5px}.md-k span{font-size:10.5px}
+  #moneyDueCard .section-head .pill{font-size:11px}
+  .list-row[data-action='openTour'] .t{font-size:12.5px;line-height:1.3}.list-row[data-action='openTour'] .s{font-size:11px}
+}
+
 /* ===== Dashboard insight cards: Money due · Underbooked · Today ===== */
 .md-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 4px}
 .md-k{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:1px;min-width:0}
@@ -1046,7 +1067,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 249</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 250</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1055,7 +1076,7 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 249</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 250</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3177,9 +3198,30 @@ function gotoAlert(kind,arg){
 }
 function alertsCard(){
   var al=buildAlerts();
-  if(!al.length)return "<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Alerts</div><div class='empty'>All clear — no scheduling clashes, overdue payments or unassigned operations. ✓</div></div>";
-  return "<div class='card card-pad' style='margin-top:16px;border-left:3px solid var(--coral)'><div class='h-sec' style='font-size:15px;margin-bottom:8px;color:var(--coral)'>⚠ Alerts ("+al.length+")</div>"+al.map(function(x){return "<div class='list-row' data-action='gotoAlert' data-arg='"+x.kind+"|"+x.arg+"' style='cursor:pointer'><div class='ic' style='background:"+(x.level==="err"?"#fbe7e4":"#fff4e0")+"'><svg viewBox='0 0 24 24' fill='none' stroke='"+(x.level==="err"?"var(--coral)":"var(--amber)")+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg></div><div class='meta'><div class='t' style='font-weight:500;white-space:normal'>"+x.text+"</div><div class='s'>Tap to open →</div></div></div>";}).join("")+"</div>";
+  if(!al.length)return "<div class='card card-pad' id='alertsCard' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:6px'>Alerts</div><div class='empty'>All clear — no scheduling clashes, overdue payments or unassigned operations. ✓</div></div>";
+  return "<div class='card card-pad' id='alertsCard' style='margin-top:16px;border-left:3px solid var(--coral)'><details class='alert-dd'"+(_alertsOpen?" open":"")+" ontoggle='_alertsOpen=this.open'><summary><span class='h-sec' style='font-size:15px;color:var(--coral)'>⚠ Alerts ("+al.length+")</span><span class='alert-sum'>"+al.filter(function(x){return x.level==="err";}).length+" urgent · tap to review</span><svg class='chk-chev' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg></summary><div style='margin-top:6px'>"+al.map(function(x){return "<div class='list-row' data-action='gotoAlert' data-arg='"+x.kind+"|"+x.arg+"' style='cursor:pointer'><div class='ic' style='background:"+(x.level==="err"?"#fbe7e4":"#fff4e0")+"'><svg viewBox='0 0 24 24' fill='none' stroke='"+(x.level==="err"?"var(--coral)":"var(--amber)")+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/><path d='M12 9v4M12 17h.01'/></svg></div><div class='meta'><div class='t' style='font-weight:500;white-space:normal'>"+x.text+"</div><div class='s'>Tap to open →</div></div></div>";}).join("")+"</div></details></div>";
 }
+var _alertsOpen=false;
+/* ===== ALERT NUDGE — a small toast every few minutes while alerts are open =====
+   Snoozed for 30 min when dismissed; never shown while a dialog is open. */
+var ALERT_NUDGE_EVERY=5*60*1000,ALERT_SNOOZE=30*60*1000;
+function alertNudge(){
+  if(window.__DEMO__&&!window.__NUDGE_TEST__)return;
+  try{if(Date.now()-(parseInt(localStorage.getItem("ieo_alert_snooze")||"0",10)||0)<ALERT_SNOOZE)return;}catch(e){}
+  var scrim=document.getElementById("scrim");if(scrim&&scrim.classList.contains("show"))return;
+  var al=(typeof buildAlerts==="function")?buildAlerts():[];if(!al.length){hideNudge();return;}
+  var urgent=al.filter(function(x){return x.level==="err";}).length;
+  var el=document.getElementById("alertNudge");
+  if(!el){el=document.createElement("div");el.id="alertNudge";el.className="nudge";document.body.appendChild(el);}
+  el.innerHTML="<span class='nudge-ic'>\u26a0</span><div class='nudge-t'><b>"+al.length+" alert"+(al.length===1?"":"s")+" need attention</b><span>"+(urgent?urgent+" urgent \u00b7 ":"")+String(al[0].text).replace(/</g,"&lt;").slice(0,70)+(al[0].text.length>70?"\u2026":"")+"</span></div><button class='btn btn-primary btn-sm' onclick='nudgeView()'>View</button><button class='nudge-x' title='Snooze for 30 min' onclick='nudgeSnooze()'>\u00d7</button>";
+  el.classList.add("show");
+  clearTimeout(el._t);el._t=setTimeout(hideNudge,12000);
+}
+function hideNudge(){var el=document.getElementById("alertNudge");if(el)el.classList.remove("show");}
+function nudgeSnooze(){try{localStorage.setItem("ieo_alert_snooze",String(Date.now()));}catch(e){}hideNudge();}
+function nudgeView(){hideNudge();_alertsOpen=true;go("dashboard");setTimeout(function(){var c=document.getElementById("alertsCard");if(c){var d=c.querySelector("details");if(d)d.open=true;c.scrollIntoView({behavior:"smooth",block:"start"});}},120);}
+setInterval(alertNudge,ALERT_NUDGE_EVERY);
+setTimeout(alertNudge,60000);
 function referralRollup(){
   var m={};reservations.forEach(function(r){if(r.referral>0){var key=r.by||"Unassigned";m[key]=(m[key]||0)+r.referral;}});
   return Object.keys(m).map(function(k){return {by:k,total:m[k]};}).sort(function(a,b){return b.total-a.total;});
@@ -3783,10 +3825,10 @@ function viewDashboard(){
       kpi("Confirmed Bookings",visibleConfirmed,"confirmed","up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
     "<div class='grid-2' style='margin-top:16px'>"+todayCard()+underbookedCard()+"</div>"+
-    "<div class='card card-pad' id='dashOpsBoard' style='margin-top:16px'>"+opsBoardMarkup()+"</div>"+
-    alertsCard()+
-    "<div id='payPanel' style='margin-top:16px'></div>"+
     "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
+    alertsCard()+
+    "<div class='card card-pad' id='dashOpsBoard' style='margin-top:16px'>"+opsBoardMarkup()+"</div>"+
+    "<div id='payPanel' style='margin-top:16px'></div>"+
     (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
     "<div class='card card-pad' style='margin-top:16px'>"+
       "<div class='section-head'><div class='h-sec'>Occupancy by departure</div></div>"+
