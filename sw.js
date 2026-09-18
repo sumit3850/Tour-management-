@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v121"; /* v121: theme + column-ruler buttons in the top bar; pipeline stage tabs with counts; pulled guests stay one group under a POC; Past tours column removed; select chevron fix */
+var CACHE = "ie-ops-v122"; /* v122: tours with bookings but no POC get one automatically (pulled groups keep their leader), so Bookings shows one row per tour */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
