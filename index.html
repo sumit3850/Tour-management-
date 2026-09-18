@@ -782,6 +782,22 @@ th.bk-quick,td.bk-quick{display:none}
 .pill.tc-ready.bad{background:var(--coral-soft);color:var(--coral);border-color:transparent}
 @media(max-width:600px){.chk-item{flex-wrap:wrap}.chk-item .chk-when{flex-basis:100%;padding-left:27px;margin-top:-4px}}
 
+/* ===== Message templates panel · Itinerary builder ===== */
+.msg-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+@media(max-width:600px){.msg-grid{grid-template-columns:1fr}}
+.itin-row{display:grid;grid-template-columns:96px 1fr;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--line-soft);align-items:start}
+.itin-row .input{margin:0}.itin-row textarea.input{grid-column:2;min-height:64px;font-size:13px}
+.itin-day{font-weight:700;font-size:13px;color:var(--ink);padding-top:10px}.itin-day span{display:block;font-weight:500;font-size:11.5px;color:var(--ink-soft)}
+@media(max-width:600px){.itin-row{grid-template-columns:1fr}.itin-row textarea.input{grid-column:1}.itin-day{padding-top:0}}
+.itin-box{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.itin-view{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:13px}
+.itin-view:last-child{border-bottom:none}
+.itin-view-d{font-weight:700;color:var(--forest)}.itin-view-d span{display:block;font-weight:500;font-size:11.5px;color:var(--ink-soft)}
+.itin-view-p{margin-top:3px;color:var(--ink-soft);line-height:1.5;white-space:normal}
+@media(max-width:600px){.itin-view{grid-template-columns:1fr;gap:2px}}
+.op-itin{margin-top:8px;font-size:12px}.op-itin summary{cursor:pointer;font-weight:600;color:var(--sea)}
+.op-itin-d{padding:6px 0;border-bottom:1px solid var(--line-soft)}.op-itin-d div{color:var(--ink-soft);margin-top:2px;line-height:1.45}
+
 /* ===== Analytics: YoY grouped bars, cash-flow forecast ===== */
 .chart .stk2{display:flex;gap:3px;align-items:flex-end;width:100%;max-width:40px;height:100%}
 .chart .stk2 .stk{width:50%;max-width:none}
@@ -898,7 +914,7 @@ th.bk-quick,td.bk-quick{display:none}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 239</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 240</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -907,7 +923,7 @@ th.bk-quick,td.bk-quick{display:none}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 239</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 240</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2906,6 +2922,7 @@ function enrichOp(o){
   });
   var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
   if(t){o.tourId=o.tourId||tourCode(t);o.tourName=t.name||tourLabel(t);if(t.stay&&!o.stay)o.stay=t.stay;
+    o.itinerary=(t.itinerary||[]).map(function(d,i){return {day:i+1,date:d.date||"",title:d.title||"",plan:d.plan||""};}).filter(function(d){return d.title||d.plan;});
     if(t.pocId){var pb=(bookings||[]).find(function(b){return b.id===t.pocId;});if(pb){o.pocName=pb.guest;o.pocPhone=pb.phone||"";}}}
 }
 function enrichAllOps(){(ops||[]).forEach(enrichOp);}
@@ -3101,7 +3118,7 @@ var CHK_TEMPLATE=[
   {k:"tickets",  label:"Ship / ferry / flight tickets booked", offset:21},
   {k:"permits",  label:"Permits arranged (RAP / forest / island)", offset:14},
   {k:"vehicle",  label:"Vehicle & driver assigned",           offset:14, auto:function(t){return (ops||[]).some(function(o){return o.fromTour===t.id&&opActive(o)&&o.veh&&o.veh!=="—"&&o.driver&&o.driver!=="—";});}},
-  {k:"docs",     label:"Guest IDs / documents collected",     offset:14},
+  {k:"docs",     label:"Guest IDs / documents collected",     offset:14, auto:function(t){var bs=bookings.filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";});return bs.length>0&&bs.every(function(b){return b.documents&&b.documents.length;});}},
   {k:"balance",  label:"Balance payment cleared",             offset:15, auto:function(t){return tourPayStatus(t)==="Paid";}},
   {k:"brief",    label:"Pre-departure info sent to guests",   offset:7},
   {k:"pickup",   label:"Pickup time confirmed with driver & POC", offset:2}
@@ -3219,6 +3236,127 @@ function checklistMarkup(t){
         (i.custom?"<button class='chk-x' title='Remove item' onclick=\"event.preventDefault();chkRemove('"+t.id+"','"+i.k+"')\">×</button>":"")+"</label>";
     }).join("")+"</div>"+
     "<div class='chk-add'><input class='input' id='chkNew' placeholder='Add an item…' onkeydown=\"if(event.key==='Enter'){chkAdd('"+t.id+"');}\"><input class='input mono' id='chkNewOff' type='number' min='0' value='7' title='Days before departure'><span class='chk-add-l'>days before</span><button class='btn btn-ghost btn-sm' onclick=\"chkAdd('"+t.id+"')\">Add</button></div>";
+}
+/* ===== MESSAGE TEMPLATES ======================================================
+   Reusable guest messages built from the booking + tour, sent as WhatsApp deep
+   links / mailto (no API needed). Bookings → "Message a guest" panel. */
+function msgCompany(){return (window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";}
+function msgSignature(){return "\n\nSumit Kumar · +91 99332 02175 · info@islandexplorer.in";}
+function itineraryText(t){
+  var it=(t&&t.itinerary)||[];if(!it.length)return "";
+  return it.map(function(d,i){return "Day "+(i+1)+(d.date?" ("+dShort(d.date)+")":"")+(d.title?" — "+d.title:"")+(d.plan?"\n"+d.plan:"");}).join("\n\n");
+}
+var MSG_TEMPLATES=[
+  {id:"advance",label:"Advance received — booking confirmed",subject:"Booking confirmed",body:function(b,t){
+    var dep=bookingDeposit(b),pend=bookingPending(b),due=bookingDueDate(b);
+    return "Hello "+b.guest+",\n\nThank you — we have received your advance of "+fmt(dep)+" and your booking for "+(t?shortName(t):(b.customTour||"your tour"))+(b.start?" ("+dShort(b.start)+" – "+dShort(b.end)+")":"")+" is confirmed for "+(b.party||1)+" guest"+((b.party||1)===1?"":"s")+".\n"+(pend>0?"\nBalance of "+fmt(pend)+(due?" is due by "+dShort(due):"")+"."+payLinkLines(pend):"")+"\nWe will share the pre-departure details closer to the date. Looking forward to birding with you!"+msgSignature();}},
+  {id:"balance",label:"Balance payment reminder",subject:"Pending payment",body:function(b,t){return paymentMsg(b);}},
+  {id:"brief",label:"Pre-departure info pack",subject:"Pre-departure information",body:function(b,t){
+    var lines=["Hello "+b.guest+",","","Here are the details for your upcoming tour with "+msgCompany()+":",""];
+    if(t){lines.push("📍 "+shortName(t)+(t.start?" · "+dShort(t.start)+" – "+dShort(t.end):""));
+      if(t.pickup&&t.pickup!=="—")lines.push("🚐 Pickup: "+t.pickup);
+      if(t.stay&&t.stay!=="—")lines.push("🏨 Stay: "+t.stay);
+      if(t.guide&&t.guide!=="—")lines.push("🦜 Guide: "+t.guide);}
+    else if(b.start)lines.push("📍 "+(b.customTour||"Tour")+" · "+dShort(b.start)+" – "+dShort(b.end));
+    lines.push("","What to bring: binoculars, light full-sleeve clothing, hat, rain jacket, sunscreen, insect repellent, comfortable walking shoes, torch, refillable water bottle, and a valid photo ID / passport (foreign nationals: carry your RAP / permit copies).");
+    var pend=bookingPending(b);if(pend>0)lines.push("","Balance of "+fmt(pend)+" to be cleared before departure."+payLinkLines(pend));
+    var it=t?itineraryText(t):"";if(it)lines.push("","Day-by-day plan:","",it);
+    lines.push("","For anything at all, WhatsApp us on +91 99332 02175. See you soon!");
+    return lines.join("\n")+msgSignature();}},
+  {id:"itin",label:"Day-by-day itinerary",subject:"Your itinerary",body:function(b,t){var it=t?itineraryText(t):"";return "Hello "+b.guest+",\n\nYour day-by-day plan for "+(t?shortName(t):"the tour")+":\n\n"+(it||"(Add days in the tour's Itinerary first.)")+"\n\nTimings may shift with weather and tides — your guide will keep you posted."+msgSignature();}},
+  {id:"reg",label:"Registration form link",subject:"Your tour registration",body:function(b,t){return guestMsg(b);}},
+  {id:"thanks",label:"Thank you + review request",subject:"Thank you for birding with us",body:function(b,t){var rev=payCfg.reviewUrl?"\n\nIf you enjoyed the tour, a short Google review would mean a lot to our small team:\n"+payCfg.reviewUrl:"";var fb=(typeof feedbackLink==="function")?feedbackLink():"";return "Hello "+b.guest+",\n\nThank you for birding with "+msgCompany()+" — it was a pleasure hosting you"+(t?" on "+shortName(t):"")+"."+rev+(fb?"\n\nAnd 30 seconds of feedback helps us improve:\n"+fb:"")+"\n\nHope to see you again in the islands!"+msgSignature();}}
+];
+function msgBookingOptions(sel){
+  var list=(bookings||[]).filter(function(b){return b.status!=="Cancelled";}).slice().sort(function(a,b){return (b.start||"").localeCompare(a.start||"");});
+  return "<option value=''>Choose a guest…</option>"+list.map(function(b){var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;return "<option value='"+b.id+"' "+(b.id===sel?"selected":"")+">"+String(b.guest||"").replace(/</g,"&lt;")+" · "+(t?tourCode(t)+" "+shortName(t):(b.customTour||"—"))+(b.start?" · "+dShort(b.start):"")+"</option>";}).join("");
+}
+function renderMsgPanel(){
+  var sel=document.getElementById("msgBooking");if(!sel)return;var keep=sel.value;sel.innerHTML=msgBookingOptions(keep);
+  var ts=document.getElementById("msgTpl");if(ts&&!ts.options.length)ts.innerHTML=MSG_TEMPLATES.map(function(m){return "<option value='"+m.id+"'>"+m.label+"</option>";}).join("");
+  msgPreview();
+}
+function msgPreview(){
+  var ta=document.getElementById("msgText");if(!ta)return;
+  var bid=(document.getElementById("msgBooking")||{}).value,tid=(document.getElementById("msgTpl")||{}).value;
+  var b=bookings.find(function(x){return x.id===bid;}),m=MSG_TEMPLATES.find(function(x){return x.id===tid;})||MSG_TEMPLATES[0];
+  if(!b){ta.value="";ta.placeholder="Pick a guest to preview the message.";return;}
+  var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;
+  ta.value=m.body(b,t);
+}
+function msgSend(via){
+  var bid=(document.getElementById("msgBooking")||{}).value;var b=bookings.find(function(x){return x.id===bid;});
+  var ta=document.getElementById("msgText");var text=ta?ta.value:"";
+  if(!b||!text){alert("Pick a guest first.");return;}
+  var m=MSG_TEMPLATES.find(function(x){return x.id===(document.getElementById("msgTpl")||{}).value;})||MSG_TEMPLATES[0];
+  if(via==="wa")waShare(text,b.phone);
+  else if(via==="em"){if(!b.email){alert("No email on this booking.");return;}mailSend(b.email,m.subject+" · "+msgCompany(),text);}
+  else{try{navigator.clipboard.writeText(text);}catch(e){}var btn=document.getElementById("msgCopyBtn");if(btn){btn.textContent="Copied ✓";setTimeout(function(){btn.textContent="Copy";},1200);}}
+  audit("message",m.id,b.guest+" via "+via);
+}
+function msgPanelMarkup(){
+  return "<div class='card card-pad' style='margin-bottom:14px'>"+
+    "<div class='eyebrow' style='margin-bottom:10px'>Message a guest — templates</div>"+
+    "<div class='msg-grid'>"+
+      "<select class='input' id='msgBooking' onchange='msgPreview()'></select>"+
+      "<select class='input' id='msgTpl' onchange='msgPreview()'></select>"+
+    "</div>"+
+    "<textarea class='input' id='msgText' style='min-height:150px;margin-top:10px;font-size:13px;line-height:1.5' placeholder='Pick a guest to preview the message.'></textarea>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><button class='btn btn-sea btn-sm' onclick=\"msgSend('wa')\">WhatsApp</button><button class='btn btn-ghost btn-sm' onclick=\"msgSend('em')\">Email</button><button class='btn btn-ghost btn-sm' id='msgCopyBtn' onclick=\"msgSend('copy')\">Copy</button><span style='font-size:11.5px;color:var(--ink-soft);align-self:center'>Edit the text before sending — it opens in WhatsApp / your mail app.</span></div>"+
+  "</div>";
+}
+/* ===== ITINERARY BUILDER ======================================================
+   Day-by-day plan stored on the tour (t.itinerary = [{date,title,plan}]), shown in
+   the tour modal, printable, sendable, and copied onto the linked operation so
+   the guide and driver apps show each day's plan. */
+function itineraryDays(t){
+  var n=(t.tourType==="session")?((t.sessionDates||[t.start]).length):(durNights(t)+1);
+  n=Math.max(1,Math.min(n||1,45));
+  var out=[];for(var i=0;i<n;i++){var d=(t.tourType==="session")?((t.sessionDates||[t.start])[i]||""):(t.start?(function(){var x=new Date(t.start+"T00:00:00");x.setDate(x.getDate()+i);return x.toISOString().slice(0,10);})():"");var cur=(t.itinerary||[])[i]||{};out.push({date:d,title:cur.title||"",plan:cur.plan||""});}
+  return out;
+}
+function openItinerary(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  var days=itineraryDays(t);var esc=function(v){return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");};
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>"+tourCode(t)+" · "+dRangeNice(t.start,t.end)+"</span><h2 class='display' style='font-size:20px;margin-top:6px'>Itinerary — "+esc(shortName(t))+"</h2></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px'>One row per day. Saved on the tour, printed for guests, and shown to the guide and driver in their apps.</p>"+
+      "<div id='itinRows'>"+days.map(function(d,i){return "<div class='itin-row'><div class='itin-day'>Day "+(i+1)+(d.date?"<span>"+dShort(d.date)+"</span>":"")+"</div><input class='input' id='it_t_"+i+"' value=\""+esc(d.title)+"\" placeholder='Title — e.g. Chidiya Tapu & Mount Harriet'><textarea class='input' id='it_p_"+i+"' placeholder='Plan — pickup 05:00, morning birding, lunch, afternoon site…'>"+esc(d.plan)+"</textarea></div>";}).join("")+"</div>"+
+    "</div>"+
+    "<div class='modal-foot' style='flex-wrap:wrap'><button class='btn btn-ghost' onclick='closeModal()'>Cancel</button><button class='btn btn-ghost' onclick=\"printItinerary('"+id+"')\">Print / PDF</button><button class='btn btn-ghost' onclick=\"sendItinerary('"+id+"')\">WhatsApp to POC</button><button class='btn btn-primary' onclick=\"saveItinerary('"+id+"')\">Save itinerary</button></div>";
+  openScrim();
+}
+function collectItinerary(t){
+  var days=itineraryDays(t);
+  return days.map(function(d,i){var te=document.getElementById("it_t_"+i),pe=document.getElementById("it_p_"+i);return {date:d.date,title:te?te.value.trim():d.title,plan:pe?pe.value.trim():d.plan};});
+}
+function saveItinerary(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  t.itinerary=collectItinerary(t);t.updatedAt=new Date().toISOString();
+  audit("tour","itinerary",tourCode(t)+" · "+t.itinerary.filter(function(d){return d.title||d.plan;}).length+" day(s)");
+  persistData();closeModal();renderTours();if(typeof renderDashOps==="function")renderDashOps();openTour(id);
+}
+function itineraryHTML(t){
+  var esc=function(v){return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+  var all=t.itinerary||[];var it=all.filter(function(d){return d.title||d.plan;});if(!it.length)return "";
+  return it.map(function(d){var idx=all.indexOf(d);return "<div class='itin-view'><div class='itin-view-d'>Day "+(idx+1)+(d.date?"<span>"+dShort(d.date)+"</span>":"")+"</div><div><b>"+esc(d.title)+"</b>"+(d.plan?"<div class='itin-view-p'>"+esc(d.plan).replace(/\n/g,"<br>")+"</div>":"")+"</div></div>";}).join("");
+}
+function printItinerary(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  if(document.getElementById("it_t_0"))t.itinerary=collectItinerary(t);
+  var body=itineraryHTML(t)||"<p style='color:#5a6b62'>No days filled in yet.</p>";
+  var w=window.open("","_blank");
+  w.document.write("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Itinerary — "+shortName(t)+"</title><style>@import url('https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap');*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff}body{font-family:'Inter',system-ui,sans-serif;color:#20302b;display:flex;justify-content:center}#rep{max-width:760px;width:100%;padding:24px}.itin-view{display:grid;grid-template-columns:110px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid #eef4f0;font-size:13px}.itin-view-d{font-weight:700;color:#15563c}.itin-view-d span{display:block;font-weight:400;font-size:11.5px;color:#5a6b62}.itin-view-p{margin-top:3px;color:#3a4a43;line-height:1.5}@media print{@page{size:A4;margin:12mm}}</style></head><body><div id='rep'>"+quoteHeaderHTML()+
+    "<div style='text-align:center;margin-bottom:14px'><div style='font-family:Calistoga,Georgia,serif;font-size:22px;color:#15563c'>Day-by-day Itinerary</div><div style='font-size:14px;font-weight:700;margin-top:6px'>"+shortName(t)+" <span style='color:#7b8a84;font-weight:400'>("+tourCode(t)+")</span></div><div style='font-size:12.5px;color:#3a4a43;margin-top:3px'>"+dRangeNice(t.start,t.end)+(t.guide?" · Guide: "+t.guide:"")+"</div></div>"+body+
+    "<div style='margin-top:16px;font-size:11.5px;color:#7b8a84;text-align:center'>Timings may shift with weather and tides · "+msgCompany()+"</div></div><script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script></body></html>");
+  w.document.close();
+}
+function sendItinerary(id){
+  var t=tours.find(function(x){return x.id===id;});if(!t)return;
+  if(document.getElementById("it_t_0"))t.itinerary=collectItinerary(t);
+  var poc=t.pocId?bookings.find(function(b){return b.id===t.pocId;}):bookings.find(function(b){return b.tour===t.id;});
+  var txt=itineraryText(t);if(!txt){alert("Fill in at least one day first.");return;}
+  waShare("Hello "+(poc?poc.guest:"")+",\n\nYour day-by-day plan for "+shortName(t)+":\n\n"+txt+"\n\nTimings may shift with weather and tides — your guide will keep you posted."+msgSignature(),poc&&poc.phone);
 }
 function savePrefs(){
   var g=function(id,d){var e=document.getElementById(id);var v=e?parseFloat(e.value):NaN;return isFinite(v)?v:d;};
@@ -4025,6 +4163,7 @@ function viewBookings(){
         "</div>"+
       "</div>"+
     "</div>"+
+    msgPanelMarkup()+
     "<div class='card'><div class='tbl-wrap'><table class='bk-table'><thead><tr><th class='bk-guest'>Guest</th><th class='bk-tour'>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total</th><th class='num'>Deposit</th><th class='num'>Pending</th><th class='bk-notes'>Notes</th><th class='bk-quick'></th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
   "</section>";
 }
@@ -4056,6 +4195,7 @@ function renderBookings(){
       "<td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td>"+
     "</tr>"}).join("");
   renderBulkTourSelect();
+  if(typeof renderMsgPanel==="function")renderMsgPanel();
   persistData();
 }
 /* ---- Message every guest on a tour (bulk WhatsApp / Email by tour code) -------
@@ -6154,6 +6294,7 @@ function opCard(o){
     opLegsSummaryHtml(o)+
     opStaysSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
+    ((o.itinerary&&o.itinerary.length)?"<details class='op-itin'><summary>Itinerary \u00b7 "+o.itinerary.length+" day"+(o.itinerary.length===1?"":"s")+"</summary>"+o.itinerary.map(function(d){return "<div class='op-itin-d'><b>Day "+d.day+(d.date?" \u00b7 "+dShort(d.date):"")+"</b>"+(d.title?" \u2014 "+String(d.title).replace(/</g,"&lt;"):"")+(d.plan?"<div>"+String(d.plan).replace(/</g,"&lt;").replace(/\n/g,"<br>")+"</div>":"")+"</div>";}).join("")+"</details>":"")+
     opDriverReportsHtml(o)+
     (o.guideFeedback?"<div style='margin-top:6px;padding:8px 10px;background:#fbe7e4;border-radius:8px;font-size:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px'><div><b>Guide feedback ("+(o.guideFeedbackAt?dShort(o.guideFeedbackAt):"")+"):</b> "+o.guideFeedback+"</div><button onclick=\"clearOpFeedback('"+o.id+"','guide')\" title='Remove this note' style='flex-shrink:0;border:1px solid var(--coral);background:#fff;border-radius:7px;padding:3px 7px;font-size:11px;font-weight:700;color:var(--coral);cursor:pointer'>✕</button></div>":"")+
     opDriverFeedbackHtml(o)+
@@ -6803,7 +6944,7 @@ function makeBookingFromSub(s){
           bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
   if(!dup){
     var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
-    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:(s.data&&Array.isArray(s.data.participants)?s.data.participants.map(function(p){return p&&p.name;}).filter(Boolean).join(", "):""),party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:""};
+    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:(s.data&&Array.isArray(s.data.participants)?s.data.participants.map(function(p){return p&&p.name;}).filter(Boolean).join(", "):""),party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:"",documents:(s.data&&Array.isArray(s.data.documents)?s.data.documents:[])};
     bookings.unshift(nb);
     addOrUpdateCustomer(s);
     pushBooking(nb);
@@ -8530,10 +8671,12 @@ function openTour(id){
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourForm('"+id+"','client')\">Tour Registration</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"shareTourReservation('"+id+"')\">Guide Reservation</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"openTripReport('"+id+"')\">Trip report</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"openItinerary('"+id+"')\">"+((t.itinerary||[]).some(function(d){return d.title||d.plan;})?"Itinerary \u2713":"Itinerary")+"</button>"+
       "</div>"+
+      (function(){var h=itineraryHTML(t);return h?"<div class='itin-box'><div class='chk-title' style='margin-bottom:4px'>Day-by-day itinerary</div>"+h+"</div>":"";})()+
       (_isSess?"":"<div class='chk-box' id='chkBox'>"+checklistMarkup(t)+"</div>")+
       "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Bookings</div><button class='btn btn-primary btn-sm' data-action='openAddBooking' data-arg='"+id+"'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div>"+
-      "<div class='tbl-wrap'><table><thead><tr><th>PoC</th><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th><th></th></tr></thead><tbody>"+(bs.map(x=>"<tr><td><button class='poc-star "+(t.pocId===x.id?"on":"")+"' title='Mark as point of contact' onclick=\"markPoc('"+id+"','"+x.id+"')\">"+(t.pocId===x.id?"★":"☆")+"</button></td><td class='strong nowrap'>"+x.guest+((x.members&&String(x.members).trim())?"<div class='s' style='font-size:11px;color:var(--ink-soft);font-weight:400;white-space:normal'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Modify booking'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No bookings yet.</td></tr>")+"</tbody></table></div>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>PoC</th><th>Guest</th><th>Dates</th><th>Country</th><th class='num'>Pax</th><th>Payment</th><th></th></tr></thead><tbody>"+(bs.map(x=>"<tr><td><button class='poc-star "+(t.pocId===x.id?"on":"")+"' title='Mark as point of contact' onclick=\"markPoc('"+id+"','"+x.id+"')\">"+(t.pocId===x.id?"★":"☆")+"</button></td><td class='strong nowrap'>"+x.guest+((x.documents&&x.documents.length)?" <a href='#' title='"+x.documents.length+" document(s) uploaded on the registration form' onclick=\"event.preventDefault();event.stopPropagation();openDoc('"+String((x.documents[0]&&(x.documents[0].url||x.documents[0]))||"").replace(/'/g,"")+"')\" style='color:var(--sea);font-size:12px;font-weight:700;text-decoration:none'>\ud83d\udcc4</a>":"")+((x.members&&String(x.members).trim())?"<div class='s' style='font-size:11px;color:var(--ink-soft);font-weight:400;white-space:normal'>+ "+String(x.members).split(/[,\n]/).map(function(m){return m.trim();}).filter(Boolean).join(", ")+"</div>":"")+"</td><td class='nowrap'>"+(x.start?dShort(x.start)+" – "+dShort(x.end):"—")+"</td><td>"+x.country+"</td><td class='num mono'>"+x.party+"</td><td><span class='pill "+(x.pay==="Paid"?"completed":"plain")+"'>"+x.pay+"</span></td><td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Modify booking'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>").join("")||"<tr><td colspan='7' class='empty'>No bookings yet.</td></tr>")+"</tbody></table></div>"+
       (wl.length?"<div class='h-sec' style='font-size:14px;margin:16px 0 6px'>Waitlist</div>"+wl.map(w=>"<div class='list-row'><div class='meta'><div class='t'>"+w.guest+"</div></div><span class='pill plain'>"+w.party+" pax</span></div>").join(""):
 "")+
     "</div>";
