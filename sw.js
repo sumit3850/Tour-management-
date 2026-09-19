@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v154"; /* v154: PDF / WhatsApp / e-mail save the document to its folder first; client name always captured from the document */
+var CACHE = "ie-ops-v155"; /* v155: old saved documents get the header grid and their client name on load, whatever the stored markup spelling */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
