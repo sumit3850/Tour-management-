@@ -45,7 +45,7 @@ function sandbox(extra) {
   vm.runInContext("var SHEET_DATA=" + sheetLine[1] + ";", ctx);
   ["quotedTotal", "isIndianCountry", "bookingTotalCost", "bookingDeposit", "bookingPending", "bookingDueDate",
    "applyGqOverrides", "daysBetween", "billableBookings", "receivables",
-   "durNights", "tourRevenue", "tourPaxBooked", "tourRateKey", "estimateTourCost", "breakEvenPax", "pad2", "dShort"
+   "durNights", "tourRevenue", "tourPaxBooked", "tourRateKey", "tourRateKeyAuto", "estimateTourCost", "breakEvenPax", "pad2", "dShort"
   ].forEach((n) => vm.runInContext(fnSource(n), ctx));
   return ctx;
 }
