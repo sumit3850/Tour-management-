@@ -1138,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 275</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 276</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1147,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 275</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 276</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5351,6 +5351,22 @@ function nextQuoteNum(){
   var mx=maxDocNum(quotationLog,"qid",/Q-?(\d+)\s*$/i);
   return mx>0?mx+1:((parseInt(quoteSeq,10)||0)+1);
 }
+/* Every saved number in the current spelling: <PREFIX>-<year>-Q<nn> for
+   quotations, <PREFIX>-<year>-IN<nn> for invoices. Older documents were saved
+   as <PREFIX>/<year>/Q-<n> and <PREFIX>/<year>/INV-<n>; those are rewritten in
+   place (record + the number printed in the stored document). Idempotent. */
+function normalizeDocNo(no,kind){
+  var m=String(no||"").trim().match(/^([A-Za-z0-9]+)[\/\-\s]+(\d{4})[\/\-\s]+(?:INV|IN|Q)[\-\s]?(\d+)\s*$/i);
+  if(!m)return String(no||"").trim();
+  return m[1].toUpperCase()+"-"+m[2]+"-"+(kind==="inv"?"IN":"Q")+pad2(parseInt(m[3],10));
+}
+function migrateDocNumbers(){
+  var changed=0;
+  var fix=function(list,field,kind){(list||[]).forEach(function(r){if(!r||!r[field])return;var nn=normalizeDocNo(r[field],kind);if(nn&&nn!==r[field]){var old=r[field];r[field]=nn;if(r.html)r.html=String(r.html).split(old).join(nn);r.updatedAt=new Date().toISOString();changed++;}});};
+  fix(quotationLog,"qid","q");fix(invoiceLog,"invid","inv");
+  if(changed){audit("documents","renumbered",changed+" document number(s) → PREFIX-YEAR-Qnn / INnn");if(typeof persistData==="function")persistData();}
+  return changed;
+}
 function peekQuoteNo(){
   var yr=(new Date()).getFullYear();
   return quotePrefix()+"-"+yr+"-Q"+pad2(nextQuoteNum()); /* IEBT-2026-Q14 */
@@ -6892,6 +6908,7 @@ function quoteConversion(){
 /* The saved-quotations folder rendered inside the Group Quotation module. */
 function renderSavedQuotes(){
   var el=document.getElementById("savedQuotes");if(!el)return;
+  if(typeof migrateDocNumbers==="function")migrateDocNumbers(); /* records pulled from the cloud in the old spelling */
   var list=(quotationLog||[]).filter(function(x){return x&&x.html;});
   if(!list.length){el.innerHTML="<div style='padding:18px;text-align:center;color:var(--ink-soft);font-size:13px'>No saved quotations yet. Generate a quotation and press <b>Save quotation</b>.</div>";return;}
   var cv=quoteConversion();
@@ -7148,6 +7165,7 @@ function deleteSavedInvoice(id){
   persistData();renderSavedInvoices();
 }
 function renderSavedInvoices(){
+  if(typeof migrateDocNumbers==="function")migrateDocNumbers();
   var el=document.getElementById("savedInvoices");if(!el)return;
   var list=(invoiceLog||[]).filter(function(x){return x&&x.html;});
   if(!list.length){el.innerHTML="<div style='padding:18px;text-align:center;color:var(--ink-soft);font-size:13px'>No saved invoices yet. Open the Cost Calculator, press <b>Invoice</b>, then <b>Save invoice</b>.</div>";return;}
@@ -9895,6 +9913,7 @@ function boot(keepView){
   if(typeof ensureTourPocs==="function")ensureTourPocs();
   tours.forEach(syncTourPaymentToBookings);
   if(typeof migratePayAccounts==="function")migratePayAccounts();
+  if(typeof migrateDocNumbers==="function")migrateDocNumbers();
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewCatalog(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewRateCards(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderCostSheet();renderLog();renderCRM();renderCustomers();renderReviews();renderOperators();renderReservations();
