@@ -1131,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 257</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 258</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1140,7 +1140,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 257</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 258</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1275,7 +1275,7 @@ var GQ_TIERS=[
 var SQ_TIERS=[
   {id:"early",  label:"10%", pct:10, min:5, max:99999, text:"Booking 5+ days in advance"},
   {id:"mid",    label:"20%", pct:20, min:2, max:4,     text:"Booking 2–4 days in advance"},
-  {id:"late",   label:"50%", pct:50, min:0, max:1,     text:"Booking less than 2 days in advance"}
+  {id:"late",   label:"100%",pct:100,min:0, max:1,     text:"Booking within 48 hours"}
 ];
 var gqTierId="early";                /* currently selected deposit tier */
 /* Quotations & invoices come in two flavours: multi-day GROUP tours (priced from
@@ -1345,21 +1345,88 @@ function sessRateFor(id){return sessRates[id]||{basis:"person",price:0,size:2,lo
 function sessionLabel(s){return s.name+" ("+s.dur+")";}
 function sessionOptions(sel){return DOC_SESSIONS.map(function(s){return "<option value='"+s.id+"' "+(s.id===sel?"selected":"")+">"+sessionLabel(s)+"</option>";}).join("");}
 function gqTiers(){return gqMode==="session"?SQ_TIERS:GQ_TIERS;}
-/* What each document flavour prints under Includes / Terms & Cancellation. */
-var DOC_TERMS={
+/* ===== POLICIES & TERMS (Settings → Policies & Terms; synced) ==================
+   Printed on every quotation and invoice. Group / private tours and session
+   tours each carry their own Booking & Payment tiers and Cancellation policy;
+   the general Terms & Conditions go on every document. The deposit tiers also
+   drive the automated deposit on the Group Quotation page (min = days before
+   departure from which the tier applies; the windows are derived in order). */
+var POLICY_DEFAULT={
   group:{
-    includes:"Accommodation, private vehicle, expert guiding, ferry / ship tickets, forest permits &amp; entry fees, meals as listed.",
-    bullets:["Prices are in Indian Rupees (INR) · Subject to availability",
-      "Balance due 30 days before departure",
-      "Cancellation: Full refund 60+ days · 50% refund 30-60 days · No refund &lt;30 days",
-      "Itinerary may change due to weather/sea conditions"]},
+    tiers:[{id:"early",label:"20–30%",pct:25,min:61,text:"Booking 60 or more days in advance"},
+           {id:"mid",  label:"30–40%",pct:35,min:16,text:"Booking 16–60 days in advance"},
+           {id:"late", label:"100%",  pct:100,min:0,text:"Booking 15 days or less in advance"}],
+    payment:["Booking is confirmed only after receipt of the applicable advance / payment.",
+             "Remaining balance must be paid 30 days before departure; bookings made 15 days or less before departure are payable in full."],
+    cancel:["60 or more days before departure: 100% of the advance refunded, excluding transaction charges.",
+            "30–59 days before departure: 50% of the advance refunded.",
+            "Less than 30 days before departure / no-show: no refund."],
+    includes:"Accommodation, private vehicle, expert guiding, ferry / ship tickets, forest permits & entry fees, meals as listed."
+  },
   session:{
-    includes:"Guide charges, vehicle charges, pick up and drop at hotel / accommodation.",
-    bullets:["Prices are in Indian Rupees (INR) · Subject to availability",
-      "Balance due should be cleared before the session",
-      "Cancellation: Full refund on 5+ days (excluding transaction charges) · 50% refund 2-5 days · No refund &lt;2 days",
-      "Itinerary may change due to weather"]}
+    tiers:[{id:"early",label:"10%", pct:10, min:5,text:"Booking 5 or more days in advance"},
+           {id:"mid",  label:"20%", pct:20, min:2,text:"Booking 2–4 days in advance"},
+           {id:"late", label:"100%",pct:100,min:0,text:"Booking within 48 hours"}],
+    payment:["10% advance for bookings made 5 or more days in advance.",
+             "20% advance for bookings made 2–4 days in advance.",
+             "100% payment for bookings made within 48 hours.",
+             "Booking is confirmed only after receipt of the applicable advance / payment.",
+             "Remaining balance must be paid before the session begins."],
+    cancel:["5 or more days before the session: 100% of the advance / payment refunded, excluding transaction charges.",
+            "2–4 days before the session: 50% of the advance / payment refunded.",
+            "1 day before the session: 25% of the advance / payment refunded.",
+            "On the day of the session / no-show: no refund."],
+    includes:"Guide charges, vehicle charges, pick up and drop at hotel / accommodation."
+  },
+  general:["Prices are in Indian Rupees (INR) and subject to availability at the time of confirmation.",
+           "Itinerary, timings and sites may change due to weather, sea conditions, permits or safety considerations; wildlife sightings cannot be guaranteed.",
+           "Guests must carry valid photo ID and, where applicable, permits / passports; foreign nationals must comply with Restricted Area Permit rules.",
+           "Travel and medical insurance is strongly recommended.",
+           "The company is not liable for delays, losses or costs arising from events beyond its control (weather, transport cancellations, strikes, illness).",
+           "Guests are expected to follow the guide's safety instructions and respect wildlife, habitats and local regulations."]
 };
+var policyCfg=JSON.parse(JSON.stringify(POLICY_DEFAULT));
+function policyMerge(v){
+  var d=JSON.parse(JSON.stringify(POLICY_DEFAULT));if(!v||typeof v!=="object")return d;
+  ["group","session"].forEach(function(m){var src=v[m]||{};var out=d[m];
+    if(Array.isArray(src.tiers)&&src.tiers.length)out.tiers=src.tiers.map(function(t,i){return {id:t.id||out.tiers[i]&&out.tiers[i].id||("t"+i),label:t.label||"",pct:+t.pct||0,min:+t.min||0,text:t.text||""};});
+    if(Array.isArray(src.payment))out.payment=src.payment.slice();
+    if(Array.isArray(src.cancel))out.cancel=src.cancel.slice();
+    if(typeof src.includes==="string")out.includes=src.includes;});
+  if(Array.isArray(v.general))d.general=v.general.slice();
+  return d;
+}
+function rebuildTiers(){
+  var mk=function(list){
+    var out=(list||[]).map(function(t,i){return {id:t.id||["early","mid","late"][i]||("t"+i),label:t.label||(t.pct+"%"),pct:+t.pct||0,min:Math.max(0,+t.min||0),text:t.text||""};}).sort(function(a,b){return b.min-a.min;});
+    out.forEach(function(t,i){t.max=i===0?99999:Math.max(t.min,out[i-1].min-1);});
+    return out.length?out:JSON.parse(JSON.stringify(POLICY_DEFAULT.group.tiers));
+  };
+  GQ_TIERS=mk(policyCfg.group.tiers);SQ_TIERS=mk(policyCfg.session.tiers);
+}
+rebuildTiers();
+/* The policy blocks as printed on a document (quotation or invoice).
+   opts.tier = id of the deposit tier that applies (highlighted); opts.gstLine =
+   extra first line under Terms (invoices); opts.thanks = closing line. */
+function policyDocHTML(mode,opts){
+  opts=opts||{};var P=policyCfg[mode==="session"?"session":"group"]||policyCfg.group;
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+  var tiers=(mode==="session")?SQ_TIERS:GQ_TIERS;
+  var head=function(t){return "<div style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px'>"+t+"</div>";};
+  var box=function(inner){return "<div style='font-size:11px;color:#5a6b62;background:#fafcfb;border:1px solid #e6efe9;border-radius:10px;padding:11px 14px;line-height:1.7;margin-bottom:12px'>"+inner+"</div>";};
+  var lines=function(arr){return (arr||[]).filter(function(x){return String(x).trim();}).map(function(b){return "• "+esc(b);}).join("<br>");};
+  var html="";
+  if(P.includes)html+="<div style='font-size:12px;color:#5a6b62;margin-bottom:14px'><span style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em'>Includes</span><br>"+esc(P.includes)+"</div>";
+  var tierRows=tiers.map(function(t){var on=opts.tier&&t.id===opts.tier;
+    return "<tr"+(on?" style='background:#eaf4ee;font-weight:700'":"")+"><td style='padding:7px 12px;border-bottom:1px solid #eef4f0'>"+esc(t.text)+(on?" <span style='font-size:10px;color:#1f8f5f'>● applies</span>":"")+"</td><td style='padding:7px 12px;border-bottom:1px solid #eef4f0;text-align:right;white-space:nowrap'>"+esc(t.label)+" "+(mode==="session"?"advance":"deposit")+"</td></tr>";}).join("");
+  html+="<table style='width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:12px'>"+
+    "<thead><tr><th colspan='2' style='text-align:left;padding:9px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Booking &amp; Payment"+(mode==="session"?" — session tours":" — group / private tours")+"</th></tr></thead>"+
+    "<tbody>"+tierRows+((P.payment||[]).length?"<tr><td colspan='2' style='padding:9px 12px;font-size:11px;color:#5a6b62;line-height:1.7'>"+lines(P.payment)+"</td></tr>":"")+"</tbody></table>";
+  if((P.cancel||[]).length)html+=box(head("Cancellation Policy")+lines(P.cancel));
+  var gen=(policyCfg.general||[]).slice();if(opts.gstLine)gen.unshift(opts.gstLine);
+  if(gen.length||opts.thanks)html+=box(head("Terms &amp; Conditions")+lines(gen)+(opts.thanks?(gen.length?"<br>":"")+"• Thank you for travelling with us.":""));
+  return html;
+}
 let bookings=[];
 /* "Is this an Indian/domestic client?" — country is a free-text field, so match
    flexibly (india / indian / bharat / "in") rather than an exact "India" string.
@@ -1498,6 +1565,7 @@ const STORE=[
   {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
   {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
   {k:"catalog",get:function(){return catalog;},set:function(v){if(v&&typeof v==="object")catalog=v;rebuildCatalog();}},
+  {k:"policyCfg",get:function(){return policyCfg;},set:function(v){policyCfg=policyMerge(v);rebuildTiers();}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
   {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}},
   {k:"prefs",get:function(){return prefs;},set:function(v){if(v&&typeof v==="object")prefs=Object.assign({},PREFS_DEFAULT,v);}},
@@ -5330,19 +5398,7 @@ function generateQuotation(){
           </tfoot>
         </table>
 
-        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:16px">
-          <div style="font-weight:600;color:var(--ink);margin-bottom:4px">Includes:</div>
-          Accommodation, private vehicle, expert guiding, ferry / ship tickets, forest permits & entry fees, meals as listed.
-        </div>
-
-        <div style="font-size:11px;color:var(--ink-soft);border-top:1px solid var(--line-soft);padding-top:10px">
-          <div style="font-weight:600;color:var(--ink);margin-bottom:4px">Terms & Conditions</div>
-          \u2022 50% deposit required to confirm booking \u00b7 Balance due 30 days before departure<br>
-          \u2022 Prices are in Indian Rupees (INR) \u00b7 Subject to availability<br>
-          \u2022 Cancellation: Full refund 60+ days \u00b7 50% refund 30-60 days \u00b7 No refund &lt;30 days<br>
-          \u2022 Travel insurance strongly recommended \u00b7 Weather contingencies may apply<br>
-          \u2022 Itinerary may change due to weather/sea conditions
-        </div>
+        ${policyDocHTML("group")}
 
         <div style="margin-top:20px;padding:14px;background:var(--surface-2);border-radius:10px;display:flex;align-items:center;gap:12px">
           <div style="width:40px;height:40px;border-radius:50%;background:var(--forest);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px">SK</div>
@@ -6435,7 +6491,6 @@ function generateGroupQuotation(){
     var on=t.id===q.tier.id;
     return "<tr"+(on?" style='background:#eaf4ee;font-weight:700'":"")+"><td style='padding:9px 12px;border-bottom:1px solid #eef4f0'>"+t.text+(on?" <span style='font-size:10px;color:#1f8f5f'>● applies</span>":"")+"</td><td style='padding:9px 12px;border-bottom:1px solid #eef4f0;text-align:right;color:#15563c'>"+t.label+" deposit</td></tr>";
   }).join("");
-  var T=DOC_TERMS[isSess?"session":"group"];
   var mi=function(l,v){return "<div><div style='font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#5a6b62;margin-bottom:1px'>"+l+"</div><div style='font-weight:600;color:#16241d'>"+(v||"—")+"</div></div>";};
   var html=
     "<div class='modal-head'>"+
@@ -6469,15 +6524,7 @@ function generateGroupQuotation(){
             "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0'>Pending amount</td>"+pendRow+"</tr>"+
           "</tbody>"+
         "</table></div>"+
-        "<div style='font-size:12px;color:#5a6b62;margin-bottom:16px'><span style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em'>Includes</span><br>"+T.includes+"</div>"+
-        "<table style='width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:16px'>"+
-          "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Payment Terms</th></tr></thead>"+
-          "<tbody>"+termRows+"</tbody>"+
-        "</table>"+
-        "<div style='font-size:11px;color:#5a6b62;background:#fafcfb;border:1px solid #e6efe9;border-radius:10px;padding:11px 14px;line-height:1.7'>"+
-          "<div style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px'>Terms &amp; Cancellation Policy</div>"+
-          T.bullets.map(function(b){return "• "+b;}).join("<br>")+
-        "</div>"+
+        policyDocHTML(isSess?"session":"group",{tier:q.tier&&q.tier.id})+
         "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
           "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>Island Explorer Birding Tours</div>"+
           "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India</div>"+
@@ -6808,14 +6855,7 @@ function renderInvoiceDoc(){
     "</table>"+
     (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:16px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
     payNowHTML(grand)+
-    "<div style='font-size:11px;color:#5a6b62;background:#fafcfb;border:1px solid #e6efe9;border-radius:10px;padding:11px 14px;line-height:1.7'>"+
-      "<div style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px'>Terms &amp; Cancellation Policy</div>"+
-      (gst?"• Amounts are in Indian Rupees (INR) · GST charged as itemised above<br>":"• Amounts are in Indian Rupees (INR) · Inclusive of applicable taxes unless stated<br>")+
-      (inv.isSess
-        ?"• Balance due should be cleared before the session<br>• Cancellation: Full refund on 5+ days (excluding transaction charges) · 50% refund 2-5 days · No refund &lt;2 days<br>"
-        :"• Balance due 30 days before departure<br>• Cancellation: Full refund 60+ days · 50% refund 30-60 days · No refund &lt;30 days<br>")+
-      "• Thank you for travelling with us."+
-    "</div>"+
+    policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"Amounts are in Indian Rupees (INR) · GST charged as itemised above":"Amounts are in Indian Rupees (INR) · inclusive of applicable taxes unless stated"),thanks:true})+
     "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
       "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>"+esc0(company)+"</div>"+
       "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India</div>"+
@@ -8769,6 +8809,7 @@ function viewSettings(){
     "</div>"+
     "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='savePayCfg()'>Save payment settings</button>"+
   "</div>"+
+  policySettingsCard()+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Sharing</div><div class='h-sec' style='margin-bottom:6px'>Review &amp; feedback links</div>"+
     "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>These are the links the console forwards whenever you share from <b>Reviews &amp; Feedback</b> or the <b>Bookings</b> page. Save them once — every share button then sends exactly these saved links.</p>"+
@@ -8872,6 +8913,46 @@ function viewSettings(){
     "<p style='font-size:12px;color:var(--ink-soft);margin-top:12px'>Tip: press <b>Ctrl+K</b> (\u2318K on Mac) anywhere to search tours, guests, quotes, invoices, leads and vehicles.</p>"+
   "</div>"+
   "</section>";
+}
+/* ---- Settings → Policies & Terms --------------------------------------------- */
+function policySettingsCard(){
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  var tierRows=function(m,P){return (P.tiers||[]).map(function(t,i){return "<div class='field'><label>Deposit tier "+(i+1)+" — booking window</label><input class='input' id='po_"+m+"_t"+i+"_text' value='"+esc(t.text)+"' placeholder='Booking 5 or more days in advance'></div>"+
+    "<div class='field'><label>Tier "+(i+1)+" — advance % · label · from days before</label><div style='display:flex;gap:8px'><input class='input mono' type='number' min='0' max='100' id='po_"+m+"_t"+i+"_pct' value='"+(+t.pct||0)+"' style='width:80px' title='Deposit % used for the automated amount'><input class='input' id='po_"+m+"_t"+i+"_label' value='"+esc(t.label)+"' style='width:100px' placeholder='10%' title='As printed'><input class='input mono' type='number' min='0' id='po_"+m+"_t"+i+"_min' value='"+(+t.min||0)+"' style='width:90px' title='Applies from this many days before the start'></div></div>";}).join("");};
+  var block=function(m,title,P){return "<div class='h-sec' style='font-size:14px;margin:14px 0 6px'>"+title+"</div><div class='form-grid'>"+tierRows(m,P)+
+    "<div class='field full'><label>Includes</label><input class='input' id='po_"+m+"_inc' value='"+esc(P.includes)+"'></div>"+
+    "<div class='field full'><label>Booking &amp; Payment (one point per line)</label><textarea class='input' id='po_"+m+"_pay' rows='5'>"+esc((P.payment||[]).join("\n"))+"</textarea></div>"+
+    "<div class='field full'><label>Cancellation policy (one point per line)</label><textarea class='input' id='po_"+m+"_cancel' rows='5'>"+esc((P.cancel||[]).join("\n"))+"</textarea></div>"+
+    "</div>";};
+  return "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Documents</div><div class='h-sec' style='margin-bottom:6px'>Policies &amp; Terms</div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:6px;max-width:760px'>Printed on every quotation and invoice. <b>Group / private tours</b> and <b>session tours</b> each have their own Booking &amp; Payment tiers and Cancellation policy; the <b>general Terms &amp; Conditions</b> go on every document (paste them from your website — one point per line). The deposit % of each tier also sets the automated deposit on the Group Quotation page.</p>"+
+    block("g","Group / private tours",policyCfg.group)+
+    block("s","Session tours",policyCfg.session)+
+    "<div class='h-sec' style='font-size:14px;margin:14px 0 6px'>General Terms &amp; Conditions — every document</div>"+
+    "<div class='field full'><textarea class='input' id='po_general' rows='9' placeholder='One point per line'>"+esc((policyCfg.general||[]).join("\n"))+"</textarea></div>"+
+    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px'><button class='btn btn-primary btn-sm' onclick='savePolicyCfg()'>Save policies &amp; terms</button><button class='btn btn-ghost btn-sm' onclick='previewPolicy(\"group\")'>Preview — group tour</button><button class='btn btn-ghost btn-sm' onclick='previewPolicy(\"session\")'>Preview — session</button><button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='resetPolicyCfg()'>Reset to defaults</button></div>"+
+  "</div>";
+}
+function savePolicyCfg(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value:"";};
+  var linesOf=function(id){return g(id).split(/\n/).map(function(x){return x.trim();}).filter(Boolean);};
+  var read=function(m,cur){return {
+    tiers:(cur.tiers||[]).map(function(t,i){return {id:t.id,text:g("po_"+m+"_t"+i+"_text").trim(),pct:Math.max(0,Math.min(100,parseFloat(g("po_"+m+"_t"+i+"_pct"))||0)),label:g("po_"+m+"_t"+i+"_label").trim()||(parseFloat(g("po_"+m+"_t"+i+"_pct"))||0)+"%",min:Math.max(0,parseInt(g("po_"+m+"_t"+i+"_min"),10)||0)};}),
+    includes:g("po_"+m+"_inc").trim(),payment:linesOf("po_"+m+"_pay"),cancel:linesOf("po_"+m+"_cancel")};};
+  policyCfg={group:read("g",policyCfg.group),session:read("s",policyCfg.session),general:linesOf("po_general")};
+  rebuildTiers();
+  audit("settings","policies-updated","group "+GQ_TIERS.map(function(t){return t.pct+"%";}).join("/")+" · session "+SQ_TIERS.map(function(t){return t.pct+"%";}).join("/"));
+  persistData();
+  if(typeof renderGroupQuote==="function")renderGroupQuote();
+  alert("Saved. Every new quotation and invoice now prints these policies and terms.");
+}
+function resetPolicyCfg(){if(!confirm("Reset all policies and terms to the built-in defaults?"))return;policyCfg=JSON.parse(JSON.stringify(POLICY_DEFAULT));rebuildTiers();persistData();refreshSettings();if(typeof renderGroupQuote==="function")renderGroupQuote();}
+function previewPolicy(mode){
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>Preview</span><h2 style='font-size:18px;margin-top:4px'>"+(mode==="session"?"Session tour":"Group / private tour")+" — as printed</h2></div>"+XBTN+"</div>"+
+    "<div class='modal-body' style='background:#fff;color:#20302b'>"+policyDocHTML(mode,{tier:(mode==="session"?SQ_TIERS:GQ_TIERS)[0].id,thanks:true})+"</div>"+
+    "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button></div>";
+  openScrim();
 }
 function savePayCfg(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
