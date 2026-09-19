@@ -1138,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 277</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 278</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1147,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 277</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 278</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1429,15 +1429,18 @@ function stripDocFooter(html){
 /* Swap the header block (client / number / dates) of a saved snapshot for the
    current layout, rebuilt from the record's own fields. Old layouts: a flex div
    (gap:16px;margin-bottom:18px) or the two-table variant; new: one doc-kv table. */
-function refreshDocMeta(html,metaHtml){
+function hasOldDocMeta(html){return /<div style=['"]\s*display:\s*flex;\s*justify-content:\s*space-between;[^'"]*['"]>[\s\S]{0,600}?(?:Quotation|Invoice) To\s*</i.test(String(html||""));}
+function refreshDocMeta(html,metaHtml,onlyOld){
   html=String(html||"");if(!metaHtml)return html;
-  var m=/<div style=['"]display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px['"]>/.exec(html);
-  if(m){
+  /* the old header: the flex row whose contents hold "Quotation To" / "Invoice To"
+     (attribute spelling tolerant — the browser may re-serialise it with spaces) */
+  var re=/<div style=['"]\s*display:\s*flex;\s*justify-content:\s*space-between;[^'"]*['"]>/g,m;
+  while((m=re.exec(html))){
     var depth=0,tag=/<\/?div\b[^>]*>/g;tag.lastIndex=m.index;var t,end=-1;
     while((t=tag.exec(html))){if(t[0][1]==="/"){depth--;if(depth===0){end=t.index+t[0].length;break;}}else depth++;}
-    if(end>m.index)return html.slice(0,m.index)+metaHtml+html.slice(end);
-    return html;
+    if(end>m.index&&/(?:Quotation|Invoice) To\s*</i.test(html.slice(m.index,end)))return html.slice(0,m.index)+metaHtml+html.slice(end);
   }
+  if(onlyOld)return html;
   var k=/<table class=['"]doc-kv['"][^>]*>/.exec(html);
   if(k){var e=html.indexOf("</table>",k.index);if(e>0)return html.slice(0,k.index)+metaHtml+html.slice(e+8);}
   return html;
@@ -5364,8 +5367,9 @@ function normalizeDocNo(no,kind){
    the older "Quotation To / Invoice To" block). */
 function docClientFromHtml(html){
   var h=String(html||"");
-  var m=h.match(/class=['"]doc-client['"][^>]*>([^<]*)</)||h.match(/(?:Quotation|Invoice) To<\/div>\s*<div[^>]*>([^<]+)<\/div>/);
-  var n=m?m[1].replace(/&amp;/g,"&").replace(/\s+/g," ").trim():"";
+  var m=h.match(/class=['"]doc-client['"][^>]*>([^<]*)</)||h.match(/(?:Quotation|Invoice) To\s*<\/[^>]+>\s*(?:<[^>]+>\s*)*([^<]+)</i);
+  var n=m?m[1].replace(/&amp;/g,"&").replace(/&#39;/g,"'").replace(/\s+/g," ").trim():"";
+  if(/^(address|gst no\.?|guest name)\b/i.test(n))n="";
   return (n&&n!=="Guest Name")?n:"";
 }
 function migrateDocNumbers(){
@@ -5374,6 +5378,8 @@ function migrateDocNumbers(){
   [quotationLog,invoiceLog].forEach(function(list){(list||[]).forEach(function(r){if(r&&!r.guest){var g=docClientFromHtml(r.html);if(g){r.guest=g;changed++;}}});});
   var fix=function(list,field,kind){(list||[]).forEach(function(r){if(!r||!r[field])return;var nn=normalizeDocNo(r[field],kind);if(nn&&nn!==r[field]){var old=r[field];r[field]=nn;if(r.html)r.html=String(r.html).split(old).join(nn);r.updatedAt=new Date().toISOString();changed++;}});};
   fix(quotationLog,"qid","q");fix(invoiceLog,"invid","inv");
+  (quotationLog||[]).forEach(function(r){if(r&&r.html&&hasOldDocMeta(r.html)){var nh=refreshDocMeta(r.html,quoteMetaRow(r.qid,r.date,r.validUntil,r.departure,{name:r.guest,address:r.address,gst:r.gst}),true);if(nh!==r.html){r.html=nh;changed++;}}});
+  (invoiceLog||[]).forEach(function(r){if(r&&r.html&&hasOldDocMeta(r.html)){var nh=refreshDocMeta(r.html,invoiceMetaRow(r.invid,r.date,{name:r.guest,address:r.address,gst:r.gst},r.startDate,r.endDate),true);if(nh!==r.html){r.html=nh;changed++;}}});
   if(changed){audit("documents","renumbered",changed+" document number(s) → PREFIX-YEAR-Qnn / INnn");if(typeof persistData==="function")persistData();}
   return changed;
 }
