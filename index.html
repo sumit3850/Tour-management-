@@ -1131,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 260</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 261</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1140,7 +1140,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 260</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 261</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1518,6 +1518,7 @@ let sheetEpoch=0;
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
 let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""};
+var payAccounts=[]; /* saved bank accounts (India + international) — see PAYMENT ACCOUNTS */
 /* Integrations switchboard (Settings → Integrations): real gates, synced.
    sheets off → no Google-Sheet pushes; whatsapp/email off → those share/send
    buttons explain instead of opening; maps is informational. */
@@ -1586,6 +1587,7 @@ const STORE=[
   {k:"quoteSeq",get:function(){return quoteSeq;},set:function(v){quoteSeq=parseInt(v,10)||0;}},
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
+  {k:"payAccounts",arr:1,get:function(){return payAccounts;},set:function(v){if(Array.isArray(v))payAccounts=v;}},
   {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
   {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
   {k:"catalog",get:function(){return catalog;},set:function(v){if(v&&typeof v==="object")catalog=v;rebuildCatalog();}},
@@ -5530,21 +5532,22 @@ function paymentPageHTML(){
   var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:7px 12px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:7px 12px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
   var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
     "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:13px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
-  var inCard=card("Bank Transfer — India",
-    row("Account holder",payCfg.bkHolder)+
-    row("Account number",payCfg.bkAcc,1)+
-    row("Bank",payCfg.bkBank)+
-    row("Branch",payCfg.bkBranch)+
-    row("IFSC",payCfg.bkIfsc,1)+
-    row("Bank address",payCfg.bkAddr));
-  var xCard=card("International Payment"+(payCfg.xMethod?" — "+esc(payCfg.xMethod):""),
-    row("Account holder",payCfg.xHolder)+
-    row("Payment method",payCfg.xMethod)+
-    row("Account number",payCfg.xAcc,1)+
-    row("Routing code",payCfg.xRouting,1)+
-    row("Routing type",payCfg.xRoutingType)+
-    row("Bank",payCfg.xBank)+
-    row("Bank address",payCfg.xAddr));
+  var A=payAccountFor("in"),X=payAccountFor("x");
+  var inCard=A?card("Bank Transfer — India",
+    row("Account holder",A.holder)+
+    row("Account number",A.acc,1)+
+    row("Bank",A.bank)+
+    row("Branch",A.branch)+
+    row("IFSC",A.ifsc,1)+
+    row("Bank address",A.addr)):"";
+  var xCard=X?card("International Payment"+(X.method?" — "+esc(X.method):""),
+    row("Account holder",X.holder)+
+    row("Payment method",X.method)+
+    row("Account number",X.acc,1)+
+    row("Routing code",X.routing,1)+
+    row("Routing type",X.routingType)+
+    row("Bank",X.bank)+
+    row("Bank address",X.addr)):"";
   if(!inCard&&!xCard&&!link&&!upi)return "";
   var html="<div id='payPage' style='padding:24px;background:#fff;color:#20302b'>"+
     "<div style='border-bottom:2px solid #143a2e;padding-bottom:10px;margin-bottom:16px'>"+
@@ -6219,32 +6222,15 @@ function viewGroupQuote(){
         "<button class='btn btn-ghost btn-sm' onclick=\"var b=document.getElementById('pd_body');b.style.display=(b.style.display==='none'?'block':'none')\">Show / hide</button>"+
       "</div>"+
       "<div id='pd_body' style='display:none;margin-top:10px'>"+
-        "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Everything you fill in here prints as <b>page 2 — Payment Information</b> of every quotation, in the document's own design. Leave a whole section empty and it simply won't appear.</p>"+
-        "<div class='eyebrow' style='margin-bottom:8px'>Bank transfer — India</div>"+
-        "<div class='cost-grid'>"+
-          "<div class='field'><label>Account holder</label><input class='input' id='pd_bkHolder' placeholder='Company account name'></div>"+
-          "<div class='field'><label>Account number</label><input class='input mono' id='pd_bkAcc' placeholder='0000004…'></div>"+
-          "<div class='field'><label>Bank name</label><input class='input' id='pd_bkBank' placeholder='State Bank of India'></div>"+
-          "<div class='field'><label>Branch</label><input class='input' id='pd_bkBranch' placeholder='Branch'></div>"+
-          "<div class='field'><label>IFSC</label><input class='input mono' id='pd_bkIfsc' placeholder='SBIN0…'></div>"+
-          "<div class='field full'><label>Bank address</label><input class='input' id='pd_bkAddr' placeholder='Full branch address'></div>"+
-        "</div>"+
-        "<div class='eyebrow' style='margin:14px 0 8px'>International payment</div>"+
-        "<div class='cost-grid'>"+
-          "<div class='field'><label>Account holder</label><input class='input' id='pd_xHolder' placeholder='Company account name'></div>"+
-          "<div class='field'><label>Payment method</label><input class='input' id='pd_xMethod' placeholder='e.g. ACH / SWIFT'></div>"+
-          "<div class='field'><label>Account number</label><input class='input mono' id='pd_xAcc' placeholder='Account number'></div>"+
-          "<div class='field'><label>Routing code</label><input class='input mono' id='pd_xRouting' placeholder='Routing / SWIFT code'></div>"+
-          "<div class='field'><label>Routing type</label><input class='input' id='pd_xRoutingType' placeholder='e.g. ach_routing_number'></div>"+
-          "<div class='field'><label>Bank name</label><input class='input' id='pd_xBank' placeholder='Bank name'></div>"+
-          "<div class='field full'><label>Bank address</label><input class='input' id='pd_xAddr' placeholder='Full bank address'></div>"+
-        "</div>"+
+        "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;max-width:720px'>Save as many bank accounts as you like (India and international) and pick which one prints as <b>page 2 — Payment Information</b> of every quotation; the chosen accounts and the pay-online details print in the document's own design. Leave a whole section empty and it simply won't appear.</p>"+
+        payAccountsFormHTML("in")+
+        payAccountsFormHTML("x")+
         "<div class='eyebrow' style='margin:14px 0 8px'>Pay online</div>"+
         "<div class='cost-grid'>"+
           "<div class='field'><label>Payment link <span style='color:var(--ink-soft);font-weight:400'>(clickable in the PDF)</span></label><input class='input' id='pd_link' placeholder='https://razorpay.me/@yourcompany'></div>"+
           "<div class='field'><label>UPI ID</label><input class='input mono' id='pd_upi' placeholder='name@bank'></div>"+
         "</div>"+
-        "<button class='btn btn-primary btn-sm' style='margin-top:12px' onclick='savePayDetails()'>Save payment details</button>"+
+        "<button class='btn btn-primary btn-sm' style='margin-top:12px' onclick='savePayDetails()'>Save pay-online details</button>"+
       "</div>"+
     "</div>"+
     "<div class='card' style='margin-top:16px'>"+
@@ -6253,15 +6239,93 @@ function viewGroupQuote(){
     "</div>"+
   "</section>";
 }
-/* The Payment-details form <-> payCfg (synced per workspace). */
-var PD_KEYS=["bkHolder","bkAcc","bkBank","bkBranch","bkIfsc","bkAddr","xHolder","xMethod","xAcc","xRouting","xRoutingType","xBank","xAddr"];
+/* ===== PAYMENT ACCOUNTS =========================================================
+   Any number of saved bank accounts — kind "in" (India, IFSC) or "x"
+   (international, ACH / SWIFT / IBAN). The operator picks which India account
+   and which international account print on page 2 of every quotation
+   (payCfg.printIn / payCfg.printX; "none" hides that section). Synced;
+   declared next to payCfg so a data load never runs before it exists. */
+var PA_FIELDS={
+  "in":[["name","Label for your list","e.g. HDFC current account"],["holder","Account holder","Company account name"],["acc","Account number","0000004…",1],["bank","Bank name","State Bank of India"],["branch","Branch","Branch"],["ifsc","IFSC","SBIN0…",1],["addr","Bank address","Full branch address",0,1]],
+  "x":[["name","Label for your list","e.g. Wise USD (ACH)"],["holder","Account holder","Company account name"],["method","Payment method","e.g. ACH / SWIFT / IBAN"],["acc","Account number / IBAN","Account number",1],["routing","Routing code / SWIFT / BIC","Routing / SWIFT code",1],["routingType","Routing type","e.g. ach_routing_number"],["bank","Bank name","Bank name"],["addr","Bank address","Full bank address",0,1]]
+};
+var _paEdit={"in":"","x":""};   /* account id being edited per kind ("new" = a fresh one) */
+function paKindLabel(k){return k==="in"?"Bank transfer — India":"International payment";}
+function payAccountsOf(k){return (payAccounts||[]).filter(function(a){return a&&a.kind===k;});}
+function payAccountFor(k){
+  var id=payCfg[k==="in"?"printIn":"printX"];
+  if(id==="none")return null;
+  var list=payAccountsOf(k);
+  return list.find(function(a){return a.id===id;})||list[0]||null;
+}
+/* One-off: the single account that used to live in payCfg becomes the first saved account. */
+function migratePayAccounts(){
+  if((payAccounts||[]).length)return;
+  var made=false;
+  if(payCfg.bkHolder||payCfg.bkAcc){var a={id:"PA"+Date.now().toString(36)+"i",kind:"in",name:(payCfg.bkBank||"India")+" account",holder:payCfg.bkHolder||"",acc:payCfg.bkAcc||"",bank:payCfg.bkBank||"",branch:payCfg.bkBranch||"",ifsc:payCfg.bkIfsc||"",addr:payCfg.bkAddr||""};payAccounts.push(a);payCfg.printIn=a.id;made=true;}
+  if(payCfg.xHolder||payCfg.xAcc){var x={id:"PA"+Date.now().toString(36)+"x",kind:"x",name:(payCfg.xBank||"International")+(payCfg.xMethod?" · "+payCfg.xMethod:""),holder:payCfg.xHolder||"",method:payCfg.xMethod||"",acc:payCfg.xAcc||"",routing:payCfg.xRouting||"",routingType:payCfg.xRoutingType||"",bank:payCfg.xBank||"",addr:payCfg.xAddr||""};payAccounts.push(x);payCfg.printX=x.id;made=true;}
+  if(made&&typeof persistData==="function")persistData();
+}
+function payAccountsFormHTML(k){
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  return "<div class='eyebrow' style='margin:14px 0 8px'>"+paKindLabel(k)+"</div>"+
+    "<div class='field'><label>Print on quotations</label><div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'>"+
+      "<select class='input' id='pa_sel_"+k+"' onchange=\"paSelect('"+k+"',this.value)\" style='flex:1;min-width:220px'></select>"+
+      "<button class='btn btn-ghost btn-sm' onclick=\"paNew('"+k+"')\">+ New account</button>"+
+      "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"paDelete('"+k+"')\">Delete</button>"+
+    "</div></div>"+
+    "<div class='cost-grid' id='pa_form_"+k+"'>"+PA_FIELDS[k].map(function(f){return "<div class='field"+(f[4]?" full":"")+"'><label>"+esc(f[1])+"</label><input class='input"+(f[3]?" mono":"")+"' id='pa_"+k+"_"+f[0]+"' placeholder='"+esc(f[2])+"'></div>";}).join("")+"</div>"+
+    "<div style='display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px'><button class='btn btn-primary btn-sm' onclick=\"paSave('"+k+"')\">Save "+(k==="in"?"India":"international")+" account</button><span id='pa_hint_"+k+"' style='font-size:11.5px;color:var(--ink-soft)'></span></div>";
+}
+function renderPayAccounts(){
+  ["in","x"].forEach(function(k){
+    var sel=document.getElementById("pa_sel_"+k);if(!sel)return;
+    var list=payAccountsOf(k);var cur=payAccountFor(k);var printId=cur?cur.id:"none";
+    /* "new" sticks only while the operator is deliberately adding one; otherwise edit the printed account */
+    if(_paEdit[k]==="new"&&!_paEdit[k+"_manual"]&&list.length)_paEdit[k]="";
+    if(!_paEdit[k]||(_paEdit[k]!=="new"&&!list.some(function(a){return a.id===_paEdit[k];})))_paEdit[k]=cur?cur.id:(list.length?list[0].id:"new");
+    sel.innerHTML=list.map(function(a){return "<option value='"+a.id+"' "+(a.id===printId?"selected":"")+">"+String(a.name||a.bank||a.holder||a.id).replace(/</g,"&lt;")+"</option>";}).join("")+"<option value='none' "+(printId==="none"?"selected":"")+">— none (don't print this section) —</option>";
+    var editing=(_paEdit[k]==="new")?null:list.find(function(a){return a.id===_paEdit[k];});
+    PA_FIELDS[k].forEach(function(f){var e=document.getElementById("pa_"+k+"_"+f[0]);if(e&&document.activeElement!==e)e.value=editing?(editing[f[0]]||""):"";});
+    var h=document.getElementById("pa_hint_"+k);if(h)h.textContent=editing?("Editing “"+(editing.name||editing.bank||"account")+"”"+(editing.id===printId?" · printed on quotations":"")):(list.length?"New account — fill in and save":"No "+(k==="in"?"India":"international")+" account saved yet — fill in and save");
+  });
+}
+function paSelect(k,id){
+  payCfg[k==="in"?"printIn":"printX"]=id||"none";
+  if(id&&id!=="none")_paEdit[k]=id;
+  _paEdit[k+"_manual"]=false;
+  persistData();renderPayAccounts();
+}
+function paNew(k){_paEdit[k]="new";_paEdit[k+"_manual"]=true;renderPayAccounts();var first=document.getElementById("pa_"+k+"_name");if(first)first.focus();}
+function paSave(k){
+  var rec={};PA_FIELDS[k].forEach(function(f){var e=document.getElementById("pa_"+k+"_"+f[0]);rec[f[0]]=e?e.value.trim():"";});
+  if(!rec.holder&&!rec.acc){alert("Fill in at least the account holder and account number.");return;}
+  if(!rec.name)rec.name=(rec.bank||(k==="in"?"India":"International"))+(rec.method?" · "+rec.method:"")+" account";
+  var list=payAccountsOf(k);var existing=(_paEdit[k]&&_paEdit[k]!=="new")?list.find(function(a){return a.id===_paEdit[k];}):null;
+  if(existing){Object.assign(existing,rec);existing.updatedAt=new Date().toISOString();}
+  else{rec.id="PA"+Date.now().toString(36);rec.kind=k;rec.updatedAt=new Date().toISOString();payAccounts.push(rec);_paEdit[k]=rec.id;if(!payAccountFor(k)||payCfg[k==="in"?"printIn":"printX"]==="none"||list.length===0)payCfg[k==="in"?"printIn":"printX"]=rec.id;}
+  _paEdit[k+"_manual"]=false;
+  audit("costsheet","payment-account-saved",(k==="in"?"India: ":"International: ")+rec.name);
+  persistData();renderPayAccounts();
+  var btn=event&&event.target;if(btn&&btn.tagName==="BUTTON"){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1300);}
+}
+function paDelete(k){
+  var id=_paEdit[k];var a=(payAccounts||[]).find(function(x){return x.id===id;});
+  if(!a){alert("Pick the account to delete first.");return;}
+  if(!confirm("Delete the saved account “"+(a.name||a.bank||a.holder)+"”?"))return;
+  payAccounts=payAccounts.filter(function(x){return x.id!==id;});
+  var key=k==="in"?"printIn":"printX";if(payCfg[key]===id){var rest=payAccountsOf(k);payCfg[key]=rest.length?rest[0].id:"none";}
+  _paEdit[k]="";_paEdit[k+"_manual"]=false;audit("costsheet","payment-account-deleted",a.name||"");
+  persistData();renderPayAccounts();
+}
+/* The Pay-online fields <-> payCfg (synced per workspace). */
+var PD_KEYS=["bkHolder","bkAcc","bkBank","bkBranch","bkIfsc","bkAddr","xHolder","xMethod","xAcc","xRouting","xRoutingType","xBank","xAddr"]; /* legacy single-account fields, migrated into payAccounts */
 function fillPayDetails(){
-  PD_KEYS.forEach(function(k){var e=document.getElementById("pd_"+k);if(e&&document.activeElement!==e)e.value=payCfg[k]||"";});
+  renderPayAccounts();
   var l=document.getElementById("pd_link");if(l&&document.activeElement!==l)l.value=payCfg.payPage||"";
   var u=document.getElementById("pd_upi");if(u&&document.activeElement!==u)u.value=payCfg.upi||"";
 }
 function savePayDetails(){
-  PD_KEYS.forEach(function(k){var e=document.getElementById("pd_"+k);if(e)payCfg[k]=e.value.trim();});
   var l=document.getElementById("pd_link");
   if(l){var lv=l.value.trim();if(lv&&!/^https?:\/\//i.test(lv))lv="https://"+lv.replace(/^\/+/,"");payCfg.payPage=lv;l.value=lv;}
   var u=document.getElementById("pd_upi");if(u)payCfg.upi=u.value.trim();
@@ -8981,7 +9045,7 @@ function previewPolicy(mode){
 function savePayCfg(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
   /* review/feedback links live in their own settings card (saveReviewLinks) — keep them */
-  payCfg={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page"),reviewUrl:payCfg.reviewUrl||"",feedbackUrl:payCfg.feedbackUrl||"",ebirdKey:payCfg.ebirdKey||""};
+  payCfg=Object.assign({},payCfg,{gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page")}); /* keeps bank accounts, print choices and review links */
   audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.upi||""));
   persistData();
   alert("Saved. Invoices now show "+(payCfg.gstRate>0?("the GST break-up @ "+payCfg.gstRate+"%"):"no GST line")+(payCfg.upi||payCfg.payPage?" and a Pay-now block.":"."));
@@ -9702,6 +9766,7 @@ function boot(keepView){
   if(typeof purgeOldTrash==="function")purgeOldTrash();
   if(typeof ensureTourPocs==="function")ensureTourPocs();
   tours.forEach(syncTourPaymentToBookings);
+  if(typeof migratePayAccounts==="function")migratePayAccounts();
   buildNav();
   document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewCatalog(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewRateCards(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderCostSheet();renderLog();renderCRM();renderCustomers();renderReviews();renderOperators();renderReservations();
