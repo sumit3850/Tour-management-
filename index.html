@@ -125,6 +125,10 @@ svg{display:block}
 .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 14%,transparent);color:var(--cc)}
 html.dark .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 32%,transparent);color:color-mix(in srgb,var(--cc) 45%,#fff)}
 .cat-swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:1px}
+/* Documents (quotation / invoice / payment page): one weight everywhere, the client name is the only bold text */
+#quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important}
+#quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important;font-size:14px}
+.doc-kv{border-collapse:collapse;font-size:13px;align-self:flex-start}.doc-kv td{border:0 !important;background:transparent !important}
 
 .bar{height:6px;background:var(--line-soft);border-radius:999px;overflow:hidden}
 .bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sea),var(--forest))}
@@ -1131,7 +1135,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 268</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 269</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1140,7 +1144,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 268</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 269</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1554,7 +1558,7 @@ let deletedSubs=[];
    bookings, restorable from Tours → Trash. Purged automatically after 30 days. */
 let trash=[];
 var TRASH_DAYS=30;
-const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"]];
+const STAGES=[["New","New Inquiry"],["Contacted","Contacted"],["Proposal","Proposal Sent"],["FollowUp","Follow-Up"],["Confirmed","Confirmed"],["Lost","Lost"],["Cancelled","Cancelled"]];
 let customers=[];
 let vehicles=[];
 let drivers=[];
@@ -3041,7 +3045,7 @@ function renderAccommodation(){
       "<div class='acc-head'>"+
         "<div><div class='acc-name'>"+a.name+"</div><div class='acc-loc'><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z'/><circle cx='12' cy='10' r='3'/></svg>"+a.location+"</div></div>"+
         "<span class='pill "+(a.status==="Active"?"active":"maintenance")+"'>"+a.status+"</span>"+
-      "</div>"+
+      "</tbody></table>"+
       "<div class='acc-meta'>"+
         "<div><span class='k'>Type</span><br><span class='v'>"+a.type+"</span></div>"+
         "<div><span class='k'>Total rooms</span><br><span class='v'>"+a.rooms+"</span></div>"+
@@ -4035,7 +4039,7 @@ function viewDashboard(){
     "<div class='kpis' style='margin-top:16px'>"+
       kpi("Upcoming Tours",upcoming,"departures ahead","up","M8 2v4M16 2v4M3 10h18M5 4h14v18H5z")+
       kpi("Total Participants",totalParticipants,"across departures","","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z")+
-      kpi("Active Leads",leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed").length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
+      kpi("Active Leads",leads.filter(l=>["Lost","Confirmed","Cancelled"].indexOf(l.stage)<0).length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
       kpi("Confirmed Bookings",visibleConfirmed,"confirmed","up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
     "<div class='grid-2' style='margin-top:16px'>"+todayCard()+underbookedCard()+"</div>"+
@@ -5207,7 +5211,7 @@ function viewInvoices(){
         "<div class='field'><label>Address</label><input class='input' id='inv_addr' placeholder='Billing address'></div>"+
         "<div class='field'><label>Client GST No. <span style='color:var(--ink-soft);font-weight:400'>(optional — sets CGST/SGST vs IGST)</span></label><input class='input mono' id='inv_gst' placeholder='29XXXXXXXXXXXZ5'></div>"+
       "</div>"+
-      "<button class='btn btn-primary' onclick=\"generateInvoice('inv')\" style='background:var(--forest)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6'/></svg>Generate invoice</button>"+
+      "<button class='btn btn-sea' onclick=\"generateInvoice('inv')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 13h6M9 17h6'/></svg>Generate invoice</button>"+
     "</div>"+
     "<div class='card' style='margin-bottom:16px'>"+
       "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>From your quotations</div><div class='h-sec' style='margin-bottom:6px'>Accepted quotations — ready to invoice</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Mark a quotation <b>Accepted</b> in the Group Quotation folder and it appears here. Click <b>Create invoice</b> to turn it into an invoice, pre-filled from the quote.</p></div>"+
@@ -5367,22 +5371,25 @@ function quoteHeaderHTML(){
 /* "Quotation To" party block (left) + meta block (right). Guest name / country are
    enlarged; an editable Address line and GST No. line sit below; the meta block always
    shows a Departure row (blank when no date is chosen) plus a GST No. space. */
+/* One "Label : value" row of the document header (label column, colon, value). */
+function docKvRow(label,value){
+  return "<tr><td style='color:#5a6b62;padding:2px 8px 2px 0;white-space:nowrap;vertical-align:top'>"+label+"</td><td style='color:#5a6b62;padding:2px 6px 2px 0;vertical-align:top'>:</td><td style='padding:2px 0;color:#16241d;vertical-align:top'>"+(value||"")+"</td></tr>";
+}
 function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
   client=client||{};
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
   var name=esc(client.name)||"Guest Name";
   return "<div style='display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px'>"+
-    "<div style='max-width:58%'>"+
-      "<div style='font-size:11px;color:#5a6b62;text-transform:uppercase;letter-spacing:.07em'>Quotation To</div>"+
-      "<div style='font-weight:600;font-size:15px;margin-top:2px;color:#16241d'>"+name+"</div>"+
-      "<div style='font-size:13px;color:#5a6b62;margin-top:6px'>Address: "+esc(client.address)+"</div>"+
-      "<div style='font-size:13px;color:#5a6b62;margin-top:2px'>GST No.: "+esc(client.gst)+"</div>"+
-    "</div>"+
-    "<div style='text-align:right'>"+
-      "<div><span style='color:#5a6b62'>Quotation #:</span> <b>"+qid+"</b></div>"+
-      "<div><span style='color:#5a6b62'>Date:</span> "+today+"</div>"+
-      "<div><span style='color:#5a6b62'>Valid Until:</span> "+validUntil+"</div>"+
-    "</div>"+
+    "<table class='doc-kv' style='max-width:58%'><tbody>"+
+      docKvRow("Quotation To","<span class='doc-client'>"+name+"</span>")+
+      docKvRow("Address",esc(client.address))+
+      docKvRow("GST No.",esc(client.gst))+
+    "</tbody></table>"+
+    "<table class='doc-kv' style='margin-left:auto'><tbody>"+
+      docKvRow("Quotation #",qid)+
+      docKvRow("Date",today)+
+      docKvRow("Valid Until",validUntil)+
+    "</tbody></table>"+
   "</div>";
 }
 function generateQuotation(){
@@ -5619,6 +5626,9 @@ function printQuotation() {
         html,body{margin:0;padding:0;background:#fff}
         body{font-family:'Inter',system-ui,sans-serif;display:block}
         #quotationBody,#payPage{max-width:760px;width:100%;margin:0 auto}
+        #quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important}
+        #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important;font-size:14px}
+        .doc-kv{border-collapse:collapse;font-size:13px}.doc-kv td{border:0 !important;background:transparent !important}
         @media print{
           @page{size:A4 portrait;margin:8mm 10mm}
           body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -6837,14 +6847,14 @@ function deleteSavedQuote(id){
 }
 /* Quotation funnel: Draft → Sent → Accepted / Lost. Conversion = accepted out of
    every quotation that reached a decision or is awaiting one (sent+accepted+lost). */
-var QUOTE_STATUSES=["Draft","Sent","Accepted","Lost"];
+var QUOTE_STATUSES=["Draft","Sent","Accepted","Lost","Cancelled"];
 function setQuoteStatus(id,val){
   var r=quotationLog.find(function(x){return x.id===id;});if(!r)return;
   r.status=val;audit("quotation",val.toLowerCase(),r.qid+" · "+(r.tour||""));
   persistData();renderSavedQuotes();if(typeof renderAcceptedQuotes==="function")renderAcceptedQuotes();
 }
 function quoteConversion(){
-  var c={Draft:0,Sent:0,Accepted:0,Lost:0};
+  var c={Draft:0,Sent:0,Accepted:0,Lost:0,Cancelled:0};
   (quotationLog||[]).forEach(function(r){c[r.status||"Draft"]=(c[r.status||"Draft"]||0)+1;});
   var decided=c.Sent+c.Accepted+c.Lost;
   return {counts:c,pct:decided?Math.round(c.Accepted/decided*100):0,decided:decided};
@@ -6863,7 +6873,7 @@ function renderSavedQuotes(){
     var st=r.status||"Draft";
     var stSel="<select class='input' style='width:auto;padding:4px 8px;font-size:11.5px' onchange=\"setQuoteStatus('"+r.id+"',this.value)\">"+QUOTE_STATUSES.map(function(s){return "<option "+(s===st?"selected":"")+">"+s+"</option>";}).join("")+"</select>";
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
-      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":(st==="Lost"?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
+      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":((st==="Lost"||st==="Cancelled")?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
         "<div style='font-size:11px;color:var(--ink-soft)'>"+(r.guest?r.guest+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0;align-items:center'>"+
         stSel+
@@ -6898,19 +6908,18 @@ function invoiceMetaRow(vid,today,client,startD,endD){
   client=client||{};
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
   return "<div style='display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px'>"+
-    "<div style='max-width:58%'>"+
-      "<div style='font-size:11px;color:#5a6b62;text-transform:uppercase;letter-spacing:.07em'>Invoice To</div>"+
-      "<div style='font-weight:600;font-size:15px;margin-top:2px;color:#16241d'>"+(esc(client.name)||"Guest Name")+"</div>"+
-      "<div style='font-size:13px;color:#5a6b62;margin-top:6px'>Address: "+esc(client.address)+"</div>"+
-      "<div style='font-size:13px;color:#5a6b62;margin-top:2px'>GST No.: "+esc(client.gst)+"</div>"+
-    "</div>"+
-    "<div style='text-align:right'>"+
-      "<div><span style='color:#5a6b62'>Invoice #:</span> <b>"+vid+"</b></div>"+
-      "<div><span style='color:#5a6b62'>Date:</span> "+today+"</div>"+
-      (startD?"<div><span style='color:#5a6b62'>Tour dates:</span> "+startD+(endD?" – "+endD:"")+"</div>":"")+
-      (payCfg.gstin?"<div><span style='color:#5a6b62'>Our GSTIN:</span> <b>"+esc(payCfg.gstin)+"</b></div>":"")+
-      (payCfg.gstin&&payCfg.hsn?"<div><span style='color:#5a6b62'>SAC:</span> "+esc(payCfg.hsn)+"</div>":"")+
-    "</div>"+
+    "<table class='doc-kv' style='max-width:58%'><tbody>"+
+      docKvRow("Invoice To","<span class='doc-client'>"+(esc(client.name)||"Guest Name")+"</span>")+
+      docKvRow("Address",esc(client.address))+
+      docKvRow("GST No.",esc(client.gst))+
+    "</tbody></table>"+
+    "<table class='doc-kv' style='margin-left:auto'><tbody>"+
+      docKvRow("Invoice #",vid)+
+      docKvRow("Date",today)+
+      (startD?docKvRow("Tour dates",startD+(endD?" – "+endD:"")):"")+
+      (payCfg.gstin?docKvRow("Our GSTIN",esc(payCfg.gstin)):"")+
+      (payCfg.gstin&&payCfg.hsn?docKvRow("SAC",esc(payCfg.hsn)):"")+
+    "</tbody></table>"+
   "</div>";
 }
 /* GST break-up for an invoice. Split rule: if the client's GSTIN starts with our
@@ -7548,7 +7557,7 @@ function saveLeadFilter(){
   });
 }
 /* Stage accent colours drive the column top-border, dot and card avatar. */
-const KAN_COLORS={New:"#0a6ed1",Contacted:"#7c5cff",Proposal:"#b8860b",FollowUp:"#d97706",Confirmed:"#1b7a4d",Lost:"#c0392b"};
+const KAN_COLORS={New:"#0a6ed1",Contacted:"#7c5cff",Proposal:"#b8860b",FollowUp:"#d97706",Confirmed:"#1b7a4d",Lost:"#c0392b",Cancelled:"#6b7280"};
 function leadCard(l){
   var esc=function(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");};
   var initials=String(l.name||"?").trim().split(/\s+/).map(function(w){return w.charAt(0);}).slice(0,2).join("").toUpperCase()||"?";
@@ -8921,7 +8930,7 @@ Day 9: Western Ghats trail — mixed flocks
 Day 10: Rest morning. Optional: turtle nesting beach
 Day 11: Return Campbell Bay. Final checklist
 Day 12: Departure`);}
-  else if(q.includes("lead")||q.includes("pipeline")){const active=leads.filter(l=>l.stage!=="Lost"&&l.stage!=="Confirmed");addMsg("bot","Pipeline snapshot\n\n"+active.map((l,i)=>`${i+1}. ${l.name} — ${l.tour} — ${STAGES.find(s=>s[0]===l.stage)[1]}`).join("\n")+`\n\nTotal active: ${active.length}`);}
+  else if(q.includes("lead")||q.includes("pipeline")){const active=leads.filter(l=>["Lost","Confirmed","Cancelled"].indexOf(l.stage)<0);addMsg("bot","Pipeline snapshot\n\n"+active.map((l,i)=>`${i+1}. ${l.name} — ${l.tour} — ${STAGES.find(s=>s[0]===l.stage)[1]}`).join("\n")+`\n\nTotal active: ${active.length}`);}
   else if(q.includes("occupancy")){addMsg("bot","Upcoming departures\n\n"+tours.filter(t=>status(t)!=="completed").map(t=>`${t.name}: ${booked(t.id)}/${t.cap} booked`).join("\n"));}
   else if(q.includes("price")||q.includes("cost")){addMsg("bot","Pricing tiers\n\n• South Andaman 5-Night: ₹48,500 pp\n• South & Little Andaman 7-Night: ₹72,000 pp\n• Great Nicobar 12-Night: ₹1,18,500 pp\n• Guided Session: ₹8,500 pp/day\n\nAll twin-share. Single supplement +25%.");}
   else if(q.includes("social")||q.includes("caption")){addMsg("bot",`Monsoon birding tip: carry a rain cover for your binoculars. The Andamans reward patience — 147 endemics recorded this season.
