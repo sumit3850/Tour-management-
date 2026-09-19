@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v156"; /* v156: cloud pull can no longer blank or roll back records saved after the cloud copy (bank accounts, quotations); pending edits are flushed before the boot pull */
+var CACHE = "ie-ops-v157"; /* v157: quotation / invoice dialogs fit a phone screen (header reflows, policy tables wrap); boot sync pulls before flushing; 7-day keep window for unpushed records */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
