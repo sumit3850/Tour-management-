@@ -126,8 +126,10 @@ svg{display:block}
 html.dark .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 32%,transparent);color:color-mix(in srgb,var(--cc) 45%,#fff)}
 .cat-swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:1px}
 /* Documents (quotation / invoice / payment page): one weight everywhere, the client name is the only bold text */
-#quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important}
-#quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important;font-size:14px}
+#quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important;font-family:'Inter',system-ui,sans-serif !important;font-size:12.5px !important;line-height:1.5}
+#quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important}
+#quotationBody .doc-title,#payPage .doc-title{font-size:14px !important}
+#quotationBody img,#payPage img{font-size:0 !important}
 .doc-kv{border-collapse:collapse;font-size:13px;align-self:flex-start}.doc-kv td{border:0 !important;background:transparent !important}
 
 .bar{height:6px;background:var(--line-soft);border-radius:999px;overflow:hidden}
@@ -1135,7 +1137,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 269</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 270</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1144,7 +1146,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 269</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 270</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5371,26 +5373,24 @@ function quoteHeaderHTML(){
 /* "Quotation To" party block (left) + meta block (right). Guest name / country are
    enlarged; an editable Address line and GST No. line sit below; the meta block always
    shows a Departure row (blank when no date is chosen) plus a GST No. space. */
-/* One "Label : value" row of the document header (label column, colon, value). */
-function docKvRow(label,value){
-  return "<tr><td style='color:#5a6b62;padding:2px 8px 2px 0;white-space:nowrap;vertical-align:top'>"+label+"</td><td style='color:#5a6b62;padding:2px 6px 2px 0;vertical-align:top'>:</td><td style='padding:2px 0;color:#16241d;vertical-align:top'>"+(value||"")+"</td></tr>";
+/* Document header as "Label : value" cells (label column, colon, value) — two
+   pairs per row, like the customer detail dialog. docKvGrid pairs the left and
+   right lists row by row. */
+function docKvCell(label,value){
+  return "<td style='color:#5a6b62;padding:3px 8px 3px 0;white-space:nowrap;vertical-align:top'>"+label+"</td><td style='color:#5a6b62;padding:3px 6px 3px 0;vertical-align:top'>:</td><td style='padding:3px 18px 3px 0;color:#16241d;vertical-align:top'>"+(value||"")+"</td>";
+}
+function docKvGrid(left,right){
+  var n=Math.max(left.length,right.length),rows="";
+  for(var i=0;i<n;i++){rows+="<tr>"+(left[i]?docKvCell(left[i][0],left[i][1]):"<td></td><td></td><td></td>")+(right[i]?docKvCell(right[i][0],right[i][1]):"<td></td><td></td><td></td>")+"</tr>";}
+  return "<table class='doc-kv' style='width:100%;margin-bottom:18px'><tbody>"+rows+"</tbody></table>";
 }
 function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
   client=client||{};
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
   var name=esc(client.name)||"Guest Name";
-  return "<div style='display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px'>"+
-    "<table class='doc-kv' style='max-width:58%'><tbody>"+
-      docKvRow("Quotation To","<span class='doc-client'>"+name+"</span>")+
-      docKvRow("Address",esc(client.address))+
-      docKvRow("GST No.",esc(client.gst))+
-    "</tbody></table>"+
-    "<table class='doc-kv' style='margin-left:auto'><tbody>"+
-      docKvRow("Quotation #",qid)+
-      docKvRow("Date",today)+
-      docKvRow("Valid Until",validUntil)+
-    "</tbody></table>"+
-  "</div>";
+  return docKvGrid(
+    [["Quotation To","<span class='doc-client'>"+name+"</span>"],["Address",esc(client.address)],["GST No.",esc(client.gst)]],
+    [["Quotation #",qid],["Date",today],["Valid Until",validUntil]]);
 }
 function generateQuotation(){
   const sel = calcSelection();
@@ -5626,8 +5626,9 @@ function printQuotation() {
         html,body{margin:0;padding:0;background:#fff}
         body{font-family:'Inter',system-ui,sans-serif;display:block}
         #quotationBody,#payPage{max-width:760px;width:100%;margin:0 auto}
-        #quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important}
-        #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important;font-size:14px}
+        #quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important;font-family:'Inter',system-ui,sans-serif !important;font-size:12.5px !important;line-height:1.5}
+        #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important}
+        #quotationBody .doc-title,#payPage .doc-title{font-size:14px !important}
         .doc-kv{border-collapse:collapse;font-size:13px}.doc-kv td{border:0 !important;background:transparent !important}
         @media print{
           @page{size:A4 portrait;margin:8mm 10mm}
@@ -6687,7 +6688,7 @@ function generateGroupQuotation(){
         quoteMetaRow(qid,today,validUntil,depText,qClient,dueText)+
         "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px'>"+
           "<div style='display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px'>"+
-            "<div style='font-weight:700;font-size:15px;color:#15563c'>"+q.title+"</div>"+
+            "<div class='doc-title' style='font-weight:700;font-size:15px;color:#15563c'>"+q.title+"</div>"+
             "<span style='font-size:11px;font-weight:700;color:#15563c;background:#e2f0e8;border:1px solid #cfe5d8;border-radius:99px;padding:2px 10px;white-space:nowrap'>"+q.durLabel+"</span>"+
           "</div>"+
           "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px 14px'>"+
@@ -6907,20 +6908,13 @@ function peekInvoiceNo(){var yr=(new Date()).getFullYear();return invoicePrefix(
 function invoiceMetaRow(vid,today,client,startD,endD){
   client=client||{};
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
-  return "<div style='display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px'>"+
-    "<table class='doc-kv' style='max-width:58%'><tbody>"+
-      docKvRow("Invoice To","<span class='doc-client'>"+(esc(client.name)||"Guest Name")+"</span>")+
-      docKvRow("Address",esc(client.address))+
-      docKvRow("GST No.",esc(client.gst))+
-    "</tbody></table>"+
-    "<table class='doc-kv' style='margin-left:auto'><tbody>"+
-      docKvRow("Invoice #",vid)+
-      docKvRow("Date",today)+
-      (startD?docKvRow("Tour dates",startD+(endD?" – "+endD:"")):"")+
-      (payCfg.gstin?docKvRow("Our GSTIN",esc(payCfg.gstin)):"")+
-      (payCfg.gstin&&payCfg.hsn?docKvRow("SAC",esc(payCfg.hsn)):"")+
-    "</tbody></table>"+
-  "</div>";
+  var right=[["Invoice #",vid],["Date",today]];
+  if(startD)right.push(["Tour dates",startD+(endD?" – "+endD:"")]);
+  if(payCfg.gstin)right.push(["Our GSTIN",esc(payCfg.gstin)]);
+  if(payCfg.gstin&&payCfg.hsn)right.push(["SAC",esc(payCfg.hsn)]);
+  return docKvGrid(
+    [["Invoice To","<span class='doc-client'>"+(esc(client.name)||"Guest Name")+"</span>"],["Address",esc(client.address)],["GST No.",esc(client.gst)]],
+    right);
 }
 /* GST break-up for an invoice. Split rule: if the client's GSTIN starts with our
    own state code it's an intra-state supply (CGST+SGST), otherwise inter-state
@@ -7028,7 +7022,7 @@ function renderInvoiceDoc(){
     quoteHeaderHTML()+
     invoiceMetaRow(inv.invid,inv.date,inv.client,inv.startDate,inv.endDate)+
     "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
-      "<div style='font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c'>"+esc0(inv.tour)+"</div>"+
+      "<div class='doc-title' style='font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c'>"+esc0(inv.tour)+"</div>"+
       "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>"+
         "<div><span style='color:#5a6b62'>Participants:</span> <b>"+esc0(inv.participants)+"</b></div>"+
         "<div><span style='color:#5a6b62'>Client type:</span> <b>"+esc0(inv.clientType)+"</b></div>"+
