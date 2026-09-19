@@ -1138,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 278</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 279</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1147,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 278</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 279</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1651,14 +1651,32 @@ function collectStore(){var o={};STORE.forEach(function(s){o[s.k]=s.get();});ret
    then read the wipe as an intentional deletion and delete it from the cloud too
    — this is exactly how a vehicle could vanish repeatedly and need a manual
    re-sync every time. */
-function applyStore(d){
+/* Union of two record lists by id: the newer `updatedAt` wins for shared ids,
+   local-only items survive (they have not reached the cloud yet). */
+function unionById(local,remote,keepLocalOnly){
+  if(!Array.isArray(local)||!local.length)return remote;
+  var out=[],seen={};
+  (remote||[]).forEach(function(r){var id=r&&(r.id!=null?r.id:r.name);if(id==null){out.push(r);return;}var l=local.find(function(x){return x&&(x.id!=null?x.id:x.name)===id;});seen[id]=1;out.push((l&&l.updatedAt&&(!r.updatedAt||l.updatedAt>r.updatedAt))?l:r);});
+  local.forEach(function(l){var id=l&&(l.id!=null?l.id:l.name);if(id!=null&&!seen[id]&&keepLocalOnly(l))out.push(l);});
+  return out;
+}
+function applyStore(d,cloudTs){
   if(!d)return;
-  var snap=STORE.some(function(s){return d[s.k]!==undefined;});
+  /* A local record the cloud copy cannot know about is kept: an edit still
+     unpushed (pending flag), or a record saved AFTER the cloud copy was written
+     (its own clock is newer than the blob's). Everything else follows the cloud. */
+  var pending=false;try{pending=localStorage.getItem("ieo_record_pending")==="1"||(typeof _localDirty!=="undefined"&&_localDirty);}catch(e){}
+  var keep=function(l){if(pending)return true;var ts=l&&(l.updatedAt||l.savedAt||l.createdAt||"");return !!(cloudTs&&ts&&ts>cloudTs);};
   var skipKeys=(typeof _perRecordActive!=="undefined"&&_perRecordActive&&typeof PER_RECORD_KEYS!=="undefined")?PER_RECORD_KEYS:[];
   STORE.forEach(function(s){
     if(skipKeys.indexOf(s.k)>-1)return;
-    if(d[s.k]!==undefined&&d[s.k]!==null)s.set(d[s.k]);
-    else if(snap&&s.arr&&s.k!=="operators")s.set([]);
+    if(d[s.k]!==undefined&&d[s.k]!==null){
+      if(s.arr&&Array.isArray(d[s.k]))s.set(unionById(s.get()||[],d[s.k],keep));
+      else s.set(d[s.k]);
+    }
+    /* A collection the cloud copy does not carry (older build on another device,
+       or a key that never existed there) is LEFT AS IT IS — never blanked. It goes
+       up with the next push. */
   });
   ensureSheetDefaults();
   /* One-time quotation-number restart: whenever the stored epoch is behind the code's
@@ -2499,9 +2517,9 @@ function sbClient(){
 }
 function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el.textContent=msg;el.className="sb-status "+(kind||"");}}
 function sbCollect(){var o=collectStore();o.trips=(typeof tripLogs!=="undefined"?tripLogs:[]);return o;}
-function sbApply(d){
+function sbApply(d,cloudTs){
   if(!d)return;
-  applyStore(d);
+  applyStore(d,cloudTs);
   if(d.trips){tripLogs=d.trips;try{localStorage.setItem("ieo_sync_trips",JSON.stringify(tripLogs));}catch(e){}}
 }
 function sbSaveConfig(){
@@ -2612,7 +2630,7 @@ async function cloudPull(silent){
     var shouldApply=!silent||!localTs||(cloudTs&&cloudTs>localTs);
     if(!shouldApply){if(!silent)sbStatus("Your local copy is newer — kept your changes.","ok");return "kept-local";}
     _sbApplying=true;
-    sbApply(res.data.data);
+    sbApply(res.data.data,cloudTs);
     try{localStorage.setItem(DATA_KEY,JSON.stringify(collectStore()));}catch(e){}
     setLocalUpdated(cloudTs||new Date().toISOString());
     refreshUI();
@@ -2649,18 +2667,17 @@ function cloudAutoPush(){
 async function cloudInit(){
   var c=sbConfig();
   if(c&&c.auto&&sbClient()){
-    var result=await cloudPull(true);
     /* If a PREVIOUS session left an edit unpushed (see persistData's ieo_record_pending
-       flag) — e.g. the tab/app closed or reloaded before the debounced per-record push
-       fired — flush that edit to the per-record tables NOW, before pulling. Otherwise
-       the unconditional pull below would overwrite the in-memory collections with the
-       cloud's older copy, silently erasing whatever was added/edited right before the
-       reload (this is exactly how a manually-added vehicle could vanish). A normal boot
-       with nothing pending skips this and pulls first, as before — so this can't
-       resurrect stale data on a device that's actually behind. */
+       flag) — e.g. the tab/app closed or reloaded before the debounced push fired —
+       flush it to the cloud NOW, BEFORE pulling. Otherwise the pull below would
+       overwrite the in-memory collections with the cloud's older copy, silently
+       erasing whatever was added right before the reload (a saved quotation, a bank
+       account…). Records go to the per-record tables, the rest with the blob. */
+    var _hadPending=false;
     try{
-      if(localStorage.getItem("ieo_record_pending")==="1")await pushAllRecords();
+      if(localStorage.getItem("ieo_record_pending")==="1"){_hadPending=true;await pushAllRecords();await cloudPush(true);}
     }catch(e){}
+    var result=await cloudPull(true);
     /* Per-record tables (if the SQL in docs/DATABASE_SCHEMA.md has been run) are the
        more precise source of truth for the list collections — read them after the
        blob pull and let them override those same collections with the real, current,
