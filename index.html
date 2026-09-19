@@ -121,6 +121,10 @@ svg{display:block}
 .cat{display:inline-flex;align-items:center;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:600}
 .cat.southandaman{background:#e4ece6;color:#1b4d3e}.cat.littleandaman{background:#e3f1f1;color:#0c656f}
 .cat.nicobar{background:#e6ebf3;color:#3a527d}.cat.session{background:#fbeccb;color:#7a5410}.cat.custom{background:#f1e9df;color:#7a5a37}
+/* catalog-driven badges: colour comes from the category itself */
+.cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 14%,transparent);color:var(--cc)}
+html.dark .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 32%,transparent);color:color-mix(in srgb,var(--cc) 45%,#fff)}
+.cat-swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:1px}
 
 .bar{height:6px;background:var(--line-soft);border-radius:999px;overflow:hidden}
 .bar > span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--sea),var(--forest))}
@@ -1127,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 255</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 256</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1136,7 +1140,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 255</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 256</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1176,7 +1180,13 @@ const fmt=n=>"₹"+Math.round(n).toLocaleString("en-IN");
    "today"/"this month" stats (Daily Activity km, trips today, active vehicles)
    and calendar highlighting in the past. */
 const todayISO=(function(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
-const CATS={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session - Full Day","guided-night":"Guided Session - Night","guided-half":"Guided Session - Half Day",narcondam:"Narcondam Expedition",anbirding:"A & N Birding Expeditions",custom:"Custom"};
+/* Built-in seed for the base catalog. The LIVE list is `catalog.cats`, editable
+   under Overview → Categories; CATS is rebuilt from it (id → name) so every
+   existing lookup keeps working. */
+const CATS_DEFAULT={southandaman:"South Andaman",littleandaman:"South & Little Andaman",nicobar:"Great Nicobar",session:"Guided Session - Full Day","guided-night":"Guided Session - Night","guided-half":"Guided Session - Half Day",narcondam:"Narcondam Expedition",anbirding:"A & N Birding Expeditions",custom:"Custom"};
+const CAT_COLORS_DEFAULT={southandaman:"#1b4d3e",littleandaman:"#0c656f",nicobar:"#3a527d",session:"#7a5410","guided-night":"#7a5410","guided-half":"#7a5410",narcondam:"#8a3d70",anbirding:"#c2603f",custom:"#7a5a37"};
+const ACTIVITIES_DEFAULT=["Birding tour","Herping tour","Mixed tour"];
+var CATS={};
 const TOURCOLORS=["#1b4d3e","#107a86","#dd9a2b","#8a3d70","#3a527d","#c2603f","#5b8c3e","#a14b8a"];
 const XBTN="<button class='x' onclick='closeModal()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18M6 6l12 12'/></svg></button>";
 
@@ -1221,8 +1231,14 @@ const CALC_LABELS={T1:"5N · South Andaman",T3:"7N · South & Little Andaman",T4
 /* Tour list = the built-in keys plus any custom tours saved in SHEET_DATA (added
    via "New custom tour" in the Cost Sheet). Every tour dropdown builds from these,
    so a custom tour appears in the calculator, invoices and both quotation pickers. */
-function tourKeys(){var ks=CALC_ORDER.slice();Object.keys(SHEET_DATA||{}).forEach(function(k){if(ks.indexOf(k)<0&&/^CT/.test(k))ks.push(k);});return ks;}
-function calcTourLabel(k){var s=SHEET_DATA[k];return CALC_LABELS[k]||((s&&s.title)||k);}
+/* Every rate card in the cost sheet: the built-ins that still exist (a deleted
+   built-in stays deleted) in their fixed order, then every card the operator
+   added (from the Categories page, the Cost Sheet or an uploaded template). */
+function isRateCard(o){return !!(o&&typeof o==="object"&&(o.indian||o.foreign||o.title));}
+function rateCardHasRates(o){return ["indian","foreign"].some(function(t){var d=(o||{})[t]||{};return Object.keys(d).some(function(p){return d[p]&&d[p].total>0;});});}
+function tourKeys(){var ks=CALC_ORDER.filter(function(k){return SHEET_DATA&&isRateCard(SHEET_DATA[k]);});Object.keys(SHEET_DATA||{}).forEach(function(k){if(ks.indexOf(k)<0&&isRateCard(SHEET_DATA[k])&&!(k==="TC"&&!rateCardHasRates(SHEET_DATA[k])))ks.push(k);});return ks;} /* "TC" is the old empty placeholder — hidden until it holds rates */
+function firstTourKey(){return tourKeys()[0]||CALC_ORDER[0];}
+function calcTourLabel(k){var s=SHEET_DATA[k];return (s&&s.label)||CALC_LABELS[k]||((s&&s.title)||k);}
 function tourOptions(selKey){return tourKeys().map(function(k){return "<option value='"+k+"' "+(k===selKey?"selected":"")+">"+String(calcTourLabel(k)).replace(/</g,"&lt;")+"</option>";}).join("");}
 function rebuildTourSelects(){
   ["calcCategory","inv_cat","csTour","gqTour"].forEach(function(id){
@@ -1267,7 +1283,7 @@ var gqTierId="early";                /* currently selected deposit tier */
    Each carries its own payment terms and cancellation policy on the document. */
 var gqMode="group";                  /* "group" | "session" — quotation generator */
 var invMode="group";                 /* "group" | "session" — invoice generator */
-var DOC_SESSIONS=[
+var DOC_SESSIONS_DEFAULT=[
   {id:"SB_FD", name:"Guided Birding Session", dur:"Full Day"},
   {id:"SB_HD", name:"Guided Birding Session", dur:"Half Day"},
   {id:"SB_N",  name:"Guided Birding Session", dur:"Night"},
@@ -1279,6 +1295,34 @@ var DOC_SESSIONS=[
   {id:"SH_FDN",name:"Guided Herping Session", dur:"Full Day and Night"},
   {id:"SH_HDN",name:"Guided Herping Session", dur:"Half Day and Night"}
 ];
+var DOC_SESSIONS=DOC_SESSIONS_DEFAULT.slice();
+/* ===== BASE CATALOG — tour categories, activities, session types ==============
+   One synced object so an operator running treks, dives or safaris can rename
+   everything to their own world (Overview → Categories). A category can be
+   linked to a cost-sheet rate card so its costs show up in every estimate. */
+var catalog={cats:[],activities:[],sessions:[]};
+function catalogDefaults(){
+  return {cats:Object.keys(CATS_DEFAULT).map(function(k){return {id:k,name:CATS_DEFAULT[k],color:CAT_COLORS_DEFAULT[k]||"#3a527d",rateKey:""};}),
+          activities:ACTIVITIES_DEFAULT.slice(),
+          sessions:DOC_SESSIONS_DEFAULT.map(function(x){return {id:x.id,name:x.name,dur:x.dur};})};
+}
+function rebuildCatalog(){
+  var c=(catalog&&typeof catalog==="object")?catalog:{};var d=catalogDefaults();
+  if(!Array.isArray(c.cats)||!c.cats.length)c.cats=d.cats;
+  if(!Array.isArray(c.activities)||!c.activities.length)c.activities=d.activities;
+  if(!Array.isArray(c.sessions)||!c.sessions.length)c.sessions=d.sessions;
+  c.cats=c.cats.filter(function(x){return x&&x.id;});
+  catalog=c;
+  CATS={};c.cats.forEach(function(x){CATS[x.id]=x.name||x.id;});
+  DOC_SESSIONS=c.sessions.filter(function(x){return x&&x.id;}).map(function(x){return {id:x.id,name:x.name||"Session",dur:x.dur||""};});
+  if(!DOC_SESSIONS.length)DOC_SESSIONS=DOC_SESSIONS_DEFAULT.slice();
+}
+rebuildCatalog();
+function catDef(id){return (catalog.cats||[]).find(function(c){return c.id===id;});}
+function catColor(id){var c=catDef(id);return (c&&c.color)||"#3a527d";}
+function catBadge(id){return "<span class='cat' style='--cc:"+catColor(id)+"'>"+String(CATS[id]||id||"—").replace(/</g,"&lt;")+"</span>";}
+function activityOptions(sel){var list=(catalog.activities||[]).slice();if(sel&&list.indexOf(sel)<0)list.push(sel);return list.map(function(a){return "<option "+(a===sel?"selected":"")+">"+String(a).replace(/</g,"&lt;")+"</option>";}).join("");}
+function slugId(name,taken){var b=String(name||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,24)||"cat";var s=b,n=2;while(taken[s]){s=b+"-"+n;n++;}return s;}
 var gqSession=DOC_SESSIONS[0].id;   /* selected session for session-mode quotes */
 var gqSessPP="";                     /* manual per-person price for session quotes */
 function sessionById(id){return DOC_SESSIONS.find(function(s){return s.id===id;})||DOC_SESSIONS[0];}
@@ -1453,6 +1497,7 @@ const STORE=[
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
   {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
   {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
+  {k:"catalog",get:function(){return catalog;},set:function(v){if(v&&typeof v==="object")catalog=v;rebuildCatalog();}},
   {k:"auditLog",arr:1,get:function(){return auditLog;},set:function(v){auditLog=v;}},
   {k:"integCfg",get:function(){return integCfg;},set:function(v){if(v&&typeof v==="object")integCfg=Object.assign({sheets:true,maps:true,whatsapp:true,email:true},v);}},
   {k:"prefs",get:function(){return prefs;},set:function(v){if(v&&typeof v==="object")prefs=Object.assign({},PREFS_DEFAULT,v);}},
@@ -2814,6 +2859,7 @@ const NAV=[
   ["requests","Inbox","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z"],
   ["calendar","Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4"],
   ["analytics","Analytics","M3 3v18h18M7 14l4-4 3 3 5-6"],
+  ["catalog","Categories","M4 6h16M4 12h16M4 18h9M18 16l2 2 4-4"],
   ["group","Sales & Ops"],
   ["tours","Tours","M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"],
   ["bookings","Bookings","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
@@ -2827,7 +2873,7 @@ const NAV=[
   ["reviews","Forms & Reviews","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
-const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],tours:["Sales & Ops","Tours"],calendar:["Overview","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
+const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],catalog:["Overview","Categories"],tours:["Sales & Ops","Tours"],calendar:["Overview","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
   accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Tour costing","Cost Calculator"],invoices:["Tour costing","Invoices"],profit:["Tour costing","Profit Calculator"],groupquote:["Tour costing","Group Quotation"],costsheet:["Tour costing","Tour Cost Sheet"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Overview","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Forms, Review & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
@@ -3120,6 +3166,7 @@ function renderView(v){
   else if(v==="costsheet")renderCostSheet();
   else if(v==="dashboard")refreshDashboard();
   else if(v==="analytics")renderAnalytics();
+  else if(v==="catalog")renderCatalog();
 }
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
 function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
@@ -3915,6 +3962,131 @@ function viewDashboard(){
    revenue by month & by tour, collected vs pending, the lead funnel, quotation
    conversion and guide utilization. Pure client-side; no new storage. ===== */
 function viewAnalytics(){return "<section class='view' id='v-analytics'><div id='anaBody'></div></section>";}
+
+/* ===== CATEGORIES (Overview → Categories) =====================================
+   The base catalog every other section reads from: tour categories, activities,
+   session types and the cost-sheet rate cards — all editable, all synced. */
+function viewCatalog(){return "<section class='view' id='v-catalog'><div id='catalogBody'></div></section>";}
+function catSave(what){rebuildCatalog();persistData();audit("catalog",what||"updated","");renderCatalog();if(typeof renderTours==="function")renderTours();}
+function catUsage(id){return (tours||[]).filter(function(t){return t.cat===id;}).length;}
+function renderCatalog(){
+  var el=document.getElementById("catalogBody");if(!el)return;
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;").replace(/"/g,"&quot;");};
+  var cats=catalog.cats||[],acts=catalog.activities||[],sess=catalog.sessions||[],keys=tourKeys();
+  var rateSel=function(cur){return "<option value=''>Auto (by name / nights)</option>"+keys.map(function(k){return "<option value='"+k+"' "+(k===cur?"selected":"")+">"+esc(calcTourLabel(k))+"</option>";}).join("");};
+  var filled=function(k,type){var d=(SHEET_DATA[k]||{})[type]||{};var n=0;for(var p=1;p<=10;p++){if(d[String(p)]&&d[String(p)].total>0)n++;}return n;};
+  var IC_EDIT="<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>";
+  var IC_DEL="<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>";
+  el.innerHTML=
+    "<div class='card card-pad' style='margin-bottom:16px'>"+
+      "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Base catalog</div><div class='h-sec'>Tour categories</div></div></div>"+
+      "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;max-width:760px'>Rename these to match what you run — treks, dives, safaris, workshops. Every tour picks one, the Tours page groups by them, and a category linked to a rate card uses that card's costs for every estimate.</p>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>Colour</th><th>Category</th><th>Tours</th><th>Rate card for costs</th><th></th></tr></thead><tbody>"+
+        cats.map(function(c,i){return "<tr>"+
+          "<td><input type='color' value='"+esc(c.color||"#3a527d")+"' onchange=\"catSetColor('"+esc(c.id)+"',this.value)\" title='Colour' style='width:36px;height:28px;border:1px solid var(--line);border-radius:6px;background:none;padding:0'></td>"+
+          "<td class='strong'>"+esc(c.name)+"<div style='font-size:11px;color:var(--ink-soft);font-family:var(--font-mono)'>"+esc(c.id)+"</div></td>"+
+          "<td class='num mono'>"+catUsage(c.id)+"</td>"+
+          "<td><select class='input' style='padding:6px 9px;font-size:12.5px;min-width:180px' onchange=\"catSetRate('"+esc(c.id)+"',this.value)\">"+rateSel(c.rateKey||"")+"</select></td>"+
+          "<td><div class='tbl-actions'>"+
+            "<button title='Move up' onclick=\"catMove('"+esc(c.id)+"',-1)\" "+(i===0?"disabled":"")+">↑</button>"+
+            "<button title='Move down' onclick=\"catMove('"+esc(c.id)+"',1)\" "+(i===cats.length-1?"disabled":"")+">↓</button>"+
+            "<button class='edit-btn' title='Rename' onclick=\"catRename('"+esc(c.id)+"')\">"+IC_EDIT+"</button>"+
+            "<button class='del-btn' title='Delete' onclick=\"catDelete('"+esc(c.id)+"')\">"+IC_DEL+"</button>"+
+          "</div></td></tr>";}).join("")+
+      "</tbody></table></div>"+
+      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px'>"+
+        "<input class='input' id='catNewName' placeholder='New category, e.g. 3D - Jungle Trek' style='flex:1;min-width:200px' onkeydown=\"if(event.key==='Enter')catAdd()\">"+
+        "<input type='color' id='catNewColor' value='#3a527d' title='Colour' style='width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:none;padding:2px'>"+
+        "<button class='btn btn-primary' onclick='catAdd()'>Add category</button>"+
+      "</div>"+
+    "</div>"+
+    "<div class='grid-2' style='margin-bottom:16px'>"+
+      "<div class='card card-pad'>"+
+        "<div class='eyebrow'>What you offer</div><div class='h-sec' style='margin-bottom:8px'>Activities</div>"+
+        "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 10px'>The Activity dropdown when you create or edit a tour.</p>"+
+        "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px'>"+acts.map(function(a,i){return "<span class='pill plain' style='font-size:12.5px;display:inline-flex;align-items:center;gap:6px'>"+esc(a)+"<button class='nudge-x' style='font-size:16px' title='Remove' onclick='actDelete("+i+")'>×</button></span>";}).join("")+"</div>"+
+        "<div style='display:flex;gap:8px'><input class='input' id='actNew' placeholder='e.g. Scuba dive' style='flex:1' onkeydown=\"if(event.key==='Enter')actAdd()\"><button class='btn btn-primary btn-sm' onclick='actAdd()'>Add</button></div>"+
+      "</div>"+
+      "<div class='card card-pad'>"+
+        "<div class='eyebrow'>Session tours</div><div class='h-sec' style='margin-bottom:8px'>Session types</div>"+
+        "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 10px'>Half-day / full-day style products priced per session or per person (rates live in Cost Sheet → Session Tours).</p>"+
+        "<div class='tbl-wrap'><table><thead><tr><th>Session</th><th>Duration</th><th></th></tr></thead><tbody>"+
+          sess.map(function(x){return "<tr><td class='strong'>"+esc(x.name)+"</td><td>"+esc(x.dur)+"</td><td><div class='tbl-actions'><button class='edit-btn' title='Rename' onclick=\"sessRename('"+esc(x.id)+"')\">"+IC_EDIT+"</button><button class='del-btn' title='Delete' onclick=\"sessDelete('"+esc(x.id)+"')\">"+IC_DEL+"</button></div></td></tr>";}).join("")+
+        "</tbody></table></div>"+
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><input class='input' id='sessNewName' placeholder='Session name' style='flex:2;min-width:140px'><input class='input' id='sessNewDur' placeholder='Duration, e.g. Half Day' style='flex:1;min-width:120px' onkeydown=\"if(event.key==='Enter')sessAdd()\"><button class='btn btn-primary btn-sm' onclick='sessAdd()'>Add</button></div>"+
+      "</div>"+
+    "</div>"+
+    "<div class='card card-pad'>"+
+      "<div class='section-head' style='margin-bottom:6px;flex-wrap:wrap;gap:8px'><div><div class='eyebrow'>Tour costing</div><div class='h-sec'>Cost-sheet rate cards</div></div>"+
+        "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+
+          "<button class='btn btn-ghost btn-sm' id='catTplBtn' onclick=\"downloadRatesTemplate('catTplBtn')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download template (.xlsx)</button>"+
+          "<button class='btn btn-ghost btn-sm' id='catDlBtn' onclick=\"downloadRatesXlsx(null,'All-rate-cards-'+new Date().toISOString().slice(0,10),'catDlBtn')\">Download my rates</button>"+
+          "<button class='btn btn-sea btn-sm' onclick='document.getElementById(\"catImportFile\").click()'>Upload filled template</button>"+
+          "<input type='file' id='catImportFile' accept='.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' style='display:none' onchange='importRatesXlsx(this)'>"+
+          "<button class='btn btn-primary btn-sm' onclick='rateAdd()'>Add rate card</button>"+
+        "</div></div>"+
+      "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;max-width:760px'>One card per product you price by group size. Download the template, fill the costs in Excel or Google Sheets (add rows on its Tours sheet for new products), then upload it — the Cost Calculator, Group Quotation and profit estimates use the figures straight away.</p>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>Key</th><th>Short label</th><th>Full title</th><th>Indian</th><th>Foreign</th><th>Linked categories</th><th></th></tr></thead><tbody>"+
+        keys.map(function(k){var c=SHEET_DATA[k]||{};var linked=cats.filter(function(x){return x.rateKey===k;}).map(function(x){return x.name;}).join(", ");return "<tr>"+
+          "<td class='mono'>"+esc(k)+"</td><td class='strong'>"+esc(calcTourLabel(k))+"</td><td>"+esc(c.title||"")+"</td>"+
+          "<td class='num mono'>"+filled(k,"indian")+"/10</td><td class='num mono'>"+filled(k,"foreign")+"/10</td><td>"+(esc(linked)||"<span style='color:var(--ink-soft)'>—</span>")+"</td>"+
+          "<td><div class='tbl-actions'><button title='Open in Cost Sheet' onclick=\"rateOpen('"+esc(k)+"')\">→</button><button class='edit-btn' title='Rename' onclick=\"rateRename('"+esc(k)+"')\">"+IC_EDIT+"</button><button class='del-btn' title='Delete' onclick=\"deleteCustomTour('"+esc(k)+"')\">"+IC_DEL+"</button></div></td></tr>";}).join("")+
+      "</tbody></table></div>"+
+    "</div>";
+  if(typeof labelTables==="function")labelTables(el);
+}
+/* -- categories -- */
+function catAdd(){
+  var inp=document.getElementById("catNewName"),col=document.getElementById("catNewColor");
+  var name=(inp&&inp.value||"").trim();if(!name){alert("Type the category name first.");return;}
+  var id=slugId(name,CATS);
+  catalog.cats.push({id:id,name:name,color:(col&&col.value)||"#3a527d",rateKey:""});
+  if(inp)inp.value="";
+  catSave("category-added");
+}
+function catRename(id){var c=catDef(id);if(!c)return;var v=prompt("Category name:",c.name);if(v==null)return;v=v.trim();if(!v)return;c.name=v;catSave("category-renamed");}
+function catSetColor(id,val){var c=catDef(id);if(!c)return;c.color=val;rebuildCatalog();persistData();if(typeof renderTours==="function")renderTours();}
+function catSetRate(id,val){var c=catDef(id);if(!c)return;c.rateKey=val||"";catSave("category-rate-linked");}
+function catMove(id,dir){var a=catalog.cats,i=a.findIndex(function(c){return c.id===id;});var j=i+dir;if(i<0||j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t;catSave("category-moved");}
+function catDelete(id){
+  var c=catDef(id);if(!c)return;
+  if(catalog.cats.length<=1){alert("Keep at least one category.");return;}
+  var used=(tours||[]).filter(function(t){return t.cat===id;});
+  var other=catalog.cats.find(function(x){return x.id!==id;});
+  var msg="Delete the category \""+c.name+"\"?";
+  if(used.length)msg+="\n\n"+used.length+" tour"+(used.length===1?" uses":"s use")+" it — "+(used.length===1?"it":"they")+" will be moved to \""+other.name+"\" (you can change them later).";
+  if(!confirm(msg))return;
+  used.forEach(function(t){t.cat=other.id;t.updatedAt=new Date().toISOString();});
+  catalog.cats=catalog.cats.filter(function(x){return x.id!==id;});
+  catSave("category-deleted");
+}
+/* -- activities -- */
+function actAdd(){var inp=document.getElementById("actNew");var v=(inp&&inp.value||"").trim();if(!v)return;if(catalog.activities.indexOf(v)<0)catalog.activities.push(v);if(inp)inp.value="";catSave("activity-added");}
+function actDelete(i){if(catalog.activities.length<=1){alert("Keep at least one activity.");return;}catalog.activities.splice(i,1);catSave("activity-removed");}
+/* -- session types -- */
+function sessAdd(){
+  var n=document.getElementById("sessNewName"),d=document.getElementById("sessNewDur");
+  var name=(n&&n.value||"").trim(),dur=(d&&d.value||"").trim();if(!name){alert("Type the session name first.");return;}
+  var id="S"+Date.now().toString(36);
+  catalog.sessions.push({id:id,name:name,dur:dur||"Full Day"});
+  sessRates[id]={basis:"session",price:0,size:2,loc:""};
+  if(n)n.value="";if(d)d.value="";
+  catSave("session-added");
+  if(typeof renderCostSheet==="function")renderCostSheet();
+}
+function sessRename(id){var x=(catalog.sessions||[]).find(function(s){return s.id===id;});if(!x)return;var n=prompt("Session name:",x.name);if(n==null)return;var d=prompt("Duration (e.g. Half Day):",x.dur||"");if(d==null)return;x.name=n.trim()||x.name;x.dur=d.trim();catSave("session-renamed");}
+function sessDelete(id){if((catalog.sessions||[]).length<=1){alert("Keep at least one session type.");return;}var x=(catalog.sessions||[]).find(function(s){return s.id===id;});if(!x||!confirm("Delete the session type \""+x.name+" ("+x.dur+")\"?\n\nSaved quotations and invoices keep their figures."))return;catalog.sessions=catalog.sessions.filter(function(s){return s.id!==id;});catSave("session-deleted");if(gqSession===id)gqSession=DOC_SESSIONS[0].id;}
+/* -- rate cards -- */
+function rateAdd(){
+  var name=prompt("Full title of the new rate card (used on quotations), e.g. \"Jungle Trek (3 Days)\":","");if(name==null)return;name=name.trim();if(!name){return;}
+  var label=prompt("Short label for dropdowns, e.g. \"3D · Jungle Trek\":",name.slice(0,28));if(label==null)label="";
+  var key=addRateCard(name,label);
+  csTour=key;persistData();rebuildTourSelects();
+  if(typeof renderCostSheet==="function")renderCostSheet();
+  renderCatalog();
+}
+function rateRename(k){var c=SHEET_DATA[k];if(!c)return;var label=prompt("Short label (dropdowns):",calcTourLabel(k));if(label==null)return;var title=prompt("Full title (quotations):",c.title||"");if(title==null)return;c.label=label.trim()||undefined;if(title.trim())c.title=title.trim();_sheetRev++;persistData();rebuildTourSelects();if(typeof renderCostSheet==="function")renderCostSheet();renderCatalog();}
+function rateOpen(k){if(SHEET_DATA[k])csTour=k;go("costsheet");}
 /* Per-card year filters + hideable cards (persisted on this device). */
 var _anaYearBy=(function(){try{return JSON.parse(localStorage.getItem("ieo_anaYears")||"{}");}catch(e){return {};}})();
 var _anaHidden=(function(){try{return JSON.parse(localStorage.getItem("ieo_anaHidden")||"[]");}catch(e){return [];}})();
@@ -3965,6 +4137,13 @@ function anaYearFilter(id){var y=_anaYearBy[id]||"all";return function(t){return
       pax, majority client type) — clearly badged so nobody mistakes it. */
 function tourPaxBooked(t){return (bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";}).reduce(function(s,b){return s+(parseInt(b.party,10)||1);},0);}
 function tourRateKey(t){
+  /* a category linked to a rate card (Overview → Categories) wins over the name heuristics */
+  if(typeof catDef==="function"){var cd=catDef(t.cat);if(cd&&cd.rateKey&&SHEET_DATA[cd.rateKey])return cd.rateKey;}
+  var k=tourRateKeyAuto(t);
+  if(!SHEET_DATA[k]&&typeof tourKeys==="function"){var ks=tourKeys();if(ks.length)k=ks[0];} /* built-in card deleted → first card */
+  return k;
+}
+function tourRateKeyAuto(t){
   var s=((t.name||"")+" "+(t.cat||"")).toLowerCase();
   var n=(typeof durNights==="function")?durNights(t):0;
   if(/narcondam/.test(s))return "T8";
@@ -4478,13 +4657,13 @@ function renderTours(filter=curTab){
     if(filter==="Upcoming")return s!=="completed"&&new Date(t.start)>new Date(todayISO);
     if(filter==="Ongoing")return s!=="completed"&&new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO);
     return true;});
-  const order=["southandaman","littleandaman","nicobar","narcondam","session","guided-half","custom","__sessions"];
+  const order=(catalog.cats||[]).map(function(c){return c.id;}).concat(["__sessions"]);
   /* Session tours get their OWN column, regardless of category. */
   const groups={};list.forEach(function(t){var key=(t.tourType==="session")?"__sessions":t.cat;(groups[key]=groups[key]||[]).push(t);});
   const cats=Object.keys(groups).sort(function(a,b){var ia=order.indexOf(a),ib=order.indexOf(b);return (ia<0?98:ia)-(ib<0?98:ib);});
   grid.innerHTML=cats.map(function(cat){
     var items=groups[cat].slice().sort(function(a,b){return (a.start||"").localeCompare(b.start||"");});
-    var head=(cat==="__sessions")?"Session Tours":(CATS[cat]||cat);
+    var head=(cat==="__sessions")?"Session Tours":("<span class='cat-swatch' style='background:"+catColor(cat)+"'></span>"+(CATS[cat]||cat));
     return "<div class='tour-col"+(cat==="__sessions"?" tour-col-sess":"")+"'><div class='tour-col-head'>"+head+"<span class='ct'>"+items.length+"</span></div>"+
       items.map(tourCard).join("")+"</div>";
   }).join("")||"<div class='empty'>No tours in this view.</div>";
@@ -4842,7 +5021,7 @@ function deleteBooking(id){
    as a sub-tab of Cost Calculator rather than its own sidebar item). */
 function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='invoices'?'active':'')+"' onclick=\"go('invoices')\">Invoices</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Group Quotation</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button></div>";}
 function viewCalc(){
-  if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
+  if(!currentCalcTourId)currentCalcTourId=firstTourKey();
   const tourOpts=tourOptions(currentCalcTourId);
   const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
   return "<section class='view' id='v-calc'>"+calcTabsBar('calc')+"<div class='calc-grid'>"+
@@ -4862,7 +5041,7 @@ function viewCalc(){
 /* ===== INVOICES — standalone module (generator + folder), split out of the
    Cost Calculator. Same costing data; its own selection + client fields. ===== */
 function viewInvoices(){
-  if(!currentCalcTourId)currentCalcTourId=CALC_ORDER[0];
+  if(!currentCalcTourId)currentCalcTourId=firstTourKey();
   const tourOpts=tourOptions(currentCalcTourId);
   const groupOpts=[1,2,3,4,5,6,7,8,9,10].map(n=>"<option value='"+n+"' "+(n===2?"selected":"")+">"+n+" pax</option>").join("");
   return "<section class='view' id='v-invoices'>"+calcTabsBar('invoices')+
@@ -5453,7 +5632,7 @@ function renderCostSheet(){
   if(typeof fillSessRates==="function")fillSessRates();
   var sel=document.getElementById("csTour");
   if(sel){
-    if(!csTour||tourKeys().indexOf(csTour)<0)csTour=CALC_ORDER[0];
+    if(!csTour||tourKeys().indexOf(csTour)<0)csTour=firstTourKey();
     sel.innerHTML=tourOptions(csTour); /* rebuilt each render so custom tours appear */
     sel.value=csTour;
   }
@@ -5464,7 +5643,7 @@ function renderCostSheet(){
     if(cpKeep&&cpKeep!==csTour&&SHEET_DATA[cpKeep])cp.value=cpKeep;
   }
   var db=document.getElementById("csDeleteBtn");
-  if(db)db.style.display=/^CT/.test(csTour)?"":"none";
+  if(db){db.style.display="";db.textContent="Delete this rate card";}
   document.querySelectorAll("#csTypeToggle .btn").forEach(function(b){var on=b.getAttribute("data-cst")===csType;b.classList.toggle("btn-primary",on);b.classList.toggle("btn-ghost",!on);});
   var src=SHEET_DATA[csTour]||{};
   var titleEl=document.getElementById("csTitle");if(titleEl)titleEl.value=(src.title||"");
@@ -5520,7 +5699,7 @@ function csLineEdited(k,n){
   csRecalc(n);
 }
 function saveCostSheet(){
-  if(!csTour)csTour=CALC_ORDER[0];
+  if(!csTour)csTour=firstTourKey();
   if(!SHEET_DATA[csTour])SHEET_DATA[csTour]={title:csTour,indian:{},foreign:{}};
   var titleEl=document.getElementById("csTitle");
   if(titleEl&&titleEl.value.trim())SHEET_DATA[csTour].title=titleEl.value.trim();
@@ -5613,6 +5792,64 @@ function downloadRatesXlsx(keys,fname,btnId){
     alert("Couldn't build the Excel file: "+((e&&e.message)||e)+"\n\n(The formatter needs a network connection the first time.)");
   });
 }
+/* ---- Cost-sheet TEMPLATE (.xlsx) ---------------------------------------------
+   A fill-in workbook any operator can download, complete in Excel / Google Sheets
+   and upload back (Categories page or Cost Sheet → Import). Tabs are named
+   "<key> Indian" / "<key> Foreign" so the import maps them without guessing, and
+   the "Tours" index sheet lets the operator add brand-new rate cards by adding a
+   row + two tabs. */
+function downloadRatesTemplate(btnId){
+  var btn=document.getElementById(btnId||"catTplBtn");if(btn){btn.disabled=true;btn.dataset.lbl=btn.textContent;btn.textContent="Building…";}
+  var done=function(){if(btn){btn.disabled=false;btn.textContent=btn.dataset.lbl||"Download template";}};
+  loadExcelJS().then(function(ExcelJS){
+    var wb=new ExcelJS.Workbook();
+    wb.creator=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Operation Console";
+    var F={name:"Arial",size:10},FB={name:"Arial",size:10,bold:true};
+    var rm=wb.addWorksheet("Read me");
+    [["COST SHEET TEMPLATE — how to fill it in",FB],
+     ["1. The \"Tours\" sheet lists your rate cards: Key · Short label · Full title · Category. Keep the keys as they are.",F],
+     ["2. To ADD a rate card: add a row on \"Tours\" with a new key (letters/digits, e.g. TREK3), then copy any pair of rate tabs and rename them \"<key> Indian\" and \"<key> Foreign\".",F],
+     ["3. Each rate tab has one row per group size (Pax 1–10). Fill the cost columns as TOTALS for the whole group at that size: Ship/Boat, Accommodation, Vehicle, Guide, Entry total, Food total. Nights and Rooms are informational.",F],
+     ["4. Leave a row at 0 if you never sell that group size. Do not rename the header row or the tab names.",F],
+     ["5. Upload the file at Overview → Categories → \"Upload filled template\" (or Tour costing → Cost Sheet → Import). The console recalculates Total and Per-person (rounded up to ₹100) and the Cost Calculator, Group Quotation and profit estimates use the new figures immediately.",F],
+     ["6. Optional: put a category name in the Category column to link the card to that tour category — every tour in it then uses these costs for estimates.",F]
+    ].forEach(function(l,i){var c=rm.getCell("A"+(i+1));c.value=l[0];c.font=l[1];c.alignment={wrapText:true,vertical:"top"};});
+    rm.getColumn(1).width=120;
+    var ix=wb.addWorksheet("Tours",{views:[{state:"frozen",ySplit:1}]});
+    var IH=["Key","Short label","Full title","Category (optional)"];
+    IH.forEach(function(h,i){var c=ix.getCell(1,i+1);c.value=h;c.font=FB;c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE8EEF6"}};});
+    var keys=tourKeys();
+    keys.forEach(function(k,i){
+      var c=SHEET_DATA[k]||{};var cd=(catalog.cats||[]).find(function(x){return x.rateKey===k;});
+      [k,calcTourLabel(k),c.title||"",cd?cd.name:""].forEach(function(v,j){var cell=ix.getCell(i+2,j+1);cell.value=v;cell.font=F;});
+    });
+    [10,30,60,28].forEach(function(w,i){ix.getColumn(i+1).width=w;});
+    var HEAD=["Pax","Nights","Rooms","Ship/Boat","Accommodation","Vehicle","Guide","Entry total","Food total"];
+    keys.forEach(function(k){
+      var src=SHEET_DATA[k]||{};
+      [["indian","Indian"],["foreign","Foreign"]].forEach(function(tp){
+        var ws=wb.addWorksheet((k+" "+tp[1]).slice(0,31),{views:[{state:"frozen",ySplit:4}]});
+        ws.getCell("A1").value=(src.title||calcTourLabel(k))+" — "+tp[1]+" clients";ws.getCell("A1").font={name:"Arial",size:11,bold:true};
+        ws.getCell("A2").value="Totals for the WHOLE GROUP at each size. Per-person = total ÷ pax, rounded up to ₹100 (computed on upload).";ws.getCell("A2").font={name:"Arial",size:9,italic:true};
+        var hr=ws.getRow(4);HEAD.forEach(function(h,i){var c=hr.getCell(i+1);c.value=h;c.font=FB;c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFE8EEF6"}};c.alignment={horizontal:"center"};});
+        var data=src[tp[0]]||{};
+        for(var pax=1;pax<=10;pax++){
+          var d=data[String(pax)]||{};var row=ws.getRow(4+pax);
+          [pax,d.nights||0,d.rooms||Math.ceil(pax/2),d.ship||0,d.accommodation||0,d.vehicle||0,d.guide||0,d.entry||0,d.food||0].forEach(function(v,i){var c=row.getCell(i+1);c.value=v;c.font=F;if(i>=3){c.numFmt="#,##0";c.alignment={horizontal:"right"};}});
+        }
+        ws.columns.forEach(function(col,i){col.width=i===0?6:Math.max(HEAD[i].length+3,12);});
+      });
+    });
+    return wb.xlsx.writeBuffer();
+  }).then(function(buf){
+    var blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    var url=URL.createObjectURL(blob);var a=document.createElement("a");
+    a.href=url;a.download="Cost-sheet-template-"+new Date().toISOString().slice(0,10)+".xlsx";
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+    audit("costsheet","template-downloaded","");
+    done();
+  }).catch(function(e){done();alert("Couldn't build the template: "+((e&&e.message)||e)+"\n\n(The Excel formatter needs a network connection the first time.)");});
+}
 /* Download ONLY the tour currently selected in the Cost Sheet (Indian + Foreign tabs). */
 function downloadSelectedXlsx(){
   var t=SHEET_DATA[csTour];
@@ -5627,36 +5864,46 @@ function downloadSelectedXlsx(){
    invoices, both quotation generators) exactly like the built-in tours, and rates
    can be migrated into it from any existing tour with "Copy rates". */
 function addCustomTour(){
-  var name=prompt("Name of the new custom tour (appears in every tour dropdown and on quotations):","");
+  var name=prompt("Name of the new rate card (appears in every tour dropdown and on quotations):","");
   if(name==null)return;
   name=name.trim();
-  if(!name){alert("Give the custom tour a name.");return;}
-  var key="CT"+Date.now().toString(36);
-  var blank=function(){var o={};for(var p=1;p<=10;p++){o[String(p)]={rooms:Math.ceil(p/2),nights:3,ship:0,accommodation:0,vehicle:0,guide:0,entry:0,food:0,total:0,perPerson:0};}return o;};
-  SHEET_DATA[key]={title:name,indian:blank(),foreign:blank()};
-  _sheetRev++;
+  if(!name){alert("Give the rate card a name.");return;}
+  var key=addRateCard(name);
   csTour=key;
   sheetChangeLog.unshift({ts:new Date().toISOString(),tour:key,tourName:name,type:"Custom tour",via:"created"});
   if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
-  audit("costsheet","custom-tour-added",name);
   persistData();
   rebuildTourSelects();
   renderCostSheet();
-  alert("Custom tour \""+name+"\" created ✓\n\nIt is now in every tour dropdown. Fill its rates below (or use \"Copy rates\" to migrate a prebuilt tour's rates into it), then Save.");
+  alert("Rate card \""+name+"\" created ✓\n\nIt is now in every tour dropdown. Fill its rates below (or use \"Copy rates\" to migrate another card's rates into it), then Save.");
 }
-function deleteCustomTour(){
-  if(!/^CT/.test(csTour))return; /* built-in tours can't be deleted */
-  var name=(SHEET_DATA[csTour]&&SHEET_DATA[csTour].title)||csTour;
-  if(!confirm("Delete the custom tour \""+name+"\" and its rates?\n\nQuotations already saved keep their figures; the tour just disappears from the dropdowns."))return;
+/* Creates an empty rate card (10 group sizes, Indian + Foreign) and returns its key. */
+function blankRateRows(){var o={};for(var p=1;p<=10;p++){o[String(p)]={rooms:Math.ceil(p/2),nights:3,ship:0,accommodation:0,vehicle:0,guide:0,entry:0,food:0,total:0,perPerson:0};}return o;}
+function addRateCard(name,label,key){
+  key=key||("CT"+Date.now().toString(36));
+  SHEET_DATA[key]={title:name,label:(label||"").trim()||undefined,indian:blankRateRows(),foreign:blankRateRows()};
+  _sheetRev++;
+  sheetChangeLog.unshift({ts:new Date().toISOString(),tour:key,tourName:name,type:"Rate card",via:"created"});
+  if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
+  audit("costsheet","rate-card-added",name);
+  return key;
+}
+function deleteCustomTour(key){
+  if(key&&SHEET_DATA[key])csTour=key;
+  if(!SHEET_DATA[csTour])return;
+  if(tourKeys().length<=1){alert("Keep at least one rate card — add the new one first, then delete this one.");return;}
+  var name=calcTourLabel(csTour)||csTour;
+  if(!confirm("Delete the rate card \""+name+"\" and its rates?\n\nQuotations already saved keep their figures; the card just disappears from every dropdown."))return;
   delete SHEET_DATA[csTour];
   _sheetRev++;
-  csTour=CALC_ORDER[0];
-  if(currentCalcTourId&&!SHEET_DATA[currentCalcTourId])currentCalcTourId=CALC_ORDER[0];
-  if(gqTour&&!SHEET_DATA[gqTour])gqTour=CALC_ORDER[0];
-  audit("costsheet","custom-tour-deleted",name);
+  csTour=firstTourKey();
+  if(currentCalcTourId&&!SHEET_DATA[currentCalcTourId])currentCalcTourId=firstTourKey();
+  if(gqTour&&!SHEET_DATA[gqTour])gqTour=firstTourKey();
+  audit("costsheet","rate-card-deleted",name);
   persistData();
   rebuildTourSelects();
   renderCostSheet();
+  if(typeof renderCatalog==="function")renderCatalog();
   if(typeof calc==="function")calc();
 }
 /* One-click migration: copy a reference tour's complete rate table (Indian +
@@ -5691,6 +5938,12 @@ function csTabTarget(name){
   var s=String(name||"").toLowerCase();
   var type=/foreign/.test(s)?"foreign":(/indian|domestic/.test(s)?"indian":null);
   var key=null;
+  /* 1. template naming: "<key> Indian" / "<key> Foreign" (what the downloadable template uses) */
+  var km=String(name||"").trim().match(/^([A-Za-z][A-Za-z0-9_-]*)\s*[·\-–]?\s*(indian|domestic|foreign(?:er)?s?)\s*$/i);
+  if(km&&SHEET_DATA[km[1]])return {key:km[1],type:/^(indian|domestic)/i.test(km[2])?"indian":"foreign"};
+  /* 2. a card's own export name / short label / title inside the tab name (custom cards) */
+  if(type){var hit=null;tourKeys().forEach(function(k){if(hit)return;var c=SHEET_DATA[k]||{};var names=[CS_EXPORT_NAMES[k],c.label,c.title].filter(Boolean).map(function(x){return String(x).toLowerCase().replace(/[\\\/\?\*\[\]:]/g," ").replace(/\s+/g," ").trim().slice(0,20);});if(names.some(function(nm){return nm.length>=3&&s.indexOf(nm)>=0;}))hit=k;});if(hit&&!/^T\d+$/.test(hit))return {key:hit,type:type};}
+  /* 3. the built-in Island Explorer names */
   if(/narcondam/.test(s)){
     if(/v1|(^|[^a-z])a([^a-z]|$)/.test(s))key="T8";
     else if(/v2|(^|[^a-z])b([^a-z]|$)/.test(s))key="T9";
@@ -5750,8 +6003,24 @@ function importRatesXlsx(input){
     var wb=new res[0].Workbook();
     return wb.xlsx.load(res[1]);
   }).then(function(wb){
-    var staged=[],skipped=[];
+    var staged=[],skipped=[],created=[],renamed=[];
+    /* "Tours" index sheet (from the template): Key | Short label | Full title | Category.
+       A new key becomes a new rate card; an existing key gets its names updated. */
+    var ix=wb.worksheets.find(function(w){return /^(tours|rate ?cards?|index)$/i.test(String(w.name).trim());});
+    if(ix){
+      for(var r=2;r<=200;r++){
+        var row=ix.getRow(r);
+        var key=String(_csCellText(row.getCell(1).value)||"").trim().replace(/[^A-Za-z0-9_-]/g,"");
+        var label=String(_csCellText(row.getCell(2).value)||"").trim(),title=String(_csCellText(row.getCell(3).value)||"").trim(),catName=String(_csCellText(row.getCell(4).value)||"").trim();
+        if(!key||/^key$/i.test(key))continue;
+        if(!label&&!title)continue;
+        if(!SHEET_DATA[key]){addRateCard(title||label,label,key);created.push(key);}
+        else{var c=SHEET_DATA[key];if(label)c.label=label;if(title)c.title=title;renamed.push(key);}
+        if(catName&&typeof catalog!=="undefined"){var cd=(catalog.cats||[]).find(function(x){return String(x.name).toLowerCase()===catName.toLowerCase();});if(cd)cd.rateKey=key;}
+      }
+    }
     wb.worksheets.forEach(function(ws){
+      if(/^(read ?me|instructions|tours|rate ?cards?|index)$/i.test(String(ws.name).trim()))return;
       var tgt=csTabTarget(ws.name);
       if(!tgt){skipped.push(ws.name);return;}
       var hdr=csFindHeader(ws);
@@ -5774,12 +6043,16 @@ function importRatesXlsx(input){
       if(!count){skipped.push(ws.name+" — no data rows under the header");return;}
       staged.push({tab:ws.name,key:tgt.key,type:tgt.type,rows:rows,count:count});
     });
-    if(!staged.length){
-      alert("Nothing to import from \""+fname+"\".\n\nNo sheet tab matched a console tour + client type. Name each tab like the rate card, e.g. \"South Andaman 5N Indian\" or \"Narcondam A V1 Foreigner\"."+(skipped.length?"\n\nTabs found:\n• "+skipped.join("\n• "):""));
+    if(!staged.length&&!created.length&&!renamed.length){
+      alert("Nothing to import from \""+fname+"\".\n\nNo sheet tab matched a rate card + client type. Download the template from Overview → Categories and keep its tab names (e.g. \"T1 Indian\", \"CT9x Foreign\"), or name a tab after the card, e.g. \"South Andaman 5N Indian\"."+(skipped.length?"\n\nTabs found:\n• "+skipped.join("\n• "):""));
       return;
     }
     var lines=staged.map(function(s){return "• "+s.tab+"  →  "+(CALC_LABELS[s.key]||s.key)+" ("+(s.type==="foreign"?"Foreign":"Indian")+", "+s.count+" group sizes)";});
-    if(!confirm("Import rates from \""+fname+"\"?\n\nThis overwrites the saved cost sheet for:\n\n"+lines.join("\n")+(skipped.length?"\n\nSkipped (not recognised):\n• "+skipped.join("\n• "):"")+"\n\nThe Cost Calculator and quotation generators use the new rates immediately."))return;
+    var extra=(created.length?"\n\nNew rate cards from the Tours sheet:\n• "+created.map(function(k){return calcTourLabel(k)+" ("+k+")";}).join("\n• "):"");
+    if(!confirm("Import rates from \""+fname+"\"?\n\n"+(lines.length?"This overwrites the saved cost sheet for:\n\n"+lines.join("\n"):"No rate tabs matched — only the Tours sheet will be applied.")+extra+(skipped.length?"\n\nSkipped (not recognised):\n• "+skipped.join("\n• "):"")+"\n\nThe Cost Calculator and quotation generators use the new rates immediately.")){
+      created.forEach(function(k){delete SHEET_DATA[k];}); /* roll back the cards the index sheet created */
+      return;
+    }
     staged.forEach(function(s){
       if(!SHEET_DATA[s.key])SHEET_DATA[s.key]={title:(CALC_LABELS[s.key]||s.key),indian:{},foreign:{}};
       if(!SHEET_DATA[s.key][s.type])SHEET_DATA[s.key][s.type]={};
@@ -5788,12 +6061,13 @@ function importRatesXlsx(input){
     });
     if(sheetChangeLog.length>300)sheetChangeLog=sheetChangeLog.slice(0,300);
     _sheetRev++;
-    audit("costsheet","imported",fname+" → "+staged.length+" sheet(s)");
+    audit("costsheet","imported",fname+" → "+staged.length+" sheet(s)"+(created.length?", "+created.length+" new card(s)":""));
     persistData();
     rebuildTourSelects();
     renderCostSheet();
+    if(typeof renderCatalog==="function")renderCatalog();
     if(typeof calc==="function")calc();
-    alert("Imported "+staged.length+" rate sheet(s) from \""+fname+"\" ✓\n\nThe Cost Calculator and both quotation generators now use the new rates.");
+    alert("Imported "+staged.length+" rate sheet(s)"+(created.length?" and created "+created.length+" new rate card(s)":"")+" from \""+fname+"\" ✓\n\nThe Cost Calculator and both quotation generators now use the new rates.");
   }).catch(function(e){
     alert("Could not read \""+fname+"\": "+((e&&e.message)||e)+"\n\nUpload a .xlsx file — from a Google Sheet use File → Download → Microsoft Excel (.xlsx).");
   });
@@ -6026,7 +6300,7 @@ function gqCollect(){
     return {mode:"session",key:s.id,label:sessionLabel(s),title:s.name,durLabel:s.dur,basis:rate.basis,type:gqType,rows:applyGqOverrides(srows,pct),tier:tier,tiers:tiers,pct:pct,nights:0,
       departure:depEl?depEl.value:"",end:endEl?endEl.value:""};
   }
-  if(!gqTour)gqTour=CALC_ORDER[0];
+  if(!gqTour)gqTour=firstTourKey();
   var src=SHEET_DATA[gqTour];
   var label=CALC_LABELS[gqTour]||(src?src.title:gqTour);
   var title=catName(gqTour);
@@ -6047,7 +6321,7 @@ function renderGroupQuote(){
   /* keep the controls in sync with state (first render / after nav) */
   var tourSel=document.getElementById("gqTour");
   if(tourSel&&gqMode!=="session"){
-    if(!gqTour||tourKeys().indexOf(gqTour)<0)gqTour=CALC_ORDER[0];
+    if(!gqTour||tourKeys().indexOf(gqTour)<0)gqTour=firstTourKey();
     tourSel.innerHTML=tourOptions(gqTour); /* rebuilt each render so custom tours appear */
     tourSel.value=gqTour;
   }
@@ -8742,7 +9016,7 @@ function openCreateTour(){
   modalForm("New tour","Create a tour","<div class='form-grid'>"+
     "<div class='field full'><label>Tour name</label><input class='input' id='nt_name' placeholder='e.g. North Andaman Endemic 4-Night'></div>"+
     tourTypeField("nt","group")+
-    "<div class='field'><label>Activity</label><select class='input' id='nt_activity'>"+["Birding tour","Herping tour","Mixed tour"].map(a=>"<option>"+a+"</option>").join("")+"</select></div>"+
+    "<div class='field'><label>Activity</label><select class='input' id='nt_activity'>"+activityOptions((catalog.activities||[])[0])+"</select></div>"+
     "<div class='field'><label>Category</label><select class='input' id='nt_cat'>"+Object.entries(CATS).map(([k,v])=>"<option value='"+k+"'>"+v+"</option>").join("")+"</select></div>"+
     "<div class='field'><label>Status</label><select class='input' id='nt_status'>"+["open","full","closed","completed"].map(s=>"<option value='"+s+"'>"+s[0].toUpperCase()+s.slice(1)+"</option>").join("")+"</select></div>"+
     "<div class='field' id='nt_startwrap'><label>Start date</label><input class='input' type='date' id='nt_start' value='2026-07-01'></div>"+
@@ -8798,7 +9072,7 @@ function editTour(id){
   modalForm("Edit tour","Update tour","<div class='form-grid'>"+
     "<div class='field full'><label>Tour name</label><input class='input' id='et_name' value='"+(t.name||"")+"'></div>"+
     tourTypeField("et",t.tourType||"group")+
-    "<div class='field'><label>Activity</label><select class='input' id='et_activity'>"+["Birding tour","Herping tour","Mixed tour"].map(a=>"<option "+(a===(t.activity||"Birding tour")?"selected":"")+">"+a+"</option>").join("")+"</select></div>"+
+    "<div class='field'><label>Activity</label><select class='input' id='et_activity'>"+activityOptions(t.activity||(catalog.activities||[])[0])+"</select></div>"+
     "<div class='field'><label>Category</label><select class='input' id='et_cat'>"+catOpts+"</select></div>"+
     "<div class='field'><label>Status</label><select class='input' id='et_status'>"+statOpts+"</select></div>"+
     "<div class='field' id='et_startwrap' style='display:"+(_isSess?"none":"block")+"'><label>Start date</label><input class='input' type='date' id='et_start' value='"+(t.start||"")+"'></div>"+
@@ -9157,7 +9431,7 @@ function openTour(id){
     ?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]).map(function(d){return dShort(d);}).join(" · ")+" · "+((t.sessionDates||[t.start]).length)+" day"+(((t.sessionDates||[t.start]).length)===1?"":"s")
     :dShort(t.start)+" – "+dShort(t.end)+" · "+durNights(t)+" nights";
   document.getElementById("modal").innerHTML=
-    "<div class='modal-head'><div><span class='cat "+t.cat+"'>"+CATS[t.cat]+"</span> <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span>"+(t.activity?" <span class='pill plain'>"+t.activity+"</span>":"")+"<h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+_dateLine+"</div></div><div style='display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none'>"+XBTN+"<button class='btn btn-primary btn-sm' style='white-space:nowrap' onclick=\"editTour('"+id+"')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit tour</button></div></div>"+
+    "<div class='modal-head'><div>"+catBadge(t.cat)+" <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span>"+(t.activity?" <span class='pill plain'>"+t.activity+"</span>":"")+"<h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+_dateLine+"</div></div><div style='display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none'>"+XBTN+"<button class='btn btn-primary btn-sm' style='white-space:nowrap' onclick=\"editTour('"+id+"')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit tour</button></div></div>"+
     "<div class='modal-body'>"+
       "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Pax</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
@@ -9307,7 +9581,7 @@ function boot(keepView){
   if(typeof ensureTourPocs==="function")ensureTourPocs();
   tours.forEach(syncTourPaymentToBookings);
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewCatalog(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderCostSheet();renderLog();renderCRM();renderCustomers();renderReviews();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
     /* In-place rebuild: no navigation, no history reset — and visually silent.
