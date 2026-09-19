@@ -1138,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 276</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 277</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1147,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 276</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 277</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5360,8 +5360,18 @@ function normalizeDocNo(no,kind){
   if(!m)return String(no||"").trim();
   return m[1].toUpperCase()+"-"+m[2]+"-"+(kind==="inv"?"IN":"Q")+pad2(parseInt(m[3],10));
 }
+/* The client's name as printed in a stored document (current header grid or
+   the older "Quotation To / Invoice To" block). */
+function docClientFromHtml(html){
+  var h=String(html||"");
+  var m=h.match(/class=['"]doc-client['"][^>]*>([^<]*)</)||h.match(/(?:Quotation|Invoice) To<\/div>\s*<div[^>]*>([^<]+)<\/div>/);
+  var n=m?m[1].replace(/&amp;/g,"&").replace(/\s+/g," ").trim():"";
+  return (n&&n!=="Guest Name")?n:"";
+}
 function migrateDocNumbers(){
   var changed=0;
+  /* records saved without a client name pick it up from the document itself */
+  [quotationLog,invoiceLog].forEach(function(list){(list||[]).forEach(function(r){if(r&&!r.guest){var g=docClientFromHtml(r.html);if(g){r.guest=g;changed++;}}});});
   var fix=function(list,field,kind){(list||[]).forEach(function(r){if(!r||!r[field])return;var nn=normalizeDocNo(r[field],kind);if(nn&&nn!==r[field]){var old=r[field];r[field]=nn;if(r.html)r.html=String(r.html).split(old).join(nn);r.updatedAt=new Date().toISOString();changed++;}});};
   fix(quotationLog,"qid","q");fix(invoiceLog,"invid","inv");
   if(changed){audit("documents","renumbered",changed+" document number(s) → PREFIX-YEAR-Qnn / INnn");if(typeof persistData==="function")persistData();}
@@ -5650,6 +5660,8 @@ function printQuotation() {
      Payment Information page; invoices stay a single page. */
   var isInv=/Invoice\s*#/i.test(body.innerText||body.textContent||"");
   var payHtml=isInv?"":paymentPageHTML();
+  /* A printed / downloaded document always lives in its folder: save it first if it isn't yet. */
+  try{if(isInv){if(typeof _curInvoice!=="undefined"&&_curInvoice&&!_curInvoice.savedId)saveCurrentInvoice();}else{if(typeof _curQuote!=="undefined"&&_curQuote&&!_curQuote.savedId)saveCurrentQuote();}}catch(e){}
   /* The browser's "Save as PDF" takes the file name from the page title:
      "<client name> <document number>", e.g. "Philip Michael Hansbro IEBT-2026-Q14". */
   var _rec=isInv?(typeof _curInvoice!=="undefined"&&_curInvoice):(typeof _curQuote!=="undefined"&&_curQuote);
@@ -6779,6 +6791,7 @@ function gqShareArg(q,qid){
 }
 function shareGroupQuoteWhatsApp(enc){
   if(typeof integCfg!=="undefined"&&integCfg.whatsapp===false){alert("WhatsApp is switched off — turn it on in Settings → Integrations.");return;}
+  try{if(typeof _curQuote!=="undefined"&&_curQuote&&!_curQuote.savedId&&document.getElementById("quotationBody"))saveCurrentQuote();}catch(e){}
   var q=_gqSharePayload;
   if(!q&&enc){try{q=JSON.parse(decodeURIComponent(enc));}catch(e){}}
   if(!q)return;
@@ -6831,6 +6844,7 @@ function saveCurrentQuote(){
   if(!_curQuote){return;}
   applyHeadingTitle(_curQuote);
   var body=document.getElementById("quotationBody");
+  var _cn=docClientFromHtml(body?body.innerHTML:"");if(_cn){_curQuote.client=_curQuote.client||{};_curQuote.client.name=_cn;}
   var docHtml=body?body.innerHTML:"";
   var editedNo=docNoFrom(docHtml,"q");
   if(editedNo)_curQuote.qid=editedNo;
@@ -6839,7 +6853,7 @@ function saveCurrentQuote(){
     var rec=quotationLog.find(function(x){return x.id===_curQuote.savedId;});
     if(rec){
       if(editedNo&&editedNo!==rec.qid){audit("quotation","renumbered",rec.qid+" → "+editedNo);rec.qid=editedNo;}
-      rec.html=docHtml;rec.title=_curQuote.title;rec.tour=_curQuote.title;rec.updatedAt=new Date().toISOString();
+      rec.html=docHtml;rec.title=_curQuote.title;rec.tour=_curQuote.title;if((_curQuote.client||{}).name)rec.guest=_curQuote.client.name;rec.updatedAt=new Date().toISOString();
     }
   }else{
     /* new quotation → consume the number printed on the document (folder-driven);
@@ -6921,7 +6935,7 @@ function renderSavedQuotes(){
     var stSel="<select class='input' style='width:auto;padding:4px 8px;font-size:11.5px' onchange=\"setQuoteStatus('"+r.id+"',this.value)\">"+QUOTE_STATUSES.map(function(s){return "<option "+(s===st?"selected":"")+">"+s+"</option>";}).join("")+"</select>";
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
       "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":((st==="Lost"||st==="Cancelled")?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
-        "<div style='font-size:11px;color:var(--ink-soft)'>"+(r.guest?r.guest+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
+        "<div style='font-size:11px;color:var(--ink-soft)'>"+((r.guest||docClientFromHtml(r.html))?(r.guest||docClientFromHtml(r.html))+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0;align-items:center'>"+
         stSel+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedQuote('"+r.id+"')\">Open</button>"+
@@ -7108,6 +7122,7 @@ function saveCurrentInvoice(){
   if(!_curInvoice)return;
   applyHeadingTitle(_curInvoice);
   var body=document.getElementById("quotationBody");
+  var _cn=docClientFromHtml(body?body.innerHTML:"");if(_cn){_curInvoice.client=_curInvoice.client||{};_curInvoice.client.name=_cn;}
   var docHtml=body?body.innerHTML:"";
   var editedNo=docNoFrom(docHtml,"inv");
   if(editedNo)_curInvoice.invid=editedNo;
@@ -7116,7 +7131,7 @@ function saveCurrentInvoice(){
     var rec=invoiceLog.find(function(x){return x.id===_curInvoice.savedId;});
     if(rec){
       if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
-      rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;rec.updatedAt=new Date().toISOString();
+      rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;if((_curInvoice.client||{}).name)rec.guest=_curInvoice.client.name;rec.updatedAt=new Date().toISOString();
     }
   }else{
     /* folder-driven number; keep the legacy counter aligned */
@@ -7182,6 +7197,7 @@ function renderSavedInvoices(){
   }).join("");
 }
 function shareInvoiceEmail(vid,tourName,total,pax){
+  try{if(typeof _curInvoice!=="undefined"&&_curInvoice&&!_curInvoice.savedId&&document.getElementById("quotationBody"))saveCurrentInvoice();}catch(e){}
   var subject=encodeURIComponent("Invoice "+vid+" - "+tourName);
   var body=encodeURIComponent(
     "Dear Guest,\n\n"+
