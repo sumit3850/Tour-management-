@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v148"; /* v148: document body keeps its bold headings; only the header block is single-weight; saved documents re-open with the header grid */
+var CACHE = "ie-ops-v149"; /* v149: quotation / invoice number and dates never wrap in the document header */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",

@@ -1138,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 271</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 272</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1147,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 271</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 272</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5393,13 +5393,17 @@ function quoteHeaderHTML(){
 /* Document header as "Label : value" cells (label column, colon, value) — two
    pairs per row, like the customer detail dialog. docKvGrid pairs the left and
    right lists row by row. */
-function docKvCell(label,value){
-  return "<td style='color:#5a6b62;padding:3px 8px 3px 0;white-space:nowrap;vertical-align:top'>"+label+"</td><td style='color:#5a6b62;padding:3px 6px 3px 0;vertical-align:top'>:</td><td style='padding:3px 18px 3px 0;color:#16241d;vertical-align:top'>"+(value||"")+"</td>";
+function docKvCell(label,value,opt){
+  opt=opt||{};
+  return "<td style='color:#5a6b62;padding:3px 8px 3px 0;white-space:nowrap;vertical-align:top;width:1%'>"+label+"</td><td style='color:#5a6b62;padding:3px 6px 3px 0;vertical-align:top;width:1%'>:</td><td style='padding:3px 18px 3px 0;color:#16241d;vertical-align:top"+(opt.nowrap?";white-space:nowrap;width:1%":"")+"'>"+(value||"")+"</td>";
 }
+/* Left pair (client, address…) takes the remaining width; the right pair
+   (number, dates) never wraps, so a long address can't push "Q-14" onto a
+   second line — the right block simply starts further left. */
 function docKvGrid(left,right){
   var n=Math.max(left.length,right.length),rows="";
-  for(var i=0;i<n;i++){rows+="<tr>"+(left[i]?docKvCell(left[i][0],left[i][1]):"<td></td><td></td><td></td>")+(right[i]?docKvCell(right[i][0],right[i][1]):"<td></td><td></td><td></td>")+"</tr>";}
-  return "<table class='doc-kv' style='width:100%;margin-bottom:18px'><tbody>"+rows+"</tbody></table>";
+  for(var i=0;i<n;i++){rows+="<tr>"+(left[i]?docKvCell(left[i][0],left[i][1]):"<td></td><td></td><td></td>")+(right[i]?docKvCell(right[i][0],right[i][1],{nowrap:true}):"<td></td><td></td><td></td>")+"</tr>";}
+  return "<table class='doc-kv' style='width:100%;margin-bottom:18px;table-layout:auto'><tbody>"+rows+"</tbody></table>";
 }
 function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
   client=client||{};
