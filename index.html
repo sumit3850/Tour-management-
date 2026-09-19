@@ -126,7 +126,8 @@ svg{display:block}
 html.dark .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 32%,transparent);color:color-mix(in srgb,var(--cc) 45%,#fff)}
 .cat-swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:1px}
 /* Documents (quotation / invoice / payment page): one weight everywhere, the client name is the only bold text */
-#quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important;font-family:'Inter',system-ui,sans-serif !important;font-size:12.5px !important;line-height:1.5}
+#quotationBody,#quotationBody *,#payPage,#payPage *{font-family:'Inter',system-ui,sans-serif !important;font-size:12.5px !important;line-height:1.5}
+#quotationBody .doc-kv td{font-weight:400 !important}
 #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important}
 #quotationBody .doc-title,#payPage .doc-title{font-size:14px !important}
 #quotationBody img,#payPage img{font-size:0 !important}
@@ -1137,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 270</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 271</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1146,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 270</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 271</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1424,6 +1425,22 @@ rebuildTiers();
 function stripDocFooter(html){
   /* the old centred "company · address" footer under a 2px #143a2e rule — no longer printed */
   return String(html||"").replace(/<div style=['"]text-align:center;margin-top:2\dpx;padding-top:12px;border-top:2px solid #143a2e['"]>\s*<div[^>]*>[^<]*<\/div>\s*<div[^>]*>[^<]*<\/div>\s*<\/div>/g,"");
+}
+/* Swap the header block (client / number / dates) of a saved snapshot for the
+   current layout, rebuilt from the record's own fields. Old layouts: a flex div
+   (gap:16px;margin-bottom:18px) or the two-table variant; new: one doc-kv table. */
+function refreshDocMeta(html,metaHtml){
+  html=String(html||"");if(!metaHtml)return html;
+  var m=/<div style=['"]display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;font-size:13px['"]>/.exec(html);
+  if(m){
+    var depth=0,tag=/<\/?div\b[^>]*>/g;tag.lastIndex=m.index;var t,end=-1;
+    while((t=tag.exec(html))){if(t[0][1]==="/"){depth--;if(depth===0){end=t.index+t[0].length;break;}}else depth++;}
+    if(end>m.index)return html.slice(0,m.index)+metaHtml+html.slice(end);
+    return html;
+  }
+  var k=/<table class=['"]doc-kv['"][^>]*>/.exec(html);
+  if(k){var e=html.indexOf("</table>",k.index);if(e>0)return html.slice(0,k.index)+metaHtml+html.slice(e+8);}
+  return html;
 }
 function refreshDocTerms(html,mode,opts){
   html=stripDocFooter(html);
@@ -5626,7 +5643,8 @@ function printQuotation() {
         html,body{margin:0;padding:0;background:#fff}
         body{font-family:'Inter',system-ui,sans-serif;display:block}
         #quotationBody,#payPage{max-width:760px;width:100%;margin:0 auto}
-        #quotationBody,#quotationBody *,#payPage,#payPage *{font-weight:400 !important;font-family:'Inter',system-ui,sans-serif !important;font-size:12.5px !important;line-height:1.5}
+        #quotationBody,#quotationBody *,#payPage,#payPage *{font-family:'Inter',system-ui,sans-serif !important;font-size:12.5px !important;line-height:1.5}
+        #quotationBody .doc-kv td{font-weight:400 !important}
         #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important}
         #quotationBody .doc-title,#payPage .doc-title{font-size:14px !important}
         .doc-kv{border-collapse:collapse;font-size:13px}.doc-kv td{border:0 !important;background:transparent !important}
@@ -6835,7 +6853,7 @@ function openSavedQuote(id){
   "</div>";
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec' id='qhTitle' title='Press Edit quotation to rename'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+rec.qid+"</span> · "+rec.date+"</div></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(rec.html||"",(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(rec.html||"",quoteMetaRow(rec.qid,rec.date,rec.validUntil,rec.departure,{name:rec.guest,address:rec.address,gst:rec.gst})),(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
     foot;
   openScrim();
 }
@@ -7109,7 +7127,7 @@ function openSavedInvoice(id){
   "</div>";
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(rec.html||"",(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(rec.html||"",invoiceMetaRow(rec.invid,rec.date,{name:rec.guest,address:rec.address,gst:rec.gst},rec.startDate,rec.endDate)),(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
   openScrim();
 }
 function editSavedInvoice(id){openSavedInvoice(id);setTimeout(function(){var b=document.getElementById("qEditBtn");if(b&&b.textContent.indexOf("Done")<0)toggleQuoteEdit();},60);}
