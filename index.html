@@ -1131,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 259</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 260</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1140,7 +1140,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 259</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 260</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1419,7 +1419,17 @@ function refreshDocTerms(html,mode,opts){
   var ends=[/<div style=['"]text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e['"]>/, /<div style=['"]margin-top:20px;padding:14px;background:var\(--surface-2\)/];
   var si=-1;starts.forEach(function(r){var m=r.exec(html);if(m&&(si<0||m.index<si))si=m.index;});
   var ei=-1;ends.forEach(function(r){var m=r.exec(html);if(m&&(ei<0||m.index<ei))ei=m.index;});
-  if(si<0||ei<0||ei<=si)return html;
+  if(si<0)return html;
+  if(ei<0||ei<=si){
+    /* no known footer after the policy block (older snapshot layouts): end at the
+       close of the LAST terms box — the balanced </div> of the last box start */
+    var boxRe=/<div style=['"]font-size:11px;color:#5a6b62;background:#fafcfb[^'"]*['"]>/g,m,last=-1;
+    while((m=boxRe.exec(html)))last=m.index;
+    if(last<si)return html;
+    var depth=0,tag=/<\/?div\b[^>]*>/g;tag.lastIndex=last;var t;
+    while((t=tag.exec(html))){if(t[0][1]==="/"){depth--;if(depth===0){ei=t.index+t[0].length;break;}}else depth++;}
+    if(ei<0||ei<=si)return html;
+  }
   return html.slice(0,si)+policyDocHTML(mode,opts||{})+html.slice(ei);
 }
 function policyDocHTML(mode,opts){
