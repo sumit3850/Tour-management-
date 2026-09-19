@@ -1131,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 264</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 265</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1140,7 +1140,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 264</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 265</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5197,6 +5197,8 @@ function viewInvoices(){
           ?"<div class='field'><label>Session</label><select class='input' id='inv_cat' onchange='invPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"+
            "<div class='field'><label id='invPPLbl'>"+(sessRateFor(gqSession).basis==="session"?"Session charge (₹ · whole group)":"Price per person (₹)")+"</label><input class='input mono' type='number' id='inv_pp' min='0' value='"+(sessRateFor(gqSession).price||"")+"' placeholder='auto from Session Tours rates'></div>"
           :"<div class='field'><label>Tour</label><select class='input' id='inv_cat'>"+tourOpts+"</select></div>")+
+        "<div class='field full'><label>From your Tours list <span style='color:var(--ink-soft);font-weight:400'>(optional — fills the title, dates, group size and rate card)</span></label><select class='input' id='invFromTour' onchange='invPickTour(this.value)'>"+docTourListOptions("")+"</select></div>"+
+        "<div class='field full'><label>Tour title <span style='color:var(--ink-soft);font-weight:400'>(as printed on the invoice — leave blank for the rate card / session name)</span></label><input class='input' id='inv_title' placeholder='e.g. 6N South Andaman Herping Tour'></div>"+
         "<div class='field'><label>Group size</label><select class='input mono' id='inv_pax'>"+groupOpts+"</select></div>"+
         "<div class='field'><label>Client type</label><select class='input' id='inv_type'><option value='indian'>Indian</option><option value='foreign'>Foreigner</option></select></div>"+
         "<div class='field'><label>"+(invMode==="session"?"Session start date":"Tour start date")+"</label><input class='input' type='date' id='inv_start'></div>"+
@@ -5536,6 +5538,10 @@ function toggleQuoteEdit(){
   body.setAttribute('contenteditable',on?'false':'true');
   body.style.outline=on?'':'2px dashed var(--sea)';
   body.style.outlineOffset=on?'':'4px';
+  /* the heading (tour title) is editable too; Save applies the new name to the
+     document, the saved record and the quotation / invoice folder */
+  var ht=document.getElementById('qhTitle');
+  if(ht){ht.setAttribute('contenteditable',on?'false':'true');ht.style.outline=on?'':'2px dashed var(--sea)';ht.style.outlineOffset=on?'':'3px';ht.style.borderRadius='6px';}
   if(btn)btn.textContent=on?'Edit quotation':'Done editing';
   if(!on){body.focus();}
 }
@@ -6220,7 +6226,9 @@ function viewGroupQuote(){
         "</div></div>"+
         (gqMode==="session"
           ?"<div class='field full'><label>Session</label><select class='input' id='gqSession' onchange='gqPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"
-          :"<div class='field full'><label>Tour</label><select class='input' id='gqTour' onchange='gqTour=this.value;gqResetEdits();renderGroupQuote()'></select></div>")+
+          :"<div class='field full'><label>Rate card</label><select class='input' id='gqTour' onchange='gqTour=this.value;gqTitleOverride=\"\";_gqFromTour=\"\";gqResetEdits();renderGroupQuote()'></select></div>")+
+        "<div class='field full'><label>From your Tours list <span style='color:var(--ink-soft);font-weight:400'>(optional — fills the title, dates and rate card)</span></label><select class='input' id='gqFromTour' onchange='gqPickTour(this.value)'>"+docTourListOptions(_gqFromTour)+"</select></div>"+
+        "<div class='field full'><label>Tour title <span style='color:var(--ink-soft);font-weight:400'>(as printed on the quotation)</span></label><input class='input' id='gqTitle' placeholder='e.g. 6N South Andaman Herping Tour' oninput='gqTitleOverride=this.value'></div>"+
         "<div class='field'><label>Client type</label><div class='tourist-toggle' id='gqTypeToggle'>"+
           "<button class='btn btn-sm' data-gqt='indian' onclick='setGqType(\"indian\")'>Indian</button>"+
           "<button class='btn btn-sm' data-gqt='foreign' onclick='setGqType(\"foreign\")'>Foreign</button>"+
@@ -6411,7 +6419,7 @@ function setGqMode(m){
   renderGroupQuote();
 }
 /* Session picked on the quotation form → pull its saved rate + pricing basis. */
-function gqPickSession(v){
+function gqPickSession(v){gqTitleOverride="";_gqFromTour="";
   gqSession=v;
   gqResetEdits();
   gqSessPP=String(sessRateFor(v).price||"");
@@ -6463,6 +6471,49 @@ function gqAutoTier(){
   var p=document.getElementById("gqPct");if(p)p.value=t.pct;
 }
 /* Gather the current selection into a tidy object the render + generate share. */
+/* ---- "From your Tours list" on quotations & invoices ---------------------------
+   A scheduled tour (Sales & Ops → Tours) fills the printed title, the dates,
+   the client type (from the POC's country) and picks the rate card the tour's
+   category is linked to (or the best match by name / nights). The title stays
+   editable afterwards. */
+var gqTitleOverride="",_gqFromTour="";
+function docTourListOptions(sel){
+  var list=(tours||[]).filter(function(t){return t&&!t.archived;}).slice().sort(function(a,b){return String(b.start||"").localeCompare(String(a.start||""));});
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  return "<option value=''>— pick a scheduled tour (optional) —</option>"+list.map(function(t){return "<option value='"+esc(t.id)+"' "+(t.id===sel?"selected":"")+">"+esc(tourCode(t)+" · "+(t.name||"")+(t.start?" · "+dShort(t.start):""))+"</option>";}).join("");
+}
+function docTourClientType(t){
+  var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;
+  if(!pb)pb=(bookings||[]).find(function(b){return b.tour===t.id&&b.country;});
+  return (pb&&pb.country&&!isIndianCountry(pb.country))?"foreign":"indian";
+}
+function gqPickTour(id){
+  _gqFromTour=id||"";
+  var t=(tours||[]).find(function(x){return x.id===id;});
+  if(!t){renderGroupQuote();return;}
+  if(gqMode==="session")setGqMode("group");
+  var key=tourRateKey(t);if(SHEET_DATA[key])gqTour=key;
+  gqTitleOverride=t.name||"";
+  gqType=docTourClientType(t);
+  var d=document.getElementById("gqDeparture"),e=document.getElementById("gqEnd");
+  if(d)d.value=t.start||"";if(e)e.value=t.end||"";
+  gqResetEdits();
+  if(typeof gqAutoTier==="function")gqAutoTier();
+  renderGroupQuote();
+}
+function invPickTour(id){
+  var t=(tours||[]).find(function(x){return x.id===id;});
+  if(!t)return;
+  var g=function(i){return document.getElementById(i);};
+  if(invMode!=="session"){var key=tourRateKey(t);var c=g("inv_cat");if(c&&SHEET_DATA[key]){c.value=key;if(c.value!==key){c.innerHTML=tourOptions(key);c.value=key;}}}
+  if(g("inv_title"))g("inv_title").value=t.name||"";
+  if(g("inv_start"))g("inv_start").value=t.start||"";
+  if(g("inv_end"))g("inv_end").value=t.end||"";
+  var pax=(typeof tourPaxBooked==="function")?tourPaxBooked(t):0;if(g("inv_pax")&&pax>=1&&pax<=10)g("inv_pax").value=String(pax);
+  if(g("inv_type"))g("inv_type").value=docTourClientType(t);
+  var pb=t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;
+  if(pb&&g("inv_name")&&!g("inv_name").value)g("inv_name").value=pb.guest||"";
+}
 function gqCollect(){
   var tiers=gqTiers();
   var tier=tiers.find(function(x){return x.id===gqTierId;})||tiers[0];
@@ -6480,13 +6531,14 @@ function gqCollect(){
       }
       return {size:n,perPerson:pp||null,total:pp?pp*n:null,deposit:pp?Math.round(pp*n*pct/100):null};
     });
-    return {mode:"session",key:s.id,label:sessionLabel(s),title:s.name,durLabel:s.dur,basis:rate.basis,type:gqType,rows:applyGqOverrides(srows,pct),tier:tier,tiers:tiers,pct:pct,nights:0,
+    var _st=(gqTitleOverride||"").trim();
+    return {mode:"session",key:s.id,label:_st||sessionLabel(s),title:_st||s.name,durLabel:s.dur,basis:rate.basis,type:gqType,rows:applyGqOverrides(srows,pct),tier:tier,tiers:tiers,pct:pct,nights:0,
       departure:depEl?depEl.value:"",end:endEl?endEl.value:""};
   }
   if(!gqTour)gqTour=firstTourKey();
   var src=SHEET_DATA[gqTour];
   var label=CALC_LABELS[gqTour]||(src?src.title:gqTour);
-  var title=catName(gqTour);
+  var title=(gqTitleOverride||"").trim()||catName(gqTour);
   var rows=gqSizes.map(function(n){
     var d=src&&src[gqType]?src[gqType][String(n)]:null;
     /* Customer-facing total must equal price-per-person × group size so the
@@ -6509,6 +6561,8 @@ function renderGroupQuote(){
     tourSel.value=gqTour;
   }
   var sessSel=document.getElementById("gqSession");if(sessSel)sessSel.value=gqSession;
+  var ftSel=document.getElementById("gqFromTour");if(ftSel){ftSel.innerHTML=docTourListOptions(_gqFromTour);ftSel.value=_gqFromTour||"";}
+  var tIn=document.getElementById("gqTitle");if(tIn&&document.activeElement!==tIn)tIn.value=(gqTitleOverride||"").trim()||(gqMode==="session"?sessionById(gqSession).name:catName(gqTour));
   document.querySelectorAll("#gqTypeToggle .btn").forEach(function(b){
     var on=b.getAttribute("data-gqt")===gqType;b.classList.toggle("btn-primary",on);b.classList.toggle("btn-ghost",!on);});
   var tierSel=document.getElementById("gqTierSel");if(tierSel)tierSel.value=gqTierId;
@@ -6604,7 +6658,7 @@ function generateGroupQuotation(){
   var mi=function(l,v){return "<div><div style='font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#5a6b62;margin-bottom:1px'>"+l+"</div><div style='font-weight:600;color:#16241d'>"+(v||"—")+"</div></div>";};
   var html=
     "<div class='modal-head'>"+
-      "<div><div class='eyebrow'>"+(isSess?"Session Quotation":"Group Quotation")+"</div><div class='h-sec'>"+(isSess?q.label:q.title)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+qid+"</span> · "+today+"</div></div>"+
+      "<div><div class='eyebrow'>"+(isSess?"Session Quotation":"Group Quotation")+"</div><div class='h-sec' id='qhTitle' title='Press Edit quotation to rename'>"+(isSess?q.label:q.title)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+qid+"</span> · "+today+"</div></div>"+
       XBTN+
     "</div>"+
     "<div class='modal-body' style='padding:0'>"+
@@ -6693,8 +6747,23 @@ function docNoFrom(html,kind){
   return m?m[1].replace(/[.,;:]+$/,""):"";
 }
 function setDocHeaderNo(no){var el=document.getElementById("qhNo");if(el&&no)el.textContent=no;}
+/* A renamed heading (contenteditable #qhTitle) → the record's title and every
+   occurrence of the old title inside the document snapshot. Returns the title. */
+function applyHeadingTitle(rec){
+  var ht=document.getElementById("qhTitle");if(!ht)return rec.title;
+  var nt=ht.textContent.replace(/\s+/g," ").trim();var old=String(rec.title||"").trim();
+  if(!nt||nt===old)return rec.title;
+  var body=document.getElementById("quotationBody");
+  if(body&&old){
+    var esc=function(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+    body.innerHTML=body.innerHTML.split(esc(old)).join(esc(nt)).split(old).join(esc(nt));
+  }
+  rec.title=nt;rec.tour=nt;
+  return nt;
+}
 function saveCurrentQuote(){
   if(!_curQuote){return;}
+  applyHeadingTitle(_curQuote);
   var body=document.getElementById("quotationBody");
   var docHtml=body?body.innerHTML:"";
   var editedNo=docNoFrom(docHtml,"q");
@@ -6704,7 +6773,7 @@ function saveCurrentQuote(){
     var rec=quotationLog.find(function(x){return x.id===_curQuote.savedId;});
     if(rec){
       if(editedNo&&editedNo!==rec.qid){audit("quotation","renumbered",rec.qid+" → "+editedNo);rec.qid=editedNo;}
-      rec.html=docHtml;rec.title=_curQuote.title;rec.updatedAt=new Date().toISOString();
+      rec.html=docHtml;rec.title=_curQuote.title;rec.tour=_curQuote.title;rec.updatedAt=new Date().toISOString();
     }
   }else{
     /* new quotation → consume the number printed on the document (folder-driven);
@@ -6744,7 +6813,7 @@ function openSavedQuote(id){
     "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
   "</div>";
   document.getElementById('modal').innerHTML=
-    "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+rec.qid+"</span> · "+rec.date+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec' id='qhTitle' title='Press Edit quotation to rename'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+rec.qid+"</span> · "+rec.date+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(rec.html||"",(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
     foot;
   openScrim();
@@ -6870,7 +6939,8 @@ function generateInvoice(src){
   }
   var d=isSess?null:((!fromInv&&document.getElementById('cb_accommodation'))?readCalcInputs():sel.d);
   var pax=sel.pax;
-  var tourName=isSess?sel.label:catName(sel.key);
+  var _to=fromInv?(((document.getElementById("inv_title")||{}).value)||"").trim():"";
+  var tourName=_to||(isSess?sel.label:catName(sel.key));
   var clientType=sel.type==="foreign"?"Foreigner":"Indian";
   var vid=peekInvoiceNo();
   var today=dmy(new Date());
@@ -6896,7 +6966,7 @@ function showInvoiceModal(){
   renderInvoiceDoc();
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'>"+
-      "<div><div class='eyebrow'>Invoice</div><div class='h-sec'>"+esc0(inv.tour)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+esc0(inv.invid)+"</span> · "+esc0(inv.date)+"</div></div>"+XBTN+
+      "<div><div class='eyebrow'>Invoice</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+esc0(inv.tour)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+esc0(inv.invid)+"</span> · "+esc0(inv.date)+"</div></div>"+XBTN+
     "</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'></div></div>"+
     "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
@@ -6977,6 +7047,7 @@ function invToggleLines(){
 }
 function saveCurrentInvoice(){
   if(!_curInvoice)return;
+  applyHeadingTitle(_curInvoice);
   var body=document.getElementById("quotationBody");
   var docHtml=body?body.innerHTML:"";
   var editedNo=docNoFrom(docHtml,"inv");
@@ -6986,7 +7057,7 @@ function saveCurrentInvoice(){
     var rec=invoiceLog.find(function(x){return x.id===_curInvoice.savedId;});
     if(rec){
       if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
-      rec.html=docHtml;rec.title=_curInvoice.title;rec.updatedAt=new Date().toISOString();
+      rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;rec.updatedAt=new Date().toISOString();
     }
   }else{
     /* folder-driven number; keep the legacy counter aligned */
@@ -7024,7 +7095,7 @@ function openSavedInvoice(id){
     "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
   "</div>";
   document.getElementById('modal').innerHTML=
-    "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(rec.html||"",(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
   openScrim();
 }
