@@ -1138,7 +1138,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 274</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 275</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1147,7 +1147,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 274</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 275</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5337,7 +5337,8 @@ function quotePrefix(){
     return (name.replace(/[^A-Za-z0-9]/g,"").slice(0,4).toUpperCase())||"Q";
   }catch(e){return "Q";}
 }
-/* The NEXT quotation number WITHOUT consuming it → <PREFIX>/<year>/Q-<n>.
+/* The NEXT quotation number WITHOUT consuming it → <PREFIX>-<year>-Q<nn>
+   (older documents keep their <PREFIX>/<year>/Q-<n> numbers; both are read).
    n comes from the QUOTATION FOLDER — the highest Q-number actually saved,
    plus one — so renaming/deleting documents keeps the sequence honest (rename
    Q-3 → Q-2 and the next generate offers Q-3 again, not Q-4). Falls back to
@@ -5347,12 +5348,12 @@ function maxDocNum(list,field,re){
   return mx;
 }
 function nextQuoteNum(){
-  var mx=maxDocNum(quotationLog,"qid",/Q-(\d+)\s*$/i);
+  var mx=maxDocNum(quotationLog,"qid",/Q-?(\d+)\s*$/i);
   return mx>0?mx+1:((parseInt(quoteSeq,10)||0)+1);
 }
 function peekQuoteNo(){
   var yr=(new Date()).getFullYear();
-  return quotePrefix()+"/"+yr+"/Q-"+nextQuoteNum();
+  return quotePrefix()+"-"+yr+"-Q"+pad2(nextQuoteNum()); /* IEBT-2026-Q14 */
 }
 /* Public-facing company email for letterheads / documents. The brand's stored
    email is the OWNER'S LOGIN email (from my_org) — often a personal gmail — which
@@ -5633,13 +5634,19 @@ function printQuotation() {
      Payment Information page; invoices stay a single page. */
   var isInv=/Invoice\s*#/i.test(body.innerText||body.textContent||"");
   var payHtml=isInv?"":paymentPageHTML();
+  /* The browser's "Save as PDF" takes the file name from the page title:
+     "<client name> <document number>", e.g. "Philip Michael Hansbro IEBT-2026-Q14". */
+  var _rec=isInv?(typeof _curInvoice!=="undefined"&&_curInvoice):(typeof _curQuote!=="undefined"&&_curQuote);
+  var _client=String((_rec&&_rec.client&&_rec.client.name)||(body.querySelector(".doc-client")||{}).textContent||"").replace(/\s+/g," ").trim();
+  var _no=docNoFrom(body.innerHTML,isInv?"inv":"q")||String((_rec&&(_rec.invid||_rec.qid))||"");
+  var pdfTitle=(_client+" "+_no).replace(/[\\\/:*?"<>|]+/g,"-").trim()||((isInv?"Invoice":"Quotation")+" - "+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Ops Console"));
 
   const printWindow = window.open('', '_blank');
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${isInv?"Invoice":"Quotation"} - ${(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Ops Console"}</title>
+      <title>${pdfTitle.replace(/</g,"&lt;")}</title>
       <meta charset="UTF-8">
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap');
@@ -6821,7 +6828,7 @@ function saveCurrentQuote(){
   }else{
     /* new quotation → consume the number printed on the document (folder-driven);
        keep the legacy counter aligned so old fallbacks never go backwards */
-    var _qn=parseInt((String(_curQuote.qid||"").match(/Q-(\d+)\s*$/i)||[])[1],10)||((parseInt(quoteSeq,10)||0)+1);
+    var _qn=parseInt((String(_curQuote.qid||"").match(/Q-?(\d+)\s*$/i)||[])[1],10)||((parseInt(quoteSeq,10)||0)+1);
     quoteSeq=Math.max(parseInt(quoteSeq,10)||0,_qn);
     var id="Q"+_qn+"-"+Date.now().toString(36);
     var cl=_curQuote.client||{};
@@ -6923,10 +6930,10 @@ function invoicePrefix(){var p=quotePrefix();return p;}
 /* Next invoice number follows the INVOICE FOLDER (highest INV-n saved + 1),
    so renames/deletes keep the sequence honest; legacy counter as fallback. */
 function nextInvoiceNum(){
-  var mx=maxDocNum(invoiceLog,"invid",/INV-(\d+)\s*$/i);
+  var mx=maxDocNum(invoiceLog,"invid",/(?:INV-?|IN)(\d+)\s*$/i);
   return mx>0?mx+1:((parseInt(invoiceSeq,10)||0)+1);
 }
-function peekInvoiceNo(){var yr=(new Date()).getFullYear();return invoicePrefix()+"/"+yr+"/INV-"+nextInvoiceNum();}
+function peekInvoiceNo(){var yr=(new Date()).getFullYear();return invoicePrefix()+"-"+yr+"-IN"+pad2(nextInvoiceNum());} /* IEBT-2026-IN02 */
 function invoiceMetaRow(vid,today,client,startD,endD){
   client=client||{};
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
@@ -7096,7 +7103,7 @@ function saveCurrentInvoice(){
     }
   }else{
     /* folder-driven number; keep the legacy counter aligned */
-    var _in=parseInt((String(_curInvoice.invid||"").match(/INV-(\d+)\s*$/i)||[])[1],10)||((parseInt(invoiceSeq,10)||0)+1);
+    var _in=parseInt((String(_curInvoice.invid||"").match(/(?:INV-?|IN)(\d+)\s*$/i)||[])[1],10)||((parseInt(invoiceSeq,10)||0)+1);
     invoiceSeq=Math.max(parseInt(invoiceSeq,10)||0,_in);
     var id="INV"+_in+"-"+Date.now().toString(36);
     var cl=_curInvoice.client||{};
