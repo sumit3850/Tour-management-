@@ -337,7 +337,11 @@ body.no-anim .view{animation:none} /* background data refresh — rebuild withou
 .cal-nav button{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
 .cal-nav button svg{width:18px;height:18px;stroke:var(--ink)}
 .cal-sel{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:inherit;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
-.cal-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cal-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.acc-cal-grid{touch-action:pan-y}
+@keyframes calInL{from{opacity:.4;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes calInR{from{opacity:.4;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.cal-swipe-l{animation:calInL .22s ease-out}.cal-swipe-r{animation:calInR .22s ease-out}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;min-width:660px}
 .cal .dow{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:600;text-align:center;padding-bottom:4px}
 .cal .cell{min-height:84px;border:1px solid var(--line-soft);border-radius:11px;padding:7px;background:var(--surface);position:relative}
@@ -1118,7 +1122,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 253</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 254</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1127,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 253</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 254</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2836,14 +2840,15 @@ function accTab(t,el){
   document.querySelectorAll("#accTabs .tab").forEach(function(x){x.classList.remove("active");});
   if(el) el.classList.add("active");
   else document.querySelectorAll("#accTabs .tab").forEach(function(x){if(x.textContent.trim()===t)x.classList.add("active");});
-  if(t==="Availability Calendar") renderAccCalendar(); else renderAccommodation();
+  if(t==="Availability Calendar"){if(!_accCalJump)calResetToday();_accCalJump=false;renderAccCalendar();} else renderAccommodation();
 }
+var _accCalJump=false; /* set by jumpAccCalendar so the jump-to-month is not overridden by the today reset */
 /* Jump the Availability Calendar tab straight to the month of a given booking's check-in. */
 function jumpAccCalendar(dateISO){
   if(!dateISO)return;
   var d=new Date(dateISO);if(isNaN(d))return;
   calY=d.getFullYear();calM=d.getMonth();
-  accTab("Availability Calendar");
+  _accCalJump=true;accTab("Availability Calendar");
 }
 /* ===== Room-availability engine: rooms booked out of accBookings, per property per date ===== */
 function accRoomsBookedOn(accId,dateISO){
@@ -3091,7 +3096,7 @@ function go(v,isBack){
   window.scrollTo(0,0);toggleNav(false);
 }
 function renderView(v){
-  if(v==="calendar")renderCalendar();
+  if(v==="calendar"){if(!_calKeep)calResetToday();_calKeep=false;renderCalendar();}
   else if(v==="tours")renderTours();
   else if(v==="bookings")renderBookings();
   else if(v==="accommodation")renderAccommodation();
@@ -4548,7 +4553,11 @@ function filterTours(f,el){curTab=f;document.querySelectorAll("#tourTabs .tab").
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const YEAR_MIN=2000, YEAR_MAX=2100; /* ~100-year selectable range */
 function yearOptions(sel){var s="";for(var y=YEAR_MIN;y<=YEAR_MAX;y++){s+="<option value='"+y+"'"+(y===sel?" selected":"")+">"+y+"</option>";}return s;}
-let calY=2026,calM=5;
+let calY=new Date().getFullYear(),calM=new Date().getMonth();
+/* Every calendar opens on the CURRENT month (the ‹ › buttons, the selects and a
+   swipe move away from it; the next visit lands back on today's month). */
+function calResetToday(){var n=new Date();calY=n.getFullYear();calM=n.getMonth();}
+var _calKeep=false; /* set before go("calendar") by callers that jump to a specific month */
 function viewCalendar(){
   return "<section class='view' id='v-calendar'>"+
     "<div class='cal-bar'>"+
@@ -4561,6 +4570,29 @@ function viewCalendar(){
   "</section>";
 }
 function calStep(d){calM+=d;if(calM<0){calM=11;calY--}if(calM>11){calM=0;calY++}if(document.getElementById("accCalMonth"))renderAccCalendar();else renderCalendar();}
+/* Swipe left = next month, swipe right = previous month, on the tours calendar
+   and the accommodation availability calendar. Works for finger and pen on
+   phones, tablets and touch-screen laptops; a mouse drag is left alone. A mostly
+   vertical movement is a scroll and is ignored. */
+(function(){
+  var sx=0,sy=0,st=0,live=false;
+  function calOf(el){return el&&el.closest?el.closest(".cal-scroll, .acc-cal-grid, .cal-bar"):null;}
+  document.addEventListener("pointerdown",function(e){
+    if(e.pointerType==="mouse"||!calOf(e.target)){live=false;return;}
+    live=true;sx=e.clientX;sy=e.clientY;st=Date.now();
+  },{passive:true});
+  document.addEventListener("pointerup",function(e){
+    if(!live)return;live=false;
+    var dx=e.clientX-sx,dy=e.clientY-sy;
+    if(Math.abs(dx)<50||Math.abs(dy)>Math.abs(dx)*0.6||Date.now()-st>800)return;
+    var grid=document.getElementById("calGrid")||document.querySelector(".acc-cal-grid");
+    if(grid){grid.classList.remove("cal-swipe-l","cal-swipe-r");void grid.offsetWidth;grid.classList.add(dx<0?"cal-swipe-l":"cal-swipe-r");}
+    calStep(dx<0?1:-1);
+    var g2=document.getElementById("calGrid")||document.querySelector(".acc-cal-grid");
+    if(g2)g2.classList.add(dx<0?"cal-swipe-l":"cal-swipe-r");
+  },{passive:true});
+  document.addEventListener("pointercancel",function(){live=false;},{passive:true});
+})();
 function renderCalendar(){
   const grid=document.getElementById("calGrid");if(!grid)return;
   document.getElementById("calMonth").value=calM;document.getElementById("calYear").value=calY;
