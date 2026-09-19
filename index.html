@@ -6343,7 +6343,7 @@ function paSave(k,asNew){
   var list=payAccountsOf(k);var existing=(!asNew&&_paEdit[k]&&_paEdit[k]!=="new")?list.find(function(a){return a.id===_paEdit[k];}):null;
   if(asNew&&list.some(function(a){return (a.name||"").toLowerCase()===rec.name.toLowerCase();}))rec.name+=" (2)";
   if(existing){Object.assign(existing,rec);existing.updatedAt=new Date().toISOString();}
-  else{rec.id="PA"+Date.now().toString(36);rec.kind=k;rec.updatedAt=new Date().toISOString();payAccounts.push(rec);_paEdit[k]=rec.id;if(!payAccountFor(k)||payCfg[k==="in"?"printIn":"printX"]==="none"||list.length===0)payCfg[k==="in"?"printIn":"printX"]=rec.id;}
+  else{rec.id="PA"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);rec.kind=k;rec.updatedAt=new Date().toISOString();payAccounts.push(rec);_paEdit[k]=rec.id;if(!payAccountFor(k)||payCfg[k==="in"?"printIn":"printX"]==="none"||list.length===0)payCfg[k==="in"?"printIn":"printX"]=rec.id;}
   _paEdit[k+"_manual"]=false;
   audit("costsheet","payment-account-saved",(k==="in"?"India: ":"International: ")+rec.name);
   persistData();renderPayAccounts();
