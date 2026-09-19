@@ -1131,7 +1131,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 258</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 259</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1140,7 +1140,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 258</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 259</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1407,7 +1407,21 @@ function rebuildTiers(){
 rebuildTiers();
 /* The policy blocks as printed on a document (quotation or invoice).
    opts.tier = id of the deposit tier that applies (highlighted); opts.gstLine =
-   extra first line under Terms (invoices); opts.thanks = closing line. */
+   extra first line under Terms (invoices, only when GST is itemised). */
+/* A saved quotation / invoice keeps an HTML snapshot; when it is re-opened the
+   policy segment (Includes … Terms) is swapped for the live policies so an old
+   document never shows superseded terms. Everything else in the snapshot —
+   figures, client, any manual edits — is left untouched. */
+function refreshDocTerms(html,mode,opts){
+  if(!html)return html||"";
+  var starts=[/<div style=['"]font-size:12px;color:#5a6b62;margin-bottom:1[46]px['"]><span/, /<div style=['"]font-size:12px;color:var\(--ink-soft\);margin-bottom:16px['"]>/,
+              /<table style=['"][^'"]*['"]><thead><tr><th colspan=['"]2['"][^>]*>(Payment Terms|Booking &amp; Payment)/, /<div style=['"]font-size:11px;color:#5a6b62;background:#fafcfb[^'"]*['"]>\s*<div[^>]*>Terms/];
+  var ends=[/<div style=['"]text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e['"]>/, /<div style=['"]margin-top:20px;padding:14px;background:var\(--surface-2\)/];
+  var si=-1;starts.forEach(function(r){var m=r.exec(html);if(m&&(si<0||m.index<si))si=m.index;});
+  var ei=-1;ends.forEach(function(r){var m=r.exec(html);if(m&&(ei<0||m.index<ei))ei=m.index;});
+  if(si<0||ei<0||ei<=si)return html;
+  return html.slice(0,si)+policyDocHTML(mode,opts||{})+html.slice(ei);
+}
 function policyDocHTML(mode,opts){
   opts=opts||{};var P=policyCfg[mode==="session"?"session":"group"]||policyCfg.group;
   var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
@@ -1424,7 +1438,7 @@ function policyDocHTML(mode,opts){
     "<tbody>"+tierRows+((P.payment||[]).length?"<tr><td colspan='2' style='padding:9px 12px;font-size:11px;color:#5a6b62;line-height:1.7'>"+lines(P.payment)+"</td></tr>":"")+"</tbody></table>";
   if((P.cancel||[]).length)html+=box(head("Cancellation Policy")+lines(P.cancel));
   var gen=(policyCfg.general||[]).slice();if(opts.gstLine)gen.unshift(opts.gstLine);
-  if(gen.length||opts.thanks)html+=box(head("Terms &amp; Conditions")+lines(gen)+(opts.thanks?(gen.length?"<br>":"")+"• Thank you for travelling with us.":""));
+  if(gen.length)html+=box(head("Terms &amp; Conditions")+lines(gen));
   return html;
 }
 let bookings=[];
@@ -6639,7 +6653,7 @@ function openSavedQuote(id){
   "</div>";
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+rec.qid+"</span> · "+rec.date+"</div></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+(rec.html||"")+"</div></div>"+
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(rec.html||"",(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
     foot;
   openScrim();
 }
@@ -6855,7 +6869,7 @@ function renderInvoiceDoc(){
     "</table>"+
     (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:16px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
     payNowHTML(grand)+
-    policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"Amounts are in Indian Rupees (INR) · GST charged as itemised above":"Amounts are in Indian Rupees (INR) · inclusive of applicable taxes unless stated"),thanks:true})+
+    policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"GST is charged as itemised above on the taxable value.":"")})+
     "<div style='text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e'>"+
       "<div style='font-family:\"Calistoga\",serif;font-size:16px;color:#15563c'>"+esc0(company)+"</div>"+
       "<div style='font-size:11px;color:#5a6b62'>Sri Vijay Puram (Port Blair) · Andaman & Nicobar Islands · India</div>"+
@@ -6899,7 +6913,7 @@ function saveCurrentInvoice(){
       food:_curInvoice.food, entry:_curInvoice.entry, ship:_curInvoice.ship, guide:_curInvoice.guide,
       referral:_curInvoice.referral, total:_curInvoice.total,
       gstRate:_curInvoice.gstRate||0, gstAmount:_curInvoice.gstAmount||0, grandTotal:_curInvoice.grandTotal||_curInvoice.total,
-      fromQuote:_curInvoice.fromQuote||"",
+      fromQuote:_curInvoice.fromQuote||"", isSess:!!_curInvoice.isSess,
       html:docHtml, savedAt:new Date().toISOString()
     });
     if(typeof renderAcceptedQuotes==="function")renderAcceptedQuotes();
@@ -6922,7 +6936,7 @@ function openSavedInvoice(id){
   "</div>";
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+(rec.html||"")+"</div></div>"+foot;
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(rec.html||"",(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
   openScrim();
 }
 function editSavedInvoice(id){openSavedInvoice(id);setTimeout(function(){var b=document.getElementById("qEditBtn");if(b&&b.textContent.indexOf("Done")<0)toggleQuoteEdit();},60);}
@@ -8950,7 +8964,7 @@ function savePolicyCfg(){
 function resetPolicyCfg(){if(!confirm("Reset all policies and terms to the built-in defaults?"))return;policyCfg=JSON.parse(JSON.stringify(POLICY_DEFAULT));rebuildTiers();persistData();refreshSettings();if(typeof renderGroupQuote==="function")renderGroupQuote();}
 function previewPolicy(mode){
   document.getElementById("modal").innerHTML="<div class='modal-head'><div><span class='eyebrow'>Preview</span><h2 style='font-size:18px;margin-top:4px'>"+(mode==="session"?"Session tour":"Group / private tour")+" — as printed</h2></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='background:#fff;color:#20302b'>"+policyDocHTML(mode,{tier:(mode==="session"?SQ_TIERS:GQ_TIERS)[0].id,thanks:true})+"</div>"+
+    "<div class='modal-body' style='background:#fff;color:#20302b'>"+policyDocHTML(mode,{tier:(mode==="session"?SQ_TIERS:GQ_TIERS)[0].id})+"</div>"+
     "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button></div>";
   openScrim();
 }
