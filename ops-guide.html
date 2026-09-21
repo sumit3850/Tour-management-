@@ -22,14 +22,19 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .head .brand{font-family:'Calistoga',serif;font-size:20px}.head .brand .ex{color:#1976d2}
 .head h1{font-size:15px;font-weight:600;margin-top:10px;color:var(--soft)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px -14px rgba(20,40,80,.2)}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
 .top b{font-size:15px}
+.head-l{min-width:0}
+.code{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:#e7f1fb;border-radius:6px;padding:1px 8px;margin-bottom:4px}
+.name{font-size:15px;font-weight:700;line-height:1.3}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.fee{font-size:13px;font-weight:700;color:var(--ok);background:#e4f3ea;border-radius:8px;padding:3px 10px;white-space:nowrap}
 .pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#e7f1fb;color:var(--blue);white-space:nowrap}
 .pill.warn{background:#fbe7e4;color:var(--err)}
 .pill.ok{background:#e4f3ea;color:var(--ok)}
-.dates{font-size:12.5px;color:var(--soft);margin-bottom:10px}
-.rows{display:grid;grid-template-columns:118px 1fr;gap:5px 10px;font-size:13px}
-.rows span.k{color:var(--soft)}.rows span.v{font-weight:600;text-align:left}
+.dates{font-size:13px;color:var(--soft);margin-top:2px}
+.rows{display:grid;grid-template-columns:max-content 8px minmax(0,1fr);gap:6px 6px;font-size:13px;line-height:1.45;align-items:start}
+.rows span.k{color:var(--soft);font-weight:500;white-space:nowrap;padding-right:6px}.rows span.c{color:var(--soft)}.rows span.v{font-weight:500;text-align:left;min-width:0;overflow-wrap:break-word}
 .remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
 .fb{margin-top:8px;padding:10px 12px;background:#fbe7e4;border-radius:10px;font-size:12.5px;color:var(--err)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
@@ -107,7 +112,8 @@ if("serviceWorker" in navigator){window.addEventListener("load",function(){navig
 function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
 function showOk(m){var b=document.getElementById("okbox");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
-function row(k,v){return "<span class='k'>"+k+"</span><span class='v'>"+(v||"—")+"</span>";}
+function row(k,v){return "<span class='k'>"+k+"</span><span class='c'>:</span><span class='v'>"+(v||"—")+"</span>";}
+function money(n){n=Math.round(parseFloat(n)||0);return "₹"+n.toLocaleString("en-IN");}
 function normPhone(p){return String(p||"").replace(/\D/g,"");}
 
 /* ===== OFFLINE SUPPORT =====
@@ -337,11 +343,11 @@ function renderList(){
   list.innerHTML=subtabs+(shown.length?shown.map(function(o){
     var v=allVehicles.find(function(x){return x.name===o.veh;})||{};
     var d=allDrivers.find(function(x){return x.name===o.driver;})||{};
-    return "<div class='card' id='card_"+o.id+"'><div class='top'><b>"+(o.tour||"Tour")+"</b><span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
-      (o.tourId?"<div class='dates mono'>"+o.tourId+"</div>":"")+
-      "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div>"+
-      (o.pocName?"<div class='rows' style='margin-bottom:6px'>"+row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):"")+"</div>":"")+
-      "<div class='rows'>"+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
+    var fee=(o.guideFee!=null&&o.guideFee!=="")?money(o.guideFee):"";
+    return "<div class='card' id='card_"+o.id+"'><div class='top'><div class='head-l'>"+(o.tourId?"<div class='code'>"+o.tourId+"</div>":"")+"<div class='name'>"+(o.tour||"Tour")+"</div>"+
+      "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div></div>"+
+      "<div class='side'><span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span>"+(fee?"<span class='fee' title='Guide fee'>Guide fee "+fee+"</span>":"")+"</div></div>"+
+      "<div class='rows'>"+(o.pocName?row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):""):"")+row("Pax",o.pax)+(o.guideRole?row("Role",o.guideRole):"")+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
       (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       opLegsSummaryHtml(o)+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+

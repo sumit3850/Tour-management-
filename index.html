@@ -424,13 +424,18 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 
 .ops-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .op-card{padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
-.op-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px}
+.op-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.op-head{min-width:0;font-size:12.5px}
+.op-code{display:inline-block;font-size:11.5px;font-weight:700;color:#0c5760;background:var(--sea-soft);border:1px solid var(--sea);border-radius:6px;padding:1px 7px;margin-bottom:4px}
+.op-name{font-size:14px;font-weight:700;letter-spacing:-.01em;line-height:1.3}
+.op-date{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.op-side{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
 .op-status-sel{font-size:11.5px;font-weight:700;padding:4px 8px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer;flex-shrink:0}
-.op-top b{font-size:14px;letter-spacing:-.01em}
-.op-date{font-size:12px;color:var(--ink-soft);margin-bottom:10px}
-.op-rows{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12px}
-.op-rows .k{color:var(--ink-soft)}
-.op-rows .v{font-weight:500;text-align:right}
+.op-fee{font-size:12px;font-weight:700;color:#0c5760;background:var(--sea-soft);border:1px solid var(--sea);border-radius:6px;padding:2px 8px;white-space:nowrap}
+.op-rows{display:grid;grid-template-columns:max-content 8px minmax(0,1fr);gap:6px 6px;font-size:12.5px;line-height:1.45;align-items:start}
+.op-rows .k{color:var(--ink-soft);font-weight:500;white-space:nowrap;padding-right:6px}
+.op-rows .c{color:var(--ink-soft)}
+.op-rows .v{font-weight:500;min-width:0;overflow-wrap:break-word}
 .op-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft)}
 .op-actions button{flex:1;min-height:32px;border-radius:7px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px}
 .op-actions .btn-edit{background:var(--sea-soft);border:1px solid var(--sea);color:#0c5760}
@@ -1099,7 +1104,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   .stat-strip .s .v{font-size:21px}.stat-strip .s .l{font-size:11px}
   .modal-head h2{font-size:17px !important}.modal-body{padding:14px 16px;font-size:13px}
   .m-cards td{font-size:12.5px}.m-cards td:first-child{font-size:14px}
-  .op-top b{font-size:13.5px}.op-date{font-size:11.5px}.op-rows{font-size:11.5px;gap:5px 12px}.op-status-sel{font-size:11px}
+  .op-name{font-size:13.5px}.op-date{font-size:12px}.op-rows{font-size:12px;gap:5px 6px}.op-status-sel{font-size:11px}
   .md-k b{font-size:13px}.td-tag{font-size:10px}
   .chk-item{font-size:12.5px}.gs-box input{font-size:14px}
   .empty{font-size:12.5px}
@@ -1148,7 +1153,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 282</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 283</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1157,7 +1162,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 282</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 283</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1961,14 +1966,14 @@ function bookingsForSheet(){
 var _sheetSyncTimer=null;
 function scheduleSheetSync(){if(!sheetHook())return;clearTimeout(_sheetSyncTimer);_sheetSyncTimer=setTimeout(syncSheets,1800);}
 /* Logistics & Operations tab — one row per operation (incl. completed tours). */
-var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","POC","POC Phone","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Legs","Status","Remarks","Guide Feedback","Guide Feedback At","Driver Feedback","Driver Feedback At"];
+var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","POC","POC Phone","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Guide Role","Guide Fee","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Legs","Status","Remarks","Guide Feedback","Guide Feedback At","Driver Feedback","Driver Feedback At"];
 /* Compact one-cell text for a multi-leg op's vehicle/driver changes ("" when single-leg). */
 function opLegsSheetText(o){
   if(!o.legs||!o.legs.length)return "";
   var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverStatus:o.driverStatus}].concat(o.legs);
   return rows.map(function(l,i){return "Leg "+(i+1)+" ("+(l.start||"—")+" to "+(l.end||"—")+"): "+(l.veh||"—")+(l.reg?" "+l.reg:"")+" / "+(l.driver||"—")+(l.driverStatus?" ["+l.driverStatus+"]":"");}).join(" | ");
 }
-function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
+function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Guide Role":o.guideRole||"","Guide Fee":(o.guideFee!=null?o.guideFee:""),"Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
 var DAILY_COLS=["Tour ID","Date","Vehicle","Reg. No.","Driver","Start km","End km","Total km","Location","Time","Entry"];
 function dailyActivitySheetRow(r){return {"Tour ID":tripTourCode(r),"Date":dOpt(r.date),"Vehicle":r.veh||"","Reg. No.":r.reg||"","Driver":r.driver||"","Start km":r.startKm||0,"End km":r.endKm||0,"Total km":r.totalKm||0,"Location":r.loc||"","Time":r.time||"","Entry":r.offline?"Offline":"Online"};}
 var VEHICLE_COLS=["Vehicle","Reg. No.","Type","Seats","Driver","Login Code","Status"];
@@ -2141,6 +2146,16 @@ var FEE_HEADS=["Location","Half·Lead","Half·Asst","Full·Lead","Full·Asst","N
 var SESSION_TYPES=["Half day","Full day","Night","Half day + Night","Full day + Night"];
 var FEE_LOC={session:"Session Tour","guided-half":"Session Tour",southandaman:"South Andaman",littleandaman:"Little Andaman",nicobar:"Great Nicobar",narcondam:"Great Nicobar",custom:"Session Tour"};
 var SESSION_COL={"Half day":1,"Full day":3,"Night":5,"Half day + Night":7,"Full day + Night":9};
+/* The guide's role on a tour (Lead / Assistant) and the fee actually payable:
+   a fee typed on the tour card wins; otherwise the rate sheet's Lead or
+   Assistant payout for the tour's location, session type and days. */
+var GUIDE_ROLES=["Lead","Assistant"];
+function tourGuideRole(t){return (t&&t.guideRole==="Assistant")?"Assistant":"Lead";}
+function tourGuideFee(t){
+  if(!t)return 0;
+  var m=parseFloat(t.guideFee);if(isFinite(m)&&m>0)return m;
+  var f=feeFor(t);return tourGuideRole(t)==="Assistant"?(f.asstTotal||0):(f.leadTotal||0);
+}
 function feeFor(t){
   var loc=FEE_LOC[t.cat]||"Session Tour";
   var row=(GUIDE_FEE_ROWS||[]).find(function(r){return r[0]===loc;});
@@ -3408,6 +3423,7 @@ function enrichOp(o){
   });
   var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
   if(t){o.tourId=o.tourId||tourCode(t);o.tourName=t.name||tourLabel(t);if(t.stay&&!o.stay)o.stay=t.stay;
+    o.guideRole=tourGuideRole(t);o.guideFee=tourGuideFee(t);
     o.itinerary=(t.itinerary||[]).map(function(d,i){return {day:i+1,date:d.date||"",title:d.title||"",plan:d.plan||""};}).filter(function(d){return d.title||d.plan;});
     if(t.pocId){var pb=(bookings||[]).find(function(b){return b.id===t.pocId;});if(pb){o.pocName=pb.guest;o.pocPhone=pb.phone||"";}}}
 }
@@ -4615,7 +4631,8 @@ function tourCard(t){
     "<div class='tc-bar "+(pct>=80?"warn":"")+"'><span style='width:"+pct+"%'></span></div>"+
     "<div class='tc-metarow'>"+
       "<span class='tc-chip tc-rev' title='Booked revenue (set per-person rates in the Cost Calculator)'>"+fmt(rev)+"</span>"+
-      (t.guide?"<span class='tc-chip' title='Guide'>"+String(t.guide).replace(/'/g,"&#39;")+"</span>":"")+
+      (t.guide&&t.guide!=="—"?"<span class='tc-chip' title='Guide · role'>"+String(t.guide).replace(/'/g,"&#39;")+" · "+tourGuideRole(t)+"</span>":"")+
+      "<span class='tc-chip' title='Guide fee"+((parseFloat(t.guideFee)>0)?" (set on the tour)":" (rate sheet)")+"'>Guide fee "+fmt(tourGuideFee(t))+"</span>"+
       "<span class='tc-chip' title='Capacity'>"+cap+" cap</span>"+riskChip+
     "</div>"+
     (gArr.length?"<div class='tc-guests'><span>Guests</span>"+gArr.join(", ")+"</div>":"")+
@@ -7633,13 +7650,13 @@ function opCard(o){
   var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};
   var poc="";var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
   if(t&&t.pocId){var pb=bookings.find(function(b){return b.id===t.pocId;});if(pb)poc=pb.guest+(pb.phone?" · "+pb.phone:"");}
-  var row=function(k,val){return "<span class='k'>"+k+"</span><span class='v'>"+(val||"—")+"</span>";};
+  var row=function(k,val){return "<span class='k'>"+k+"</span><span class='c'>:</span><span class='v'>"+(val||"—")+"</span>";};
   var _stc=(o.status==="Completed")?"#1b7a4d":((o.status==="Withdrawn"||o.status==="Declined"||o.status==="Cancelled")?"#c0392b":((o.status==="Transferred")?"#b8860b":((o.status==="In progress")?"#0a6ed1":"#5a6a86")));
-  return "<div class='op-card'><div class='op-top'><b>"+o.tour+"</b><select class='op-status-sel' style='border-color:"+_stc+";color:"+_stc+"' onclick='event.stopPropagation()' onchange=\"setOpStatusQuick('"+o.id+"',this.value)\">"+["Scheduled","In progress","Completed","Withdrawn","Declined","Transferred","Cancelled"].map(function(st){return "<option "+(st===(o.status||"Scheduled")?"selected":"")+">"+st+"</option>";}).join("")+"</select></div>"+
-    "<div class='op-date'>"+(o.tourId?"<span class='mono'>"+o.tourId+"</span> · ":"")+o.dateDisplay+" · "+o.pax+" pax</div>"+
-    (poc?"<div style='font-size:12px;margin:4px 0'><b>POC:</b> "+poc+"</div>":"")+
-    "<div style='margin:6px 0;font-size:11px;color:var(--ink-soft)'><span class='mono'>"+o.start+"</span> → <span class='mono'>"+o.end+"</span></div>"+
-    "<div class='op-rows'>"+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
+  var _fee=(o.guideFee!=null&&o.guideFee!=="")?fmt(o.guideFee):"";
+  return "<div class='op-card'><div class='op-top'><div class='op-head'>"+(o.tourId?"<div class='op-code'>"+o.tourId+"</div>":"")+"<div class='op-name'>"+o.tour+"</div><div class='op-date'>"+o.start+" – "+o.end+"</div></div>"+
+      "<div class='op-side'><select class='op-status-sel' style='border-color:"+_stc+";color:"+_stc+"' onclick='event.stopPropagation()' onchange=\"setOpStatusQuick('"+o.id+"',this.value)\">"+["Scheduled","In progress","Completed","Withdrawn","Declined","Transferred","Cancelled"].map(function(st){return "<option "+(st===(o.status||"Scheduled")?"selected":"")+">"+st+"</option>";}).join("")+"</select>"+
+      (_fee?"<div class='op-fee' title='Guide fee'>Guide fee "+_fee+"</div>":"")+"</div></div>"+
+    "<div class='op-rows'>"+(poc?row("POC",poc):"")+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide role",o.guideRole)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
     opLegsSummaryHtml(o)+
     opStaysSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
@@ -8509,6 +8526,7 @@ function saveNewGuide(){var n=document.getElementById("g_name").value.trim();if(
 function editGuide(i){var g=externalGuides[i];if(!g)return;modalForm("Edit guide","Update guide",guideForm(g),"saveEditGuide","Update");document.getElementById("modal").dataset.gi=i;}
 function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;g.adminLocked=true;persistData();closeModal();renderGuides();}
 function deleteGuide(i){if(!confirm("Remove this guide?"))return;var g=externalGuides[i];if(g)retireSourceSub(g.fromSub);externalGuides.splice(i,1);persistData();renderGuides();}
+function guideDatalist(){return "<datalist id='guideNameList'>"+(externalGuides||[]).map(function(g){return "<option value=\""+String(g.name||"").replace(/"/g,"&quot;")+"\">";}).join("")+"</datalist>";}
 function guideOptions(sel){return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("");}
 /* Operation "Guide" field: a real dropdown of the External Guides directory + Custom
    (so a guide not yet in the directory can still be typed in). */
@@ -8658,7 +8676,7 @@ function opFromTour(t){
   ops.unshift({id:"OP"+Date.now()+Math.floor(Math.random()*100),fromTour:t.id,tourId:tourCode(t),tour:tourLabel(t),
     dateDisplay:dShort(t.start),date:dShort(t.start),start:dShort(t.start),end:dShort(t.end),
     startISO:t.start||"",endISO:t.end||"",
-    pax:booked(t.id),clients:"—",veh:"—",driver:"—",guide:t.guide||t.guideAlloted||"—",pickupDate:t.start||"",pickupLoc:t.pickup||"—",pickup:t.pickup||"—",dropDate:t.end||"",dropLoc:"",birding:t.startLoc||"—",stay:t.stay||"—",status:"Scheduled"});
+    pax:booked(t.id),clients:"—",veh:"—",driver:"—",guide:t.guide||t.guideAlloted||"—",guideRole:tourGuideRole(t),guideFee:tourGuideFee(t),pickupDate:t.start||"",pickupLoc:t.pickup||"—",pickup:t.pickup||"—",dropDate:t.end||"",dropLoc:"",birding:t.startLoc||"—",stay:t.stay||"—",status:"Scheduled"});
   persistData();
   renderDashOps();
 }
@@ -8877,7 +8895,7 @@ function setGuideRole(id,role){var t=tours.find(function(x){return x.id===id;});
 function shareTourReservation(id){
   var t=tours.find(function(x){return x.id===id;});if(!t)return;
   var r=reservations.find(function(x){return x.fromTour===t.id;});
-  if(!r){var f=feeFor(t);r={id:"R"+Date.now(),fromTour:t.id,tour:tourLabel(t),date:t.start,endDate:t.end,location:t.pickup||t.startLoc||"",guideFee:f.leadTotal||0,referral:0,guideName:t.guideAlloted||"",by:"",stage:"proposed",createdAt:new Date().toISOString()};reservations.unshift(r);persistData();if(document.getElementById("resKanban"))renderReservations();}
+  if(!r){r={id:"R"+Date.now(),fromTour:t.id,tour:tourLabel(t),date:t.start,endDate:t.end,location:t.pickup||t.startLoc||"",guideFee:tourGuideFee(t),referral:0,guideName:t.guideAlloted||"",by:"",stage:"proposed",createdAt:new Date().toISOString()};reservations.unshift(r);persistData();if(document.getElementById("resKanban"))renderReservations();}
   var url=respondLink(r.id);
   if(navigator.clipboard)navigator.clipboard.writeText(url);
   var msg="Island Explorer — Guide Service Request\n\nTour: "+tourLabel(t)+"\nDates: "+dShort(t.start)+" – "+dShort(t.end)+"\nGuide fee: "+fmt(r.guideFee||0)+"\n\nPlease review & respond here:\n"+url;
@@ -9654,8 +9672,10 @@ function openCreateTour(){
     "<div class='field' id='nt_endwrap'><label>End date</label><input class='input' type='date' id='nt_end' value='2026-07-05'></div>"+
     sessDatesField("nt",null)+
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='nt_cap' value='8'></div>"+
-    "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Kumar'></div>"+
+    "<div class='field'><label>Guide</label><input class='input' id='nt_guide' value='Sumit Kumar' list='guideNameList' placeholder='Pick from the guide directory or type a name'>"+guideDatalist()+"</div>"+
+    "<div class='field'><label>Guide role</label><select class='input' id='nt_guiderole'>"+GUIDE_ROLES.map(function(r){return "<option>"+r+"</option>";}).join("")+"</select></div>"+
     "<div class='field'><label>External Guides</label><select class='input' id='nt_guideAlloted'>"+guideOptions("")+"</select></div>"+
+    "<div class='field'><label>Guide fee (₹) <span style='color:var(--ink-soft);font-weight:400'>(blank = rate sheet)</span></label><input class='input mono' type='number' id='nt_guidefee' placeholder='auto from rate sheet'></div>"+
     "<div class='field'><label>Session type <span style='color:var(--ink-soft);font-weight:400'>(for guide fee)</span></label><select class='input' id='nt_session'>"+SESSION_TYPES.map(function(s){return "<option "+(s==="Full day"?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
     "<div class='field full'><label>Pickup point</label><input class='input' id='nt_pickup' placeholder='e.g. Port Blair'></div>"+
     "<div class='field'><label>Total tour cost (₹)</label><input class='input mono' type='number' id='nt_cost' value='0' oninput='ntPend()'></div>"+
@@ -9679,7 +9699,7 @@ function saveTour(){
   }
   var nt={id:"T"+Date.now(),name,tourType:ttype,sessionDates:sessDates||undefined,activity:(document.getElementById("nt_activity")||{}).value||"Birding tour",cat:document.getElementById("nt_cat").value,start:start,end:end,
     cap:Math.max(parseInt(document.getElementById("nt_cap").value)||1,1),status:document.getElementById("nt_status").value,
-    guide:document.getElementById("nt_guide").value||"—",guideAlloted:document.getElementById("nt_guideAlloted").value||"",sessionType:document.getElementById("nt_session").value,pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
+    guide:document.getElementById("nt_guide").value||"—",guideRole:(document.getElementById("nt_guiderole")||{}).value||"Lead",guideFee:parseFloat((document.getElementById("nt_guidefee")||{}).value)||0,guideAlloted:document.getElementById("nt_guideAlloted").value||"",sessionType:document.getElementById("nt_session").value,pickup:document.getElementById("nt_pickup").value||"—",startLoc:"—",stay:"—",
     tourCost:parseFloat(document.getElementById("nt_cost").value)||0,tourDeposit:parseFloat(document.getElementById("nt_deposit").value)||0,due:document.getElementById("nt_due").value||"",
     species:(document.getElementById("nt_species")||{}).value||""};
   tours.push(nt);tourCode(nt); /* assign the auto Tour ID immediately */
@@ -9710,8 +9730,10 @@ function editTour(id){
     "<div class='field' id='et_endwrap' style='display:"+(_isSess?"none":"block")+"'><label>End date</label><input class='input' type='date' id='et_end' value='"+(t.end||"")+"'></div>"+
     sessDatesField("et",_isSess?(t.sessionDates&&t.sessionDates.length?t.sessionDates:[t.start]):null)+
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='et_cap' value='"+t.cap+"'></div>"+
-    "<div class='field'><label>Team leader / guide</label><input class='input' id='et_guide' value='"+(t.guide||"")+"'></div>"+
+    "<div class='field'><label>Guide</label><input class='input' id='et_guide' value='"+String(t.guide||"").replace(/'/g,"&#39;")+"' list='guideNameList' placeholder='Pick from the guide directory or type a name'>"+guideDatalist()+"</div>"+
+    "<div class='field'><label>Guide role</label><select class='input' id='et_guiderole'>"+GUIDE_ROLES.map(function(r){return "<option "+(r===tourGuideRole(t)?"selected":"")+">"+r+"</option>";}).join("")+"</select></div>"+
     "<div class='field'><label>External Guides</label><select class='input' id='et_guideAlloted' onchange='etGuidePick()'>"+guideOptions(t.guideAlloted||"")+"</select></div>"+
+    "<div class='field'><label>Guide fee (₹) <span style='color:var(--ink-soft);font-weight:400'>(blank = rate sheet "+fmt((function(){var f=feeFor(t);return tourGuideRole(t)==="Assistant"?f.asstTotal:f.leadTotal;})())+")</span></label><input class='input mono' type='number' id='et_guidefee' value='"+((parseFloat(t.guideFee)>0)?t.guideFee:"")+"' placeholder='auto from rate sheet'></div>"+
     "<div class='field'><label>Session type <span style='color:var(--ink-soft);font-weight:400'>(for guide fee)</span></label><select class='input' id='et_session'>"+SESSION_TYPES.map(function(s){return "<option "+(s===(t.sessionType||"Full day")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
     "<div class='field'><label>Guide phone</label><input class='input' id='et_guidephone' value='"+_agPhone+"' placeholder='+91 99332 02175'></div>"+
     "<div class='field'><label>Guide email</label><input class='input' id='et_guideemail' value='"+_agEmail+"' placeholder='info@islandexplorer.in'></div>"+
@@ -9751,6 +9773,8 @@ function saveEditTour(){
   t.start=start;t.end=end;
   t.cap=Math.max(parseInt(document.getElementById("et_cap").value)||1,1);
   t.guide=document.getElementById("et_guide").value||"—";
+  t.guideRole=(document.getElementById("et_guiderole")||{}).value||"Lead";
+  t.guideFee=parseFloat((document.getElementById("et_guidefee")||{}).value)||0;
   t.guideAlloted=document.getElementById("et_guideAlloted").value||"";
   t.sessionType=document.getElementById("et_session").value;
   t.guidePhone=document.getElementById("et_guidephone").value||"";
@@ -9805,6 +9829,7 @@ function syncTourToOps(t){
   o.startISO=t.start||"";o.endISO=t.end||"";
   o.pax=booked(t.id);
   o.guide=t.guide||t.guideAlloted||o.guide||"—";
+  o.guideRole=tourGuideRole(t);o.guideFee=tourGuideFee(t);
   o.pickupDate=t.start||"";o.dropDate=t.end||"";
   o.pickupLoc=t.pickup||o.pickupLoc||"—";o.pickup=o.pickupLoc||"—";
   o.birding=t.startLoc||o.birding||"—";
@@ -9819,7 +9844,7 @@ function syncTourToReservation(t){
   var f=feeFor(t);
   r.tour=tourLabel(t);r.date=t.start||r.date;r.endDate=t.end||r.endDate;
   r.location=t.pickup||t.startLoc||r.location;
-  if(f&&f.leadTotal!=null)r.guideFee=f.leadTotal;
+  r.guideFee=tourGuideFee(t);
   if(t.guideAlloted)r.guideName=t.guideAlloted;
 }
 /* Push a tour's edits to every linked record + re-render the affected views. */
@@ -10064,7 +10089,7 @@ function openTour(id){
   document.getElementById("modal").innerHTML=
     "<div class='modal-head'><div>"+catBadge(t.cat)+" <span class='pill plain' style='font-family:var(--font-mono)'>ID "+tourCode(t)+"</span>"+(t.activity?" <span class='pill plain'>"+t.activity+"</span>":"")+"<h2 style='font-size:20px;font-weight:700;margin-top:8px'>"+(t.name||tourLabel(t))+"</h2>"+(poc?"<div style='font-size:12.5px;font-weight:700;color:var(--sea);margin-top:6px'>POC: "+poc.guest+"</div>":"")+"<div style='color:var(--ink-soft);font-size:13px;margin-top:2px'>"+_dateLine+"</div></div><div style='display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none'>"+XBTN+"<button class='btn btn-primary btn-sm' style='white-space:nowrap' onclick=\"editTour('"+id+"')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg>Edit tour</button></div></div>"+
     "<div class='modal-body'>"+
-      "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+"</div></div></div>"+
+      "<div class='team-card'><div class='tc-av'>"+(poc?String(poc.guest||"P").split(" ").map(function(w){return w[0];}).join("").slice(0,2).toUpperCase():"—")+"</div><div class='tc-meta'><div class='tc-role'>Point of contact</div><div class='tc-name'>"+(poc?poc.guest:"Not set — tap the ☆ next to a participant below")+"</div>"+(poc?"<div class='tc-contact'>"+[poc.phone,poc.email].filter(Boolean).join(" · ")+"</div>":"")+"<div class='tc-contact' style='margin-top:2px'>Guide: "+(t.guide||"—")+" · "+tourGuideRole(t)+" · fee "+fmt(tourGuideFee(t))+"</div></div></div>"+
       "<div class='stat-strip'><div class='s'><div class='v mono'>"+t.cap+"</div><div class='l'>Capacity</div></div><div class='s'><div class='v mono'>"+b+"</div><div class='l'>Pax</div></div><div class='s'><div class='v mono' style='color:var("+"sea)'>"+(t.cap-b)+"</div><div class='l'>Remaining</div></div><div class='s'><div class='v mono'>"+wl.length+"</div><div class='l'>Waitlist</div></div></div>"+
       "<div class='bar "+(b/t.cap>=.8?"warn":"")+"' style='margin-bottom:18px'><span style='width:"+Math.min(b/t.cap*100,100)+"%'></span></div>"+
       "<div class='kv-grid' style='display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:13px;margin-bottom:18px'>"+
