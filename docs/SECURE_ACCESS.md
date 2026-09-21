@@ -157,7 +157,9 @@ begin
     gname := lower(trim(g->>'name'));
     begin
       select coalesce(jsonb_agg(o.data),'[]'::jsonb) into ops from ieo_ops o
-        where lower(trim(coalesce(o.data->>'guide',''))) = gname;
+        where lower(trim(coalesce(o.data->>'guide',''))) = gname
+           or exists (select 1 from jsonb_array_elements(coalesce(o.data->'guides','[]'::jsonb)) gg
+                      where lower(trim(coalesce(gg->>'name',''))) = gname);
     exception when undefined_table then ops := '[]'::jsonb;
     end;
     -- Only the fields the guide/driver apps actually display — never the
@@ -212,7 +214,9 @@ begin
   gname := lower(trim(g->>'name'));
   select coalesce(jsonb_agg(o),'[]'::jsonb) into ops
     from jsonb_array_elements(coalesce(ws->'ops','[]'::jsonb)) o
-    where lower(trim(coalesce(o->>'guide',''))) = gname;
+    where lower(trim(coalesce(o->>'guide',''))) = gname
+       or exists (select 1 from jsonb_array_elements(coalesce(o->'guides','[]'::jsonb)) gg
+                  where lower(trim(coalesce(gg->>'name',''))) = gname);
   select coalesce(jsonb_agg(jsonb_build_object('name',v->>'name','reg',v->>'reg','driver',v->>'driver')),'[]'::jsonb) into vehs
     from jsonb_array_elements(coalesce(ws->'vehicles','[]'::jsonb)) v
     where lower(trim(coalesce(v->>'name',''))) in (

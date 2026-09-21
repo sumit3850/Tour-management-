@@ -449,6 +449,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .op-sub-row{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:flex-end;margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--line)}
 .op-sub-row>div{flex:1 1 130px;min-width:110px}
 .op-sub-row>div.wide{flex:1 1 100%}
+.op-sub-row>div.wide2{flex:2 1 200px}
 .op-sub-row>div label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:4px}
 .op-sub-row .input{width:100%}
 .op-sub-row>button{flex:0 0 auto;align-self:flex-end}
@@ -1153,7 +1154,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 283</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 284</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1162,7 +1163,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 283</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 284</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1966,14 +1967,14 @@ function bookingsForSheet(){
 var _sheetSyncTimer=null;
 function scheduleSheetSync(){if(!sheetHook())return;clearTimeout(_sheetSyncTimer);_sheetSyncTimer=setTimeout(syncSheets,1800);}
 /* Logistics & Operations tab — one row per operation (incl. completed tours). */
-var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","POC","POC Phone","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Guide Role","Guide Fee","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Legs","Status","Remarks","Guide Feedback","Guide Feedback At","Driver Feedback","Driver Feedback At"];
+var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","POC","POC Phone","Vehicle","Reg. No.","Driver","Driver No.","Guide","Guide ID","Guide phone","Guide Role","Guide Fee","Tour Type","Other Guides","Session Dates","Pickup Date","Pickup Location","Drop Date","Drop Location","Stay","Legs","Status","Remarks","Guide Feedback","Guide Feedback At","Driver Feedback","Driver Feedback At"];
 /* Compact one-cell text for a multi-leg op's vehicle/driver changes ("" when single-leg). */
 function opLegsSheetText(o){
   if(!o.legs||!o.legs.length)return "";
   var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverStatus:o.driverStatus}].concat(o.legs);
   return rows.map(function(l,i){return "Leg "+(i+1)+" ("+(l.start||"—")+" to "+(l.end||"—")+"): "+(l.veh||"—")+(l.reg?" "+l.reg:"")+" / "+(l.driver||"—")+(l.driverStatus?" ["+l.driverStatus+"]":"");}).join(" | ");
 }
-function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Guide Role":o.guideRole||"","Guide Fee":(o.guideFee!=null?o.guideFee:""),"Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
+function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Guide Role":o.guideRole||"","Guide Fee":(o.guideFee!=null?o.guideFee:""),"Tour Type":opTypeLabel(o.opType),"Other Guides":(o.guides||[]).map(function(x){return x.name+" ("+x.role+(x.fee?" · "+x.fee:"")+")";}).join("; "),"Session Dates":(o.sessions||[]).map(function(x){return dOpt(x.date)+(x.amount!==""&&x.amount!=null?" ₹"+x.amount:"")+(x.work?" "+x.work:"");}).join("; "),"Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
 var DAILY_COLS=["Tour ID","Date","Vehicle","Reg. No.","Driver","Start km","End km","Total km","Location","Time","Entry"];
 function dailyActivitySheetRow(r){return {"Tour ID":tripTourCode(r),"Date":dOpt(r.date),"Vehicle":r.veh||"","Reg. No.":r.reg||"","Driver":r.driver||"","Start km":r.startKm||0,"End km":r.endKm||0,"Total km":r.totalKm||0,"Location":r.loc||"","Time":r.time||"","Entry":r.offline?"Offline":"Online"};}
 var VEHICLE_COLS=["Vehicle","Reg. No.","Type","Seats","Driver","Login Code","Status"];
@@ -1996,6 +1997,109 @@ function opDriverPhoneValue(prefix,name){var sel=document.getElementById(prefix+
    cover the tour from its Start Date up to the first leg's Start Date (or
    the whole tour if no legs are added) — the common, single-driver case
    needs no legs at all. */
+/* ===== Operation: tour type, guides with roles, per-date sessions =====
+   opType: group (date range) · session (individual working dates, each with
+   the work and the amount allotted) · mixed (range + dated sessions).
+   Guides: the first row is the primary guide (o.guide / guideRole / guideFee —
+   what the guide app filters on); extra rows live in o.guides[{name,role,fee}].
+   Sessions: o.sessions[{date,work,amount}] — shown per date in the guide app. */
+var OP_TYPES=[["group","Group tour"],["session","Session tour"],["mixed","Mixed tour"]];
+function opTypeOptions(sel){sel=sel||"group";return OP_TYPES.map(function(p){return "<option value='"+p[0]+"' "+(p[0]===sel?"selected":"")+">"+p[1]+"</option>";}).join("");}
+function opTypeLabel(v){var p=OP_TYPES.find(function(x){return x[0]===(v||"group");});return p?p[1]:"Group tour";}
+function opTypeSwap(prefix){
+  var v=(document.getElementById(prefix+"_optype")||{}).value||"group";
+  var sw=document.getElementById(prefix+"_sesswrap");if(sw)sw.style.display=(v==="group")?"none":"block";
+  ["_startwrap","_endwrap"].forEach(function(sfx){var e=document.getElementById(prefix+sfx);if(e)e.style.display=(v==="session")?"none":"block";});
+  if(v!=="group"){var box=document.getElementById(prefix+"_sess");if(box&&!box.children.length)addOpSessRow(prefix);}
+}
+function opSessRowHtml(x){
+  x=x||{};var esc=function(v){return String(v==null?"":v).replace(/'/g,"&#39;").replace(/</g,"&lt;");};
+  return "<div class='op-sess-row op-sub-row'>"+
+    "<div><label>Date</label><input class='input op-sess-date' type='date' value='"+esc(x.date)+"'></div>"+
+    "<div class='wide2'><label>Work / plan</label><input class='input op-sess-work' value='"+esc(x.work)+"' placeholder='e.g. Night herping — Chidiya Tapu'></div>"+
+    "<div><label>Amount (₹)</label><input class='input mono op-sess-amt' type='number' min='0' value='"+((x.amount!=null&&x.amount!=="")?x.amount:"")+"' placeholder='guide fee'></div>"+
+    "<button type='button' onclick='this.closest(\".op-sess-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--coral);font-weight:700;cursor:pointer'>✕</button>"+
+  "</div>";
+}
+function addOpSessRow(prefix,x){var box=document.getElementById(prefix+"_sess");if(!box)return;box.insertAdjacentHTML("beforeend",opSessRowHtml(x));}
+function opSessFieldHtml(prefix,sessions,type){
+  return "<div class='field full' id='"+prefix+"_sesswrap' style='display:"+((type||"group")==="group"?"none":"block")+";border-top:1px solid var(--line);padding-top:14px;margin-top:6px'>"+
+    "<label>Session dates <span style='color:var(--ink-soft);font-weight:400'>(one row per working date — the guide sees each date, the work and the amount allotted in the Guide Ops app)</span></label>"+
+    "<div id='"+prefix+"_sess'>"+(sessions||[]).map(opSessRowHtml).join("")+"</div>"+
+    "<button type='button' class='btn btn-ghost btn-sm' onclick=\"addOpSessRow('"+prefix+"')\">+ Add date</button>"+
+  "</div>";
+}
+function collectOpSessions(prefix){
+  var box=document.getElementById(prefix+"_sess");if(!box)return [];
+  var out=[];
+  box.querySelectorAll(".op-sess-row").forEach(function(r){
+    var date=(r.querySelector(".op-sess-date")||{}).value||"";if(!date)return;
+    var amt=(r.querySelector(".op-sess-amt")||{}).value;
+    out.push({date:date,work:((r.querySelector(".op-sess-work")||{}).value||"").trim(),amount:(String(amt||"").trim()==="")?"":Math.max(0,parseFloat(amt)||0)});
+  });
+  return out.sort(function(a,b){return a.date.localeCompare(b.date);});
+}
+function opSessionsTotal(o){return (o&&o.sessions||[]).reduce(function(t,x){return t+(parseFloat(x.amount)||0);},0);}
+function opGuideRowHtml(gx,idx){
+  gx=gx||{};var name=(gx.name&&gx.name!=="—")?gx.name:"";var known=externalGuides.some(function(g){return g.name===name;});var custom=!!(name&&!known);
+  return "<div class='op-guide-row op-sub-row'>"+
+    "<div><label>"+(idx===0?"Guide":"Additional guide")+"</label><select class='input op-g-name' onchange='opGuideRowPick(this)'>"+opGuideOptions(name)+"</select></div>"+
+    "<div class='op-g-customwrap' style='display:"+(custom?"block":"none")+"'><label>Custom guide name</label><input class='input op-g-custom' value='"+(custom?name.replace(/'/g,"&#39;"):"")+"' placeholder='Guide name'></div>"+
+    "<div><label>Role</label><select class='input op-g-role'>"+GUIDE_ROLES.map(function(r){return "<option "+(r===(gx.role==="Assistant"?"Assistant":"Lead")?"selected":"")+">"+r+"</option>";}).join("")+"</select></div>"+
+    "<div><label>Fee (₹)</label><input class='input mono op-g-fee' type='number' min='0' value='"+((gx.fee!=null&&gx.fee!==""&&parseFloat(gx.fee)>0)?gx.fee:"")+"' placeholder='"+(idx===0?"session amounts / rate sheet":"0")+"'></div>"+
+    (idx>0?"<button type='button' onclick='this.closest(\".op-guide-row\").remove()' style='padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--coral);font-weight:700;cursor:pointer'>✕</button>":"")+
+  "</div>";
+}
+function opGuideRowPick(sel){var w=sel.closest(".op-guide-row").querySelector(".op-g-customwrap");if(w)w.style.display=(sel.value==="custom")?"block":"none";}
+function addOpGuideRow(prefix){var box=document.getElementById(prefix+"_guides");if(!box)return;box.insertAdjacentHTML("beforeend",opGuideRowHtml({},box.children.length));}
+function opGuidesFieldHtml(prefix,o){
+  o=o||{};
+  var list=[{name:o.guide,role:o.guideRole,fee:o.guideFee}].concat(o.guides||[]);
+  return "<div class='field full' style='border-top:1px solid var(--line);padding-top:14px;margin-top:6px'>"+
+    "<label>Guides <span style='color:var(--ink-soft);font-weight:400'>(each with a role — Lead or Assistant — and the fee; the first guide is the one the operation is filed under)</span></label>"+
+    "<div id='"+prefix+"_guides'>"+list.map(opGuideRowHtml).join("")+"</div>"+
+    "<button type='button' class='btn btn-ghost btn-sm' onclick=\"addOpGuideRow('"+prefix+"')\">+ Add guide</button>"+
+  "</div>";
+}
+function collectOpGuides(prefix){
+  var box=document.getElementById(prefix+"_guides");if(!box)return [];
+  var out=[];
+  box.querySelectorAll(".op-guide-row").forEach(function(r,i){
+    var sel=r.querySelector(".op-g-name");var name=sel?sel.value:"";
+    if(name==="custom")name=((r.querySelector(".op-g-custom")||{}).value||"").trim();
+    var fee=(r.querySelector(".op-g-fee")||{}).value;
+    var row={name:name,role:((r.querySelector(".op-g-role")||{}).value==="Assistant")?"Assistant":"Lead",fee:(String(fee||"").trim()==="")?"":Math.max(0,parseFloat(fee)||0)};
+    if(i===0||name)out.push(row);
+  });
+  return out;
+}
+/* Read the shared parts of the operation form (type, guides, sessions) onto the record. */
+function applyOpForm(o,prefix){
+  o.opType=(document.getElementById(prefix+"_optype")||{}).value||"group";
+  var gs=collectOpGuides(prefix);var g0=gs[0]||{};
+  o.guide=g0.name||"—";o.guideRole=g0.role||"Lead";
+  o.guides=gs.slice(1);
+  o.sessions=(o.opType==="group")?[]:collectOpSessions(prefix);
+  var sum=opSessionsTotal(o);
+  o.guideFee=(o.opType!=="group"&&sum>0)?sum:(parseFloat(g0.fee)||0);
+  if(o.opType==="session"&&o.sessions.length){
+    o.startISO=o.sessions[0].date;o.endISO=o.sessions[o.sessions.length-1].date;
+    o.start=dShort(o.startISO);o.end=dShort(o.endISO);o.date=o.start;o.dateDisplay=o.start;
+    if(!o.pickupDate)o.pickupDate=o.startISO;if(!o.dropDate)o.dropDate=o.endISO;
+  }
+}
+/* A session tour's dates flow onto its operation: every tour date gets a row,
+   existing rows keep the work / amount typed on them, new ones start at the
+   guide's per-day rate (or an even split of a fee set on the tour). */
+function opSyncSessions(o,t,prune){
+  var dates=(t.sessionDates&&t.sessionDates.length)?t.sessionDates.slice():(t.start?[t.start]:[]);
+  var f=feeFor(t);var perDay=(parseFloat(t.guideFee)>0&&dates.length)?Math.round(parseFloat(t.guideFee)/dates.length):(tourGuideRole(t)==="Assistant"?(f.asst||0):(f.lead||0));
+  var have={};(o.sessions||[]).forEach(function(x){if(x&&x.date)have[x.date]=x;});
+  var out=dates.map(function(d){return have[d]||{date:d,work:"",amount:perDay||""};});
+  if(!prune)(o.sessions||[]).forEach(function(x){if(x&&x.date&&dates.indexOf(x.date)<0)out.push(x);});
+  o.sessions=out.sort(function(a,b){return a.date.localeCompare(b.date);});
+  var sum=opSessionsTotal(o);if(sum>0)o.guideFee=sum;
+}
 function opLegRowHtml(l){
   l=l||{};
   return "<div class='op-leg-row op-sub-row'>"+
@@ -3423,7 +3527,11 @@ function enrichOp(o){
   });
   var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
   if(t){o.tourId=o.tourId||tourCode(t);o.tourName=t.name||tourLabel(t);if(t.stay&&!o.stay)o.stay=t.stay;
-    o.guideRole=tourGuideRole(t);o.guideFee=tourGuideFee(t);
+    /* fill only what the operation doesn't have yet — the operation's own edits win */
+    if(o.guideRole==null)o.guideRole=tourGuideRole(t);
+    if(o.guideFee==null||o.guideFee==="")o.guideFee=tourGuideFee(t);
+    if(!o.opType)o.opType=(t.tourType==="session")?"session":"group";
+    if(t.tourType==="session"&&o.opType!=="group"&&!(o.sessions&&o.sessions.length))opSyncSessions(o,t,false);
     o.itinerary=(t.itinerary||[]).map(function(d,i){return {day:i+1,date:d.date||"",title:d.title||"",plan:d.plan||""};}).filter(function(d){return d.title||d.plan;});
     if(t.pocId){var pb=(bookings||[]).find(function(b){return b.id===t.pocId;});if(pb){o.pocName=pb.guest;o.pocPhone=pb.phone||"";}}}
 }
@@ -7656,7 +7764,7 @@ function opCard(o){
   return "<div class='op-card'><div class='op-top'><div class='op-head'>"+(o.tourId?"<div class='op-code'>"+o.tourId+"</div>":"")+"<div class='op-name'>"+o.tour+"</div><div class='op-date'>"+o.start+" – "+o.end+"</div></div>"+
       "<div class='op-side'><select class='op-status-sel' style='border-color:"+_stc+";color:"+_stc+"' onclick='event.stopPropagation()' onchange=\"setOpStatusQuick('"+o.id+"',this.value)\">"+["Scheduled","In progress","Completed","Withdrawn","Declined","Transferred","Cancelled"].map(function(st){return "<option "+(st===(o.status||"Scheduled")?"selected":"")+">"+st+"</option>";}).join("")+"</select>"+
       (_fee?"<div class='op-fee' title='Guide fee'>Guide fee "+_fee+"</div>":"")+"</div></div>"+
-    "<div class='op-rows'>"+(poc?row("POC",poc):"")+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Guide",o.guide)+row("Guide role",o.guideRole)+row("Guide ID",g.gid)+row("Guide phone",g.phone)+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
+    "<div class='op-rows'>"+(poc?row("POC",poc):"")+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Tour type",opTypeLabel(o.opType))+row("Guide",o.guide+(o.guideRole?" ("+o.guideRole+")":""))+((o.guides&&o.guides.length)?row("Other guides",o.guides.map(function(x){return x.name+" ("+x.role+")";}).join(", ")):"")+row("Guide ID",g.gid)+row("Guide phone",g.phone)+((o.sessions&&o.sessions.length)?row("Sessions",o.sessions.length+" date"+(o.sessions.length===1?"":"s")+" · "+fmt(opSessionsTotal(o))+" (per-date detail in Guide Ops)"):"")+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
     opLegsSummaryHtml(o)+
     opStaysSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
@@ -7734,16 +7842,18 @@ function ensureAccBookingForTour(t,accId){
   var rec={accId:accId,tourId:t.id,tour:tourLabel(t),poc:(pb&&pb.guest)||"",guests:booked(t.id)||1,rooms:(existing&&existing.rooms)||1,checkIn:t.start||"",checkOut:t.end||"",status:"Confirmed"};
   if(existing)Object.assign(existing,rec);else{rec.id="AB"+Date.now();accBookings.unshift(rec);}
 }
-function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=accommodations.some(function(a){return a.name===o.stay;});var guideKnown=externalGuides.some(function(g){return g.name===o.guide;});var driverIsCustom=o.driver&&o.driver!=="—"&&!drivers.some(function(d){return d.name===o.driver;});modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+String(o.tour||"").replace(/'/g,"&#39;")+"'></div><div class='field'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field'><label>End Date</label><input class='input' id='eo_end' value='"+(o.end||"")+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle available</label><select class='input' id='eo_veh'>"+vehicleOptions(o.veh)+"</select></div><div class='field'><label>Driver available</label><select class='input' id='eo_driver' onchange=\"opDriverPick('eo')\">"+driverOptions(o.driver)+"</select></div><div class='field' id='eo_drivercustomwrap' style='display:"+(driverIsCustom?"block":"none")+"'><label>Custom driver name</label><input class='input' id='eo_drivercustom' value='"+(driverIsCustom?String(o.driver).replace(/'/g,"&#39;"):"")+"'></div><div class='field' id='eo_driverphonewrap' style='display:"+(driverIsCustom?"block":"none")+"'><label>Custom driver phone</label><input class='input' id='eo_driverphone' value='"+String(o.driverPhone||"").replace(/'/g,"&#39;")+"'></div><div class='field'><label>Guide</label><select class='input' id='eo_guide' onchange=\"opGuidePick('eo')\">"+opGuideOptions(o.guide)+"</select></div><div class='field' id='eo_guidecustomwrap' style='display:"+((o.guide&&!guideKnown)?"block":"none")+"'><label>Custom guide name</label><input class='input' id='eo_guidecustom' value='"+((o.guide&&!guideKnown)?o.guide.replace(/'/g,"&#39;"):"")+"'></div><div class='field'><label>Status</label><select class='input' id='eo_status'>"+["Scheduled","In progress","Completed","Withdrawn","Declined","Transferred","Cancelled"].map(function(s){return "<option "+(s===(o.status||"Scheduled")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
+function editOp(id){const o=ops.find(x=>x.id===id);if(!o)return;var stayKnown=accommodations.some(function(a){return a.name===o.stay;});var guideKnown=externalGuides.some(function(g){return g.name===o.guide;});var driverIsCustom=o.driver&&o.driver!=="—"&&!drivers.some(function(d){return d.name===o.driver;});modalForm("Edit operation","Update operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='eo_tour' value='"+String(o.tour||"").replace(/'/g,"&#39;")+"'></div><div class='field'><label>Tour type</label><select class='input' id='eo_optype' onchange=\"opTypeSwap('eo')\">"+opTypeOptions(o.opType)+"</select></div><div class='field' id='eo_startwrap' style='display:"+((o.opType||"group")==="session"?"none":"block")+"'><label>Start Date</label><input class='input' id='eo_date' value='"+o.start+"'></div><div class='field' id='eo_endwrap' style='display:"+((o.opType||"group")==="session"?"none":"block")+"'><label>End Date</label><input class='input' id='eo_end' value='"+(o.end||"")+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='eo_pax' value='"+o.pax+"'></div><div class='field'><label>Vehicle available</label><select class='input' id='eo_veh'>"+vehicleOptions(o.veh)+"</select></div><div class='field'><label>Driver available</label><select class='input' id='eo_driver' onchange=\"opDriverPick('eo')\">"+driverOptions(o.driver)+"</select></div><div class='field' id='eo_drivercustomwrap' style='display:"+(driverIsCustom?"block":"none")+"'><label>Custom driver name</label><input class='input' id='eo_drivercustom' value='"+(driverIsCustom?String(o.driver).replace(/'/g,"&#39;"):"")+"'></div><div class='field' id='eo_driverphonewrap' style='display:"+(driverIsCustom?"block":"none")+"'><label>Custom driver phone</label><input class='input' id='eo_driverphone' value='"+String(o.driverPhone||"").replace(/'/g,"&#39;")+"'></div><div class='field'><label>Status</label><select class='input' id='eo_status'>"+["Scheduled","In progress","Completed","Withdrawn","Declined","Transferred","Cancelled"].map(function(s){return "<option "+(s===(o.status||"Scheduled")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
   "<div class='field'><label>Pickup Date</label><input class='input' type='date' id='eo_pudate' value='"+(o.pickupDate||"")+"'></div>"+
   "<div class='field'><label>Pickup Location</label><input class='input' id='eo_puloc' value='"+((o.pickupLoc||o.pickup||"")).replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair 04:30'></div>"+
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='eo_drdate' value='"+(o.dropDate||"")+"'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='eo_drloc' value='"+(o.dropLoc||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Port Blair airport'></div>"+
+  opGuidesFieldHtml("eo",o)+
+  opSessFieldHtml("eo",o.sessions,o.opType)+
   opLegsFieldHtml("eo",o.legs)+
   opStaysFieldHtml("eo",opStaysForForm(o))+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='eo_remarks' style='min-height:70px'>"+(o.remarks||"")+"</textarea></div>"+
 "</div>","saveEditOp","Update");document.getElementById("modal").dataset.oid=id;}
-function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=opDriverValue("eo");o.driverPhone=opDriverPhoneValue("eo",o.driver);o.guide=opGuideValue("eo")||o.guide;var _newStatus=document.getElementById("eo_status").value;var _statusChanged=(_newStatus!==o.status);o.status=_newStatus;
+function saveEditOp(){const id=document.getElementById("modal").dataset.oid;const o=ops.find(x=>x.id===id);if(!o)return;o.tour=document.getElementById("eo_tour").value;o.date=document.getElementById("eo_date").value;o.start=document.getElementById("eo_date").value;o.dateDisplay=document.getElementById("eo_date").value;o.end=document.getElementById("eo_end").value;o.pax=parseInt(document.getElementById("eo_pax").value)||0;o.veh=document.getElementById("eo_veh").value;o.driver=opDriverValue("eo");o.driverPhone=opDriverPhoneValue("eo",o.driver);applyOpForm(o,"eo");var _newStatus=document.getElementById("eo_status").value;var _statusChanged=(_newStatus!==o.status);o.status=_newStatus;
   o.pickupDate=document.getElementById("eo_pudate").value||"";o.pickupLoc=document.getElementById("eo_puloc").value||"";o.pickup=o.pickupLoc||"—";
   o.dropDate=document.getElementById("eo_drdate").value||"";o.dropLoc=document.getElementById("eo_drloc").value||"";
   /* The dialog rebuilds leg objects from the DOM — carry each leg's
@@ -7780,18 +7890,21 @@ function clearOpFeedback(id,who,segKey){
   else{o.driverFeedback="";o.driverFeedbackAt="";}
   persistData();renderDashOps();
 }
-function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Date</label><input class='input' id='no_date' value='"+todayISO.slice(5,7)+" "+todayISO.slice(8,10)+"'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle available</label><select class='input' id='no_veh'>"+vehicleOptions("")+"</select></div><div class='field'><label>Driver available</label><select class='input' id='no_driver' onchange=\"opDriverPick('no')\">"+driverOptions("")+"</select></div><div class='field' id='no_drivercustomwrap' style='display:none'><label>Custom driver name</label><input class='input' id='no_drivercustom' placeholder='Driver name'></div><div class='field' id='no_driverphonewrap' style='display:none'><label>Custom driver phone</label><input class='input' id='no_driverphone' placeholder='+91 …'></div><div class='field'><label>Guide</label><select class='input' id='no_guide' onchange=\"opGuidePick('no')\">"+opGuideOptions("")+"</select></div><div class='field' id='no_guidecustomwrap' style='display:none'><label>Custom guide name</label><input class='input' id='no_guidecustom' placeholder='Guide name'></div>"+
+function openAddOp(){modalForm("New operation","Add operation","<div class='form-grid'><div class='field full'><label>Tour name</label><input class='input' id='no_tour' placeholder='e.g. Chidiya Tapu Photography'></div><div class='field'><label>Tour type</label><select class='input' id='no_optype' onchange=\"opTypeSwap('no')\">"+opTypeOptions("group")+"</select></div><div class='field' id='no_startwrap'><label>Start Date</label><input class='input' id='no_date' value='"+dShort(todayISO)+"'></div><div class='field' id='no_endwrap'><label>End Date</label><input class='input' id='no_end' placeholder='dd/mm/yyyy'></div><div class='field'><label>Pax</label><input class='input mono' type='number' id='no_pax' value='2'></div><div class='field'><label>Vehicle available</label><select class='input' id='no_veh'>"+vehicleOptions("")+"</select></div><div class='field'><label>Driver available</label><select class='input' id='no_driver' onchange=\"opDriverPick('no')\">"+driverOptions("")+"</select></div><div class='field' id='no_drivercustomwrap' style='display:none'><label>Custom driver name</label><input class='input' id='no_drivercustom' placeholder='Driver name'></div><div class='field' id='no_driverphonewrap' style='display:none'><label>Custom driver phone</label><input class='input' id='no_driverphone' placeholder='+91 …'></div>"+
   "<div class='field'><label>Pickup Date</label><input class='input' type='date' id='no_pudate' value='"+todayISO+"'></div>"+
   "<div class='field'><label>Pickup Location</label><input class='input' id='no_puloc' placeholder='e.g. Port Blair 04:30'></div>"+
   "<div class='field'><label>Drop Date</label><input class='input' type='date' id='no_drdate'></div>"+
   "<div class='field'><label>Drop Location</label><input class='input' id='no_drloc' placeholder='e.g. Port Blair airport'></div>"+
+  opGuidesFieldHtml("no",{})+
+  opSessFieldHtml("no",[],"group")+
   opLegsFieldHtml("no",[])+
   opStaysFieldHtml("no",[])+
   "<div class='field full'><label>Remarks for guide</label><textarea class='input' id='no_remarks' style='min-height:70px' placeholder='Flight details, meal notes, etc.'></textarea></div>"+
 "</div>","saveNewOp","Add operation");}
 function saveNewOp(){
   var dt=document.getElementById("no_date").value||"—";var puloc=document.getElementById("no_puloc").value||"—";
-  var op={id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:opGuideValue("no")||"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),stays:collectOpStays("no"),remarks:document.getElementById("no_remarks").value||"",birding:"—",stay:"—",status:"Scheduled"};
+  var op={id:"O"+Date.now(),tour:document.getElementById("no_tour").value||"—",date:dt,dateDisplay:dt,start:dt,end:(document.getElementById("no_end")||{}).value||"",clients:"—",pax:parseInt(document.getElementById("no_pax").value)||0,veh:document.getElementById("no_veh").value||"—",driver:opDriverValue("no")||"—",driverPhone:opDriverPhoneValue("no",opDriverValue("no")),guide:"—",pickupDate:document.getElementById("no_pudate").value||"",pickupLoc:puloc,pickup:puloc,dropDate:document.getElementById("no_drdate").value||"",dropLoc:document.getElementById("no_drloc").value||"",legs:collectOpLegs("no"),stays:collectOpStays("no"),remarks:document.getElementById("no_remarks").value||"",birding:"—",stay:"—",status:"Scheduled"};
+  applyOpForm(op,"no");
   syncOpStay(op);
   ops.push(op);
   persistData();closeModal();renderDashOps();renderAccCalendar&&renderAccCalendar();renderAccommodation&&renderAccommodation();}
@@ -8673,10 +8786,12 @@ function opFromReservation(r){
 function opFromTour(t){
   if(!t)return;
   if((ops||[]).some(function(o){return o.fromTour===t.id;}))return;
-  ops.unshift({id:"OP"+Date.now()+Math.floor(Math.random()*100),fromTour:t.id,tourId:tourCode(t),tour:tourLabel(t),
+  var _o={id:"OP"+Date.now()+Math.floor(Math.random()*100),fromTour:t.id,tourId:tourCode(t),tour:tourLabel(t),
     dateDisplay:dShort(t.start),date:dShort(t.start),start:dShort(t.start),end:dShort(t.end),
     startISO:t.start||"",endISO:t.end||"",
-    pax:booked(t.id),clients:"—",veh:"—",driver:"—",guide:t.guide||t.guideAlloted||"—",guideRole:tourGuideRole(t),guideFee:tourGuideFee(t),pickupDate:t.start||"",pickupLoc:t.pickup||"—",pickup:t.pickup||"—",dropDate:t.end||"",dropLoc:"",birding:t.startLoc||"—",stay:t.stay||"—",status:"Scheduled"});
+    pax:booked(t.id),clients:"—",veh:"—",driver:"—",guide:t.guide||t.guideAlloted||"—",guideRole:tourGuideRole(t),guideFee:tourGuideFee(t),opType:(t.tourType==="session")?"session":"group",sessions:[],guides:[],pickupDate:t.start||"",pickupLoc:t.pickup||"—",pickup:t.pickup||"—",dropDate:t.end||"",dropLoc:"",birding:t.startLoc||"—",stay:t.stay||"—",status:"Scheduled"};
+  if(t.tourType==="session")opSyncSessions(_o,t,true);
+  ops.unshift(_o);
   persistData();
   renderDashOps();
 }
@@ -9830,6 +9945,8 @@ function syncTourToOps(t){
   o.pax=booked(t.id);
   o.guide=t.guide||t.guideAlloted||o.guide||"—";
   o.guideRole=tourGuideRole(t);o.guideFee=tourGuideFee(t);
+  if(t.tourType==="session"){if(o.opType!=="mixed")o.opType="session";opSyncSessions(o,t,true);}
+  else if(!o.opType)o.opType="group";
   o.pickupDate=t.start||"";o.dropDate=t.end||"";
   o.pickupLoc=t.pickup||o.pickupLoc||"—";o.pickup=o.pickupLoc||"—";
   o.birding=t.startLoc||o.birding||"—";
