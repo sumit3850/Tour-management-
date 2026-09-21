@@ -311,17 +311,21 @@ function doLogout(){
 
 /* An operation is mine when I'm its guide or one of its additional guides. */
 function isMe(n){return String(n||"").trim().toLowerCase()===String(myGuide&&myGuide.name||"").trim().toLowerCase();}
-function myEntry(o){if(isMe(o.guide))return {name:o.guide,role:o.guideRole||"Lead",fee:o.guideFee};return (o.guides||[]).find(function(x){return isMe(x.name);})||null;}
+function myEntry(o){if(isMe(o.guide))return {name:o.guide,role:o.guideRole||"Lead",fee:o.guideFee,dates:o.guideDates||[],perDay:o.guidePerDay||0,primary:true};return (o.guides||[]).find(function(x){return isMe(x.name);})||null;}
 function myOps(){return allOps.filter(function(o){return !!myEntry(o);}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
 /* Session tours list every working date with the work and the amount allotted. */
+/* My dated plan: the session dates I'm allotted (all of them when none were
+   ticked), each with the work planned and MY amount for that date — the
+   per-date amount typed on the operation for the main guide, else my per-day
+   rate; the total is my fee. */
 function sessionsHtml(o){
-  var list=(o.sessions||[]).filter(function(x){return x&&x.date;});if(!list.length)return "";
-  /* the per-date amounts are the primary guide's — an additional guide sees the
-     dates and the work, with their own fee at the top of the card */
-  var showAmt=isMe(o.guide);
-  var tot=list.reduce(function(t,x){return t+(parseFloat(x.amount)||0);},0);
-  return "<div class='sess'><div class='sess-h'><span>Session dates · "+list.length+"</span>"+((showAmt&&tot>0)?"<span>Total "+money(tot)+"</span>":"")+"</div>"+
-    list.map(function(x){return "<div class='sess-r"+(showAmt?"":" noamt")+"'><span class='d'>"+dmy(x.date)+"</span><span class='w'>"+(x.work?String(x.work).replace(/</g,"&lt;"):"—")+"</span>"+(showAmt?"<span class='a'>"+((x.amount!==""&&x.amount!=null)?money(x.amount):"—")+"</span>":"")+"</div>";}).join("")+
+  var all=(o.sessions||[]).filter(function(x){return x&&x.date;});if(!all.length)return "";
+  var me=myEntry(o)||{};var mine=(me.dates&&me.dates.length)?all.filter(function(x){return me.dates.indexOf(x.date)>=0;}):all;
+  if(!mine.length)mine=all;
+  var amt=function(x){if(me.primary&&x.amount!==""&&x.amount!=null)return parseFloat(x.amount)||0;if(me.perDay>0)return me.perDay;var f=parseFloat(me.fee)||0;return mine.length?Math.round(f/mine.length):0;};
+  var tot=(parseFloat(me.fee)>0)?parseFloat(me.fee):mine.reduce(function(t,x){return t+amt(x);},0);
+  return "<div class='sess'><div class='sess-h'><span>My dates · "+mine.length+(mine.length<all.length?" of "+all.length:"")+"</span>"+(tot>0?"<span>Total "+money(tot)+"</span>":"")+"</div>"+
+    mine.map(function(x){var a=amt(x);return "<div class='sess-r'><span class='d'>"+dmy(x.date)+"</span><span class='w'>"+(x.work?String(x.work).replace(/</g,"&lt;"):"—")+"</span><span class='a'>"+(a>0?money(a):"—")+"</span></div>";}).join("")+
   "</div>";
 }
 var OP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
@@ -365,7 +369,8 @@ function renderList(){
     var me=myEntry(o)||{};
     var fee=(me.fee!=null&&me.fee!=="")?money(me.fee):"";
     var sess=(o.sessions||[]).filter(function(x){return x&&x.date;});
-    var dateLine=(o.opType==="session"&&sess.length)?sess.map(function(x){return dmy(x.date);}).join(" · "):(dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):""));
+    var myDates=(me.dates&&me.dates.length)?sess.filter(function(x){return me.dates.indexOf(x.date)>=0;}):sess;if(!myDates.length)myDates=sess;
+    var dateLine=(o.opType==="session"&&myDates.length)?myDates.map(function(x){return dmy(x.date);}).join(" · "):(dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):""));
     return "<div class='card' id='card_"+o.id+"'><div class='top'><div class='head-l'>"+(o.tourId?"<div class='code'>"+o.tourId+"</div>":"")+"<div class='name'>"+(o.tour||"Tour")+"</div>"+
       "<div class='dates'>"+dateLine+"</div></div>"+
       "<div class='side'><span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span>"+(fee?"<span class='fee' title='Guide fee'>Guide fee "+fee+"</span>":"")+"</div></div>"+
