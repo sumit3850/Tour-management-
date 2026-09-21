@@ -11,7 +11,7 @@
      to the network. The apps queue their writes in localStorage and flush
      them when the connection returns, so a failed API call offline is
      expected and handled by the app, not the cache. */
-var CACHE = "ie-ops-v158"; /* v158: invoices start with the five standard categories (blank), plus deposit / pending rows auto-filled from the quotation. */ /* v157: quotation / invoice dialogs fit a phone screen (header reflows, policy tables wrap); boot sync pulls before flushing; 7-day keep window for unpushed records */
+var CACHE = "ie-ops-v159"; /* v159: quotation / invoice figures edited as text recalculate (pending = total - deposit) and are saved to the record; existing documents repaired at boot. */ /* v158: invoices start with the five standard categories (blank), plus deposit / pending rows auto-filled from the quotation. */ /* v157: quotation / invoice dialogs fit a phone screen (header reflows, policy tables wrap); boot sync pulls before flushing; 7-day keep window for unpushed records */
 var SHELL = [
   "config.js",
   "driver-app.html", "ops-guide.html", "register.html", "respond.html", "departures.html", "feedback.html", "index.html",
