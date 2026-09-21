@@ -36,6 +36,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .rows{display:grid;grid-template-columns:max-content 8px minmax(0,1fr);gap:6px 6px;font-size:13px;line-height:1.45;align-items:start}
 .rows span.k{color:var(--soft);font-weight:500;white-space:nowrap;padding-right:6px}.rows span.c{color:var(--soft)}.rows span.v{font-weight:500;text-align:left;min-width:0;overflow-wrap:break-word}
 .remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
+.sess{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:13px}
+.sess-h{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--paper);font-weight:700;color:var(--forest)}
+.sess-r{display:grid;grid-template-columns:96px minmax(0,1fr) max-content;gap:8px;padding:8px 12px;border-top:1px solid var(--line);align-items:start}
+.sess-r.noamt{grid-template-columns:96px minmax(0,1fr)}
+.sess-r .d{font-weight:600;white-space:nowrap}.sess-r .w{color:var(--ink);overflow-wrap:break-word}.sess-r .a{font-weight:700;color:var(--ok);white-space:nowrap}
 .fb{margin-top:8px;padding:10px 12px;background:#fbe7e4;border-radius:10px;font-size:12.5px;color:var(--err)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .acts button{padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
@@ -304,7 +309,21 @@ function doLogout(){
   showErr("");showOk("");updateNet();updateDiag();showCtxHint();
 }
 
-function myOps(){return allOps.filter(function(o){return (o.guide||"").trim().toLowerCase()===myGuide.name.trim().toLowerCase();}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+/* An operation is mine when I'm its guide or one of its additional guides. */
+function isMe(n){return String(n||"").trim().toLowerCase()===String(myGuide&&myGuide.name||"").trim().toLowerCase();}
+function myEntry(o){if(isMe(o.guide))return {name:o.guide,role:o.guideRole||"Lead",fee:o.guideFee};return (o.guides||[]).find(function(x){return isMe(x.name);})||null;}
+function myOps(){return allOps.filter(function(o){return !!myEntry(o);}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+/* Session tours list every working date with the work and the amount allotted. */
+function sessionsHtml(o){
+  var list=(o.sessions||[]).filter(function(x){return x&&x.date;});if(!list.length)return "";
+  /* the per-date amounts are the primary guide's — an additional guide sees the
+     dates and the work, with their own fee at the top of the card */
+  var showAmt=isMe(o.guide);
+  var tot=list.reduce(function(t,x){return t+(parseFloat(x.amount)||0);},0);
+  return "<div class='sess'><div class='sess-h'><span>Session dates · "+list.length+"</span>"+((showAmt&&tot>0)?"<span>Total "+money(tot)+"</span>":"")+"</div>"+
+    list.map(function(x){return "<div class='sess-r"+(showAmt?"":" noamt")+"'><span class='d'>"+dmy(x.date)+"</span><span class='w'>"+(x.work?String(x.work).replace(/</g,"&lt;"):"—")+"</span>"+(showAmt?"<span class='a'>"+((x.amount!==""&&x.amount!=null)?money(x.amount):"—")+"</span>":"")+"</div>";}).join("")+
+  "</div>";
+}
 var OP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
 var _opFilter="Scheduled";
 function setOpFilter(f){_opFilter=f;renderList();}
@@ -343,13 +362,17 @@ function renderList(){
   list.innerHTML=subtabs+(shown.length?shown.map(function(o){
     var v=allVehicles.find(function(x){return x.name===o.veh;})||{};
     var d=allDrivers.find(function(x){return x.name===o.driver;})||{};
-    var fee=(o.guideFee!=null&&o.guideFee!=="")?money(o.guideFee):"";
+    var me=myEntry(o)||{};
+    var fee=(me.fee!=null&&me.fee!=="")?money(me.fee):"";
+    var sess=(o.sessions||[]).filter(function(x){return x&&x.date;});
+    var dateLine=(o.opType==="session"&&sess.length)?sess.map(function(x){return dmy(x.date);}).join(" · "):(dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):""));
     return "<div class='card' id='card_"+o.id+"'><div class='top'><div class='head-l'>"+(o.tourId?"<div class='code'>"+o.tourId+"</div>":"")+"<div class='name'>"+(o.tour||"Tour")+"</div>"+
-      "<div class='dates'>"+dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):"")+"</div></div>"+
+      "<div class='dates'>"+dateLine+"</div></div>"+
       "<div class='side'><span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span>"+(fee?"<span class='fee' title='Guide fee'>Guide fee "+fee+"</span>":"")+"</div></div>"+
-      "<div class='rows'>"+(o.pocName?row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):""):"")+row("Pax",o.pax)+(o.guideRole?row("Role",o.guideRole):"")+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
+      "<div class='rows'>"+(o.pocName?row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):""):"")+(o.opType?row("Tour type",o.opType==="session"?"Session tour":(o.opType==="mixed"?"Mixed tour":"Group tour")):"")+row("Pax",o.pax)+row("My role",me.role||o.guideRole||"Lead")+(function(){var others=[{name:o.guide,role:o.guideRole||"Lead"}].concat(o.guides||[]).filter(function(x){return x.name&&x.name!=="—"&&!isMe(x.name);});return others.length?row("Other guides",others.map(function(x){return x.name+" ("+x.role+")";}).join(", ")):"";})()+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
       (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       opLegsSummaryHtml(o)+
+      sessionsHtml(o)+
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       ((o.itinerary&&o.itinerary.length)?"<div class='remarks'><b>Itinerary</b>"+o.itinerary.map(function(d){return "<div style='margin-top:6px'><b>Day "+d.day+(d.date?" \u00b7 "+dmy(d.date):"")+"</b>"+(d.title?" \u2014 "+String(d.title).replace(/</g,'&lt;'):"")+(d.plan?"<div style='opacity:.85;margin-top:2px;line-height:1.45'>"+String(d.plan).replace(/</g,'&lt;').replace(/\n/g,'<br>')+"</div>":"")+"</div>";}).join("")+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
