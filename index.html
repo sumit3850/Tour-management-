@@ -1148,7 +1148,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 281</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 282</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1157,7 +1157,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 281</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 282</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2264,7 +2264,7 @@ function pocBookingFor(t){if(!t)return null;return (bookings||[]).find(function(
 var REF_BOOKING_COLS=["Booking ID","Tour ID","Tour","BookingDate","Point of Contact (POC)","Tour Start_Date","Tour End_Date","Member (s)","Party Size","Country","Email","Phone","Status","Total Tour Cost","Deposit","Pending Amount","Due Date","Payment Status","Additional Notes"];
 var REF_ACC_COLS=["Booking ID","Tour ID","Tour","Guest (POC)","Guide","Property Name","Rooms","Guests","Check-in","Check-out","No. of Nights","Status"];
 var REF_ROSTER_COLS=["Tour ID","Tour","Tour Start_Date","Tour End_Date","Tour Leader","External Guides","Pax","Capacity","Status","Session Type","Total Guide Fee"];
-var REF_QUOTE_COLS=["Quotation #","Quotation To","Address","GST No.","Tour","Start Date","End Date","Total No. of Participants","Total Tour price","Cost per person","Deposit to confirm (%)","Pending amount"];
+var REF_QUOTE_COLS=["Quotation #","Quotation To","Address","GST No.","Tour","Start Date","End Date","Total No. of Participants","Total Tour price","Cost per person","Deposit to confirm (%)","Deposit amount","Pending amount"];
 var REF_INVOICE_COLS=["Invoice #","Invoice To","Address","GST No.","Tour","Start Date","End Date","Total No. of Participants","Accommodation","Transportation and Logistics","Food and Water Bottles","Entry Fee","Ship tickets","Guide Fee","Referral amount","Total Amount","Deposit amount","Pending amount"];
 var REF_ACTIVITIES_COLS=["Tour ID","Date","Vehicle","Reg. No.","Driver","Start km","End km","Total km","Location","Time","Total Amount (Paid)","Entry"];
 var REF_PROFIT_COLS=["Tour ID","Tour","Total Tour Cost","Accommodation","Travel and Logistics","Food","Entry tickets","Ship tickets","External guide","Referral amount","Total Expenses","Profit"];
@@ -2393,6 +2393,7 @@ function refQuotationRows(){
       "Total Tour price":(q.total!=null?q.total:""),
       "Cost per person":(q.perPerson!=null?q.perPerson:""),
       "Deposit to confirm (%)":(q.depositPct!=null?q.depositPct:""),
+      "Deposit amount":(q.deposit!=null?q.deposit:""),
       "Pending amount":(q.pending!=null?q.pending:"")
     };
   });
@@ -5415,6 +5416,176 @@ function docClientFromHtml(html){
   if(/^(address|gst no\.?|guest name)\b/i.test(n))n="";
   return (n&&n!=="Guest Name")?n:"";
 }
+/* ===== Document maths ===================================================
+   Quotations and invoices can be edited as free text ("Edit quotation" /
+   "Edit text"). Any figure typed over there must keep the rest of the money
+   table consistent — pending is always total − deposit, price-per-person and
+   total stay linked, the deposit % label follows the deposit, GST re-derives —
+   and the SAVED RECORD must carry the figures printed on the document, because
+   the invoice built from a quotation and the sheet export read the record. */
+function docNum(t){if(t&&t.nodeType)t=t.textContent;var x=String(t==null?"":t).replace(/[₹,\s]/g,"").replace(/[^\d.\-]/g,"");if(x===""||x==="-"||x===".")return null;var n=parseFloat(x);return isFinite(n)?n:null;}
+function docCellText(td){return String(td?td.textContent:"").replace(/\s+/g," ").trim();}
+function docFindRow(root,re,skip){var rows=root.querySelectorAll("tr");for(var i=0;i<rows.length;i++){var c=rows[i].firstElementChild;if(c&&re.test(docCellText(c))&&(!skip||!skip.test(docCellText(c))))return rows[i];}return null;}
+/* The cell the cursor is in (never overwrite what the operator is typing). */
+function docFocusCell(root){try{var sel=window.getSelection();var n=sel&&sel.anchorNode;while(n&&n!==root){if(n.nodeType===1&&/^(TD|TH)$/.test(n.tagName))return n;n=n.parentNode;}}catch(e){}return null;}
+function docPctText(p){var v=Math.round(p*10)/10;return (v%1===0?String(v):v.toFixed(1))+"%";}
+var _docPrev=null;   /* figures as last seen — tells which cell the operator changed */
+/* Quotation table: columns per group size (or a single amount column).
+   Returns {cols:[{size,pp,total,dep,pending}],pct,changed} and rewrites the linked cells. */
+function docRecalcQuote(root,prev,live){
+  var totRow=docFindRow(root,/^total\s+(tour|session)\s+(price|cost)/i);if(!totRow)return null;
+  var ppRow=docFindRow(root,/^price per person/i);
+  var depRow=docFindRow(root,/^deposit/i);
+  var penRow=docFindRow(root,/^pending amount/i);
+  var table=totRow.closest("table");
+  var heads=table?table.querySelectorAll("thead th"):[];
+  var focus=live?docFocusCell(root):null;
+  var changed=0;
+  var put=function(row,j,txt){if(!row)return;var c=row.children[j];if(!c||c===focus||c.querySelector("input"))return;if(docCellText(c)!==txt){c.textContent=txt;changed++;}};
+  var n=totRow.children.length-1;
+  var lab=docCellText(depRow&&depRow.firstElementChild);
+  var pm=lab.match(/\(\s*([\d.]+)\s*%\s*\)/);var pct=pm?parseFloat(pm[1]):null;
+  var pPct=prev?prev.pct:null;
+  var cols=[];var pctFromDep=null;
+  for(var j=1;j<=n;j++){
+    var p=(prev&&prev.cols&&prev.cols[j-1])||{};
+    var size=null;var hm=heads[j]?docCellText(heads[j]).match(/(\d+)\s*(guest|pax|person)/i):null;
+    if(hm)size=parseInt(hm[1],10);
+    if(!size){var lm=docCellText(totRow.firstElementChild).match(/\((\d+)\s*pax\)/i);if(lm)size=parseInt(lm[1],10);}
+    if(!size)size=p.size||null;
+    var total=docNum(totRow.children[j]);
+    var pp=ppRow?docNum(ppRow.children[j]):null;
+    var dep=depRow?docNum(depRow.children[j]):null;
+    /* price per person ↔ total: whichever was typed over drives the other */
+    if(size&&prev){
+      if(total!=null&&total!==p.total&&(pp===p.pp||pp==null)){pp=Math.round(total/size);put(ppRow,j,fmt(pp));}
+      else if(pp!=null&&pp!==p.pp&&(total===p.total||total==null)){total=Math.round(pp*size);put(totRow,j,fmt(total));}
+    }
+    if(total!=null&&depRow){
+      if(dep==null&&pct!=null){dep=Math.round(total*pct/100);put(depRow,j,fmt(dep));}
+      else if(prev&&pct!=null&&pPct!=null&&pct!==pPct&&dep===p.dep){dep=Math.round(total*pct/100);put(depRow,j,fmt(dep));}
+      if(dep!=null&&total>0&&j===1)pctFromDep=dep/total*100;
+    }
+    var pending=(total!=null&&dep!=null)?Math.max(0,total-dep):null;
+    if(pending!=null)put(penRow,j,fmt(pending));
+    cols.push({size:size,pp:pp,total:total,dep:dep,pending:pending});
+  }
+  /* the "(x%)" in the deposit label follows the first column's deposit */
+  if(depRow&&pctFromDep!=null&&(pct==null||Math.abs(pctFromDep-pct)>0.06)&&depRow.firstElementChild!==focus){
+    var c0=depRow.firstElementChild;var txt=docPctText(pctFromDep);
+    if(pm){c0.innerHTML=c0.innerHTML.replace(/\(\s*[\d.]+\s*%\s*\)/,"("+txt+")");}
+    else{c0.innerHTML=c0.innerHTML.replace(/(\s*<|$)/,function(m){return " ("+txt+")"+m;});}
+    pct=Math.round(pctFromDep*10)/10;changed++;
+  }
+  return {kind:"quote",cols:cols,pct:pct,changed:changed};
+}
+/* Invoice table: line amounts → total → GST → grand → pending (= grand − deposit). */
+function docRecalcInvoice(root,prev,live){
+  var table=root.querySelector("table.itbl")||(function(){var r=docFindRow(root,/^(grand total|total amount)/i);return r?r.closest("table"):null;})();
+  if(!table||table.querySelector("input"))return null;   /* "Edit amounts" mode owns the figures */
+  var focus=live?docFocusCell(root):null;
+  var changed=0;
+  var put=function(row,txt){if(!row)return;var c=row.lastElementChild;if(!c||c===focus)return;if(docCellText(c)!==txt){c.textContent=txt;changed++;}};
+  var lines=[];var entered=false;var sum=0;
+  Array.prototype.forEach.call(table.querySelectorAll("tbody tr"),function(tr){
+    if(tr.children.length<2)return;
+    var amt=docNum(tr.lastElementChild);
+    lines.push({label:docCellText(tr.firstElementChild),amount:(amt==null?"":amt)});
+    if(amt!=null){entered=true;sum+=amt;}
+  });
+  var totRow=docFindRow(table,/^(grand total|total amount)/i);
+  var taxRow=docFindRow(table,/^taxable value/i);
+  var igRow=docFindRow(table,/^IGST/i),cgRow=docFindRow(table,/^CGST/i),sgRow=docFindRow(table,/^SGST/i);
+  var depRow=docFindRow(table,/^deposit amount/i);
+  var penRow=docFindRow(table,/^pending amount/i);
+  var total=entered?sum:(taxRow?docNum(taxRow.lastElementChild):(totRow?docNum(totRow.lastElementChild):null));
+  if(total==null)total=0;
+  var rate=0;var rm=(igRow&&docCellText(igRow.firstElementChild).match(/([\d.]+)\s*%/))||(cgRow&&docCellText(cgRow.firstElementChild).match(/([\d.]+)\s*%/));
+  if(rm)rate=parseFloat(rm[1])*(igRow?1:2);
+  var tax=rate>0?Math.round(total*rate)/100:0;
+  var grand=Math.round((total+tax)*100)/100;
+  var dep=depRow?docNum(depRow.lastElementChild):null;
+  var pending=depRow?Math.max(0,grand-(dep||0)):null;
+  if(taxRow){put(taxRow,fmt(total));put(igRow,fmt(igRow?tax:0));put(cgRow,fmt(Math.round(tax*50)/100));put(sgRow,fmt(Math.round(tax*50)/100));}
+  if(totRow&&(entered||taxRow))put(totRow,fmt(grand));
+  if(depRow&&dep==null)put(depRow,fmt(0));
+  if(penRow&&pending!=null)put(penRow,fmt(pending));
+  return {kind:"invoice",lines:lines,entered:entered,total:total,rate:rate,tax:tax,grand:grand,deposit:dep,pending:pending,changed:changed};
+}
+/* A quotation printed without a deposit row still owes a deposit figure: the stored % of its total. */
+function docQuoteFill(c,pct){if(c&&c.dep==null&&c.total!=null&&pct!=null&&isFinite(parseFloat(pct))){c.dep=Math.round(c.total*parseFloat(pct)/100);c.pending=Math.max(0,c.total-c.dep);}return c;}
+function docIsInvoice(root){return /Invoice\s*#/i.test(root.innerText||root.textContent||"");}
+/* Prime the memory of "what the figures were" when a document opens, fixing
+   any stale pending figure at the same time. */
+function docPrimeMath(){
+  var body=document.getElementById("quotationBody");if(!body)return;
+  var r=docIsInvoice(body)?docRecalcInvoice(body,null,false):docRecalcQuote(body,null,false);
+  _docPrev=r;
+}
+var _docLiveT=null;
+function docLiveMath(){
+  var body=document.getElementById("quotationBody");if(!body||body.getAttribute("contenteditable")!=="true")return;
+  var r=docIsInvoice(body)?docRecalcInvoice(body,_docPrev,true):docRecalcQuote(body,_docPrev,true);
+  if(r)_docPrev=r;
+}
+function docBindLiveMath(body){
+  if(!body||body.getAttribute("data-livemath"))return;
+  body.setAttribute("data-livemath","1");
+  body.addEventListener("input",function(){clearTimeout(_docLiveT);_docLiveT=setTimeout(docLiveMath,250);});
+}
+/* Final pass (Done editing / Save / Print): recalc without protecting the
+   cursor cell, then copy the printed figures onto the working record. */
+function docSyncFigures(){
+  var body=document.getElementById("quotationBody");if(!body)return null;
+  if(docIsInvoice(body)){
+    var r=docRecalcInvoice(body,_docPrev,false);if(!r)return null;_docPrev=r;
+    if(typeof _curInvoice!=="undefined"&&_curInvoice){
+      var inv=_curInvoice;
+      if(r.lines.length)inv.lines=r.lines;
+      if(!r.entered)inv.quotedTotal=r.total;
+      if(r.deposit!=null)inv.deposit=r.deposit;
+      inv.total=r.total;inv.grandTotal=r.grand;inv.gstRate=r.rate;inv.gstAmount=r.tax;inv.pending=(r.pending!=null?r.pending:Math.max(0,r.grand-(inv.deposit||0)));
+      inv.accommodation=lineAmt(inv,"Accommodation");inv.travel=lineAmt(inv,"Transportation and Logistics","Travel and Logistics");inv.food=lineAmt(inv,"Food and Water Bottles","Food");inv.entry=lineAmt(inv,"Entry Fee","Entry tickets");inv.ship=lineAmt(inv,"Ship tickets");inv.guide=lineAmt(inv,"Guide Fee");inv.referral=lineAmt(inv,"Referral amount");
+    }
+    return r;
+  }
+  var q=docRecalcQuote(body,_docPrev,false);if(!q)return null;_docPrev=q;
+  if(typeof _curQuote!=="undefined"&&_curQuote&&q.cols[0]){
+    var c=docQuoteFill(q.cols[0],q.pct!=null?q.pct:_curQuote.depositPct);
+    if(c.total!=null)_curQuote.total=c.total;
+    if(c.pp!=null)_curQuote.perPerson=c.pp;
+    if(c.dep!=null)_curQuote.deposit=c.dep;
+    if(c.pending!=null)_curQuote.pending=c.pending;else if(c.total!=null&&c.dep!=null)_curQuote.pending=Math.max(0,c.total-c.dep);
+    if(q.pct!=null)_curQuote.depositPct=q.pct;
+    if(c.size)_curQuote.participants=c.size;
+  }
+  return q;
+}
+/* Boot / sync repair: every saved document's figures must agree with its own
+   text (older saves kept the original maths after the text was edited). */
+function syncDocFigures(){
+  var changed=0;
+  var box=document.createElement("div");
+  (quotationLog||[]).forEach(function(r){
+    if(!r||!r.html)return;
+    box.innerHTML=r.html;
+    var q=docRecalcQuote(box,null,false);if(!q||!q.cols[0])return;
+    var c=docQuoteFill(q.cols[0],q.pct!=null?q.pct:r.depositPct);
+    var upd=function(k,v){if(v!=null&&r[k]!==v){r[k]=v;changed++;}};
+    upd("total",c.total);upd("perPerson",c.pp);upd("deposit",c.dep);upd("pending",c.pending);upd("depositPct",q.pct);
+    if(q.changed){r.html=box.innerHTML;changed++;}
+  });
+  (invoiceLog||[]).forEach(function(r){
+    if(!r||!r.html)return;
+    box.innerHTML=r.html;
+    var v=docRecalcInvoice(box,null,false);if(!v)return;
+    var upd=function(k,val){if(val!=null&&r[k]!==val){r[k]=val;changed++;}};
+    upd("total",v.total);upd("grandTotal",v.grand);upd("gstAmount",v.tax);upd("deposit",v.deposit);upd("pending",v.pending);
+    if(v.changed){r.html=box.innerHTML;changed++;}
+  });
+  if(changed){audit("documents","figures synced",changed+" figure(s) brought in line with the document text");if(typeof persistData==="function")persistData();}
+  return changed;
+}
 function migrateDocNumbers(){
   var changed=0;
   /* records saved without a client name pick it up from the document itself */
@@ -5424,6 +5595,7 @@ function migrateDocNumbers(){
   (quotationLog||[]).forEach(function(r){if(r&&r.html&&hasOldDocMeta(r.html)){var nh=refreshDocMeta(r.html,quoteMetaRow(r.qid,r.date,r.validUntil,r.departure,{name:r.guest,address:r.address,gst:r.gst}),true);if(nh!==r.html){r.html=nh;changed++;}}});
   (invoiceLog||[]).forEach(function(r){if(r&&r.html&&hasOldDocMeta(r.html)){var nh=refreshDocMeta(r.html,invoiceMetaRow(r.invid,r.date,{name:r.guest,address:r.address,gst:r.gst},r.startDate,r.endDate),true);if(nh!==r.html){r.html=nh;changed++;}}});
   if(changed){audit("documents","renumbered",changed+" document number(s) → PREFIX-YEAR-Qnn / INnn");if(typeof persistData==="function")persistData();}
+  try{changed+=syncDocFigures();}catch(e){console.warn("syncDocFigures",e);}
   return changed;
 }
 function peekQuoteNo(){
@@ -5588,6 +5760,7 @@ function generateQuotation(){
   `;
 
   document.getElementById('modal').innerHTML = html;
+  _docPrev=null;setTimeout(docPrimeMath,0);
   openScrim();
 }
 
@@ -5639,6 +5812,8 @@ function shareQuotationEmail(qid, tourName, pricePerPerson, pax) {
 function toggleQuoteEdit(){
   var body=document.getElementById('quotationBody');var btn=document.getElementById('qEditBtn');if(!body)return;
   var on=body.getAttribute('contenteditable')==='true';
+  if(on){try{docSyncFigures();}catch(e){}}   /* Done editing → settle the maths */
+  else{docBindLiveMath(body);if(!_docPrev)docPrimeMath();}
   body.setAttribute('contenteditable',on?'false':'true');
   body.style.outline=on?'':'2px dashed var(--sea)';
   body.style.outlineOffset=on?'':'4px';
@@ -5708,6 +5883,7 @@ function printQuotation() {
   /* Invoice or quotation? The document itself says so. Quotations carry the
      Payment Information page; invoices stay a single page. */
   var isInv=/Invoice\s*#/i.test(body.innerText||body.textContent||"");
+  try{docSyncFigures();}catch(e){}
   var payHtml=isInv?"":paymentPageHTML();
   /* A printed / downloaded document always lives in its folder: save it first if it isn't yet. */
   try{if(isInv){if(typeof _curInvoice!=="undefined"&&_curInvoice&&!_curInvoice.savedId)saveCurrentInvoice();}else{if(typeof _curQuote!=="undefined"&&_curQuote&&!_curQuote.savedId)saveCurrentQuote();}}catch(e){}
@@ -6829,6 +7005,7 @@ function generateGroupQuotation(){
     "</div>";
   document.getElementById('modal').innerHTML=html;
   openScrim();
+  _docPrev=null;docPrimeMath();
 }
 /* Serialise the quote into a safe argument string for the WhatsApp handler. */
 /* The share payload lives in a variable, NOT inline in the onclick attribute:
@@ -6894,6 +7071,7 @@ function applyHeadingTitle(rec){
 function saveCurrentQuote(){
   if(!_curQuote){return;}
   applyHeadingTitle(_curQuote);
+  try{docSyncFigures();}catch(e){}
   var body=document.getElementById("quotationBody");
   var _cn=docClientFromHtml(body?body.innerHTML:"");if(_cn){_curQuote.client=_curQuote.client||{};_curQuote.client.name=_cn;}
   var docHtml=body?body.innerHTML:"";
@@ -6905,6 +7083,7 @@ function saveCurrentQuote(){
     if(rec){
       if(editedNo&&editedNo!==rec.qid){audit("quotation","renumbered",rec.qid+" → "+editedNo);rec.qid=editedNo;}
       rec.html=docHtml;rec.title=_curQuote.title;rec.tour=_curQuote.title;if((_curQuote.client||{}).name)rec.guest=_curQuote.client.name;rec.updatedAt=new Date().toISOString();
+      ["total","perPerson","deposit","pending","depositPct","participants"].forEach(function(k){if(_curQuote[k]!=null)rec[k]=_curQuote[k];});
     }
   }else{
     /* new quotation → consume the number printed on the document (folder-driven);
@@ -6918,7 +7097,7 @@ function saveCurrentQuote(){
       clientType:_curQuote.clientType, guest:cl.name||"", address:cl.address||"", gst:cl.gst||"",
       date:_curQuote.date, validUntil:_curQuote.validUntil, departure:_curQuote.departure||"", endDate:_curQuote.endDate||"",
       participants:_curQuote.participants, total:_curQuote.total, perPerson:_curQuote.perPerson,
-      depositPct:_curQuote.depositPct, pending:_curQuote.pending,
+      depositPct:_curQuote.depositPct, deposit:_curQuote.deposit, pending:_curQuote.pending,
       costKey:_curQuote.costKey||"", typeRaw:_curQuote.typeRaw||"indian", invMode:_curQuote.invMode||"group",
       basis:_curQuote.basis||"", pp:_curQuote.pp||null, pax:_curQuote.pax||_curQuote.participants||2,
       startISO:_curQuote.startISO||"", endISO:_curQuote.endISO||"",
@@ -6936,7 +7115,8 @@ function saveCurrentQuote(){
 /* Open a saved quotation read-only (with share / print). */
 function openSavedQuote(id){
   var rec=quotationLog.find(function(x){return x.id===id;});if(!rec)return;
-  _curQuote={qid:rec.qid,kind:rec.kind,title:rec.tour,clientType:rec.clientType,client:{},date:rec.date,validUntil:rec.validUntil,departure:rec.departure,savedId:rec.id};
+  _curQuote={qid:rec.qid,kind:rec.kind,title:rec.tour,clientType:rec.clientType,client:{},date:rec.date,validUntil:rec.validUntil,departure:rec.departure,savedId:rec.id,
+    total:rec.total,perPerson:rec.perPerson,deposit:rec.deposit,pending:rec.pending,depositPct:rec.depositPct,participants:rec.participants};
   var foot="<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
     "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
     "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit quotation</button>"+
@@ -6948,6 +7128,7 @@ function openSavedQuote(id){
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(rec.html||"",quoteMetaRow(rec.qid,rec.date,rec.validUntil,rec.departure,{name:rec.guest,address:rec.address,gst:rec.gst})),(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
     foot;
   openScrim();
+  _docPrev=null;docPrimeMath();
 }
 /* Edit = open it with editing already switched on. */
 function editSavedQuote(id){openSavedQuote(id);setTimeout(function(){var b=document.getElementById("quotationBody");if(b&&b.getAttribute("contenteditable")!=="true")toggleQuoteEdit();},60);}
@@ -7105,6 +7286,7 @@ function showInvoiceModal(editLines){
     "</div>";
   var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
   openScrim();
+  _docPrev=null;docPrimeMath();
 }
 /* ===== Data-driven invoice document (editable / deletable line items) ===== */
 var _invEditLines=false;
@@ -7209,6 +7391,7 @@ function invLiveTotals(){
 function invDeleteLine(i){if(_curInvoice&&_curInvoice.lines){_curInvoice.lines.splice(i,1);renderInvoiceDoc();}}
 function invAddLine(){if(_curInvoice){_curInvoice.lines.push({label:"New line item",amount:""});renderInvoiceDoc();}}
 function invToggleLines(){
+  var _b=document.getElementById("quotationBody");if(_b&&_b.getAttribute("contenteditable")==="true"){try{docSyncFigures();}catch(e){}}
   _invEditLines=!_invEditLines;
   var b=document.getElementById("invLinesBtn");if(b){b.textContent=_invEditLines?"Done editing amounts":"Edit amounts";b.classList.toggle("btn-primary",_invEditLines);b.classList.toggle("btn-ghost",!_invEditLines);}
   renderInvoiceDoc();
@@ -7216,6 +7399,7 @@ function invToggleLines(){
 function saveCurrentInvoice(){
   if(!_curInvoice)return;
   applyHeadingTitle(_curInvoice);
+  try{docSyncFigures();}catch(e){}
   var body=document.getElementById("quotationBody");
   var _cn=docClientFromHtml(body?body.innerHTML:"");if(_cn){_curInvoice.client=_curInvoice.client||{};_curInvoice.client.name=_cn;}
   var docHtml=body?body.innerHTML:"";
@@ -7227,6 +7411,7 @@ function saveCurrentInvoice(){
     if(rec){
       if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
       rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;if((_curInvoice.client||{}).name)rec.guest=_curInvoice.client.name;rec.updatedAt=new Date().toISOString();
+      ["total","grandTotal","gstRate","gstAmount","deposit","pending","quotedTotal","accommodation","travel","food","entry","ship","guide","referral"].forEach(function(k){if(_curInvoice[k]!=null)rec[k]=_curInvoice[k];});
     }
   }else{
     /* folder-driven number; keep the legacy counter aligned */
@@ -7257,7 +7442,8 @@ function saveCurrentInvoice(){
 }
 function openSavedInvoice(id){
   var rec=invoiceLog.find(function(x){return x.id===id;});if(!rec)return;
-  _curInvoice={invid:rec.invid,title:rec.title,clientType:rec.clientType,client:{name:rec.guest,address:rec.address,gst:rec.gst},date:rec.date,savedId:rec.id};
+  _curInvoice={invid:rec.invid,title:rec.title,clientType:rec.clientType,client:{name:rec.guest,address:rec.address,gst:rec.gst},date:rec.date,savedId:rec.id,
+    total:rec.total,grandTotal:rec.grandTotal,gstRate:rec.gstRate,gstAmount:rec.gstAmount,deposit:rec.deposit,pending:rec.pending,quotedTotal:rec.quotedTotal,isSess:!!rec.isSess};
   var foot="<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
     "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
     "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit invoice</button>"+
@@ -7268,6 +7454,7 @@ function openSavedInvoice(id){
     "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(rec.html||"",invoiceMetaRow(rec.invid,rec.date,{name:rec.guest,address:rec.address,gst:rec.gst},rec.startDate,rec.endDate)),(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
   openScrim();
+  _docPrev=null;docPrimeMath();
 }
 function editSavedInvoice(id){openSavedInvoice(id);setTimeout(function(){var b=document.getElementById("qEditBtn");if(b&&b.textContent.indexOf("Done")<0)toggleQuoteEdit();},60);}
 function deleteSavedInvoice(id){
