@@ -62,6 +62,34 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
 .logout-btn{position:absolute;top:16px;right:16px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--soft);cursor:pointer}
 .head{position:relative}
 .install-btn{width:100%;margin-top:10px;padding:11px;border:1px dashed var(--blue);border-radius:11px;background:#e7f1fb;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer}
+/* ---- Sign-in: motion (spring-style entrance, focus glow, press scale, shake) ---- */
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.head,.card,.tabs,#netbar,#okbox,#err{animation:rise .55s cubic-bezier(.22,1,.36,1) both}
+.card{animation-delay:.08s}.tabs{animation-delay:.04s}
+#gate{padding:22px 20px 18px}
+#gate .g-title{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
+#gate .g-sub{font-size:13px;color:var(--soft);margin-bottom:6px}
+#gate label{margin-top:14px}
+#gate .g-field{position:relative}
+#gate input{transition:border-color .18s,box-shadow .18s,transform .18s;background:#fff}
+#gate input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(10,110,209,.14)}
+#gate .btn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .12s cubic-bezier(.22,1,.36,1),box-shadow .2s,background .2s;box-shadow:0 10px 24px -12px rgba(20,58,46,.6)}
+#gate .btn:active{transform:scale(.97)}
+#gate .btn:disabled{opacity:.85;cursor:default}
+#gate .btn .spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+#gate .btn.busy .spin{display:inline-block}
+#gate .g-alt{display:flex;gap:8px;margin-top:10px}
+#gate .g-alt button{flex:1;padding:11px 8px;border-radius:11px;font-size:12.5px;font-weight:700;cursor:pointer;transition:transform .12s,background .2s}
+#gate .g-alt button:active{transform:scale(.97)}
+#gate .install-btn{margin-top:0}
+#gate #offlineBtn{margin-top:0;padding:11px 8px;font-size:12.5px}
+#gate .g-saved{display:none;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border-radius:11px;background:#e4f3ea;color:var(--ok);font-size:12.5px;font-weight:600}
+#gate .g-saved .tick{width:20px;height:20px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:12px;animation:pop .5s cubic-bezier(.22,1,.36,1) both}
+.err.shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97) both}
+@media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
 </style>
 </head>
 <body>
@@ -76,17 +104,20 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   <div id="okbox" style="display:none;background:#e4f3ea;color:var(--ok);border:1px solid #b6e0c6;border-radius:12px;padding:14px;font-size:14px;margin-bottom:14px"></div>
   <div id="err" class="err" style="display:none"></div>
   <div class="card" id="gate">
-    <div id="ctxhint" style="display:none;background:#fff4e0;color:#7a5a00;border:1px solid #f0d9a8;border-radius:12px;padding:12px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.55"></div>
-    <label>Phone number</label><input id="gatePhone" type="tel" placeholder="Registered WhatsApp / phone number">
-    <label>Login code</label><input id="gateCode" inputmode="numeric" placeholder="4-digit code from Island Explorer">
-    <button class="btn" onclick="doLogin()">View my operations</button>
-    <button class="install-btn" id="installBtn" onclick="installGuideApp()">📲 Install Guide App on this device</button>
-    <button id="offlineBtn" style="width:100%;margin-top:12px;padding:13px;border:1px solid var(--forest);border-radius:12px;background:#fff;color:var(--forest);font-size:14px;font-weight:700;cursor:pointer" onclick="continueOffline()">Offline entry — continue without internet</button>
-    <div id="diag" style="font-size:11px;color:var(--soft);text-align:center;margin-top:10px"></div>
+    <div class="g-title">Sign in</div>
+    <div class="g-sub">Your phone number and the login code from Island Explorer.</div>
+    <label for="gatePhone">Phone number</label><div class="g-field"><input id="gatePhone" type="tel" autocomplete="tel" placeholder="Registered phone number" onkeydown="if(event.key==='Enter')document.getElementById('gateCode').focus()"></div>
+    <label for="gateCode">Login code</label><div class="g-field"><input id="gateCode" inputmode="numeric" autocomplete="one-time-code" placeholder="4-digit code" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn" id="loginBtn" onclick="doLogin()"><span class="spin"></span><span class="lbl">View my operations</span></button>
+    <div class="g-saved" id="gateSaved"><span class="tick">✓</span><span id="gateSavedTxt">Saved on this phone — works offline</span></div>
+    <div class="g-alt">
+      <button class="install-btn" id="installBtn" onclick="installGuideApp()">📲 Install app</button>
+      <button id="offlineBtn" style="display:none;border:1px solid var(--forest);border-radius:11px;background:#fff;color:var(--forest)" onclick="continueOffline()">Continue offline</button>
+    </div>
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v127</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v128</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -111,10 +142,10 @@ if(window.matchMedia("(display-mode: standalone)").matches||window.navigator.sta
 }
 function installGuideApp(){
   if(_deferredInstall){_deferredInstall.prompt();_deferredInstall.userChoice.then(function(){_deferredInstall=null;});return;}
-  alert("To add this page to your home screen:\n\niPhone (Safari): tap the Share icon, then \"Add to Home Screen\".\n\nAndroid (Chrome): tap the ⋮ menu, then \"Add to Home screen\" or \"Install app\".");
+  alert("iPhone: Share → Add to Home Screen.\nAndroid: ⋮ menu → Add to Home screen.");
 }
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
-function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";}
+function showErr(m){var b=document.getElementById("err");b.textContent=m;b.style.display=m?"block":"none";if(m){b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");}}
 function showOk(m){var b=document.getElementById("okbox");b.textContent=m;b.style.display=m?"block":"none";}
 function dmy(s){if(!s)return "—";if(/^\d{2}\/\d{2}\/\d{4}/.test(s))return s;var d=new Date(s);if(isNaN(d))return s;function p(n){return(n<10?"0":"")+n;}return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();}
 function row(k,v){return "<span class='k'>"+k+"</span><span class='c'>:</span><span class='v'>"+(v||"—")+"</span>";}
@@ -165,7 +196,7 @@ function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
 function enqueue(rec){syncQueue.push(rec);saveQueue();}
 function updateNet(){
   var b=document.getElementById("netbar");if(!b)return;var pend=syncQueue.length,signedIn=!!myGuide;
-  if(!_netOk){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML=signedIn?("⚡ Offline — your changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+"."):"⚡ Offline — connect to the internet to sign in.";return;}
+  if(!_netOk){b.style.display="block";b.style.background="#fff4e0";b.style.color="#7a5a00";b.innerHTML=signedIn?("⚡ Offline — changes are saved on this phone"+(pend?" · "+pend+" waiting to sync":"")+"."):"⚡ Offline — a saved sign-in still works.";return;}
   if(pend){b.style.display="block";b.style.background="#e7f1fb";b.style.color="var(--blue)";b.innerHTML=pend+" change"+(pend>1?"s":"")+" waiting to sync · <span style='cursor:pointer;text-decoration:underline' onclick='syncNow()'>Sync now</span>";return;}
   b.style.display="none";
 }
@@ -216,27 +247,19 @@ window.addEventListener("pagehide",saveSession);
    this), and a check for whether localStorage actually persists here. */
 if(navigator.storage&&navigator.storage.persist){try{navigator.storage.persist();}catch(e){}}
 function storageWorks(){try{localStorage.setItem("ie_ck","1");var ok=localStorage.getItem("ie_ck")==="1";localStorage.removeItem("ie_ck");return ok;}catch(e){return false;}}
+/* A saved sign-in on this phone: say so (one line), pre-fill the number and
+   offer "Continue offline" — the sign-in page must work with no signal. */
 function updateDiag(){
-  var d=document.getElementById("diag");if(!d)return;
+  var box=document.getElementById("gateSaved");if(!box)return;
   durGet(LS_SESSION).then(function(s){
-    if(s&&s.guide){d.innerHTML="✓ Offline sign-in saved on this device ("+(s.guide.name||"")+"). You can sign in offline.";d.style.color="var(--ok)";}
-    else{d.innerHTML="No offline sign-in saved on this device yet."+(storageWorks()?"":" ⚠ This browser is blocking storage.");d.style.color="var(--soft)";}
+    if(s&&s.guide){box.style.display="flex";var t=document.getElementById("gateSavedTxt");if(t)t.textContent="Saved on this phone"+(s.guide.name?" for "+s.guide.name:"")+" — works offline";
+      var p=document.getElementById("gatePhone");if(p&&!p.value&&s.phone)p.value=s.phone;showOfflineBtn();}
+    else box.style.display="none";
   });
 }
 function isStandalone(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
 function isInAppBrowser(){return /WhatsApp|FBAN|FBAV|FB_IAB|Instagram|Line\/|Telegram/i.test(navigator.userAgent||"");}
-function showCtxHint(){
-  var h=document.getElementById("ctxhint");if(!h)return;
-  h.style.display="block";
-  if(isStandalone()){
-    h.style.background="#e4f3ea";h.style.color="var(--ok)";h.style.borderColor="#b6e0c6";
-    h.innerHTML="✓ <b>You're in the installed app.</b> Sign in here once with internet — after that it works offline, even with no signal.";return;
-  }
-  h.style.background="#fff4e0";h.style.color="#7a5a00";h.style.borderColor="#f0d9a8";
-  h.innerHTML=isInAppBrowser()
-    ? "⚠ <b>You've opened this inside a chat app's browser.</b> To use it offline, first install it: tap the menu (⋮) → <b>Open in Chrome/Browser</b>, then tap <b>Install Guide App</b> below, open it from your <b>home-screen icon</b>, and sign in there. A sign-in here won't be saved for offline."
-    : "📲 <b>To use this offline:</b> tap <b>Install Guide App</b> below (Add to Home Screen), then open the app from your <b>home-screen icon</b> and sign in there. Signing in in a temporary browser tab won't be saved for offline.";
-}
+function showCtxHint(){ /* the sign-in card carries its own one-line hints now */ }
 function showOfflineBtn(){var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="block";}
 window.addEventListener("load",async function(){
   var s=await durGet(LS_SESSION);
@@ -250,22 +273,25 @@ async function doLogin(){
   var phone=normPhone(document.getElementById("gatePhone").value);
   var code=document.getElementById("gateCode").value.trim();
   if(!phone||!code){showErr("Enter your phone number and login code.");return;}
-  var btn=document.querySelector("#gate .btn");if(btn){btn.disabled=true;btn.textContent="Signing in…";}
-  function done(){if(btn){btn.disabled=false;btn.textContent="View my operations";}}
+  var btn=document.getElementById("loginBtn");var lbl=btn&&btn.querySelector(".lbl");
+  if(btn){btn.disabled=true;btn.classList.add("busy");if(lbl)lbl.textContent="Signing in…";}
+  function done(){if(btn){btn.disabled=false;btn.classList.remove("busy");if(lbl)lbl.textContent="View my operations";}}
   function fail(m){done();showErr(m);}
   function failOffline(m){done();showErr(m);showOfflineBtn();}
   /* Always ATTEMPT the real sign-in — never pre-block on navigator.onLine
      (unreliable on Android). Fall back to the cached session only if the
      network request itself fails. */
   ensureSb();
-  var OFFLINE_MSG="Can't reach the internet. If you've signed in on this phone before it restores automatically — otherwise tap \"Continue offline\" below.";
+  var OFFLINE_MSG="No internet. Sign in once with internet on this phone and it will work offline after that.";
+  /* No signal at all → restore the saved sign-in straight away (no 7-second wait). */
+  if(navigator.onLine===false){if(await offlineRestore(phone,code)){done();return;}}
   if(!sb){if(await offlineRestore(phone,code)){done();return;}return failOffline(OFFLINE_MSG);}
   try{
     var res=await rpcTimed("guide_login",{p_phone:phone,p_code:code},7000);
     if(res.error){_netOk=false;if(await offlineRestore(phone,code)){done();return;}
       if(netLikeErr(res.error.message))return failOffline(OFFLINE_MSG);
-      return fail("Sign-in service error: "+(res.error.message||"unknown")+". Ask Island Explorer to check the app setup (docs/SECURE_ACCESS.md).");}
-    if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match. Ask Island Explorer to confirm your login code.");}
+      return fail("Sign-in service error: "+(res.error.message||"unknown")+".");}
+    if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match.");}
     _netOk=true;
     myGuide=res.data.guide;myPhone=phone;myCode=code;
     allOps=res.data.ops||[];
@@ -273,9 +299,8 @@ async function doLogin(){
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
     setTimeout(function(){Promise.all([idbGet(LS_SESSION),cacheGet(LS_SESSION)]).then(function(r){var durable=r[0]||r[1];
-      if(durable)showOk("✓ Signed in and saved on this phone — the app will now work offline too.");
-      else if(lsGet(LS_SESSION))showOk("✓ Signed in. Saved for this session, but this browser may not keep it after you close the app — for reliable offline use, install the app to your home screen and sign in from there.");
-      else showErr("Signed in, but this browser isn't saving data on this phone, so offline mode won't work here. Add the app to your home screen (Install button on the sign-in page) and sign in from THAT app, and don't use a private/incognito window.");
+      if(durable||lsGet(LS_SESSION))showOk("✓ Signed in — works offline on this phone too.");
+      else showErr("Signed in, but this browser isn't saving data. Install the app to your home screen and sign in there for offline use.");
     });},800);
   }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}failOffline(OFFLINE_MSG);}
 }
@@ -285,9 +310,12 @@ function netLikeErr(m){m=String(m||"").toLowerCase();return m.indexOf("fetch")>-
 /* Guaranteed offline sign-in — no prior online sign-in or surviving storage
    needed. Shows any cached operations plus lets the guide report status on
    them; everything queues and syncs when back online. */
-function continueOffline(){
+async function continueOffline(){
   var phone=normPhone(document.getElementById("gatePhone").value);
   var code=document.getElementById("gateCode").value.trim();
+  /* a saved sign-in on this phone comes back with its operations */
+  var s=await durGet(LS_SESSION);
+  if(s&&s.guide&&(!phone||String(s.phone)===String(phone))){myGuide=s.guide;myPhone=s.phone;myCode=s.code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];_netOk=false;showApp();return;}
   if(!phone){showErr("Enter your phone number first.");return;}
   _netOk=false;myPhone=phone;myCode=code;
   myGuide={name:"",phone:phone,code:code,offline:true};
@@ -295,7 +323,7 @@ function continueOffline(){
   saveSession();
   var ob=document.getElementById("offlineBtn");if(ob)ob.style.display="none";
   showApp();
-  showOk("Signed in offline. Your operations will appear once you're back online.");
+  showOk("Signed in offline — your operations appear once you're back online.");
 }
 function doLogout(){
   myGuide=null;myPhone="";myCode="";allOps=[];allVehicles=[];allDrivers=[];

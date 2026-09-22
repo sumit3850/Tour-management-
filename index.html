@@ -1162,7 +1162,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 285</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 286</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1171,7 +1171,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 285</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 286</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2118,7 +2118,7 @@ function opSyncSessions(o,t,prune){
    dates, per-day amount and total, so the guide app can show a dated plan. */
 function opApplyTourGuides(o,t){
   var gs=tourGuides(t);var g0=gs[0]||{};
-  var pack=function(g){return {name:g.name||"",role:g.role||"Lead",sessionType:g.sessionType||"",dates:guideEntryDates(t,g),perDay:guideEntryRate(t,g),fee:guideEntryFee(t,g),phone:g.phone||"",email:g.email||""};};
+  var pack=function(g){var c=guideContact(g.name,g);return {name:g.name||"",role:g.role||"Lead",sessionType:g.sessionType||"",dates:guideEntryDates(t,g),perDay:guideEntryRate(t,g),fee:guideEntryFee(t,g),phone:c.phone,email:c.email};};
   var p0=pack(g0);
   o.guide=p0.name||"—";o.guideRole=p0.role;o.guideFee=p0.fee;o.guideDates=p0.dates;o.guidePerDay=p0.perDay;o.guideSessionType=p0.sessionType;o.guidePhone=p0.phone||o.guidePhone||"";
   o.guides=gs.slice(1).map(pack);
@@ -2290,10 +2290,14 @@ function guideDayRate(cat,sessionType,role){
 /* Every tour carries t.guides = [{name,role,sessionType,dates,fee,feeManual,phone,email}].
    The first entry is the guide the tour (and its operation) is filed under; the
    legacy single-guide fields are kept in step for older code paths. */
+/* Contact details for a guide: the guide directory is the source of truth;
+   the stored value only stands in for a guide who isn't in the directory. */
+function guideContact(name,stored){var g=(externalGuides||[]).find(function(x){return x.name===name;});stored=stored||{};return g?{phone:g.phone||"",email:g.email||""}:{phone:stored.phone||"",email:stored.email||""};}
 function tourGuides(t){
   if(!t)return [];
-  if(t.guides&&t.guides.length)return t.guides;
-  var list=[{name:t.guide||"",role:(t.guideRole==="Assistant")?"Assistant":"Lead",sessionType:t.sessionType||"Full day",dates:[],fee:parseFloat(t.guideFee)||0,feeManual:parseFloat(t.guideFee)>0,phone:t.guidePhone||"",email:t.guideEmail||""}];
+  if(t.guides&&t.guides.length){t.guides.forEach(function(g){var c=guideContact(g.name,g);g.phone=c.phone;g.email=c.email;});return t.guides;}
+  var _c0=guideContact(t.guide,{phone:((externalGuides||[]).some(function(x){return x.name===t.guideAlloted;})&&t.guideAlloted!==t.guide)?"":(t.guidePhone||""),email:((externalGuides||[]).some(function(x){return x.name===t.guideAlloted;})&&t.guideAlloted!==t.guide)?"":(t.guideEmail||"")});
+  var list=[{name:t.guide||"",role:(t.guideRole==="Assistant")?"Assistant":"Lead",sessionType:t.sessionType||"Full day",dates:[],fee:parseFloat(t.guideFee)||0,feeManual:parseFloat(t.guideFee)>0,phone:_c0.phone,email:_c0.email}];
   if(t.guideAlloted&&t.guideAlloted!=="—"&&t.guideAlloted!==t.guide){var g=(externalGuides||[]).find(function(x){return x.name===t.guideAlloted;})||{};list.push({name:t.guideAlloted,role:"Assistant",sessionType:t.sessionType||"Full day",dates:[],fee:0,feeManual:false,phone:g.phone||"",email:g.email||""});}
   return list;
 }
@@ -7816,11 +7820,10 @@ function opCard(o){
   if(t&&t.pocId){var pb=bookings.find(function(b){return b.id===t.pocId;});if(pb)poc=pb.guest+(pb.phone?" · "+pb.phone:"");}
   var row=function(k,val){return "<span class='k'>"+k+"</span><span class='c'>:</span><span class='v'>"+(val||"—")+"</span>";};
   var _stc=(o.status==="Completed")?"#1b7a4d":((o.status==="Withdrawn"||o.status==="Declined"||o.status==="Cancelled")?"#c0392b":((o.status==="Transferred")?"#b8860b":((o.status==="In progress")?"#0a6ed1":"#5a6a86")));
-  var _fee=(o.guideFee!=null&&o.guideFee!=="")?fmt(o.guideFee):"";
   return "<div class='op-card'><div class='op-top'><div class='op-head'>"+(o.tourId?"<div class='op-code'>"+o.tourId+"</div>":"")+"<div class='op-name'>"+o.tour+"</div><div class='op-date'>"+o.start+" – "+o.end+"</div></div>"+
       "<div class='op-side'><select class='op-status-sel' style='border-color:"+_stc+";color:"+_stc+"' onclick='event.stopPropagation()' onchange=\"setOpStatusQuick('"+o.id+"',this.value)\">"+["Scheduled","In progress","Completed","Withdrawn","Declined","Transferred","Cancelled"].map(function(st){return "<option "+(st===(o.status||"Scheduled")?"selected":"")+">"+st+"</option>";}).join("")+"</select>"+
-      (_fee?"<div class='op-fee' title='Guide fee'>Guide fee "+_fee+"</div>":"")+"</div></div>"+
-    "<div class='op-rows'>"+(poc?row("POC",poc):"")+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Tour type",opTypeLabel(o.opType))+row("Guide",o.guide+(o.guideRole?" ("+o.guideRole+")":"")+((o.guideDates&&o.guideDates.length&&o.opType!=="group")?" · "+o.guideDates.length+" date"+(o.guideDates.length===1?"":"s"):""))+((o.guides&&o.guides.length)?row("Other guides",o.guides.map(function(x){return x.name+" ("+x.role+(x.fee?" · "+fmt(x.fee):"")+((x.dates&&x.dates.length&&o.opType!=="group")?" · "+x.dates.length+" date"+(x.dates.length===1?"":"s"):"")+")";}).join(", ")):"")+row("Guide ID",g.gid)+row("Guide phone",g.phone)+((o.sessions&&o.sessions.length)?row("Sessions",o.sessions.length+" date"+(o.sessions.length===1?"":"s")+" · "+fmt(opSessionsTotal(o))+" (per-date detail in Guide Ops)"):"")+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
+      "</div></div>"+
+    "<div class='op-rows'>"+(poc?row("POC",poc):"")+row("Pax",o.pax)+row("Vehicle",o.veh)+row("Reg. No.",v.reg)+row("Driver",o.driver)+row("Driver No.",d.phone)+row("Tour type",opTypeLabel(o.opType))+row("Guide",o.guide+(o.guideRole?" ("+o.guideRole+")":"")+((o.guideDates&&o.guideDates.length&&o.opType!=="group")?" · "+o.guideDates.length+" date"+(o.guideDates.length===1?"":"s"):""))+row("Guide ID",g.gid)+row("Guide phone",g.phone||o.guidePhone)+((o.guides&&o.guides.length)?row("Other guides",o.guides.map(function(x){var xg=(externalGuides||[]).find(function(y){return y.name===x.name;})||{};return x.name+" ("+x.role+(xg.gid?" · "+xg.gid:"")+((x.dates&&x.dates.length&&o.opType!=="group")?" · "+x.dates.length+" date"+(x.dates.length===1?"":"s"):"")+")";}).join(", ")):"")+((o.sessions&&o.sessions.length)?row("Sessions",o.sessions.length+" date"+(o.sessions.length===1?"":"s")):"")+row("Pickup Date",dShort(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dShort(o.dropDate))+row("Drop Location",o.dropLoc)+((o.stays&&o.stays.length)?"":row("Stay",o.stay))+"</div>"+
     opLegsSummaryHtml(o)+
     opStaysSummaryHtml(o)+
     (o.remarks?"<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Remarks:</b> "+o.remarks+"</div>":"")+
@@ -9908,9 +9911,9 @@ function tgInit(pre,t){
   var rows=document.querySelectorAll("#"+pre+"_guides .tg-row");var gs=tourGuides(t||{});
   rows.forEach(function(row,i){
     row._initDates=(gs[i]&&gs[i].dates&&gs[i].dates.length)?gs[i].dates:null;
-    /* phone / email come from the guide directory whenever the tour has none */
+    /* phone / email always come from the guide directory for a directory guide */
     var sel=row.querySelector(".tg-name");var g=sel&&(externalGuides||[]).find(function(x){return x.name===sel.value;});
-    if(g){var ph=row.querySelector(".tg-phone"),em=row.querySelector(".tg-email");if(ph&&!ph.value)ph.value=g.phone||"";if(em&&!em.value)em.value=g.email||"";}
+    if(g){var ph=row.querySelector(".tg-phone"),em=row.querySelector(".tg-email");if(ph)ph.value=g.phone||"";if(em)em.value=g.email||"";}
   });
   var sd=document.getElementById(pre+"_sessdates");
   if(sd){sd.addEventListener("change",function(){tgRefreshDates(pre);});new MutationObserver(function(){tgRefreshDates(pre);}).observe(sd,{childList:true});}
@@ -9927,6 +9930,7 @@ function collectTourGuides(pre){
       dates:Array.prototype.map.call(row.querySelectorAll(".tg-dates input:checked"),function(i){return i.value;}),
       fee:manual?parseFloat(fee.value):0,feeManual:manual,phone:((row.querySelector(".tg-phone")||{}).value||"").trim(),email:((row.querySelector(".tg-email")||{}).value||"").trim()});
   });
+  out.forEach(function(g){var c=guideContact(g.name,g);g.phone=c.phone;g.email=c.email;});
   return out.filter(function(g,i){return i===0||g.name;});
 }
 function openCreateTour(){
@@ -9998,7 +10002,6 @@ function editTour(id){
     "<div class='field'><label>Max capacity</label><input class='input mono' type='number' id='et_cap' value='"+t.cap+"'></div>"+
     tourGuidesFieldHtml("et",t)+
     "<div class='field'><label>Pickup point</label><input class='input' id='et_pickup' value='"+(t.pickup||"")+"'></div>"+
-    "<div class='field'><label>Tour Start (birding start location)</label><input class='input' id='et_startloc' value='"+((t.startLoc&&t.startLoc!=="—")?t.startLoc:"")+"'></div>"+
     "<div class='field full'><label>Accommodation / stay</label><select class='input' id='et_stay' onchange='etStayPick()'>"+opStayOptions(t.stay)+"</select></div>"+
     "<div class='field full' id='et_staycustomwrap' style='display:"+((t.stay&&!accommodations.some(function(a){return a.name===t.stay;}))?"block":"none")+"'><label>Custom stay / notes</label><input class='input' id='et_staycustom' value='"+((t.stay&&!accommodations.some(function(a){return a.name===t.stay;}))?t.stay.replace(/'/g,"&#39;"):"")+"'></div>"+
     "<div class='field'><label>Total tour cost (₹)</label><input class='input mono' type='number' id='et_cost' value='"+(t.tourCost||0)+"' oninput='etPend()'></div>"+
@@ -10035,7 +10038,7 @@ function saveEditTour(){
   t.cap=Math.max(parseInt(document.getElementById("et_cap").value)||1,1);
   applyTourGuides(t,collectTourGuides("et"));
   t.pickup=document.getElementById("et_pickup").value||"—";
-  t.startLoc=document.getElementById("et_startloc").value||"—";
+  t.startLoc=t.startLoc||"—";
   var staySel=document.getElementById("et_stay").value;
   if(staySel==="custom"){t.stay=document.getElementById("et_staycustom").value||"—";}
   else{var acc=accommodations.find(function(a){return a.id===staySel;});t.stay=acc?acc.name:"—";ensureAccBookingForTour(t,staySel);}
