@@ -36,6 +36,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .rows{display:grid;grid-template-columns:max-content 8px minmax(0,1fr);gap:6px 6px;font-size:13px;line-height:1.45;align-items:start}
 .rows span.k{color:var(--soft);font-weight:500;white-space:nowrap;padding-right:6px}.rows span.c{color:var(--soft)}.rows span.v{font-weight:500;text-align:left;min-width:0;overflow-wrap:break-word}
 .remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
+.pay{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;font-size:12px}
+.pay-h{display:flex;justify-content:space-between;gap:8px;padding:9px 12px;background:var(--paper);font-weight:700;color:var(--forest);font-size:12px}
+.pay-r{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;border-top:1px solid var(--line)}
+.pay-l{min-width:0}.pay-l b{font-size:12.5px}.pay-l .code{font-size:11px;padding:0 6px;margin-right:2px}
+.pay-l small,.pay-a small{display:block;font-size:11px;color:var(--soft);font-weight:500;margin-top:2px}
+.pay-a{text-align:right;font-weight:700;white-space:nowrap;color:var(--ink)}.pay-a small.ok{color:var(--ok)}.pay-a small.pend{color:#b8860b}
 .sess{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:13px}
 .sess-h{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--paper);font-weight:700;color:var(--forest)}
 .sess-r{display:grid;grid-template-columns:96px minmax(0,1fr) max-content;gap:8px;padding:8px 12px;border-top:1px solid var(--line);align-items:start}
@@ -117,7 +123,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 294</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 295</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -299,8 +305,7 @@ async function doLogin(){
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
     done();saveSession();showApp();flushQueue();
     setTimeout(function(){Promise.all([idbGet(LS_SESSION),cacheGet(LS_SESSION)]).then(function(r){var durable=r[0]||r[1];
-      if(durable||lsGet(LS_SESSION))showOk("✓ Signed in — works offline on this phone too.");
-      else showErr("Signed in, but this browser isn't saving data. Install the app to your home screen and sign in there for offline use.");
+      if(!(durable||lsGet(LS_SESSION)))showErr("Signed in, but this browser isn't saving data. Install the app to your home screen and sign in there for offline use.");
     });},800);
   }catch(e){_netOk=false;if(await offlineRestore(phone,code)){done();return;}failOffline(OFFLINE_MSG);}
 }
@@ -361,7 +366,21 @@ function sessionsHtml(o){
       return "<div class='sess-r'><span class='d'>"+dmy(x.date)+(e&&e.role?"<small>"+esc(e.role)+"</small>":"")+"</span><span class='w'>"+(x.work?esc(x.work):"—")+(others.length?"<small>with "+others.map(function(y){return esc(y.name)+" ("+esc(y.role||"Lead")+")";}).join(", ")+"</small>":"")+"</span><span class='a'>"+(a>0?money(a):"—")+"</span></div>";}).join("")+
   "</div>";
 }
-var OP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
+var OP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined","Payments"];
+/* ---- Payments log: every tour I completed, with my fee and whether Island
+   Explorer has marked it paid (set on the console under Logistics → Guide payments). ---- */
+function myFeeFor(o){var me=myEntry(o)||{};return parseFloat(me.fee)||0;}
+function myPayment(o){var gp=o.guidePayments||{};var k=Object.keys(gp).find(function(n){return isMe(n);});return k?gp[k]:null;}
+function renderPayments(subtabs){
+  var list=document.getElementById("list");var esc=function(v){return String(v==null?"":v).replace(/</g,"&lt;");};
+  var done=myOps().filter(function(o){return (o.status||"")==="Completed";}).sort(function(a,b){return String(b.startISO||"").localeCompare(String(a.startISO||""));});
+  var paid=0,pend=0;
+  var rows=done.map(function(o){
+    var me=myEntry(o)||{};var fee=myFeeFor(o);var p=myPayment(o);var isPaid=!!(p&&p.paid);if(isPaid)paid+=fee;else pend+=fee;
+    return "<div class='pay-r'><div class='pay-l'><span class='code'>"+esc(o.tourId||"")+"</span> <b>"+esc(o.tour||"Tour")+"</b><small>"+dmy(o.startISO||o.start)+((o.endISO||o.end)?" – "+dmy(o.endISO||o.end):"")+" · "+esc(me.role||o.guideRole||"Lead")+"</small></div><div class='pay-a'>"+money(fee)+"<small class='"+(isPaid?"ok":"pend")+"'>"+(isPaid?"Paid"+(p.at?" "+dmy(p.at):""):"Pending")+"</small></div></div>";
+  }).join("");
+  list.innerHTML=subtabs+"<div class='pay'><div class='pay-h'><span>Completed tours · "+done.length+"</span><span>Paid "+money(paid)+" · Pending "+money(pend)+"</span></div>"+(rows||"<div class='empty' style='padding:22px;font-size:13px'>No completed tours yet.</div>")+"</div>";
+}
 var _opFilter="Scheduled";
 function setOpFilter(f){_opFilter=f;renderList();}
 function opMatchesFilter(o,f){return (o.status||"Scheduled").toLowerCase()===f.toLowerCase();}
@@ -394,6 +413,7 @@ function renderList(){
   var list=document.getElementById("list");list.style.display="block";
   var mine=myOps();
   var subtabs="<div class='tabs'>"+OP_FILTERS.map(function(f){return "<button class='tab "+(f===_opFilter?"on":"")+"' onclick=\"setOpFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
+  if(_opFilter==="Payments")return renderPayments(subtabs);
   if(!mine.length){list.innerHTML=subtabs+"<div class='empty'>No operations assigned to you yet.</div>";return;}
   var shown=mine.filter(function(o){return opMatchesFilter(o,_opFilter);});
   list.innerHTML=subtabs+(shown.length?shown.map(function(o){
@@ -414,7 +434,6 @@ function renderList(){
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       ((o.itinerary&&o.itinerary.length)?"<div class='remarks'><b>Itinerary</b>"+o.itinerary.map(function(d){return "<div style='margin-top:6px'><b>Day "+d.day+(d.date?" \u00b7 "+dmy(d.date):"")+"</b>"+(d.title?" \u2014 "+String(d.title).replace(/</g,'&lt;'):"")+(d.plan?"<div style='opacity:.85;margin-top:2px;line-height:1.45'>"+String(d.plan).replace(/</g,'&lt;').replace(/\n/g,'<br>')+"</div>":"")+"</div>";}).join("")+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
-      (((me.role||o.guideRole)==="Assistant")?"<div style='margin-top:10px;font-size:11.5px;color:var(--soft)'>You are the assistant guide on this operation — the status you set below is recorded for you; the lead guide's status is the operation's status.</div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
         "<button class='"+(o.status==='In progress'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
         "<button class='"+(o.status==='Completed'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+

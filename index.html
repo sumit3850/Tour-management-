@@ -1183,6 +1183,13 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
 .tour-card:nth-child(n+9),.op-card:nth-child(n+9),.acc-card:nth-child(n+9),.req-card:nth-child(n+9),.lead:nth-child(n+9),.m-cards tbody tr:nth-child(n+9){animation-delay:.4s}
 .tour-card:hover,.op-card:hover,.acc-card:hover,.req-card:hover,.lead:hover,.rate-card:hover{transform:translateY(-4px);box-shadow:0 18px 32px -18px rgba(20,40,80,.45)}
 @keyframes cardIn{0%{opacity:0;transform:translateY(10px) scale(.985)}60%{transform:translateY(-2px) scale(1.005)}100%{opacity:1;transform:none}}
+/* touch screens have no hover: the same lifts happen while a finger is on the element */
+@media(hover:none){
+  .tabs .tab:active{transform:translate3d(0,-2px,1.4rem);z-index:5;box-shadow:0 10px 18px -12px rgba(20,40,80,.5);background:var(--surface);color:var(--ink)}
+  .tabs .tab:active + .tab,.tabs .tab:has(+ .tab:active){transform:translate3d(0,-1px,.7rem);z-index:2}
+  .tour-card:active,.op-card:active,.acc-card:active,.req-card:active,.lead:active,.rate-card:active,.m-cards tbody tr:active{transform:translateY(-4px) scale(1.01);box-shadow:0 18px 32px -18px rgba(20,40,80,.45);transition-duration:.15s}
+  .btn:active,.btn-edit:active,.btn-del:active,.edit-btn:active,.del-btn:active,.op-actions button:active,.tbl-actions button:active{transform:translateY(-2px) scale(1.03);box-shadow:0 10px 20px -12px rgba(20,40,80,.45)}
+}
 /* the mobile bottom bar: press only, no lift (it is fixed to the screen edge) */
 .bottom-nav button:hover,.bottom-nav a:hover{transform:none}
 @media(prefers-reduced-motion:reduce){
@@ -1232,7 +1239,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 294</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 295</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1241,7 +1248,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 294</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 295</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3654,7 +3661,9 @@ function renderView(v){
   else if(v==="catalog")renderCatalog();
 }
 function goBack(){const v=navStack.pop();if(v!==undefined)go(v,true);}
-function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);}
+function toggleNav(open){document.getElementById("sidebar").classList.toggle("open",open);document.getElementById("scrimSide").classList.toggle("show",open);
+  /* the menu's pop-in ran at load while the drawer was off-screen — replay it each time the drawer opens */
+  if(open)document.querySelectorAll("#nav .nav-item").forEach(function(el){el.style.animation="none";void el.offsetWidth;el.style.animation="";});}
 function openScrim(){document.getElementById("scrim").classList.add("show")}
 function closeModal(){document.getElementById("scrim").classList.remove("show");var _m=document.getElementById("modal");if(_m)_m.style.maxWidth="";if(_pendingRefresh){_pendingRefresh=false;refreshUI();}}
 
@@ -7949,7 +7958,7 @@ function saveCalcRates(){
 }
 
 /* ===== LOGISTICS ===== */
-const LOGTABS=["Vehicles & Drivers","External Guides","Guide Fees","Daily vehicle activity"];
+const LOGTABS=["Vehicles & Drivers","External Guides","Guide Fees","Guide payments","Daily vehicle activity"];
 function viewLogistics(){
   return "<section class='view' id='v-logistics'>"+
     "<div class='tabs' id='logTabs' style='margin-bottom:18px'>"+LOGTABS.map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='logTab' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
@@ -7991,6 +8000,52 @@ function renderOperations(){
   g.innerHTML=list.length?list.map(opCard).join(""):"<div class='empty'>No operations in this view.</div>";
 }
 function logTab(t,el){_logTab=t;document.querySelectorAll("#logTabs .tab").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");else document.querySelectorAll("#logTabs .tab").forEach(x=>{if(x.textContent.trim()===t)x.classList.add("active")});renderLog(t);}
+/* ===== Guide payments: every completed operation, one line per guide on it
+   (Lead and Assistant), with the fee owed and a Paid / Pending mark. "Mark paid"
+   is stored on the operation (o.guidePayments[name]) and travels to the guide's
+   copy, so the guide sees Paid + date in their app's Payments log. ===== */
+function guidePayEntries(){
+  var out=[];
+  realOps().forEach(function(o){
+    var people=[{name:o.guide,role:o.guideRole||"Lead",fee:parseFloat(o.guideFee)||0}].concat((o.guides||[]).map(function(g){return {name:g.name,role:g.role||"Lead",fee:parseFloat(g.fee)||0};}));
+    people.forEach(function(p){
+      if(!p.name||p.name==="—")return;
+      var own=(o.guideStatuses||{})[p.name];
+      var done=(o.status==="Completed")||!!(own&&own.status==="Completed"&&own.base===(o.status||""));
+      if(!done)return;
+      var pay=(o.guidePayments||{})[p.name]||{};
+      out.push({o:o,name:p.name,role:p.role,fee:p.fee,paid:!!pay.paid,at:pay.at||""});
+    });
+  });
+  out.sort(function(a,b){return a.name.localeCompare(b.name)||String(b.o.startISO||"").localeCompare(String(a.o.startISO||""));});
+  return out;
+}
+function guidePaymentsHtml(){
+  var es=guidePayEntries();var esc=function(v){return String(v==null?"":v).replace(/</g,"&lt;");};
+  var groups={};es.forEach(function(e){(groups[e.name]=groups[e.name]||[]).push(e);});
+  var names=Object.keys(groups).sort();
+  var totalPend=es.filter(function(e){return !e.paid;}).reduce(function(t,e){return t+e.fee;},0);
+  var html="<div class='section-head'><div><div class='eyebrow'>Guides</div><div class='h-sec'>Guide payments</div></div><span class='pill "+(totalPend?"plain":"completed")+"' style='font-family:var(--font-mono)'>"+(totalPend?"Pending "+fmt(totalPend):"All paid")+"</span></div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:12px'>One line per guide on every completed operation, with the fee owed. Press <b>Mark paid</b> once you have paid — the guide sees Paid and the date in their app under Payments.</p>";
+  if(!names.length)return html+"<div class='card card-pad' style='text-align:center;color:var(--ink-soft);font-size:13px'>No completed operations yet.</div>";
+  html+=names.map(function(n){
+    var rows=groups[n];var pend=rows.filter(function(e){return !e.paid;}).reduce(function(t,e){return t+e.fee;},0);var paid=rows.filter(function(e){return e.paid;}).reduce(function(t,e){return t+e.fee;},0);
+    var g=(externalGuides||[]).find(function(x){return x.name===n;})||{};
+    return "<div class='card' style='margin-bottom:14px'><div style='display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line-soft)'><div><b style='font-size:14px'>"+esc(n)+"</b>"+(g.gid?" <span class='pill plain' style='font-family:var(--font-mono);font-size:11px'>"+esc(g.gid)+"</span>":"")+"</div><div style='font-size:12px;color:var(--ink-soft)'>Pending <b style='color:#b45309'>"+fmt(pend)+"</b> · Paid <b style='color:#1b7a4d'>"+fmt(paid)+"</b></div></div>"+
+      "<div class='tbl-wrap'><table><thead><tr><th>Tour ID</th><th>Tour</th><th>Dates</th><th>Role</th><th class='num'>Fee</th><th>Payment</th><th></th></tr></thead><tbody>"+
+      rows.map(function(e){var o=e.o;return "<tr><td class='mono'>"+esc(o.tourId||"")+"</td><td class='strong'>"+esc(o.tour)+"</td><td class='nowrap'>"+esc(o.start||"")+(o.end?" – "+esc(o.end):"")+"</td><td>"+esc(e.role)+"</td><td class='num mono'>"+fmt(e.fee)+"</td><td><span class='pill "+(e.paid?"completed":"plain")+"'>"+(e.paid?"Paid"+(e.at?" · "+dShort(e.at):""):"Pending")+"</span></td><td><div class='tbl-actions'><button class='btn "+(e.paid?"btn-ghost":"btn-sea")+" btn-sm' style='width:auto;height:auto;padding:5px 10px;font-size:11.5px' onclick=\"markGuidePaid('"+o.id+"','"+esc(e.name).replace(/'/g,"&#39;")+"',"+(e.paid?"false":"true")+")\">"+(e.paid?"Undo":"Mark paid")+"</button></div></td></tr>";}).join("")+
+      "</tbody></table></div></div>";
+  }).join("");
+  return html;
+}
+function markGuidePaid(opId,name,paid){
+  var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
+  var fee=(String(o.guide||"")===name)?(parseFloat(o.guideFee)||0):(parseFloat(((o.guides||[]).find(function(g){return g.name===name;})||{}).fee)||0);
+  o.guidePayments=o.guidePayments||{};
+  o.guidePayments[name]={paid:!!paid,at:paid?new Date().toISOString():"",amount:fee};
+  audit("guide payment",paid?"paid":"unpaid",name+" · "+(o.tourId||"")+" "+(o.tour||"")+" · "+fmt(fee));
+  persistData();renderLog("Guide payments");
+}
 function opCard(o){
   var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};
   var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};
@@ -8053,6 +8108,8 @@ function renderLog(t="Vehicles & Drivers"){
     b.innerHTML="<div class='section-head'><div><div class='eyebrow'>Directory</div><div class='h-sec'>External Guides</div></div><div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick=\"shareGuideRegLink()\">Share registration link</button><button class='btn btn-primary btn-sm' onclick='openAddGuide()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add guide</button></div></div>"+
       "<div class='card'><div class='tbl-wrap'><table><thead><tr><th>Guide ID</th><th>Name</th><th>Expertise</th><th>WhatsApp / Phone</th><th>Code</th><th>Email</th><th>ID No.</th><th>Address</th><th></th></tr></thead><tbody id='guideBody'></tbody></table></div></div>";
     renderGuides();
+  }else if(t==="Guide payments"){
+    b.innerHTML=guidePaymentsHtml();
   }else if(t==="Guide Fees"){
     var fth=FEE_HEADS.map(function(h,i){return "<th style='padding:8px;font-size:11px;text-align:"+(i?"right":"left")+";color:var(--ink-soft);white-space:nowrap;border-bottom:1px solid var(--line)'>"+h+"</th>";}).join("");
     var fbody=GUIDE_FEE_ROWS.map(function(r,ri){return "<tr><td style='padding:6px 8px;font-weight:600;white-space:nowrap'>"+r[0]+"</td>"+r.slice(1).map(function(c,ci){return "<td style='padding:4px 6px;border-bottom:1px solid var(--line-soft)'><input class='input mono' style='text-align:right;padding:6px 8px;min-width:78px' type='number' id='fee_"+ri+"_"+ci+"' value='"+c+"'></td>";}).join("")+"</tr>";}).join("");
