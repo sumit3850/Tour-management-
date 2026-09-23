@@ -40,7 +40,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .sess-h{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--paper);font-weight:700;color:var(--forest)}
 .sess-r{display:grid;grid-template-columns:96px minmax(0,1fr) max-content;gap:8px;padding:8px 12px;border-top:1px solid var(--line);align-items:start}
 .sess-r.noamt{grid-template-columns:96px minmax(0,1fr)}
-.sess-r .d{font-weight:600;white-space:nowrap}.sess-r .w{color:var(--ink);overflow-wrap:break-word}.sess-r .a{font-weight:700;color:var(--ok);white-space:nowrap}
+.sess-r .d{font-weight:600;white-space:nowrap}.sess-r .d small,.sess-r .w small{display:block;font-size:11px;color:var(--soft);font-weight:500;white-space:normal}.sess-r .w{color:var(--ink);overflow-wrap:break-word}.sess-r .a{font-weight:700;color:var(--ok);white-space:nowrap}
 .fb{margin-top:8px;padding:10px 12px;background:#fbe7e4;border-radius:10px;font-size:12.5px;color:var(--err)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .acts button{padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
@@ -67,8 +67,8 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
 @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
-.head,.card,.tabs,#netbar,#okbox,#err{animation:rise .55s cubic-bezier(.22,1,.36,1) both}
-.card{animation-delay:.08s}.tabs{animation-delay:.04s}
+.head,#gate,#netbar,#okbox,#err{animation:rise .55s cubic-bezier(.22,1,.36,1) both}
+#gate{animation-delay:.08s}
 #gate{padding:22px 20px 18px}
 #gate .g-title{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
 #gate .g-sub{font-size:13px;color:var(--soft);margin-bottom:6px}
@@ -117,7 +117,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v128</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v129</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -348,12 +348,17 @@ function myOps(){return allOps.filter(function(o){return !!myEntry(o);}).sort(fu
    rate; the total is my fee. */
 function sessionsHtml(o){
   var all=(o.sessions||[]).filter(function(x){return x&&x.date;});if(!all.length)return "";
-  var me=myEntry(o)||{};var mine=(me.dates&&me.dates.length)?all.filter(function(x){return me.dates.indexOf(x.date)>=0;}):all;
-  if(!mine.length)mine=all;
-  var amt=function(x){if(me.primary&&x.amount!==""&&x.amount!=null)return parseFloat(x.amount)||0;if(me.perDay>0)return me.perDay;var f=parseFloat(me.fee)||0;return mine.length?Math.round(f/mine.length):0;};
-  var tot=(parseFloat(me.fee)>0)?parseFloat(me.fee):mine.reduce(function(t,x){return t+amt(x);},0);
+  var me=myEntry(o)||{};
+  var alloc=all.some(function(x){return x.guides&&x.guides.length;});
+  var mineOf=function(x){return alloc?((x.guides||[]).find(function(e){return isMe(e.name);})||null):null;};
+  var mine=alloc?all.filter(function(x){return !!mineOf(x);}):((me.dates&&me.dates.length)?all.filter(function(x){return me.dates.indexOf(x.date)>=0;}):all);
+  if(!mine.length&&!alloc)mine=all;
+  var amt=function(x){var e=mineOf(x);if(e)return parseFloat(e.amount)||0;if(me.primary&&x.amount!==""&&x.amount!=null)return parseFloat(x.amount)||0;if(me.perDay>0)return me.perDay;var f=parseFloat(me.fee)||0;return mine.length?Math.round(f/mine.length):0;};
+  var tot=mine.reduce(function(t,x){return t+amt(x);},0);if(!tot&&parseFloat(me.fee)>0)tot=parseFloat(me.fee);
+  var esc=function(v){return String(v==null?"":v).replace(/</g,"&lt;");};
   return "<div class='sess'><div class='sess-h'><span>My dates · "+mine.length+(mine.length<all.length?" of "+all.length:"")+"</span>"+(tot>0?"<span>Total "+money(tot)+"</span>":"")+"</div>"+
-    mine.map(function(x){var a=amt(x);return "<div class='sess-r'><span class='d'>"+dmy(x.date)+"</span><span class='w'>"+(x.work?String(x.work).replace(/</g,"&lt;"):"—")+"</span><span class='a'>"+(a>0?money(a):"—")+"</span></div>";}).join("")+
+    mine.map(function(x){var a=amt(x);var e=mineOf(x);var others=(x.guides||[]).filter(function(y){return !isMe(y.name);});
+      return "<div class='sess-r'><span class='d'>"+dmy(x.date)+(e&&e.role?"<small>"+esc(e.role)+"</small>":"")+"</span><span class='w'>"+(x.work?esc(x.work):"—")+(others.length?"<small>with "+others.map(function(y){return esc(y.name)+" ("+esc(y.role||"Lead")+")";}).join(", ")+"</small>":"")+"</span><span class='a'>"+(a>0?money(a):"—")+"</span></div>";}).join("")+
   "</div>";
 }
 var OP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"];
