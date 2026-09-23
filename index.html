@@ -802,16 +802,17 @@ th.bk-quick,td.bk-quick{display:none}
   .m-cards thead{display:none}
   .m-cards tbody tr{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin:0 0 10px;box-shadow:var(--shadow);overflow:hidden}
   .m-cards tbody tr:hover{background:var(--surface)}
-  .m-cards td{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:7px 12px !important;border-bottom:1px solid var(--line-soft);font-size:13.5px;text-align:right;white-space:normal !important;max-width:none !important;min-width:0 !important;width:auto !important;line-height:1.4}
+  .m-cards td{display:flex;justify-content:flex-start;align-items:flex-start;gap:6px;padding:7px 12px !important;border-bottom:1px solid var(--line-soft);font-size:13px;text-align:left;white-space:normal !important;max-width:none !important;min-width:0 !important;width:auto !important;line-height:1.45}
   .m-cards td:last-child{border-bottom:none}
-  .m-cards td::before{content:attr(data-label);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);font-weight:700;flex:0 0 36%;text-align:left;padding-top:2px}
+  .m-cards td::before{content:attr(data-label);order:-2;flex:0 0 84px;font-family:'Inter',system-ui,sans-serif;font-size:12.5px;text-transform:none;letter-spacing:0;color:var(--ink-soft);font-weight:500;text-align:left;padding-top:0}
+  .m-cards td:not(:first-child):not(.m-nolabel)::after{content:":";order:-1;color:var(--ink-soft)}
   .m-cards td.m-nolabel::before,.m-cards td:first-child::before{display:none}
   .m-cards td.m-nolabel{justify-content:flex-end}
   .m-cards td.empty{display:block;text-align:center;padding:16px 12px !important}
   .m-cards td:first-child{font-size:15px;font-weight:700;background:var(--surface-2);padding:10px 12px !important;text-align:left;justify-content:flex-start}
-  .m-cards td.bk-dates{justify-content:flex-end;column-gap:5px}.m-cards td.bk-dates::before{margin-right:auto}
+  .m-cards td.bk-dates{justify-content:flex-start;column-gap:5px}
   .m-cards td .tbl-actions{justify-content:flex-end;width:100%}
-  .m-cards .bk-stack{align-items:flex-end}
+  .m-cards .bk-stack{align-items:flex-start}
   .m-cards td.bk-notes{display:flex !important;-webkit-line-clamp:unset;overflow:visible}
   .m-cards td.bk-quick{display:flex;background:var(--surface-2)}
   .m-cards td.bk-guest{max-width:none !important}
@@ -1183,7 +1184,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 287</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 288</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1192,7 +1193,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 287</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 288</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2600,7 +2601,7 @@ function refCustomerRows(){
   });
 }
 function refOpsRows(){
-  return (ops||[]).map(function(o){
+  return realOps().map(function(o){
     var r=opSheetRow(o);
     var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;
     if(t){
@@ -3683,10 +3684,44 @@ function enrichOp(o){
     o.itinerary=(t.itinerary||[]).map(function(d,i){return {day:i+1,date:d.date||"",title:d.title||"",plan:d.plan||""};}).filter(function(d){return d.title||d.plan;});
     if(t.pocId){var pb=(bookings||[]).find(function(b){return b.id===t.pocId;});if(pb){o.pocName=pb.guest;o.pocPhone=pb.phone||"";}}}
 }
-function enrichAllOps(){(ops||[]).forEach(enrichOp);}
+function enrichAllOps(){(ops||[]).forEach(function(o){if(o&&!o.shadowOf)enrichOp(o);});syncOpShadows();}
+/* ===== Shadow operations =================================================
+   The guide app's backend serves an operation only to the ONE guide named in
+   its `guide` field. So every additional guide (Lead or Assistant) gets a
+   shadow copy of the operation filed under their own name — same tour, dates,
+   vehicle, driver, stays, legs, remarks and per-date allotment, but with
+   `guide` = them and the fee / dates / role that are theirs. Shadows are
+   rebuilt from the real operation on every save, hidden everywhere in the
+   console, and a status / note posted from one lands on the real operation. */
+function realOps(){return (ops||[]).filter(function(o){return o&&!o.shadowOf;});}
+function opShadowId(o,name){return o.id+"~"+String(name||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,24);}
+function syncOpShadows(){
+  if(!ops)return;
+  var real=realOps();
+  var old={};(ops||[]).forEach(function(o){if(o&&o.shadowOf)old[o.id]=o;});
+  var strip=function(x){var c=Object.assign({},x);delete c.updatedAt;return JSON.stringify(c);};
+  var fresh=[];
+  real.forEach(function(o){
+    (o.guides||[]).forEach(function(g){
+      if(!g||!g.name||g.name==="—"||g.name===o.guide)return;
+      var id=opShadowId(o,g.name);
+      var sh=JSON.parse(JSON.stringify(o));
+      sh.id=id;sh.shadowOf=o.id;sh.fromTour="";sh.fromRes="";
+      sh.guide=g.name;sh.guideRole=g.role||"Lead";sh.guideFee=parseFloat(g.fee)||0;sh.guideDates=g.dates||[];sh.guidePerDay=g.perDay||0;sh.guideSessionType=g.sessionType||"";
+      var gd=(externalGuides||[]).find(function(x){return x.name===g.name;})||{};sh.guidePhone=g.phone||gd.phone||"";sh.gid=gd.gid||"";
+      sh.guides=[{name:o.guide,role:o.guideRole||"Lead",fee:o.guideFee,dates:o.guideDates||[],perDay:o.guidePerDay||0}].concat((o.guides||[]).filter(function(x){return x.name!==g.name;}));
+      var prev=old[id];
+      sh.guideFeedback=prev?(prev.guideFeedback||""):"";sh.guideFeedbackAt=prev?(prev.guideFeedbackAt||""):"";
+      if(prev&&strip(prev)===strip(sh)){fresh.push(prev);return;}
+      sh.updatedAt=new Date().toISOString();fresh.push(sh);
+    });
+  });
+  var changed=fresh.length!==Object.keys(old).length||fresh.some(function(x){return old[x.id]!==x;});
+  if(changed)ops=real.concat(fresh);
+}
 function detectClashes(){
   var out=[];
-  var live=(ops||[]).filter(opActive);
+  var live=realOps().filter(opActive);
   for(var i=0;i<live.length;i++)for(var j=i+1;j<live.length;j++){
     var a=live[i],c=live[j];
     var as=a.startISO||"",ae=a.endISO||a.startISO||"",cs=c.startISO||"",ce=c.endISO||c.startISO||"";
@@ -3707,7 +3742,7 @@ function buildAlerts(){
   detectClashes().forEach(function(c){
     A.push({level:"err",text:c.who+" ("+c.what+") is double-booked on overlapping dates: "+c.a.tour+" & "+c.b.tour,kind:"op",arg:c.a.id});
   });
-  (ops||[]).filter(opActive).forEach(function(o){
+  realOps().filter(opActive).forEach(function(o){
     if((o.startISO||"")&&(o.startISO<todayISO))return; /* only flag upcoming/undated ops */
     var missing=[];
     if(!o.guide||o.guide==="—")missing.push("guide");
@@ -3870,7 +3905,7 @@ function todayCard(){
   var live=tours.filter(function(t){return !t.archived;});
   var deps=live.filter(function(t){return in7(t.start);}).sort(function(a,b){return a.start.localeCompare(b.start);});
   var rets=live.filter(function(t){return in7(t.end)&&t.end!==t.start;}).sort(function(a,b){return a.end.localeCompare(b.end);});
-  var picks=(ops||[]).filter(opActive).filter(function(o){return in7(o.pickupDate);}).sort(function(a,b){return String(a.pickupDate).localeCompare(String(b.pickupDate));});
+  var picks=realOps().filter(opActive).filter(function(o){return in7(o.pickupDate);}).sort(function(a,b){return String(a.pickupDate).localeCompare(String(b.pickupDate));});
   var pays=receivables().filter(function(r){return r.bucket==="overdue"||r.bucket==="week";});
   var lab=function(d){var n=daysBetween(todayISO,d);return n===0?"Today":(n===1?"Tomorrow":dShort(d));};
   var esc=function(s){return String(s||"").replace(/</g,"&lt;");};
@@ -4209,7 +4244,7 @@ function searchIndex(){
   (quotationLog||[]).forEach(function(q){out.push({kind:"Quotation",title:esc(q.qid)+" · "+esc(q.tour||q.title),sub:[q.guest,q.total!=null?fmt(q.total):"",q.status,q.date].filter(Boolean).join(" · "),hay:[q.qid,q.tour,q.title,q.guest,q.status].map(esc).join(" "),open:function(){go("groupquote");setTimeout(function(){openSavedQuote(q.id);},60);}});});
   (invoiceLog||[]).forEach(function(r){if(!r||!r.html)return;out.push({kind:"Invoice",title:esc(r.invid)+" · "+esc(r.title),sub:[r.guest,r.total!=null?fmt(r.total):"",r.date].filter(Boolean).join(" · "),hay:[r.invid,r.title,r.guest].map(esc).join(" "),open:function(){go("invoices");setTimeout(function(){openSavedInvoice(r.id);},60);}});});
   (leads||[]).forEach(function(l){out.push({kind:"Lead",title:esc(l.name),sub:[l.country,l.tour,(STAGES.find(function(s){return s[0]===l.stage;})||[])[1]].filter(Boolean).join(" · "),hay:[l.name,l.country,l.tour,l.phone,l.email,l.src].map(esc).join(" "),open:function(){go("crm");setTimeout(function(){openEditLead(l.id);},60);}});});
-  (ops||[]).forEach(function(o){out.push({kind:"Operation",title:esc(o.tour),sub:[o.dateDisplay||dShort(o.startISO),o.veh,o.driver,o.guide,o.status].filter(function(x){return x&&x!=="—";}).join(" · "),hay:[o.tour,o.tourId,o.veh,o.reg,o.driver,o.guide,o.pickupLoc,o.stay].map(esc).join(" "),open:function(){go("logistics");logTab("Operations Board");setTimeout(function(){editOp(o.id);},80);}});});
+  realOps().forEach(function(o){out.push({kind:"Operation",title:esc(o.tour),sub:[o.dateDisplay||dShort(o.startISO),o.veh,o.driver,o.guide,o.status].filter(function(x){return x&&x!=="—";}).join(" · "),hay:[o.tour,o.tourId,o.veh,o.reg,o.driver,o.guide,o.pickupLoc,o.stay].map(esc).join(" "),open:function(){go("logistics");logTab("Operations Board");setTimeout(function(){editOp(o.id);},80);}});});
   (accommodations||[]).forEach(function(a){out.push({kind:"Stay",title:esc(a.name),sub:[a.location,a.type].filter(Boolean).join(" · "),hay:[a.name,a.location,a.type].map(esc).join(" "),open:function(){go("accommodation");}});});
   (externalGuides||[]).forEach(function(g){out.push({kind:"Guide",title:esc(g.name),sub:[g.gid,g.expertise,g.phone].filter(Boolean).join(" · "),hay:[g.name,g.gid,g.expertise,g.phone].map(esc).join(" "),open:function(){go("reservations");}});});
   (drivers||[]).forEach(function(d){out.push({kind:"Driver",title:esc(d.name),sub:[d.phone,d.license].filter(Boolean).join(" · "),hay:[d.name,d.phone,d.license].map(esc).join(" "),open:function(){go("logistics");logTab("Vehicles & Drivers");}});});
@@ -7869,7 +7904,7 @@ var _logTab="Vehicles & Drivers"; /* remembered so a background refresh keeps yo
 function opsBoardMarkup(){
   /* Dashboard shows only the next 4 upcoming (non-completed) operations, soonest first;
      as each completes it drops off and the next upcoming one takes its place. */
-  var up=(ops||[]).filter(function(o){var s=(o.status||"").toLowerCase();return s!=="completed"&&s!=="cancelled";}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");}).slice(0,4);
+  var up=realOps().filter(function(o){var s=(o.status||"").toLowerCase();return s!=="completed"&&s!=="cancelled";}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");}).slice(0,4);
   return "<div class='section-head'><div class='h-sec' style='font-size:15px'>Operations Board</div><div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-ghost btn-sm' onclick=\"go('operations')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M5 12h14M13 6l6 6-6 6'/></svg>Go to board</button><button class='btn btn-ghost btn-sm' onclick='syncOpsFromTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Sync from Tours</button><button class='btn btn-primary btn-sm' onclick='openAddOp()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Operation</button></div></div>"+
     "<div class='ops-grid'>"+(up.length?up.map(opCard).join(""):"<div class='empty'>No upcoming operations.</div>")+"</div>";
 }
@@ -7895,7 +7930,7 @@ function opMatchesFilter(o,f){
 }
 function renderOperations(){
   var g=document.getElementById("opGrid");if(!g)return;
-  var list=(ops||[]).filter(function(o){return opMatchesFilter(o,_opFilter);}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
+  var list=realOps().filter(function(o){return opMatchesFilter(o,_opFilter);}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
   g.innerHTML=list.length?list.map(opCard).join(""):"<div class='empty'>No operations in this view.</div>";
 }
 function logTab(t,el){_logTab=t;document.querySelectorAll("#logTabs .tab").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");else document.querySelectorAll("#logTabs .tab").forEach(x=>{if(x.textContent.trim()===t)x.classList.add("active")});renderLog(t);}
@@ -7968,7 +8003,7 @@ function renderLog(t="Vehicles & Drivers"){
       "<div class='card card-pad' style='overflow:auto'><table style='width:100%;border-collapse:collapse;min-width:820px'><thead><tr>"+fth+"</tr></thead><tbody>"+fbody+"</tbody></table></div>";
   }else{
     b.innerHTML="<div class='section-head'><div class='h-sec'>Operations Board</div><div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='syncOpsFromTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Sync from Tours</button><button class='btn btn-primary btn-sm' onclick='openAddOp()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Operation</button></div></div>"+
-    "<div class='ops-grid'>"+ops.map(opCard).join("")+"</div>";
+    "<div class='ops-grid'>"+realOps().map(opCard).join("")+"</div>";
   }
   persistData();
 }
@@ -8016,7 +8051,7 @@ function saveEditOp(){const id=document.getElementById("modal").dataset.oid;cons
   syncOpStay(o);
   o.remarks=document.getElementById("eo_remarks").value;
   persistData();closeModal();renderDashOps();renderAccCalendar();renderAccommodation();}
-function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id);persistData();renderDashOps();}
+function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id&&o.shadowOf!==id);persistData();renderDashOps();}
 /* Quick status change straight from the operation card (Scheduled / In progress /
    Completed / …) — saves + syncs immediately and reflects to the guide/driver apps. */
 /* An authoritative (admin/guide) status change supersedes every
@@ -8846,6 +8881,7 @@ function applyOpStatusUpdates(){
   updates.sort(function(a,b){return (a.created_at||"").localeCompare(b.created_at||"");});
   updates.forEach(function(s){
     var d=s.data||{};var o=ops.find(function(x){return x.id===d.opId;});
+    var shadow=null;if(o&&o.shadowOf){shadow=o;o=ops.find(function(x){return x.id===shadow.shadowOf;})||null;}
     if(o){
       /* Status authority belongs to the guide: a guide's update sets the real,
          dashboard-facing status (and clears every driver-reported status, since
@@ -8862,8 +8898,8 @@ function applyOpStatusUpdates(){
         else if(d.reason){tgt.driverFeedback=d.reason;tgt.driverFeedbackAt=s.created_at;}
       }else{
         o.status=d.newStatus||o.status;clearDriverStatuses(o);
-        if(d.clearFeedback){o.guideFeedback="";o.guideFeedbackAt="";}
-        else if(d.reason){o.guideFeedback=d.reason;o.guideFeedbackAt=s.created_at;}
+        if(d.clearFeedback){o.guideFeedback="";o.guideFeedbackAt="";if(shadow){shadow.guideFeedback="";shadow.guideFeedbackAt="";}}
+        else if(d.reason){o.guideFeedback=(shadow?shadow.guide+": ":"")+d.reason;o.guideFeedbackAt=s.created_at;if(shadow){shadow.guideFeedback=d.reason;shadow.guideFeedbackAt=s.created_at;}}
       }
       changed=true;
     }
