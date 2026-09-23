@@ -1184,7 +1184,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 289</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 290</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1193,7 +1193,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 289</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 290</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8309,6 +8309,34 @@ function openPublicDepartures(){
    are shown to YOU here for reference, but never included in the shared message —
    the guide already has their own number, and the code shouldn't sit in plain text
    in a forwardable WhatsApp/email message. */
+/* Calls the same backend function the Guide Ops app calls and compares its
+   answer with what the console holds for this guide — tells at once whether
+   the backend is serving the live data or a frozen copy. */
+async function testGuideBackend(guideName){
+  var g=externalGuides.find(function(x){return x.name===guideName;});
+  if(!g){alert("Guide not found in the directory.");return;}
+  if(!g.phone||!g.code){alert(guideName+" needs a phone number and a login code in the directory first.");return;}
+  var cl=sbClient();if(!cl){alert("Not connected to the cloud — sign in first.");return;}
+  var mine=(ops||[]).filter(function(o){return String(o.guide||"").trim().toLowerCase()===String(guideName).trim().toLowerCase();});
+  var lines=["Backend check for "+guideName+" (phone "+g.phone+", code "+g.code+")",""];
+  try{
+    var res=await cl.rpc("guide_login",{p_phone:g.phone,p_code:g.code});
+    if(res.error){alert(lines.concat(["Backend error: "+res.error.message]).join("\n"));return;}
+    if(!res.data||res.data.error){alert(lines.concat(["The backend does not recognise this phone + code ("+((res.data&&res.data.error)||"no answer")+"). It is reading an old copy of the guide directory — run supabase/saas/guide-ops-fix.sql in Supabase → SQL Editor once."]).join("\n"));return;}
+    var served=res.data.ops||[];
+    var servedIds={};served.forEach(function(o){servedIds[o.id]=1;});
+    var missing=mine.filter(function(o){return !servedIds[o.id];});
+    lines.push("Console has "+mine.length+" operation(s) filed under this guide.");
+    lines.push("Backend serves "+served.length+" operation(s)"+(res.data.workspace?" from workspace "+res.data.workspace:"")+".");
+    if(missing.length){
+      lines.push("");lines.push("Missing at the backend: "+missing.map(function(o){return (o.tourId?o.tourId+" ":"")+o.tour;}).join(", "));
+      lines.push("");lines.push(_localDirty?"A push is still pending — wait a few seconds and test again.":"The backend is serving a frozen copy (old mirror tables). Fix: open Supabase → SQL Editor, paste supabase/saas/guide-ops-fix.sql and Run it once. Then test again.");
+    }else{
+      lines.push("");lines.push(mine.length?"✓ Everything the console has for this guide reaches their app.":"Nothing is assigned to this guide yet — add them to a tour or an operation.");
+    }
+  }catch(e){lines.push("Could not reach the backend: "+(e.message||e));}
+  alert(lines.join("\n"));
+}
 function shareGuideOpsLink(guideName){
   var g=externalGuides.find(function(x){return x.name===guideName;});
   if(!g){alert("Add this guide to the External Guides directory first (with a phone number).");return;}
@@ -8811,7 +8839,7 @@ function viewReservations(){
   "</section>";
 }
 function guideId(g){if(g&&!g.gid){var max=0;externalGuides.forEach(function(x){var m=/^G(\d+)$/.exec(x.gid||"");if(m&&+m[1]>max)max=+m[1];});g.gid="G"+(max+1);}if(g&&!g.code)g.code=String(Math.floor(1000+Math.random()*9000));return g?g.gid:"";}
-function renderGuides(){var b=document.getElementById("guideBody");if(!b)return;b.innerHTML=externalGuides.map(function(g,i){guideId(g);return "<tr><td class='mono strong'>"+g.gid+"</td><td class='strong'>"+(g.name||"")+"</td><td>"+(g.expertise||"—")+"</td><td class='nowrap'>"+(g.phone||"—")+"</td><td class='mono'>"+(g.code||"—")+"</td><td class='nowrap'>"+(g.email||"—")+"</td><td>"+(g.idNo||"—")+((g.idDoc||(g.documents&&g.documents[0]))?" <a href='#' onclick='event.preventDefault();openGuideDoc("+i+")' style='color:var(--sea);font-size:11px;font-weight:600'>📄</a>":"")+"</td><td style='color:var(--ink-soft)'>"+(g.address||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"shareGuideOpsLink('"+(g.name||"").replace(/'/g,"&#39;")+"')\" title='Share ops link'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg></button><button class='edit-btn' data-action='editGuide' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteGuide' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='9' class='empty'>No external guides yet. Add one to use it in tours & reservations.</td></tr>";}
+function renderGuides(){var b=document.getElementById("guideBody");if(!b)return;b.innerHTML=externalGuides.map(function(g,i){guideId(g);return "<tr><td class='mono strong'>"+g.gid+"</td><td class='strong'>"+(g.name||"")+"</td><td>"+(g.expertise||"—")+"</td><td class='nowrap'>"+(g.phone||"—")+"</td><td class='mono'>"+(g.code||"—")+"</td><td class='nowrap'>"+(g.email||"—")+"</td><td>"+(g.idNo||"—")+((g.idDoc||(g.documents&&g.documents[0]))?" <a href='#' onclick='event.preventDefault();openGuideDoc("+i+")' style='color:var(--sea);font-size:11px;font-weight:600'>📄</a>":"")+"</td><td style='color:var(--ink-soft)'>"+(g.address||"—")+"</td><td><div class='tbl-actions'><button class='edit-btn' onclick=\"testGuideBackend('"+(g.name||"").replace(/'/g,"&#39;")+"')\" title='Test what the Guide Ops app receives for this guide' style='width:auto;padding:0 8px;font-size:11px;font-weight:700'>Test app</button><button class='edit-btn' onclick=\"shareGuideOpsLink('"+(g.name||"").replace(/'/g,"&#39;")+"')\" title='Share ops link'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg></button><button class='edit-btn' data-action='editGuide' data-arg='"+i+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteGuide' data-arg='"+i+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")||"<tr><td colspan='9' class='empty'>No external guides yet. Add one to use it in tours & reservations.</td></tr>";}
 function guideForm(g){g=g||{};return "<div class='form-grid'>"+
   "<div class='field'><label>Guide name</label><input class='input' id='g_name' value='"+(g.name||"").replace(/'/g,"&#39;")+"'></div>"+
   "<div class='field'><label>Expertise</label><input class='input' id='g_exp' value='"+(g.expertise||"").replace(/'/g,"&#39;")+"' placeholder='e.g. Endemics, waders'></div>"+
