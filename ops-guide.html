@@ -117,7 +117,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 291</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 292</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -414,6 +414,7 @@ function renderList(){
       (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
       ((o.itinerary&&o.itinerary.length)?"<div class='remarks'><b>Itinerary</b>"+o.itinerary.map(function(d){return "<div style='margin-top:6px'><b>Day "+d.day+(d.date?" \u00b7 "+dmy(d.date):"")+"</b>"+(d.title?" \u2014 "+String(d.title).replace(/</g,'&lt;'):"")+(d.plan?"<div style='opacity:.85;margin-top:2px;line-height:1.45'>"+String(d.plan).replace(/</g,'&lt;').replace(/\n/g,'<br>')+"</div>":"")+"</div>";}).join("")+"</div>":"")+
       (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
+      (((me.role||o.guideRole)==="Assistant")?"<div style='margin-top:10px;font-size:11.5px;color:var(--soft)'>You are the assistant guide on this operation — the status you set below is recorded for you; the lead guide's status is the operation's status.</div>":"")+
       "<div class='acts' id='acts_"+o.id+"'>"+
         "<button class='"+(o.status==='In progress'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
         "<button class='"+(o.status==='Completed'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
