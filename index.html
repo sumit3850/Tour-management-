@@ -1154,6 +1154,41 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   .empty{font-size:12.5px}
   .nav-item{font-size:13.5px;padding:8px 12px}
 }
+
+/* ===== Console-wide motion ==========================================
+   The sidebar's "wave pop" feel everywhere: every button springs on hover and
+   presses on tap; tab rows ripple like the menu (hovered tab lifts, neighbours
+   lift part-way); tour / operation / list cards pop in one after another when a
+   view renders and lift on hover. All CSS; honours prefers-reduced-motion. ===== */
+:root{--spring:cubic-bezier(.22,1,.36,1)}
+.btn,.tab,.btn-edit,.btn-del,.edit-btn,.del-btn,.tour-del,.tc-chip,.iconbtn,.copybtn,.backbtn,.now-btn,.lg-btn,.poc-star,.bottom-nav button,.bottom-nav a,.op-actions button,.tbl-actions button,.mv button,.acts button{transition:transform .28s var(--spring),box-shadow .28s var(--spring),background .15s,color .15s,border-color .15s;will-change:transform}
+.btn:hover,.btn-edit:hover,.btn-del:hover,.edit-btn:hover,.del-btn:hover,.iconbtn:hover,.copybtn:hover,.backbtn:hover,.now-btn:hover,.lg-btn:hover,.op-actions button:hover,.tbl-actions button:hover,.mv button:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 10px 20px -12px rgba(20,40,80,.45)}
+.btn:active,.tab:active,.btn-edit:active,.btn-del:active,.edit-btn:active,.del-btn:active,.tour-del:active,.tc-chip:active,.iconbtn:active,.copybtn:active,.backbtn:active,.now-btn:active,.lg-btn:active,.bottom-nav button:active,.bottom-nav a:active,.op-actions button:active,.tbl-actions button:active,.mv button:active{transform:scale(.95);box-shadow:none;transition-duration:.1s}
+button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
+/* tab rows: the neighbour wave */
+.tabs{perspective:800px;overflow:visible}
+.tabs .tab{position:relative;transform:translate3d(0,0,0)}
+.tabs .tab:hover,.tabs .tab:focus-visible{transform:translate3d(0,-2px,1.4rem);z-index:5;box-shadow:0 10px 18px -12px rgba(20,40,80,.5);background:var(--surface);color:var(--ink)}
+.tabs .tab:hover + .tab,.tabs .tab:has(+ .tab:hover){transform:translate3d(0,-1px,.7rem);z-index:2}
+.tabs .tab:hover + .tab + .tab,.tabs .tab:has(+ .tab + .tab:hover){transform:translate3d(0,0,.3rem)}
+/* cards: staggered pop-in on render + hover lift */
+.tour-card,.op-card,.acc-card,.req-card,.lead,.rate-card,.kv-card,.res-card,.m-cards tbody tr{animation:cardIn .45s var(--spring) backwards;transition:transform .28s var(--spring),box-shadow .28s var(--spring),border-color .15s}
+.tour-card:nth-child(2),.op-card:nth-child(2),.acc-card:nth-child(2),.req-card:nth-child(2),.lead:nth-child(2),.m-cards tbody tr:nth-child(2){animation-delay:.05s}
+.tour-card:nth-child(3),.op-card:nth-child(3),.acc-card:nth-child(3),.req-card:nth-child(3),.lead:nth-child(3),.m-cards tbody tr:nth-child(3){animation-delay:.1s}
+.tour-card:nth-child(4),.op-card:nth-child(4),.acc-card:nth-child(4),.req-card:nth-child(4),.lead:nth-child(4),.m-cards tbody tr:nth-child(4){animation-delay:.15s}
+.tour-card:nth-child(5),.op-card:nth-child(5),.acc-card:nth-child(5),.req-card:nth-child(5),.lead:nth-child(5),.m-cards tbody tr:nth-child(5){animation-delay:.2s}
+.tour-card:nth-child(6),.op-card:nth-child(6),.acc-card:nth-child(6),.req-card:nth-child(6),.lead:nth-child(6),.m-cards tbody tr:nth-child(6){animation-delay:.25s}
+.tour-card:nth-child(7),.op-card:nth-child(7),.acc-card:nth-child(7),.req-card:nth-child(7),.lead:nth-child(7),.m-cards tbody tr:nth-child(7){animation-delay:.3s}
+.tour-card:nth-child(8),.op-card:nth-child(8),.acc-card:nth-child(8),.req-card:nth-child(8),.lead:nth-child(8),.m-cards tbody tr:nth-child(8){animation-delay:.35s}
+.tour-card:nth-child(n+9),.op-card:nth-child(n+9),.acc-card:nth-child(n+9),.req-card:nth-child(n+9),.lead:nth-child(n+9),.m-cards tbody tr:nth-child(n+9){animation-delay:.4s}
+.tour-card:hover,.op-card:hover,.acc-card:hover,.req-card:hover,.lead:hover,.rate-card:hover{transform:translateY(-4px);box-shadow:0 18px 32px -18px rgba(20,40,80,.45)}
+@keyframes cardIn{0%{opacity:0;transform:translateY(10px) scale(.985)}60%{transform:translateY(-2px) scale(1.005)}100%{opacity:1;transform:none}}
+/* the mobile bottom bar: press only, no lift (it is fixed to the screen edge) */
+.bottom-nav button:hover,.bottom-nav a:hover{transform:none}
+@media(prefers-reduced-motion:reduce){
+  .btn,.tab,.tour-card,.op-card,.acc-card,.req-card,.lead,.rate-card,.m-cards tbody tr,.btn-edit,.btn-del,.edit-btn,.del-btn,.tc-chip{animation:none !important;transition:none !important}
+  .btn:hover,.tab:hover,.tour-card:hover,.op-card:hover,.acc-card:hover,.req-card:hover,.lead:hover,.tabs .tab:hover + .tab,.tabs .tab:has(+ .tab:hover){transform:none !important}
+}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1197,7 +1232,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 293</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 294</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1206,7 +1241,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 293</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 294</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
