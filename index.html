@@ -1184,7 +1184,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 290</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 291</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1193,7 +1193,7 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 290</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 291</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8851,7 +8851,30 @@ function guideForm(g){g=g||{};return "<div class='form-grid'>"+
 function openAddGuide(){modalForm("New external guide","Add guide",guideForm(),"saveNewGuide","Add guide");}
 function saveNewGuide(){var n=document.getElementById("g_name").value.trim();if(!n){alert("Enter the guide name.");return;}var g={name:n,expertise:document.getElementById("g_exp").value,phone:document.getElementById("g_phone").value,code:document.getElementById("g_code").value.trim(),email:document.getElementById("g_email").value,address:document.getElementById("g_addr").value};guideId(g);externalGuides.push(g);persistData();closeModal();renderGuides();}
 function editGuide(i){var g=externalGuides[i];if(!g)return;modalForm("Edit guide","Update guide",guideForm(g),"saveEditGuide","Update");document.getElementById("modal").dataset.gi=i;}
-function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;g.name=document.getElementById("g_name").value.trim();g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;g.adminLocked=true;persistData();closeModal();renderGuides();}
+/* A guide's NAME is the key that links them to tours, operations (and the copy
+   filed under them for the guide app), per-date allotments and reservations —
+   renaming in the directory renames them everywhere, so nothing is orphaned. */
+function renameGuideEverywhere(oldName,newName){
+  oldName=String(oldName||"").trim();newName=String(newName||"").trim();
+  if(!oldName||!newName||oldName===newName)return 0;
+  var same=function(v){return String(v||"").trim().toLowerCase()===oldName.toLowerCase();};
+  var n=0;
+  (tours||[]).forEach(function(t){
+    if(same(t.guide)){t.guide=newName;n++;}
+    if(same(t.guideAlloted)){t.guideAlloted=newName;n++;}
+    (t.guides||[]).forEach(function(g){if(same(g.name)){g.name=newName;n++;}});
+  });
+  (ops||[]).forEach(function(o){
+    if(same(o.guide)){o.guide=newName;n++;}
+    (o.guides||[]).forEach(function(g){if(same(g.name)){g.name=newName;n++;}});
+    (o.sessions||[]).forEach(function(x){(x.guides||[]).forEach(function(g){if(same(g.name)){g.name=newName;n++;}});});
+  });
+  (reservations||[]).forEach(function(r){if(same(r.guideName)){r.guideName=newName;n++;}if(same(r.by)){r.by=newName;n++;}});
+  if(n&&typeof enrichAllOps==="function")enrichAllOps();   /* shadow copies re-filed under the new name */
+  if(n)audit("guide","renamed",oldName+" → "+newName+" ("+n+" link"+(n===1?"":"s")+")");
+  return n;
+}
+function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;var _old=g.name;g.name=document.getElementById("g_name").value.trim();var _n=renameGuideEverywhere(_old,g.name);g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;g.adminLocked=true;persistData();closeModal();renderGuides();if(_n){if(typeof renderTours==="function")renderTours();if(typeof renderDashOps==="function")renderDashOps();}}
 function deleteGuide(i){if(!confirm("Remove this guide?"))return;var g=externalGuides[i];if(g)retireSourceSub(g.fromSub);externalGuides.splice(i,1);persistData();renderGuides();}
 function guideDatalist(){return "<datalist id='guideNameList'>"+(externalGuides||[]).map(function(g){return "<option value=\""+String(g.name||"").replace(/"/g,"&quot;")+"\">";}).join("")+"</datalist>";}
 function guideOptions(sel){return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("");}
