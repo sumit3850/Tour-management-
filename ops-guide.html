@@ -117,7 +117,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 289</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 290</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -126,7 +126,7 @@ const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.s
 const presetGuide=(new URLSearchParams(location.search).get("guide")||"").trim();
 var sb=null;try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}
 function ensureSb(){if(!sb&&window.supabase){try{sb=window.supabase.createClient(SB_URL,SB_KEY);}catch(e){}}return sb;}
-var myGuide=null,myPhone="",myCode="",allOps=[],allVehicles=[],allDrivers=[];
+var myGuide=null,myPhone="",myCode="",allOps=[],allVehicles=[],allDrivers=[],myWs="island-explorer";
 /* "Add to Home Screen" support — only shown on the sign-in screen, so this
    never gets confused with the main console app's own install prompt.
    The button is always visible in the HTML/CSS (no browser reliably fires
@@ -191,7 +191,7 @@ async function durGet(k){
 var _netOk=true;
 function isOnline(){return navigator.onLine!==false;}
 var syncQueue=lsGet(LS_QUEUE)||[];
-function saveSession(){if(myGuide)durSet(LS_SESSION,{phone:myPhone,code:myCode,guide:myGuide,ops:allOps,vehicles:allVehicles,drivers:allDrivers,savedAt:Date.now()});}
+function saveSession(){if(myGuide)durSet(LS_SESSION,{phone:myPhone,code:myCode,guide:myGuide,ops:allOps,vehicles:allVehicles,drivers:allDrivers,ws:myWs,savedAt:Date.now()});}
 function saveQueue(){lsSet(LS_QUEUE,syncQueue);updateNet();}
 function enqueue(rec){syncQueue.push(rec);saveQueue();}
 function updateNet(){
@@ -224,7 +224,7 @@ async function backgroundRefresh(){
     var res=await sb.rpc("guide_login",{p_phone:myPhone,p_code:myCode});
     if(res&&!res.error&&res.data&&!res.data.error){
       _netOk=true;
-      myGuide=res.data.guide;allOps=res.data.ops||[];
+      myGuide=res.data.guide;allOps=res.data.ops||[];myWs=res.data.workspace||myWs;
       allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
       allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
       saveSession();renderList();updateNet();
@@ -234,7 +234,7 @@ async function backgroundRefresh(){
 async function offlineRestore(phone,code){
   var s=await durGet(LS_SESSION);
   if(s&&s.guide&&String(s.phone)===String(phone)&&String(s.code)===String(code)){
-    myGuide=s.guide;myPhone=phone;myCode=code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];
+    myGuide=s.guide;myPhone=phone;myCode=code;allOps=s.ops||[];allVehicles=s.vehicles||[];allDrivers=s.drivers||[];myWs=s.ws||myWs;
     showApp();return true;
   }
   return false;
@@ -293,7 +293,7 @@ async function doLogin(){
       return fail("Sign-in service error: "+(res.error.message||"unknown")+".");}
     if(!res.data||res.data.error){_netOk=true;return fail("Phone number or code didn't match.");}
     _netOk=true;
-    myGuide=res.data.guide;myPhone=phone;myCode=code;
+    myGuide=res.data.guide;myPhone=phone;myCode=code;myWs=res.data.workspace||myWs;
     allOps=res.data.ops||[];
     allOps.forEach(function(o){if(o.legs&&o.legs.length)o.legs.sort(function(a,b){if(!a.start)return b.start?1:0;if(!b.start)return -1;return a.start.localeCompare(b.start);});});
     allVehicles=res.data.vehicles||[];allDrivers=res.data.drivers||[];
@@ -340,7 +340,7 @@ function doLogout(){
 /* An operation is mine when I'm its guide or one of its additional guides. */
 function isMe(n){return String(n||"").trim().toLowerCase()===String(myGuide&&myGuide.name||"").trim().toLowerCase();}
 function myEntry(o){if(isMe(o.guide))return {name:o.guide,role:o.guideRole||"Lead",fee:o.guideFee,dates:o.guideDates||[],perDay:o.guidePerDay||0,primary:true};return (o.guides||[]).find(function(x){return isMe(x.name);})||null;}
-function myOps(){return allOps.filter(function(o){return !!myEntry(o);}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
+function myOps(){return allOps.filter(function(o){if(!myEntry(o))return false;if(!o.shadowOf&&allOps.some(function(x){return x.shadowOf===o.id&&isMe(x.guide);}))return false;return true;}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});}
 /* Session tours list every working date with the work and the amount allotted. */
 /* My dated plan: the session dates I'm allotted (all of them when none were
    ticked), each with the work planned and MY amount for that date — the
@@ -446,7 +446,7 @@ async function setOpStatus(opId,status){await postStatus(opId,status,"");}
 async function postStatus(opId,status,reason){
   showErr("");
   /* workspace matches the guide_login RPC, which serves the island-explorer data */
-  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),workspace:"island-explorer",
+  var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myGuide.name,created_at:new Date().toISOString(),workspace:myWs||"island-explorer",
     data:{opId:opId,newStatus:status,reason:reason,guide:myGuide.name}};
   /* Apply locally first (instant + offline-safe), then queue — flushed now if
      online, later if not. */

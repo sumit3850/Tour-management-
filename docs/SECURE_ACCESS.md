@@ -35,6 +35,12 @@ purpose-built doors instead of a wide-open table.
 Paste into the Supabase SQL editor and run it. Safe to re-run — every
 statement either drops-and-recreates or uses `if exists`/`or replace`.
 
+> **On the shared SaaS project (supabase/saas/schema.sql) run `supabase/saas/guide-ops-fix.sql` instead of the
+> `guide_login` / `driver_login` / `driver_trips` definitions below.** That schema locks the `ieo_*` mirror tables
+> (the console can no longer write them), yet the functions below read those tables first whenever they exist —
+> so guides and drivers were served a copy frozen at the migration date. The fix file reads only the live
+> workspace blob, finds the guide / driver across every company's workspace and returns the workspace id.
+
 ```sql
 -- ============================================================
 -- Secure shared workspace: lock the data to your signed-in team,
