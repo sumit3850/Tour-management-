@@ -150,10 +150,13 @@ html.dark .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 32%,transpa
 .doc-kv tr{display:contents}.doc-kv td{display:block}
 @media(max-width:600px){
   .doc-kv tbody{grid-template-columns:max-content max-content minmax(0,1fr)}
-  #quotationBody{padding:14px !important}
+  #quotationBody{padding:14px !important;max-width:100%;overflow-x:auto}
+  #quotationBody,#quotationBody *{font-size:12px !important}
+  #quotationBody .doc-title{font-size:13px !important}
+  #quotationBody img{max-width:100% !important}
   #quotationBody td,#quotationBody th{white-space:normal !important}
-  #quotationBody .doc-kv td{white-space:nowrap !important}
-  #quotationBody .doc-kv td:nth-child(3n){white-space:normal !important;padding-right:0 !important}
+  #quotationBody .doc-kv td{white-space:nowrap !important;width:auto !important;min-width:0}
+  #quotationBody .doc-kv td:nth-child(3n){white-space:normal !important;padding-right:0 !important;overflow-wrap:anywhere}
 }
 
 .bar{height:6px;background:var(--line-soft);border-radius:999px;overflow:hidden}
@@ -343,6 +346,8 @@ body.no-anim .view{animation:none} /* background data refresh — rebuild withou
 .list-row .meta{flex:1;min-width:0}
 .list-row .t{font-weight:600;font-size:14px}
 .list-row .s{font-size:12px;color:var(--ink-soft)}
+/* document folders (quotations / invoices / accepted quotes): title + meta line */
+.doc-t{font-weight:600;font-size:13px;line-height:1.35}.doc-s{font-size:11px;color:var(--ink-soft);margin-top:2px}
 
 .tour-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .tour-card{padding:16px;cursor:pointer;transition:transform .15s,box-shadow .2s,border-color .15s}
@@ -1132,13 +1137,17 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
   .topbar .page-title b{display:inline;font-size:15px;font-weight:500;letter-spacing:0;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .topbar .themebtn{margin-left:auto}
   .topbar .iconbtn,.topbar .hamburger,.topbar .backbtn{width:36px;height:36px}
-  .h-sec{font-size:15px}.eyebrow{font-size:10px}
+  .h-sec{font-size:14px;font-weight:600}.eyebrow{font-size:10px}
+  .doc-t{font-size:12.5px;font-weight:500}.doc-s{font-size:11px}
+  .list-row .t{font-weight:500}
+  .acc-card .acc-name{font-size:14px;font-weight:600}.tour-card .nm{font-size:14px;font-weight:600}.tour-card .dt-range{font-size:16px}.kmline .big{font-size:16px}
+  .page-title b{font-size:15px}
   .card-pad{padding:14px}
   .kpi .lab{font-size:11.5px}.kpi .val{font-size:21px}.kpi .trend{font-size:11px}
   .qa-tile{padding:12px 6px;gap:6px}.qa-lbl{font-size:11.5px}.qa-ic{width:38px;height:38px}.qa-ic svg{width:19px;height:19px}
   .list-row{padding:8px 4px;gap:10px}.list-row .t{font-size:13px}.list-row .s{font-size:11.5px}
   .btn{font-size:13px;padding:9px 13px}.btn-sm{font-size:12px;padding:6px 10px}
-  .tab{font-size:12.5px;padding:6px 11px}
+  .tab{font-size:12px;font-weight:500;padding:6px 10px}.tab.active{font-weight:600}
   .pill{font-size:11px;padding:2px 8px}
   .field label{font-size:12px}
   .input,.field .input,.field select.input{font-size:14px;padding:10px 12px}
@@ -1171,6 +1180,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
 .tabs .tab:hover,.tabs .tab:focus-visible{transform:translate3d(0,-2px,1.4rem);z-index:5;box-shadow:0 10px 18px -12px rgba(20,40,80,.5);background:var(--surface);color:var(--ink)}
 .tabs .tab:hover + .tab,.tabs .tab:has(+ .tab:hover){transform:translate3d(0,-1px,.7rem);z-index:2}
 .tabs .tab:hover + .tab + .tab,.tabs .tab:has(+ .tab + .tab:hover){transform:translate3d(0,0,.3rem)}
+@media(max-width:900px){.tabs{overflow-x:auto;perspective:none;-webkit-overflow-scrolling:touch}}
 /* cards: staggered pop-in on render + hover lift */
 .tour-card,.op-card,.acc-card,.req-card,.lead,.rate-card,.kv-card,.res-card,.m-cards tbody tr{animation:cardIn .45s var(--spring) backwards;transition:transform .28s var(--spring),box-shadow .28s var(--spring),border-color .15s}
 .tour-card:nth-child(2),.op-card:nth-child(2),.acc-card:nth-child(2),.req-card:nth-child(2),.lead:nth-child(2),.m-cards tbody tr:nth-child(2){animation-delay:.05s}
@@ -1239,7 +1249,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 295</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 296</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1248,7 +1258,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 295</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 296</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5661,8 +5671,8 @@ function renderAcceptedQuotes(){
   el.innerHTML=list.map(function(r){
     var invoiced=(invoiceLog||[]).some(function(v){return v.fromQuote===r.id;});
     return "<div class='list-row' style='display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line-soft)'>"+
-      "<div style='flex:1;min-width:0'><div style='font-weight:600;font-size:13.5px'>"+esc0(r.qid||"")+" · "+esc0(r.tour||"")+(invoiced?" <span class='pill completed' style='font-size:10px'>Invoiced</span>":"")+"</div>"+
-        "<div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+esc0(r.guest||"—")+" · "+(r.pax||r.participants||"")+" pax · "+(r.clientType||"")+(r.total!=null?" · "+fmt(r.total):"")+"</div></div>"+
+      "<div style='flex:1;min-width:0'><div class='doc-t'>"+esc0(r.qid||"")+" · "+esc0(r.tour||"")+(invoiced?" <span class='pill completed' style='font-size:10px'>Invoiced</span>":"")+"</div>"+
+        "<div class='doc-s'>"+esc0(r.guest||"—")+" · "+(r.pax||r.participants||"")+" pax · "+(r.clientType||"")+(r.total!=null?" · "+fmt(r.total):"")+"</div></div>"+
       "<button class='btn btn-sea btn-sm' onclick=\"invoiceFromQuote('"+r.id+"')\" style='white-space:nowrap'>Create invoice</button>"+
     "</div>";
   }).join("");
@@ -7539,8 +7549,8 @@ function renderSavedQuotes(){
     var st=r.status||"Draft";
     var stSel="<select class='input' style='width:auto;padding:4px 8px;font-size:11.5px' onchange=\"setQuoteStatus('"+r.id+"',this.value)\">"+QUOTE_STATUSES.map(function(s){return "<option "+(s===st?"selected":"")+">"+s+"</option>";}).join("")+"</select>";
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
-      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":((st==="Lost"||st==="Cancelled")?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
-        "<div style='font-size:11px;color:var(--ink-soft)'>"+((r.guest||docClientFromHtml(r.html))?(r.guest||docClientFromHtml(r.html))+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
+      "<div style='min-width:0'><div class='doc-t'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":((st==="Lost"||st==="Cancelled")?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
+        "<div class='doc-s'>"+((r.guest||docClientFromHtml(r.html))?(r.guest||docClientFromHtml(r.html))+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0;align-items:center'>"+
         stSel+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedQuote('"+r.id+"')\">Open</button>"+
@@ -7842,8 +7852,8 @@ function renderSavedInvoices(){
   if(!list.length){el.innerHTML="<div style='padding:18px;text-align:center;color:var(--ink-soft);font-size:13px'>No saved invoices yet. Open the Cost Calculator, press <b>Invoice</b>, then <b>Save invoice</b>.</div>";return;}
   el.innerHTML=list.map(function(r){
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
-      "<div style='min-width:0'><div style='font-weight:600;font-size:13px'>"+(r.invid||"")+" · "+(r.title||"")+"</div>"+
-        "<div style='font-size:11px;color:var(--ink-soft)'>"+(r.guest?r.guest+" · ":"")+(r.total!=null?fmt(r.total):"")+" · "+(r.date||"")+"</div></div>"+
+      "<div style='min-width:0'><div class='doc-t'>"+(r.invid||"")+" · "+(r.title||"")+"</div>"+
+        "<div class='doc-s'>"+(r.guest?r.guest+" · ":"")+(r.total!=null?fmt(r.total):"")+" · "+(r.date||"")+"</div></div>"+
       "<div style='display:flex;gap:6px;flex-shrink:0'>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedInvoice('"+r.id+"')\">Open</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"editSavedInvoice('"+r.id+"')\">Edit</button>"+
