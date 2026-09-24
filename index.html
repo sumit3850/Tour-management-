@@ -1170,6 +1170,35 @@ button,.btn,.tab,.iconbtn,.tbl-actions button,.tour-del,.tc-chip[onclick],.chk-h
 html.dark .op-actions .btn-edit{background:#173044;border-color:#2b5f8a;color:#8fd0ff}
 html.dark .op-actions .btn-del{background:#3a1f22;border-color:#7a3a3a;color:#ff9aa0}
 html.dark .op-actions button[disabled]{opacity:.35 !important}
+.ln-add{width:28px;height:28px;flex-shrink:0;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);color:var(--sea);font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;font-family:inherit;padding:0}
+.ln-add:hover{background:var(--sea-soft)}
+.ln-parts{font-size:11px;color:var(--ink-soft);margin-top:4px;font-family:'JetBrains Mono',monospace}.ln-parts:empty{display:none}
+.ln-parts .ln-clear{background:none;border:0;color:var(--sea);font-size:11px;text-decoration:underline;margin-left:6px;cursor:pointer;font-family:inherit;padding:0}
+.ln-addrow{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:var(--ink-soft)}.ln-addrow[hidden]{display:none}
+.ln-addrow .calc-in{width:110px}
+.ln-addrow .btn{padding:5px 12px;font-size:12px;min-height:0}
+/* profit calculator panel */
+.pc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.pc-stats .s{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;min-width:0}
+.pc-stats .l{font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
+.pc-stats .v{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-stats .h{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.pc-lines{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+.pc-line{padding:6px 0;border-bottom:1px solid var(--line-soft)}
+.pc-line .ln{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pc-line .ln label{font-size:13px;font-weight:500;color:var(--ink);min-width:0}
+.pc-line .ln-r{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.pc-line .input{width:132px;padding:7px 9px;font-size:13px;text-align:right}
+.pc-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,max-content));gap:8px;margin-top:14px}
+.pc-actions .btn{justify-content:center}
+@media(max-width:600px){
+  .pc-stats{gap:6px}.pc-stats .s{padding:8px 9px;border-radius:10px}.pc-stats .v{font-size:15px}.pc-stats .l{font-size:9.5px;letter-spacing:.03em}.pc-stats .h{display:none}
+  .pc-lines{grid-template-columns:1fr;gap:0}
+  .pc-line{padding:5px 0}.pc-line .ln label{font-size:12.5px}.pc-line .input{width:120px;font-size:13px;padding:7px 8px}
+  .pc-actions{grid-template-columns:1fr 1fr}
+  .pc-toolbar{display:grid !important;grid-template-columns:1fr 1fr;gap:8px}.pc-toolbar .sp{display:none}.pc-toolbar .cnt{text-align:right}.pc-toolbar .btn{justify-content:center}
+  #v-profit .section-head select{width:100% !important}
+}
 .res-item .ln-r{display:flex;align-items:center;gap:6px}
 .res-item .ln-add{width:28px;height:28px;flex-shrink:0;border-radius:8px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);color:#fff;font-size:18px;line-height:1;display:grid;place-items:center;cursor:pointer;font-family:inherit;padding:0}
 .res-item .ln-add:hover{background:rgba(255,255,255,.26)}
@@ -1309,7 +1338,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 297</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 298</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1318,7 +1347,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 297</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 298</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -7997,8 +8026,7 @@ function calc(){
   var total=d.total||CALC_ITEMS.reduce(function(s,it){return s+(d[it[0]]||0);},0)||1;
   var item=function(key,lab){var v=d[key]||0;var pct=Math.min(Math.round(v/total*100),100);
     return "<div class='res-item' id='ri_"+key+"'><div class='ln'><span>"+lab+"</span><span class='ln-r'><input class='calc-in mono' type='number' id='cb_"+key+"' value='"+v+"' oninput=\"calcPartsClear('"+key+"');lineEdited('"+key+"')\"><button type='button' class='ln-add' title='Add another "+lab.toLowerCase()+" cost to this line' aria-label='Add to "+lab+"' onclick=\"calcAddOpen('"+key+"')\">+</button></span></div>"+
-      "<div class='ln-parts' id='parts_"+key+"'></div>"+
-      "<div class='ln-addrow' id='addrow_"+key+"' hidden><span>+ \u20b9</span><input class='calc-in mono' type='number' min='0' id='add_"+key+"' placeholder='amount' onkeydown=\"if(event.key==='Enter'){event.preventDefault();calcAddApply('"+key+"');}\"><button type='button' class='btn btn-sm' onclick=\"calcAddApply('"+key+"')\">Add</button></div>"+
+      lineAddRowHtml("cb_"+key,"calcAddApply('"+key+"')")+
       "<div class='trk'><i id='bar_"+key+"' style='width:"+pct+"%'></i></div></div>";};
   r.innerHTML="<h3 style='margin-bottom:10px'>"+sel.label+"</h3>"+
     "<div class='res-hero'>"+
@@ -8021,7 +8049,7 @@ function calc(){
   /* Baseline for nights/rooms scaling: each line remembers the value and the
      nights/rooms it was priced at, so scaling is proportional and a manual
      edit to a line re-baselines just that line. */
-  _calcBase={n:(d.nights||1),r:(d.rooms||1),lines:{}};_calcParts={};
+  _calcBase={n:(d.nights||1),r:(d.rooms||1),lines:{}};_lineParts={};
   CALC_ITEMS.forEach(function(it){_calcBase.lines[it[0]]={v:d[it[0]]||0,n:_calcBase.n,r:_calcBase.r};});
   _calcSheetRev=_sheetRev; /* panel now reflects the current rate database */
 }
@@ -8044,25 +8072,34 @@ function lineEdited(k){
   if(_calcBase&&_calcBase.lines[k])_calcBase.lines[k]={v:g("cb_"+k),n:g("cb_nights")||1,r:g("cb_rooms")||1};
   recalcCalc();
 }
-/* "+" on a line: add another cost (a second hotel, one more vehicle day…) ON TOP of
-   the figure already there. The line shows the total and, underneath, how it was
-   built up (29,500 + 4,000 = 33,500). Typing in the line directly starts afresh. */
-var _calcParts={};
-function calcAddOpen(k){var row=document.getElementById("addrow_"+k);if(!row)return;row.hidden=!row.hidden;if(!row.hidden){var i=document.getElementById("add_"+k);if(i){i.value="";i.focus();}}}
-function calcAddApply(k){
-  var i=document.getElementById("add_"+k),el=document.getElementById("cb_"+k);if(!i||!el)return;
+/* "+" on an amount line (cost calculator, profit calculator): add another cost ON TOP
+   of the figure already there. The line shows the total and, underneath, how it
+   was built up (29,500 + 4,000 = 33,500). Typing in the line directly starts afresh.
+   id = the amount input's id; the helper owns #addrow_<id>, #add_<id>, #parts_<id>. */
+var _lineParts={};
+function lineAddRowHtml(id,applyJs){
+  return "<div class='ln-parts' id='parts_"+id+"'></div>"+
+    "<div class='ln-addrow' id='addrow_"+id+"' hidden><span>+ \u20b9</span><input class='calc-in mono' type='number' min='0' id='add_"+id+"' placeholder='amount' onkeydown=\"if(event.key==='Enter'){event.preventDefault();"+applyJs+"}\"><button type='button' class='btn btn-sm' onclick=\""+applyJs+"\">Add</button></div>";
+}
+function lineAddOpen(id){var row=document.getElementById("addrow_"+id);if(!row)return;row.hidden=!row.hidden;if(!row.hidden){var i=document.getElementById("add_"+id);if(i){i.value="";i.focus();}}}
+function lineAddApply(id,after){
+  var i=document.getElementById("add_"+id),el=document.getElementById(id);if(!i||!el)return;
   var v=parseFloat(i.value)||0;if(!v){i.focus();return;}
   var cur=parseFloat(el.value)||0;
-  if(!_calcParts[k]||!_calcParts[k].length)_calcParts[k]=[cur];
-  _calcParts[k].push(v);el.value=Math.round((cur+v)*100)/100;i.value="";
-  var row=document.getElementById("addrow_"+k);if(row)row.hidden=true;
-  calcPartsRender(k);lineEdited(k);
+  if(!_lineParts[id]||!_lineParts[id].length)_lineParts[id]=[cur];
+  _lineParts[id].push(v);el.value=Math.round((cur+v)*100)/100;i.value="";
+  var row=document.getElementById("addrow_"+id);if(row)row.hidden=true;
+  linePartsRender(id);if(typeof after==="function")after();
 }
-function calcPartsRender(k){
-  var p=document.getElementById("parts_"+k);if(!p)return;var a=_calcParts[k]||[];
-  p.innerHTML=a.length>1?a.map(function(x){return fmt(x);}).join(" + ")+" = "+fmt(a.reduce(function(t,x){return t+x;},0))+"<button type='button' class='ln-clear' onclick=\"calcPartsClear('"+k+"')\">clear</button>":"";
+function linePartsRender(id){
+  var p=document.getElementById("parts_"+id);if(!p)return;var a=_lineParts[id]||[];
+  p.innerHTML=a.length>1?a.map(function(x){return fmt(x);}).join(" + ")+" = "+fmt(a.reduce(function(t,x){return t+x;},0))+"<button type='button' class='ln-clear' onclick=\"linePartsClear('"+id+"')\">clear</button>":"";
 }
-function calcPartsClear(k){_calcParts[k]=[];calcPartsRender(k);}
+function linePartsClear(id){_lineParts[id]=[];linePartsRender(id);}
+/* cost-calculator wrappers (its inputs are cb_<key>) */
+function calcAddOpen(k){lineAddOpen("cb_"+k);}
+function calcAddApply(k){lineAddApply("cb_"+k,function(){lineEdited(k);});}
+function calcPartsClear(k){linePartsClear("cb_"+k);}
 function readCalcInputs(){
   var g=function(id){var el=document.getElementById(id);return el?(parseFloat(el.value)||0):0;};
   var o={nights:g("cb_nights"),rooms:g("cb_rooms")};
@@ -9386,16 +9423,21 @@ function renderProfitCalc(){
   var el=document.getElementById("pcBody");if(!el)return;
   var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:tours[0].id);});if(!t)return;
   var e=window._pcEditExp||t.profitExp||{};   /* when editing a saved calc, prefill from it */
-  el.innerHTML="<div class='card card-pad'>"+
+  _lineParts={};
+  /* Compact panel: one stat strip (cost / expenses / profit), then each expense as a
+     "label : amount [+]" line — the + adds another cost on top of the figure — and
+     uniform action buttons. Two line columns on wide screens, one on a phone. */
+  el.innerHTML="<div class='card card-pad pc-panel'>"+
     (window._pcEditId?"<div class='eyebrow' style='color:var(--amber);margin-bottom:8px'>Editing a saved calculation</div>":"")+
-    "<div class='kpis'>"+kpi("Total Tour Cost",fmt(tourRevenue(t)),"from bookings","","M3 6h18v12H3zM7 12h.01M17 12h.01M12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+"</div>"+
-    "<div class='form-grid' style='margin-top:14px'>"+PROFIT_EXP_FIELDS.map(function(f){return "<div class='field'><label>"+f[1]+" (₹)</label><input class='input mono' type='number' id='pc_"+f[0]+"' value='"+(e[f[0]]||0)+"' oninput='pcRecalc()'></div>";}).join("")+"</div>"+
-    "<div class='stat-strip' style='grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-top:14px'>"+
-      "<div class='s'><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='l'>Total Tour Cost</div></div>"+
-      "<div class='s'><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div><div class='l'>Total Expenses</div></div>"+
-      "<div class='s'><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div><div class='l'>Profit</div></div>"+
+    "<div class='pc-stats'>"+
+      "<div class='s'><div class='l'>Total Tour Cost</div><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='h'>from bookings</div></div>"+
+      "<div class='s'><div class='l'>Total Expenses</div><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div></div>"+
+      "<div class='s'><div class='l'>Profit</div><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div></div>"+
     "</div>"+
-    "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:14px'>"+
+    "<div class='pc-lines'>"+PROFIT_EXP_FIELDS.map(function(f){var id="pc_"+f[0];
+      return "<div class='pc-line'><div class='ln'><label for='"+id+"'>"+f[1]+"</label><span class='ln-r'><input class='input mono' type='number' min='0' id='"+id+"' value='"+(e[f[0]]||0)+"' oninput=\"linePartsClear('"+id+"');pcRecalc()\"><button type='button' class='ln-add' title='Add another "+f[1].toLowerCase()+" cost to this line' aria-label='Add to "+f[1]+"' onclick=\"lineAddOpen('"+id+"')\">+</button></span></div>"+
+        lineAddRowHtml(id,"lineAddApply('"+id+"',pcRecalc)")+"</div>";}).join("")+"</div>"+
+    "<div class='pc-actions'>"+
       "<button class='btn btn-primary btn-sm' onclick='saveProfitCalc()'>"+(window._pcEditId?"Update saved calculation":"Save calculation")+"</button>"+
       (window._pcEditId?"<button class='btn btn-ghost btn-sm' onclick='cancelProfitEdit()'>Cancel</button>":"")+
     "</div>"+
@@ -9428,10 +9470,10 @@ function profitLogsCard(){
       "</div></div>";
   }).join(""):"<div class='empty'>No saved calculations yet — fill in the expenses above and tap <b>Save calculation</b>.</div>";
   var nSel=Object.keys(_pcSelected).filter(function(k){return _pcSelected[k];}).length;
-  var toolbar=logs.length?"<div style='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px'>"+
+  var toolbar=logs.length?"<div class='pc-toolbar' style='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px'>"+
     "<label style='display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;cursor:pointer'><input type='checkbox' id='pcSelAll' "+(nSel&&nSel===logs.length?"checked":"")+" onchange='pcSelectAll(this.checked)' style='width:16px;height:16px;accent-color:#0a6ed1'> Select all</label>"+
-    "<span style='font-size:12px;color:var(--ink-soft)'>"+(nSel?nSel+" selected":"")+"</span>"+
-    "<span style='flex:1'></span>"+
+    "<span class='cnt' style='font-size:12px;color:var(--ink-soft)'>"+(nSel?nSel+" selected":"")+"</span>"+
+    "<span class='sp' style='flex:1'></span>"+
     "<button class='btn btn-ghost btn-sm' id='pcExpSelBtn' onclick='exportProfitXlsx(true)'"+(nSel?"":" disabled style='opacity:.5'")+"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export selected (.xlsx)</button>"+
     "<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export all (.xlsx)</button>"+
   "</div>":"";
