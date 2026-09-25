@@ -1253,6 +1253,88 @@ html.dark .op-actions button[disabled]{opacity:.35 !important}
 .legend .sw{width:10px;height:10px;border-radius:99px}
 html.dark .cal .cell{background:var(--surface-2)}html.dark .cal .cell:hover{background:#1f2b3d}
 @media(max-width:600px){.cal .cell{min-height:48px;padding:3px;border-radius:9px}.cal .dn{min-width:20px;height:20px;font-size:10.5px;padding:0 3px}.cal .span{height:6px;margin-top:2px}.cal-mon{font-size:18px}.cal-sel{font-size:12.5px;padding:7px 28px 7px 10px}.cal-today{padding:7px 11px;font-size:12px}}
+/* ===== Analytics: card chrome, even filter rows, SVG charts, donuts, heat tiles, tooltip ===== */
+.ana-card{animation:cardIn .45s var(--spring) backwards}
+.ana-kpis{grid-template-columns:repeat(5,1fr);gap:12px}
+@media(max-width:1080px){.ana-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.ana-kpis{grid-template-columns:1fr 1fr;gap:8px}.ana-kpis .kpi{padding:12px}.ana-kpis .kpi .val{font-size:19px;margin-top:6px}.ana-kpis .kpi .lab{font-size:11.5px}.ana-kpis .kpi .lab svg{width:26px;height:26px;padding:5px}}
+.ana-stack{margin-top:16px}.ana-stack .ana-card+.ana-card{margin-top:16px}
+.ana-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.ana-head .t{font-size:15px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.ana-head .st{font-size:12px;color:var(--ink-soft);margin-top:1px}
+.ana-x{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);display:grid;place-items:center;flex-shrink:0;font-size:12px;cursor:pointer}
+.ana-x:hover{color:var(--coral);border-color:var(--coral)}
+.ana-filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.ana-filters .input{font-size:11.5px;padding:5px 8px;height:32px;min-height:0}
+.ana-filters select.input{width:auto;padding-right:28px}
+.ana-filters input[type=date]{width:132px}
+.ana-filters .btn{min-height:32px;padding:4px 11px;font-size:11.5px;flex:0 0 auto;max-width:none}
+.ana-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin:6px 0 4px}
+.ana-legend b{color:var(--ink)}
+.ana-chart{position:relative;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.ana-chart svg{display:block;max-width:100%;height:auto;overflow:visible}
+.ana-grid{stroke:var(--line-soft);stroke-width:1}
+.ana-axis{stroke:var(--line);stroke-width:1}
+.ana-lab{font-size:10.5px;fill:var(--ink-soft);font-family:'Inter',system-ui,sans-serif}
+.ana-val,.ana-sub{font-size:10px;fill:var(--ink);font-family:'JetBrains Mono',monospace}
+.ana-bar{animation:anaGrow .7s var(--spring) backwards;transform-box:fill-box;cursor:pointer;transition:filter .15s}
+.ana-bar:hover{filter:brightness(1.15)}
+@keyframes anaGrow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+.ana-line{fill:none;stroke:var(--sea);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:4000;stroke-dashoffset:4000;animation:anaDraw 1.4s ease-out forwards}
+@keyframes anaDraw{to{stroke-dashoffset:0}}
+.ana-area{fill:url(#anaA);animation:anaFade 1.2s ease-out backwards}
+@keyframes anaFade{from{opacity:0}to{opacity:1}}
+.ana-dot{fill:var(--surface);stroke:var(--sea);stroke-width:2;cursor:pointer;animation:anaFade .6s ease-out backwards;transition:r .15s}
+.ana-dot:hover{fill:var(--sea);r:6}
+.ana-hbar{margin-bottom:9px}
+.ana-hbar .r{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;margin-bottom:4px}
+.ana-hbar .r span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ana-hbar .trk{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.ana-hbar .trk i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--sea),var(--forest));transform-origin:left;animation:anaWide .8s var(--spring) backwards}
+@keyframes anaWide{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.ana-donut{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.ana-donut svg{width:132px;height:132px;flex-shrink:0}
+.ana-donut .seg{fill:none;stroke-width:14;cursor:pointer;transition:stroke-width .15s;animation:anaFade .8s ease-out backwards}
+.ana-donut .seg:hover{stroke-width:18}
+.ana-donut .lg{flex:1;min-width:150px}
+.ana-donut .lg div{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}
+.ana-donut .lg span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ana-donut .lg i{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.ana-donut .lg b{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;white-space:nowrap}
+.ana-donut .ctr{font-size:22px;font-weight:700;fill:var(--ink);font-family:'Inter',system-ui,sans-serif}
+.ana-donut .ctr2{font-size:10px;fill:var(--ink-soft);font-family:'Inter',system-ui,sans-serif}
+.ana-heat{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.ana-heat .m{border-radius:12px;padding:10px 11px;color:#fff;animation:cardIn .5s var(--spring) backwards;cursor:default}
+.ana-heat .m.none{background:var(--surface-2);color:var(--ink-soft)}
+.ana-heat .m .mn{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.92}
+.ana-heat .m .pc{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+.ana-heat .m .d{font-size:10.5px;opacity:.92}
+.ana-heat .m .bar{height:4px;background:rgba(255,255,255,.35);border-radius:99px;margin-top:7px;overflow:hidden}
+.ana-heat .m .bar i{display:block;height:100%;background:#fff;border-radius:99px;transform-origin:left;animation:anaWide .8s var(--spring) backwards}
+#anaTip{position:fixed;z-index:6000;pointer-events:none;background:var(--ink);color:var(--surface);font-size:11.5px;font-weight:500;padding:6px 9px;border-radius:8px;box-shadow:0 8px 20px -8px rgba(0,0,0,.45);opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;white-space:nowrap;max-width:80vw}
+#anaTip.show{opacity:1;transform:none}
+html.dark #anaTip{background:#e6edf7;color:#0f1520}
+@media(max-width:600px){
+  .ana-filters{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .ana-filters select.input{grid-column:1/-1;width:100%}
+  .ana-filters input[type=date]{width:100%;min-width:0}
+  .ana-filters .btn{grid-column:1/-1;width:100%;max-width:none}
+  .ana-heat{grid-template-columns:repeat(3,1fr);gap:6px}.ana-heat .m{padding:8px 9px;border-radius:10px}.ana-heat .m .pc{font-size:17px}.ana-heat .m .d{font-size:9.5px}
+  .ana-donut{gap:12px}.ana-donut svg{width:112px;height:112px}
+}
+/* document folders: actions on one line, equal widths; accepted-quotation rows */
+.doc-acts{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.doc-acts>.btn{flex:1 1 0 !important;min-width:0 !important;max-width:none !important;justify-content:center;white-space:nowrap}
+.doc-acts>select.input{flex:1 1 0;min-width:0}
+.acc-row{display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line-soft)}
+.acc-main{flex:1;min-width:0}
+.acc-code{font-size:11.5px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.acc-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-btn{flex-shrink:0;white-space:nowrap}
+@media(max-width:600px){
+  .doc-acts{width:100%;flex-wrap:nowrap}.doc-acts>.btn{padding:7px 4px;font-size:12px}
+  .acc-row{flex-wrap:wrap;padding:10px 14px}.acc-main{flex:1 1 100%}.acc-btn{flex:1 1 100%;justify-content:center}
+}
 /* ===== Uniform button groups (console-wide): any block whose children are all
    buttons lays them out at equal width — side by side on wide screens (each capped
    so a lone button doesn't stretch across the page), two per row on phones. ===== */
@@ -1348,7 +1430,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 300</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 301</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1357,7 +1439,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 300</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 301</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4822,19 +4904,89 @@ function hideAnaCard(card){if(_anaHidden.indexOf(card)<0)_anaHidden.push(card);t
 function showAnaCard(card){_anaHidden=_anaHidden.filter(function(c){return c!==card;});try{localStorage.setItem("ieo_anaHidden",JSON.stringify(_anaHidden));}catch(e){}renderAnalytics();}
 function anaYearsAvail(){var ys={};(tours||[]).forEach(function(t){if(t.start)ys[t.start.slice(0,4)]=1;});return Object.keys(ys).sort();}
 /* Card chrome: title + optional year filter + hide (✕). */
-function anaCard(id,title,body,withYear){
+function anaCard(id,title,body,withYear,sub,extra){
   var y=_anaYearBy[id]||"all";
   var r=_anaRangeBy[id]||{};
-  var sel=withYear?"<select class='input' style='width:auto;padding:4px 7px;font-size:11.5px' onchange=\"setAnaYear('"+id+"',this.value)\"><option value='all'>All years</option>"+anaYearsAvail().map(function(v){return "<option value='"+v+"' "+(v===y?"selected":"")+">"+v+"</option>";}).join("")+"</select>":"";
-  /* compact per-card date range (DD-MM-YYYY pickers) + one-tap clear */
-  var range=withYear?"<input type='date' class='input mono' id='af_"+id+"' value='"+(r.from||"")+"' onchange=\"setAnaRange('"+id+"')\" title='From date' style='width:120px;padding:4px 6px;font-size:11px'>"+
-    "<input type='date' class='input mono' id='at_"+id+"' value='"+(r.to||"")+"' onchange=\"setAnaRange('"+id+"')\" title='To date' style='width:120px;padding:4px 6px;font-size:11px'>"+
-    ((r.from||r.to)?"<button class='btn btn-ghost btn-sm' style='padding:3px 9px;font-size:11px;color:var(--coral)' title='Clear date range' onclick=\"clearAnaRange('"+id+"')\">Clear dates</button>":""):"";
-  return "<div class='card card-pad'><div class='section-head' style='margin-bottom:6px'><div class='h-sec' style='font-size:15px'>"+title+"</div>"+
-    "<button class='btn btn-ghost btn-sm' style='min-width:30px;padding:4px 9px;color:var(--coral)' title='Hide this card' onclick=\"hideAnaCard('"+id+"')\">✕</button></div>"+
-    (withYear?"<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:10px'>"+sel+range+"</div>":"")+
+  var sel=withYear?"<select class='input' aria-label='Year' onchange=\"setAnaYear('"+id+"',this.value)\"><option value='all'>All years</option>"+anaYearsAvail().map(function(v){return "<option value='"+v+"' "+(v===y?"selected":"")+">"+v+"</option>";}).join("")+"</select>":"";
+  /* per-card date range (DD-MM-YYYY pickers) + one-tap clear — an even grid on phones */
+  var range=withYear?"<input type='date' class='input mono' id='af_"+id+"' value='"+(r.from||"")+"' onchange=\"setAnaRange('"+id+"')\" title='From date'>"+
+    "<input type='date' class='input mono' id='at_"+id+"' value='"+(r.to||"")+"' onchange=\"setAnaRange('"+id+"')\" title='To date'>"+
+    ((r.from||r.to)?"<button class='btn btn-ghost btn-sm' style='color:var(--coral)' title='Clear date range' onclick=\"clearAnaRange('"+id+"')\">Clear dates</button>":""):"";
+  return "<div class='card card-pad ana-card'><div class='ana-head'><div><div class='t'>"+title+"</div>"+(sub?"<div class='st'>"+sub+"</div>":"")+"</div>"+
+    "<button class='ana-x' title='Hide this card' aria-label='Hide this card' onclick=\"hideAnaCard('"+id+"')\">✕</button></div>"+
+    ((withYear||extra)?"<div class='ana-filters'>"+sel+range+(extra||"")+"</div>":"")+
     body+"</div>";
 }
+/* ---- SVG charts: bars (grouped, negative-aware), line + area, donut; every
+   element carries data-tip for the floating tooltip (hover / tap). ---- */
+function anaFmtK(v){var a=Math.abs(v);var t=a>=1e7?(a/1e7).toFixed(1)+"Cr":a>=1e5?(a/1e5).toFixed(1)+"L":a>=1000?Math.round(a/1000)+"k":String(Math.round(a));return (v<0?"-":"")+"\u20b9"+t;}
+function anaEsc(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");}
+function anaWidth(){var b=document.getElementById("anaBody");var w=b?b.clientWidth:0;return Math.max(300,(w||760)-38);}
+function anaBars(o){
+  var n=o.labels.length,ns=o.series.length;
+  var W=Math.max(anaWidth(),n*(ns>1?34:26)),H=o.height||180,padT=18,padB=o.sub?34:22,padL=4,padR=4;
+  var innerH=H-padT-padB;
+  var all=[];o.series.forEach(function(sr){all=all.concat(sr.values);});
+  var maxV=Math.max.apply(null,all.map(function(v){return Math.abs(v||0);}).concat([1]));
+  var hasNeg=all.some(function(v){return v<0;});
+  var half=hasNeg?innerH/2:innerH,zeroY=padT+half,scale=half/maxV;
+  var slot=(W-padL-padR)/n,bw=Math.min(slot*0.64/ns,34),gap=ns>1?3:0;
+  var fmt=o.fmt||anaFmtK,tipFmt=o.tipFmt||function(v){return fmt(v);};
+  var g="";[0.5,1].forEach(function(k){var y=(zeroY-half*k).toFixed(1);g+="<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+y+"' y2='"+y+"' class='ana-grid'/>";if(hasNeg){var y2=(zeroY+half*k).toFixed(1);g+="<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+y2+"' y2='"+y2+"' class='ana-grid'/>";}});
+  var bars="",labs="";
+  o.labels.forEach(function(lab,i){
+    var cx=padL+slot*i+slot/2;
+    o.series.forEach(function(sr,si){
+      var v=sr.values[i]||0,h=v?Math.max(Math.abs(v)*scale,2):0;
+      var x=cx-(bw*ns+gap*(ns-1))/2+si*(bw+gap),y=v>=0?zeroY-h:zeroY;
+      var fill=v<0?(sr.negColor||"var(--coral)"):(sr.color||"url(#anaG)");
+      bars+="<rect class='ana-bar' x='"+x.toFixed(1)+"' y='"+y.toFixed(1)+"' width='"+bw.toFixed(1)+"' height='"+h.toFixed(1)+"' rx='3' fill='"+fill+"' style='transform-origin:50% "+(v>=0?"100%":"0%")+";animation-delay:"+(i*30)+"ms' data-tip='"+anaEsc(lab)+(ns>1?" \u00b7 "+anaEsc(sr.name):"")+": "+anaEsc(tipFmt(v))+"'/>";
+      if(ns===1&&o.valueLabels!==false&&v&&slot>=30)labs+="<text class='ana-val' x='"+cx.toFixed(1)+"' y='"+(v>=0?y-4:y+h+10).toFixed(1)+"' text-anchor='middle'>"+anaEsc(fmt(v))+"</text>";
+    });
+    if(slot>=18||i%2===0)labs+="<text class='ana-lab' x='"+cx.toFixed(1)+"' y='"+(H-padB+14)+"' text-anchor='middle'>"+anaEsc(lab)+"</text>";
+    if(o.sub&&o.sub[i]!=null&&(slot>=30||i%2===0))labs+="<text class='ana-sub' x='"+cx.toFixed(1)+"' y='"+(H-padB+27)+"' text-anchor='middle'"+(o.subColor?" fill='"+o.subColor(i)+"'":"")+">"+anaEsc(o.sub[i])+"</text>";
+  });
+  return "<div class='ana-chart'><svg viewBox='0 0 "+W+" "+H+"' width='"+W+"' height='"+H+"'><defs><linearGradient id='anaG' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='var(--sea)'/><stop offset='1' stop-color='var(--forest)'/></linearGradient></defs>"+g+"<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+zeroY+"' y2='"+zeroY+"' class='ana-axis'/>"+bars+labs+"</svg></div>";
+}
+function anaLine(o){
+  var n=o.labels.length;if(!n)return "";
+  var W=Math.max(anaWidth(),n*26),H=o.height||180,padT=18,padB=22,padL=6,padR=6;
+  var innerH=H-padT-padB,maxV=Math.max.apply(null,o.values.concat([1]));
+  var step=n>1?(W-padL-padR)/(n-1):0;
+  var pts=o.values.map(function(v,i){return [padL+step*i,padT+innerH-(v/maxV)*innerH];});
+  var d=pts.map(function(p,i){return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1);}).join(" ");
+  var area=d+" L"+pts[n-1][0].toFixed(1)+" "+(padT+innerH)+" L"+pts[0][0].toFixed(1)+" "+(padT+innerH)+" Z";
+  var fmt=o.fmt||anaFmtK;
+  var g="";[0.5,1].forEach(function(k){var y=(padT+innerH-innerH*k).toFixed(1);g+="<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+y+"' y2='"+y+"' class='ana-grid'/>";});
+  var dots="",labs="";
+  pts.forEach(function(p,i){
+    dots+="<circle class='ana-dot' cx='"+p[0].toFixed(1)+"' cy='"+p[1].toFixed(1)+"' r='4' style='animation-delay:"+(i*40)+"ms' data-tip='"+anaEsc(o.labels[i])+": "+anaEsc(fmt(o.values[i]))+"'/>";
+    if(step>=30||i%2===0){var anchor=i===0?"start":(i===n-1?"end":"middle");labs+="<text class='ana-lab' x='"+p[0].toFixed(1)+"' y='"+(H-padB+14)+"' text-anchor='"+anchor+"'>"+anaEsc(o.labels[i])+"</text>";}
+    if(o.values[i]&&(step>=44||i%3===0))labs+="<text class='ana-val' x='"+p[0].toFixed(1)+"' y='"+(p[1]-8).toFixed(1)+"' text-anchor='"+(i===0?"start":(i===n-1?"end":"middle"))+"'>"+anaEsc(fmt(o.values[i]))+"</text>";
+  });
+  return "<div class='ana-chart'><svg viewBox='0 0 "+W+" "+H+"' width='"+W+"' height='"+H+"'><defs><linearGradient id='anaA' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='var(--sea)' stop-opacity='.35'/><stop offset='1' stop-color='var(--sea)' stop-opacity='.02'/></linearGradient></defs>"+g+"<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+(padT+innerH)+"' y2='"+(padT+innerH)+"' class='ana-axis'/><path class='ana-area' d='"+area+"'/><path class='ana-line' d='"+d+"'/>"+dots+labs+"</svg></div>";
+}
+var ANA_COLORS=["#0a6ed1","#1f8f5f","#e8843c","#8e5cd6","#d94f70","#2fa5b8","#c9a227","#6b7c93"];
+function anaDonut(items,opt){
+  opt=opt||{};var tot=items.reduce(function(a,x){return a+x.n;},0)||1;
+  var R=52,C=2*Math.PI*R,off=0,segs="";
+  items.forEach(function(x,i){var len=x.n/tot*C;segs+="<circle class='seg' cx='66' cy='66' r='"+R+"' stroke='"+ANA_COLORS[i%ANA_COLORS.length]+"' stroke-dasharray='"+len.toFixed(2)+" "+(C-len).toFixed(2)+"' stroke-dashoffset='"+(-off).toFixed(2)+"' style='animation-delay:"+(i*70)+"ms' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'/>";off+=len;});
+  var legend=items.map(function(x,i){return "<div><i style='background:"+ANA_COLORS[i%ANA_COLORS.length]+"'></i><span>"+anaEsc(x.k)+"</span><b>"+anaEsc(opt.tip?opt.tip(x):x.n)+" \u00b7 "+Math.round(x.n/tot*100)+"%</b></div>";}).join("");
+  return "<div class='ana-donut'><svg viewBox='0 0 132 132'><g transform='rotate(-90 66 66)'>"+segs+"</g><text class='ctr' x='66' y='64' text-anchor='middle'>"+anaEsc(opt.center!=null?opt.center:tot)+"</text><text class='ctr2' x='66' y='80' text-anchor='middle'>"+anaEsc(opt.centerLabel||"total")+"</text></svg><div class='lg'>"+legend+"</div></div>";
+}
+function anaBindTips(root){
+  var tip=document.getElementById("anaTip");
+  if(!tip){tip=document.createElement("div");tip.id="anaTip";document.body.appendChild(tip);}
+  var show=function(e){var t=e.target&&e.target.closest?e.target.closest("[data-tip]"):null;if(!t){tip.classList.remove("show");return;}
+    tip.textContent=t.getAttribute("data-tip");tip.classList.add("show");
+    var x=e.clientX+12,y=e.clientY-36;if(x+tip.offsetWidth>window.innerWidth-8)x=e.clientX-tip.offsetWidth-12;if(y<8)y=e.clientY+18;
+    tip.style.left=x+"px";tip.style.top=y+"px";};
+  var hideTm=null;
+  root.onpointermove=function(e){if(e.pointerType!=="touch")show(e);};
+  root.onpointerdown=function(e){show(e);clearTimeout(hideTm);if(e.pointerType==="touch")hideTm=setTimeout(function(){tip.classList.remove("show");},2500);};
+  root.onpointerleave=function(e){if(e.pointerType!=="touch")tip.classList.remove("show");};
+}
+(function(){var tm=null;window.addEventListener("resize",function(){clearTimeout(tm);tm=setTimeout(function(){if(typeof curView!=="undefined"&&curView==="analytics"&&typeof renderAnalytics==="function")renderAnalytics();},250);});})();
 /* Per-card From/To date filter (persisted per device, DD-MM-YYYY pickers) —
    combines with each card's year dropdown; ✕ clears just that card's range. */
 var _anaRangeBy=(function(){try{return JSON.parse(localStorage.getItem("ieo_anaRangeBy")||"{}")||{};}catch(e){return {};}})();
@@ -4939,9 +5091,9 @@ function renderAnalytics(){
     var fmtK=function(v){return v>=100000?("\u20b9"+(v/100000).toFixed(1)+"L"):("\u20b9"+Math.round(v/1000)+"k");};
     var totC=cur.reduce(function(a,b){return a+b;},0),totP=prev.reduce(function(a,b){return a+b;},0);
     var delta=totP>0?Math.round((totC-totP)/totP*100):null;
-    revChart="<div style='display:flex;gap:14px;align-items:center;font-size:12px;color:var(--ink-soft);margin-bottom:6px;flex-wrap:wrap'><span><i class='yoy-sw cur'></i>"+yy+" \u00b7 <b class='mono' style='color:var(--ink)'>"+fmt(totC)+"</b></span><span><i class='yoy-sw prev'></i>"+py+" \u00b7 <b class='mono' style='color:var(--ink)'>"+fmt(totP)+"</b></span>"+(delta!=null?"<span class='pill "+(delta>=0?"completed":"full")+"'>"+(delta>=0?"\u25b2 ":"\u25bc ")+Math.abs(delta)+"% YoY</span>":"")+"</div>"+
-      "<div class='chart'>"+cur.map(function(v,m){return "<div class='col'><div class='stk2'><div class='stk prev' title='"+py+": "+fmt(prev[m])+"' style='height:"+Math.max(Math.round(prev[m]/maxY*100),2)+"%'></div><div class='stk' title='"+yy+": "+fmt(v)+"' style='height:"+Math.max(Math.round(v/maxY*100),2)+"%'></div></div><div class='cl'>"+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m]+"<br><b class='mono'>"+(v?fmtK(v):"\u2013")+"</b></div></div>";}).join("")+"</div>";
-  }else revChart=months.length?"<div class='chart'>"+months.map(function(k){var v=byMonth[k];return "<div class='col'><div class='stk' style='height:"+Math.max(Math.round(v/maxM*100),3)+"%'></div><div class='cl'>"+monthLabel(k)+"<br><b class='mono'>"+(v>=100000?("\u20b9"+(v/100000).toFixed(1)+"L"):("\u20b9"+Math.round(v/1000)+"k"))+"</b></div></div>";}).join("")+"</div>":"<div class='empty'>Add tour costs to see revenue by month.</div>";
+    revChart="<div class='ana-legend'><span><i class='yoy-sw cur'></i>"+yy+" \u00b7 <b class='mono'>"+fmt(totC)+"</b></span><span><i class='yoy-sw prev'></i>"+py+" \u00b7 <b class='mono'>"+fmt(totP)+"</b></span>"+(delta!=null?"<span class='pill "+(delta>=0?"completed":"full")+"'>"+(delta>=0?"\u25b2 ":"\u25bc ")+Math.abs(delta)+"% YoY</span>":"")+"</div>"+
+      anaBars({labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],series:[{name:py,values:prev,color:"var(--line)"},{name:yy,values:cur}],tipFmt:fmt});
+  }else revChart=months.length?anaLine({labels:months.map(monthLabel),values:months.map(function(k){return byMonth[k];}),fmt:anaFmtK}):"<div class='empty'>Add tour costs to see revenue by month.</div>";
   byTour.sort(function(a,b){return b.rev-a.rev;});
   var top=byTour.filter(function(x){return x.rev>0;}).slice(0,8);
   /* lead funnel */
@@ -4961,7 +5113,8 @@ function renderAnalytics(){
   /* lead sources */
   var srcs={};leads.forEach(function(l){var k=l.src||"—";srcs[k]=(srcs[k]||0)+1;});
   var srcList=Object.keys(srcs).map(function(k){return {k:k,n:srcs[k]};}).sort(function(a,b){return b.n-a.n;});
-  var hbar=function(label,val,max,display){return "<div style='margin-bottom:8px'><div style='display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px'><span>"+label+"</span><b class='mono'>"+(display!=null?display:val)+"</b></div><div style='height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden'><span style='display:block;height:100%;width:"+Math.max(Math.round(val/max*100),2)+"%;background:var(--sea);border-radius:99px'></span></div></div>";};
+  var _hb=0;
+  var hbar=function(label,val,max,display){var pct=Math.max(Math.round(val/max*100),2);return "<div class='ana-hbar' data-tip='"+anaEsc(String(label).replace(/<[^>]*>/g,""))+": "+anaEsc(display!=null?display:val)+"'><div class='r'><span>"+label+"</span><b class='mono'>"+(display!=null?display:val)+"</b></div><div class='trk'><i style='width:"+pct+"%;animation-delay:"+((_hb++%12)*40)+"ms'></i></div></div>";};
   var hiddenChips=_anaHidden.length?"<div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center'><span style='font-size:11.5px;color:var(--ink-soft)'>Hidden cards:</span>"+_anaHidden.map(function(c){var names={rev:"Revenue by month",top:"Top tours",funnel:"Lead funnel",guides:"Guide utilization",sources:"Lead sources",profit:"Profit by tour",season:"Profit by season",heat:"Season planner",greviews:"Google reviews",cash:"Cash-flow forecast",leadtime:"Booking lead time",guests:"Guest mix"};return "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:3px 10px' onclick=\"showAnaCard('"+c+"')\">+ "+(names[c]||c)+"</button>";}).join("")+"</div>":"";
   /* ---- Profit by tour (auto): actual > log > cost-sheet estimate ---- */
   var pRows=(tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(anaYearFilter("profit")).map(function(t){
@@ -4974,28 +5127,25 @@ function renderAnalytics(){
       "<div style='min-width:0'><div style='font-size:13px;font-weight:600'>["+tourCode(p.t)+"] "+shortName(p.t)+(best?" <span style='color:var(--forest);font-size:11px'>★ best</span>":"")+(worst?" <span style='color:var(--coral);font-size:11px'>▼ worst</span>":"")+"</div>"+
       "<div style='font-size:11.5px;color:var(--ink-soft)'>Rev "+fmt(p.rev)+" · Cost "+(p.exp?fmt(p.exp):"—")+" "+srcBadge(p.src)+((p.pct!=null&&p.exp>0&&p.pct<(+prefs.marginMin||0))?" <span class='pill full' style='font-size:10px' title='Below your minimum margin (Settings \u2192 Preferences)'>below "+(+prefs.marginMin)+"% target</span>":"")+"</div></div>"+
       "<div style='text-align:right;flex-shrink:0'><div class='mono' style='font-weight:700;color:"+(p.profit>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(p.profit)+"</div>"+(p.pct!=null?"<div style='font-size:11px;color:var(--ink-soft)'>"+p.pct+"% margin</div>":"")+"</div></div>";
-  }).join("")+"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Costs come from the Profit Calculator when entered; otherwise estimated from the cost sheet (booked pax + client mix). Enter real expenses in Tour costing → Profit Calculator to firm a tour up.</p>"
+  }).join("")
   :"<div class='empty'>No tours with revenue in this range yet.</div>";
   /* ---- Profit by season: month-of-start aggregation ---- */
   var MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var seas=[];for(var si=0;si<12;si++)seas.push(0);
   pRows.forEach(function(p){if(p.t.start&&anaYearFilter("season")(p.t))seas[parseInt(p.t.start.slice(5,7),10)-1]+=p.profit;});
   var maxSeas=Math.max.apply(null,seas.map(Math.abs).concat([1]));
-  var seasonBody=pRows.length?"<div class='chart'>"+seas.map(function(v,i){
-    return "<div class='col'><div class='stk' style='height:"+Math.max(Math.round(Math.abs(v)/maxSeas*100),2)+"%;"+(v<0?"background:var(--coral)":"")+"'></div><div class='cl'>"+MN[i]+"<br><b class='mono'>"+(v?(Math.abs(v)>=100000?("₹"+(v/100000).toFixed(1)+"L"):("₹"+Math.round(v/1000)+"k")):"—")+"</b></div></div>";
-  }).join("")+"</div>":"<div class='empty'>Profit appears here once tours have revenue.</div>";
+  var seasonBody=pRows.length?anaBars({labels:MN,series:[{name:"Profit",values:seas}],tipFmt:fmt}):"<div class='empty'>Profit appears here once tours have revenue.</div>";
   /* ---- Season planner: occupancy heatmap (seats booked / offered per month) ---- */
   var hm=seasonMonthData(anaYearFilter("heat"));
   var gapMonths=MN.filter(function(_,i){return hm[i].tours===0;});
-  var heatBody="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px'>"+hm.map(function(m,i){
+  var heatBody="<div class='ana-heat'>"+hm.map(function(m,i){
     var util=m.cap>0?Math.round(m.booked/m.cap*100):null;
-    var bg=util==null?"var(--surface-2)":(util>=80?"#1f8f5f":(util>=50?"#7cc08f":(util>=25?"#f0c36b":"#e8938c")));
-    var fg=util==null?"var(--ink-soft)":"#fff";
-    return "<div style='border-radius:10px;padding:10px;background:"+bg+";color:"+fg+"'>"+
-      "<div style='font-weight:800;font-size:13px'>"+MN[i]+"</div>"+
-      (util==null?"<div style='font-size:11px'>no departures</div>":
-        "<div class='mono' style='font-size:17px;font-weight:800'>"+util+"%</div>"+
-        "<div style='font-size:10.5px;opacity:.9'>"+m.booked+"/"+m.cap+" seats · "+m.tours+" tour"+(m.tours===1?"":"s")+"</div>")+
+    var bg=util==null?"":(util>=80?"linear-gradient(135deg,#1f8f5f,#157a4c)":(util>=50?"linear-gradient(135deg,#7cc08f,#5aa873)":(util>=25?"linear-gradient(135deg,#f0c36b,#e0a83c)":"linear-gradient(135deg,#e8938c,#d9736a)")));
+    return "<div class='m"+(util==null?" none":"")+"' style='"+(bg?"background:"+bg+";":"")+"animation-delay:"+(i*40)+"ms' data-tip='"+MN[i]+": "+(util==null?"no departures":m.booked+" of "+m.cap+" seats booked \u00b7 "+m.tours+" tour"+(m.tours===1?"":"s"))+"'>"+
+      "<div class='mn'>"+MN[i]+"</div>"+
+      (util==null?"<div class='d'>no departures</div>":
+        "<div class='pc'>"+util+"%</div>"+
+        "<div class='d'>"+m.booked+"/"+m.cap+" seats \u00b7 "+m.tours+" tour"+(m.tours===1?"":"s")+"</div><div class='bar'><i style='width:"+Math.min(util,100)+"%'></i></div>")+
     "</div>";
   }).join("")+"</div>"+
   (gapMonths.length?"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'><b>Gap months (no departures):</b> "+gapMonths.join(", ")+" — space to add tours where demand exists.</p>":"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'>Every month has at least one departure.</p>");
@@ -5033,8 +5183,8 @@ function renderAnalytics(){
     var maxV=Math.max.apply(null,rows.map(function(r){return Math.max(r.i,r.o);}).concat([1]));
     var lab=function(k){var d=new Date(k+"-01T00:00:00");return d.toLocaleDateString("en-GB",{month:"short"})+" '"+String(d.getFullYear()).slice(2);};
     if(!rows.some(function(r){return r.i||r.o;}))return "<div class='empty'>Nothing scheduled in the next 6 months yet.</div>";
-    return "<div class='cf-grid'>"+rows.map(function(r){return "<div class='cf-col'><div class='cf-bars'><span class='cf-in' title='Due in: "+fmt(r.i)+"' style='height:"+Math.max(Math.round(r.i/maxV*100),2)+"%'></span><span class='cf-out' title='Costs out: "+fmt(r.o)+"' style='height:"+Math.max(Math.round(r.o/maxV*100),2)+"%'></span></div><div class='cf-lab'>"+lab(r.k)+"</div><div class='cf-net mono' style='color:"+(r.net>=0?"var(--forest)":"var(--coral)")+"'>"+(r.net>=0?"+":"\u2212")+fmt(Math.abs(r.net)).replace("\u20b9","")+"</div></div>";}).join("")+"</div>"+
-      "<div style='display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:8px'><span><i class='yoy-sw' style='background:var(--sea)'></i>Balances due in</span><span><i class='yoy-sw' style='background:#e8843c'></i>Estimated costs out</span><span>Net 6-month position: <b class='mono' style='color:"+(cum>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(cum)+"</b></span>"+(unsched?"<span>Unscheduled balances (no due date): <b class='mono'>"+fmt(unsched)+"</b></span>":"")+"</div>";
+    return anaBars({labels:rows.map(function(r){return lab(r.k);}),series:[{name:"Due in",values:rows.map(function(r){return r.i;})},{name:"Costs out",values:rows.map(function(r){return r.o;}),color:"#e8843c"}],tipFmt:fmt,sub:rows.map(function(r){return (r.net>=0?"+":"\u2212")+anaFmtK(Math.abs(r.net)).replace("\u20b9","");}),subColor:function(i){return rows[i].net>=0?"var(--forest)":"var(--coral)";}})+
+      "<div class='ana-legend'><span><i class='yoy-sw' style='background:var(--sea)'></i>Balances due in</span><span><i class='yoy-sw' style='background:#e8843c'></i>Estimated costs out</span><span>Net 6-month position: <b class='mono' style='color:"+(cum>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(cum)+"</b></span>"+(unsched?"<span>Unscheduled balances (no due date): <b class='mono'>"+fmt(unsched)+"</b></span>":"")+"</div>";
   })();
   /* ---- Booking lead time: days between booking and departure ---- */
   var leadTimeBody=(function(){
@@ -5062,32 +5212,32 @@ function renderAnalytics(){
     var forn=(bookings||[]).filter(function(b){return b.status!=="Cancelled"&&b.country&&!/india/i.test(b.country);}).reduce(function(s,b){return s+(parseInt(b.party,10)||1);},0);
     if(!list.length&&!cust.length)return "<div class='empty'>No guests yet.</div>";
     return "<div class='stat-strip' style='grid-template-columns:repeat(3,1fr);margin-bottom:10px'><div class='s'><div class='v mono'>"+repPct+"%</div><div class='l'>Repeat guests</div></div><div class='s'><div class='v mono'>"+(tot?Math.round(forn/tot*100):0)+"%</div><div class='l'>International pax</div></div><div class='s'><div class='v mono'>"+cust.length+"</div><div class='l'>Customers</div></div></div>"+
-      list.map(function(x){return hbar(x.k,x.n,list[0].n,x.n+" pax \u00b7 "+(tot?Math.round(x.n/tot*100):0)+"%");}).join("");
+      anaDonut(list,{tip:function(x){return x.n+" pax";},center:tot,centerLabel:"pax"});
   })();
   var vis=function(id){return _anaHidden.indexOf(id)<0;};
   var cards=[];
-  if(vis("rev"))cards.push(anaCard("rev","Revenue by month <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(by tour start)</span> <button class='btn btn-sm "+(_anaYoY?"btn-primary":"btn-ghost")+"' style='padding:2px 9px;font-size:11px;margin-left:6px;vertical-align:middle' onclick='toggleAnaYoY()' title='Compare with the previous year, month by month'>YoY</button>",revChart,true));
-  if(vis("profit"))cards.push(anaCard("profit","Profit by tour <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(auto — revenue vs costs)</span>",profitBody,true));
-  if(vis("heat"))cards.push(anaCard("heat","Season planner <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(seat utilization by month)</span>",heatBody,true));
-  if(vis("greviews"))cards.push(anaCard("greviews","Google reviews <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(participants reviewed, by tour)</span>",greviewsBody,true));
-  if(vis("cash"))cards.push(anaCard("cash","Cash-flow forecast <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(next 6 months \u2014 balances due in vs estimated costs out)</span>",cashBody,false));
-  if(vis("season"))cards.push(anaCard("season","Profit by season <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(month of departure)</span>",seasonBody,true));
+  if(vis("rev"))cards.push(anaCard("rev","Revenue by month",revChart,true,"by tour start","<button class='btn btn-sm "+(_anaYoY?"btn-primary":"btn-ghost")+"' onclick='toggleAnaYoY()' title='Compare with the previous year, month by month'>YoY compare</button>"));
+  if(vis("profit"))cards.push(anaCard("profit","Profit by tour",profitBody,true,"auto \u2014 revenue vs costs"));
+  if(vis("heat"))cards.push(anaCard("heat","Season planner",heatBody,true,"seat utilization by month"));
+  if(vis("greviews"))cards.push(anaCard("greviews","Google reviews",greviewsBody,true,"participants reviewed, by tour"));
+  if(vis("cash"))cards.push(anaCard("cash","Cash-flow forecast",cashBody,false,"next 6 months \u2014 balances due in vs estimated costs out"));
+  if(vis("season"))cards.push(anaCard("season","Profit by season",seasonBody,true,"month of departure"));
   var half=[];
   if(vis("top"))half.push(anaCard("top","Top tours by revenue",(top.length?top.map(function(x){return hbar("["+x.code+"] "+x.n,x.rev,top[0].rev,fmt(x.rev));}).join(""):"<div class='empty'>No revenue captured yet.</div>"),true));
-  if(vis("funnel"))half.push(anaCard("funnel","Lead funnel",funnel.map(function(f){return hbar(f.label,f.n,totLeads);}).join("")+"<div style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>"+leadConv+"% of all leads reach Confirmed.</div>",false));
-  if(vis("guides"))half.push(anaCard("guides","Guide utilization <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(tour-days)</span>",(guides.length?guides.map(function(x){return hbar(x.g+" · "+x.tours+" tour"+(x.tours>1?"s":""),x.days,maxG,x.days+" days");}).join(""):"<div class='empty'>No guides assigned yet.</div>"),true));
-  if(vis("leadtime"))half.push(anaCard("leadtime","Booking lead time <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(booking \u2192 departure)</span>",leadTimeBody,false));
-  if(vis("guests"))half.push(anaCard("guests","Guest mix <span style='font-weight:400;font-size:12px;color:var(--ink-soft)'>(countries by pax \u00b7 repeat rate)</span>",guestsBody,false));
-  if(vis("sources"))half.push(anaCard("sources","Lead sources",(srcList.length?srcList.map(function(x){return hbar(x.k,x.n,srcList[0].n);}).join(""):"<div class='empty'>No leads yet.</div>"),false));
+  if(vis("funnel"))half.push(anaCard("funnel","Lead funnel",funnel.map(function(f){return hbar(f.label,f.n,totLeads);}).join("")+"<div style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>"+leadConv+"% of all leads reach Confirmed.</div>",false,"stage by stage"));
+  if(vis("guides"))half.push(anaCard("guides","Guide utilization",(guides.length?guides.map(function(x){return hbar(x.g+" · "+x.tours+" tour"+(x.tours>1?"s":""),x.days,maxG,x.days+" days");}).join(""):"<div class='empty'>No guides assigned yet.</div>"),true,"tour-days"));
+  if(vis("leadtime"))half.push(anaCard("leadtime","Booking lead time",leadTimeBody,false,"booking \u2192 departure"));
+  if(vis("guests"))half.push(anaCard("guests","Guest mix",guestsBody,false,"countries by pax \u00b7 repeat rate"));
+  if(vis("sources"))half.push(anaCard("sources","Lead sources",(srcList.length?anaDonut(srcList.slice(0,8),{tip:function(x){return x.n+" lead"+(x.n===1?"":"s");},center:leads.length,centerLabel:"leads"}):"<div class='empty'>No leads yet.</div>"),false,"where enquiries come from"));
   var halves="";for(var i=0;i<half.length;i+=2){halves+="<div class='grid-2' style='margin-top:16px'>"+half[i]+(half[i+1]||"")+"</div>";}
   el.innerHTML=
-    "<div class='section-head' style='margin-bottom:8px'><div class='h-sec' style='font-size:15px'>Overview</div>"+
-      "<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>"+
-        "<input type='date' class='input mono' id='af_kpi' value='"+(kr.from||"")+"' onchange=\"setAnaRange('kpi')\" title='From date' style='width:120px;padding:4px 6px;font-size:11px'>"+
-        "<input type='date' class='input mono' id='at_kpi' value='"+(kr.to||"")+"' onchange=\"setAnaRange('kpi')\" title='To date' style='width:120px;padding:4px 6px;font-size:11px'>"+
-        ((kr.from||kr.to)?"<button class='btn btn-ghost btn-sm' style='padding:3px 9px;font-size:11px;color:var(--coral)' onclick=\"clearAnaRange('kpi')\">Clear dates</button>":"")+
+    "<div class='ana-head' style='align-items:center'><div><div class='t'>Overview</div><div class='st'>"+((kr.from||kr.to)?"for the chosen dates":"all time")+"</div></div>"+
+      "<div class='ana-filters' style='margin:0'>"+
+        "<input type='date' class='input mono' id='af_kpi' value='"+(kr.from||"")+"' onchange=\"setAnaRange('kpi')\" title='From date'>"+
+        "<input type='date' class='input mono' id='at_kpi' value='"+(kr.to||"")+"' onchange=\"setAnaRange('kpi')\" title='To date'>"+
+        ((kr.from||kr.to)?"<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"clearAnaRange('kpi')\">Clear dates</button>":"")+
       "</div></div>"+
-    "<div class='kpis'>"+
+    "<div class='kpis ana-kpis'>"+
       kpi("Net Tour Cost",fmt(s.val),"all tours in range","up","M3 3v18h18M7 14l4-4 3 3 5-6")+
       kpi("Collected",fmt(s.dep),"deposits / advances","up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
       kpi("Pending",fmt(s.pend),"still to collect",s.pend>0?"down":"up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
@@ -5095,8 +5245,9 @@ function renderAnalytics(){
       kpi("Lead conversion",leadConv+"%",leads.filter(function(l){return l.stage==="Confirmed";}).length+" confirmed of "+leads.length,"","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
     "</div>"+
     hiddenChips+
-    (cards.length?"<div style='margin-top:16px'>"+cards.join("")+"</div>":"")+
+    (cards.length?"<div class='ana-stack'>"+cards.join("")+"</div>":"")+
     halves;
+  anaBindTips(el);
 }
 
 /* ===== TOURS ===== */
@@ -5783,8 +5934,8 @@ function viewInvoices(){
           ?"<div class='field'><label>Session</label><select class='input' id='inv_cat' onchange='invPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"+
            "<div class='field'><label id='invPPLbl'>"+(sessRateFor(gqSession).basis==="session"?"Session charge (₹ · whole group)":"Price per person (₹)")+"</label><input class='input mono' type='number' id='inv_pp' min='0' value='"+(sessRateFor(gqSession).price||"")+"' placeholder='auto from Session Tours rates'></div>"
           :"<div class='field'><label>Tour</label><select class='input' id='inv_cat'>"+tourOpts+"</select></div>")+
-        "<div class='field full'><label>From your Tours list <span style='color:var(--ink-soft);font-weight:400'>(optional — fills the title, dates, group size and rate card)</span></label><select class='input' id='invFromTour' onchange='invPickTour(this.value)'>"+docTourListOptions("")+"</select></div>"+
-        "<div class='field full'><label>Tour title <span style='color:var(--ink-soft);font-weight:400'>(as printed on the invoice — leave blank for the rate card / session name)</span></label><input class='input' id='inv_title' placeholder='e.g. 6N South Andaman Herping Tour'></div>"+
+        "<div class='field full'><label>From your Tours list</label><select class='input' id='invFromTour' onchange='invPickTour(this.value)'>"+docTourListOptions("")+"</select></div>"+
+        "<div class='field full'><label>Tour title</label><input class='input' id='inv_title' placeholder='e.g. 6N South Andaman Herping Tour'></div>"+
         "<div class='field'><label>Group size</label><select class='input mono' id='inv_pax'>"+groupOpts+"</select></div>"+
         "<div class='field'><label>Client type</label><select class='input' id='inv_type'><option value='indian'>Indian</option><option value='foreign'>Foreigner</option></select></div>"+
         "<div class='field'><label>"+(invMode==="session"?"Session start date":"Tour start date")+"</label><input class='input' type='date' id='inv_start'></div>"+
@@ -5800,7 +5951,7 @@ function viewInvoices(){
       "<div id='acceptedQuotes'></div>"+
     "</div>"+
     "<div class='card'>"+
-      "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Folder</div><div class='h-sec' style='margin-bottom:6px'>Saved invoices</div><p style='font-size:12px;color:var(--ink-soft);margin:2px 0 6px'>Generate above, press <b>Save invoice</b> in the preview, and it lands here and in the workbook's Invoice tab.</p></div>"+
+      "<div class='card-pad' style='padding-bottom:0'><div class='eyebrow'>Folder</div><div class='h-sec' style='margin-bottom:6px'>Saved invoices</div></div>"+
       "<div id='savedInvoices'></div>"+
     "</div>"+
   "</section>";
@@ -5812,10 +5963,11 @@ function renderAcceptedQuotes(){
   if(!list.length){el.innerHTML="<div style='padding:16px 4px;text-align:center;color:var(--ink-soft);font-size:13px'>No accepted quotations yet. In <b>Quotations → Your quotation folder</b>, set a quote's status to <b>Accepted</b>.</div>";return;}
   el.innerHTML=list.map(function(r){
     var invoiced=(invoiceLog||[]).some(function(v){return v.fromQuote===r.id;});
-    return "<div class='list-row' style='display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line-soft)'>"+
-      "<div style='flex:1;min-width:0'><div class='doc-t'>"+esc0(r.qid||"")+" · "+esc0(r.tour||"")+(invoiced?" <span class='pill completed' style='font-size:10px'>Invoiced</span>":"")+"</div>"+
+    return "<div class='acc-row'>"+
+      "<div class='acc-main'><div class='acc-code'><span class='mono'>"+esc0(r.qid||"")+"</span>"+(invoiced?" <span class='pill completed' style='font-size:10px'>Invoiced</span>":"")+"</div>"+
+        "<div class='doc-t acc-title' title='"+esc0(r.tour||"").replace(/'/g,"&#39;")+"'>"+esc0(r.tour||"")+"</div>"+
         "<div class='doc-s'>"+esc0(r.guest||"—")+" · "+(r.pax||r.participants||"")+" pax · "+(r.clientType||"")+(r.total!=null?" · "+fmt(r.total):"")+"</div></div>"+
-      "<button class='btn btn-sea btn-sm' onclick=\"invoiceFromQuote('"+r.id+"')\" style='white-space:nowrap'>Create invoice</button>"+
+      "<button class='btn btn-sea btn-sm acc-btn' onclick=\"invoiceFromQuote('"+r.id+"')\">Create invoice</button>"+
     "</div>";
   }).join("");
 }
@@ -6230,7 +6382,7 @@ function generateQuotation(){
           <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c">${tourName}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
             <div><span style="color:var(--ink-soft)">Group Size:</span> <b>${pax} guests</b></div>
-            <div><span style="color:var(--ink-soft)">Duration:</span> <b>${d.nights} nights</b></div>
+            <div><span style="color:var(--ink-soft)">Duration:</span> <b>${d.nights} Nights</b></div>
             <div><span style="color:var(--ink-soft)">Rooms:</span> <b>${d.rooms}</b></div>
             <div><span style="color:var(--ink-soft)">Client type:</span> <b>${clientType}</b></div>
             <div><span style="color:var(--ink-soft)">Guide:</span> <b>Sumit Kumar</b></div>
@@ -7046,7 +7198,7 @@ function viewGroupQuote(){
         (gqMode==="session"
           ?"<div class='field full'><label>Session</label><select class='input' id='gqSession' onchange='gqPickSession(this.value)'>"+sessionOptions(gqSession)+"</select></div>"
           :"<div class='field full'><label>Rate card</label><select class='input' id='gqTour' onchange='gqTour=this.value;gqTitleOverride=\"\";_gqFromTour=\"\";gqResetEdits();renderGroupQuote()'></select></div>")+
-        "<div class='field full'><label>From your Tours list <span style='color:var(--ink-soft);font-weight:400'>(optional — fills the title, dates and rate card)</span></label><select class='input' id='gqFromTour' onchange='gqPickTour(this.value)'>"+docTourListOptions(_gqFromTour)+"</select></div>"+
+        "<div class='field full'><label>From your Tours list</label><select class='input' id='gqFromTour' onchange='gqPickTour(this.value)'>"+docTourListOptions(_gqFromTour)+"</select></div>"+
         "<div class='field full'><label>Tour title <span style='color:var(--ink-soft);font-weight:400'>(as printed on the quotation)</span></label><input class='input' id='gqTitle' placeholder='e.g. 6N South Andaman Herping Tour' oninput='gqTitleOverride=this.value'></div>"+
         "<div class='field'><label>Client type</label><div class='tourist-toggle' id='gqTypeToggle'>"+
           "<button class='btn btn-sm' data-gqt='indian' onclick='setGqType(\"indian\")'>Indian</button>"+
@@ -7373,7 +7525,7 @@ function gqCollect(){
     return {size:n,d:d,total:tot,perPerson:d?d.perPerson:null,deposit:tot!=null?Math.round(tot*pct/100):null};
   });
   var nights=(rows[0]&&rows[0].d?rows[0].d.nights:(src&&src[gqType]&&src[gqType]["1"]?src[gqType]["1"].nights:0));
-  return {mode:"group",key:gqTour,label:label,title:title,durLabel:nights+" nights",type:gqType,rows:applyGqOverrides(rows,pct),tier:tier,tiers:tiers,pct:pct,
+  return {mode:"group",key:gqTour,label:label,title:title,durLabel:nights+" Nights",type:gqType,rows:applyGqOverrides(rows,pct),tier:tier,tiers:tiers,pct:pct,
     nights:nights,departure:depEl?depEl.value:"",end:endEl?endEl.value:""};
 }
 function renderGroupQuote(){
@@ -7550,7 +7702,7 @@ function shareGroupQuoteWhatsApp(enc){
     '*Island Explorer Birding Tours*\n\n'+
     'Quotation: '+q.qid+'\n'+
     (q.mode==="session"?'Session: ':'Tour: ')+q.title+'\n'+
-    'Duration: '+(q.dur||q.nights+' nights')+' · '+(q.type==="foreign"?"Foreigner":"Indian")+' clients\n\n'+
+    'Duration: '+(q.dur||q.nights+' Nights')+' · '+(q.type==="foreign"?"Foreigner":"Indian")+' clients\n\n'+
     '*Group prices:*\n'+lines.join('\n')+'\n\n'+
     '*Includes:* '+(q.mode==="session"?'Guide, vehicle, hotel pick-up & drop':'Private vehicle, forest permits, lodge stay, meals, expert guiding')+'\n\n'+
     'To confirm: '+q.pct+'% deposit required\nValid for 14 days\n\n'+
@@ -7688,7 +7840,7 @@ function renderSavedQuotes(){
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
       "<div style='min-width:0'><div class='doc-t'>"+(r.qid||"")+" · "+(r.tour||"")+" <span class='pill "+(st==="Accepted"?"completed":((st==="Lost"||st==="Cancelled")?"full":(st==="Sent"?"open":"plain")))+"' style='font-size:10.5px'>"+st+"</span></div>"+
         "<div class='doc-s'>"+((r.guest||docClientFromHtml(r.html))?(r.guest||docClientFromHtml(r.html))+" · ":"")+(r.clientType||"")+" · "+(r.date||"")+"</div></div>"+
-      "<div style='display:flex;gap:6px;flex-shrink:0;align-items:center'>"+
+      "<div class='doc-acts'>"+
         stSel+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedQuote('"+r.id+"')\">Open</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"editSavedQuote('"+r.id+"')\">Edit</button>"+
@@ -7862,7 +8014,7 @@ function renderInvoiceDoc(){
         (inv.isSess?"<div><span style='color:#5a6b62'>Duration:</span> <b>"+esc0(inv.sessDur)+"</b></div><div><span style='color:#5a6b62'>Guide:</span> <b>Will be allotted</b></div>":"")+
       "</div>"+
     "</div>"+
-    (edit?"<div style='font-size:11.5px;color:#5a6b62;margin:0 0 8px'>Enter the amount for each category (blank rows print empty), ✕ to delete a row, or add a new one. Total, GST and the pending amount recalculate automatically."+(fromLines?"":(inv.quotedTotal?" Until line amounts are entered the total is the "+(inv.fromQuote?"quotation's":"quoted")+" figure below — you can overtype it.":" Type the total below, or fill in the categories and it adds up by itself."))+"</div>":"")+
+    
     "<table class='itbl' style='width:100%;font-size:13px;margin-bottom:"+(edit?"8px":"16px")+"'>"+
       "<thead><tr><th style='text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Description</th><th style='text-align:right;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Amount</th></tr></thead>"+
       "<tbody>"+bodyRows+"</tbody>"+
@@ -7991,7 +8143,7 @@ function renderSavedInvoices(){
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
       "<div style='min-width:0'><div class='doc-t'>"+(r.invid||"")+" · "+(r.title||"")+"</div>"+
         "<div class='doc-s'>"+(r.guest?r.guest+" · ":"")+(r.total!=null?fmt(r.total):"")+" · "+(r.date||"")+"</div></div>"+
-      "<div style='display:flex;gap:6px;flex-shrink:0'>"+
+      "<div class='doc-acts'>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedInvoice('"+r.id+"')\">Open</button>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"editSavedInvoice('"+r.id+"')\">Edit</button>"+
         "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteSavedInvoice('"+r.id+"')\">Delete</button>"+
