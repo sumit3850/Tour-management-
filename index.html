@@ -108,8 +108,8 @@ svg{display:block}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:11px;font-weight:600;font-size:14px;transition:transform .12s,box-shadow .15s,background .15s;white-space:nowrap}
 .btn svg{width:17px;height:17px;stroke:currentColor}
 .btn:active{transform:translateY(1px)}
-.btn-primary{background:var(--amber);color:#3a2906;box-shadow:0 1px 0 rgba(0,0,0,.05)}
-.btn-primary:hover{background:#e9a73a}
+.btn-primary{background:var(--sea);color:#fff;box-shadow:0 1px 0 rgba(0,0,0,.05)}
+.btn-primary:hover{background:#0c63bd}
 .btn-ghost{background:var(--surface);border:1px solid var(--line);color:var(--ink)}
 .btn-ghost:hover{background:var(--surface-2);border-color:#d8d0bf}
 .btn-sea{background:var(--sea);color:#fff}.btn-sea:hover{background:#0e6b75}
@@ -721,8 +721,8 @@ img,svg,video,table{max-width:100%}
 .btn{border-radius:12px}
 .btn:hover{transform:translateY(-1px)}
 .btn:active{transform:translateY(0)}
-.btn-primary{background:linear-gradient(180deg,#f6b028,#ec9e00);color:#3a2906;box-shadow:0 8px 18px -10px rgba(240,164,0,.7)}
-.btn-primary:hover{background:linear-gradient(180deg,#f7b73c,#efa600)}
+.btn-primary{background:linear-gradient(180deg,#0f7bdc,#0a6ed1);color:#fff;box-shadow:0 8px 18px -10px rgba(10,110,209,.6)}
+.btn-primary:hover{background:linear-gradient(180deg,#1385ea,#0c73d8)}
 .btn-sea{background:linear-gradient(180deg,#0f7bdc,#0a6ed1);box-shadow:0 8px 18px -10px rgba(10,110,209,.6)}
 .btn-sea:hover{background:linear-gradient(180deg,#1385ea,#0c73d8)}
 .btn-ghost{background:rgba(255,255,255,.92);border-color:rgba(20,40,80,.1)}
@@ -930,7 +930,7 @@ html.dark .nav-group{color:#6f83a0}html.dark .nav-foot .who{color:var(--ink)}
 html.dark .topbar{background:rgba(14,19,28,.85);border-bottom-color:var(--line)}
 html.dark .bottom-nav{background:rgba(22,29,41,.94);border-top-color:var(--line)}
 html.dark .btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}html.dark .btn-ghost:hover{background:var(--surface-2);border-color:#3a4a62}
-html.dark .btn-primary{color:#241a02}
+html.dark .btn-primary{color:#fff}
 html.dark .input{background-color:var(--surface);border-color:var(--line);color:var(--ink)}html.dark .input:focus{background-color:var(--surface);border-color:var(--sea)}
 html.dark .backbtn,html.dark .hamburger,html.dark .sidecollapse{background:var(--surface);border-color:var(--line);color:var(--ink)}html.dark .backbtn svg,html.dark .hamburger svg{stroke:var(--ink)}
 html.dark .input::placeholder{color:#6f83a0}
@@ -1080,9 +1080,6 @@ html.dark #quotationBody,html.dark #quotationBody *{color-scheme:light}
   /* Saved profit rows: title on its own line, then Profit + actions aligned in a
      tidy row beneath it (indented past the checkbox), profit left, buttons right. */
   .pc-log-row{align-items:center}
-  .pc-log-row>div:last-child{width:100%;justify-content:space-between;padding-left:29px;gap:8px;margin-top:8px}
-  .pc-log-row>div:last-child>div:first-child{min-width:0 !important;text-align:left !important}
-  .pc-log-row>div:last-child>div:first-child span{font-size:15px}
 }
 /* ===== Uniform detail text: one size, medium weight (no bold values) ===== */
 .req-name{font-size:14px;font-weight:600;margin-top:4px}
@@ -1210,6 +1207,10 @@ html.dark .op-actions button[disabled]{opacity:.35 !important}
 .res-item .ln-addrow .calc-in{width:110px;color:#16241d;background:#fff}
 .res-item .ln-addrow .btn{padding:5px 12px;font-size:12px;min-height:0;background:#fff;color:#0d47a1;border:0}
 .cs-log{display:flex;justify-content:space-between;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line-soft);font-size:12.5px}
+.pa-def{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;color:var(--ink);margin:-4px 0 12px;cursor:pointer}.pa-def input{width:16px;height:16px;accent-color:var(--sea)}
+.pc-log-r{display:flex;gap:12px;align-items:center;flex-shrink:0}
+.pc-prof{text-align:right;min-width:92px}.pc-prof .pl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)}.pc-prof .pv{font-weight:700;font-size:13px}
+@media(max-width:600px){.pc-log-r{width:100%;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:8px;padding-left:29px;margin-top:8px}.pc-log-r .pc-prof{text-align:left;min-width:0}.pc-log-r .pc-prof .pv{font-size:14px}.pc-log-r .doc-acts{display:contents !important}}
 .cs-log .t{font-weight:500;min-width:0}.cs-log .t span{color:var(--ink-soft);font-weight:400}
 .cs-log .w{color:var(--ink-soft);white-space:nowrap;font-size:11.5px;flex-shrink:0}
 @media(max-width:600px){.cs-log{font-size:12px;padding:8px 12px}.cs-log .t{font-weight:400}}
@@ -1339,7 +1340,7 @@ html.dark #anaTip{background:#e6edf7;color:#0f1520}
    buttons lays them out at equal width — side by side on wide screens (each capped
    so a lone button doesn't stretch across the page), two per row on phones. ===== */
 .btn-row,.modal-foot,.sticky-actions,.tourist-toggle,.bk-quick-row,div:has(> .btn):not(:has(> :not(.btn))):not(.tabs){display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
-.btn-row > .btn,.modal-foot > .btn,.sticky-actions > .btn,.tourist-toggle > .btn,.bk-quick-row > .btn,div:has(> .btn):not(:has(> :not(.btn))):not(.tabs) > .btn{flex:1 1 0;min-width:120px;max-width:240px;justify-content:center;text-align:center;box-sizing:border-box}
+.btn-row > .btn,.modal-foot > .btn,.sticky-actions > .btn,.tourist-toggle > .btn,.bk-quick-row > .btn,div:has(> .btn):not(:has(> :not(.btn))):not(.tabs) > .btn{flex:1 1 0;min-width:120px;max-width:240px;justify-content:center;text-align:center;box-sizing:border-box;white-space:normal;line-height:1.25;overflow:hidden}
 .tourist-toggle > .btn{min-width:0;max-width:160px}
 @media(max-width:600px){
   .btn-row > .btn,.modal-foot > .btn,.sticky-actions > .btn,.tourist-toggle > .btn,.bk-quick-row > .btn,div:has(> .btn):not(:has(> :not(.btn))):not(.tabs) > .btn{flex:1 1 calc(50% - 4px);min-width:0;max-width:none}
@@ -1430,7 +1431,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 301</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 302</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1439,7 +1440,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 301</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 302</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -7268,33 +7269,31 @@ function payDetailsCard(){
 function payAccountsFormHTML(k){
   var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
   return "<div class='eyebrow' style='margin:14px 0 8px'>"+paKindLabel(k)+"</div>"+
-    "<div id='pa_list_"+k+"' style='margin-bottom:10px'></div>"+
-    "<div class='field'><label>Default account</label><select class='input' id='pa_sel_"+k+"' onchange=\"paSelect('"+k+"',this.value)\"></select>"+
-      "<div class='btn-row' style='margin-top:8px'><button class='btn btn-ghost btn-sm' onclick=\"paNew('"+k+"')\">+ New account</button>"+
-      "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"paDelete('"+k+"')\">Delete</button></div>"+
-    "</div>"+
+    "<div class='field'><label>Account</label><select class='input' id='pa_sel_"+k+"' onchange=\"paPick('"+k+"',this.value)\"></select></div>"+
+    "<label class='pa-def'><input type='checkbox' id='pa_def_"+k+"' onchange=\"paDefault('"+k+"',this.checked)\"> Default account — printed on quotations</label>"+
     "<div class='cost-grid' id='pa_form_"+k+"'>"+PA_FIELDS[k].map(function(f){return "<div class='field"+(f[4]?" full":"")+"'><label>"+esc(f[1])+"</label><input class='input"+(f[3]?" mono":"")+"' id='pa_"+k+"_"+f[0]+"' placeholder='"+esc(f[2])+"'></div>";}).join("")+"</div>"+
-    "<div style='display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px'><button class='btn btn-primary btn-sm' id='pa_save_"+k+"' onclick=\"paSave('"+k+"')\">Save</button><button class='btn btn-ghost btn-sm' id='pa_savenew_"+k+"' onclick=\"paSave('"+k+"',true)\" title='Keep the account you are editing and save these details as another account'>Save as new account</button></div>";
+    "<div class='btn-row' style='margin-top:8px'><button class='btn btn-primary btn-sm' id='pa_save_"+k+"' onclick=\"paSave('"+k+"')\">Save account</button><button class='btn btn-ghost btn-sm' id='pa_del_"+k+"' style='color:var(--coral)' onclick=\"paDelete('"+k+"')\">Delete account</button></div>";
 }
+/* The dropdown lists every saved account plus "+ Add new account"; picking one
+   loads it into the form, the checkbox marks which one prints on quotations. */
 function renderPayAccounts(){
   ["in","x"].forEach(function(k){
     var sel=document.getElementById("pa_sel_"+k);if(!sel)return;
     var list=payAccountsOf(k);var cur=payAccountFor(k);var printId=cur?cur.id:"none";
-    /* "new" sticks only while the operator is deliberately adding one; otherwise edit the printed account */
     if(_paEdit[k]==="new"&&!_paEdit[k+"_manual"]&&list.length)_paEdit[k]="";
     if(!_paEdit[k]||(_paEdit[k]!=="new"&&!list.some(function(a){return a.id===_paEdit[k];})))_paEdit[k]=cur?cur.id:(list.length?list[0].id:"new");
-    sel.innerHTML=list.map(function(a){return "<option value='"+a.id+"' "+(a.id===printId?"selected":"")+">"+String(a.name||a.bank||a.holder||a.id).replace(/</g,"&lt;")+"</option>";}).join("")+"<option value='none' "+(printId==="none"?"selected":"")+">— none (don't print this section) —</option>";
+    var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+    sel.innerHTML=list.map(function(a){return "<option value='"+a.id+"' "+(a.id===_paEdit[k]?"selected":"")+">"+esc(a.name||a.bank||a.holder||a.id)+(a.id===printId?" (default)":"")+"</option>";}).join("")+
+      "<option value='new' "+(_paEdit[k]==="new"?"selected":"")+">+ Add new account…</option>";
     var editing=(_paEdit[k]==="new")?null:list.find(function(a){return a.id===_paEdit[k];});
     PA_FIELDS[k].forEach(function(f){var e=document.getElementById("pa_"+k+"_"+f[0]);if(e&&document.activeElement!==e)e.value=editing?(editing[f[0]]||""):"";});
-    var sb=document.getElementById("pa_save_"+k);if(sb)sb.textContent=editing?"Update “"+(editing.name||editing.bank||"account")+"”":"Save new account";
-    var nb=document.getElementById("pa_savenew_"+k);if(nb)nb.style.display=editing?"":"none";
-    /* every saved account of this kind, at a glance */
-    var lt=document.getElementById("pa_list_"+k);
-    if(lt){var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
-      lt.innerHTML=list.length?"<div class='tbl-wrap'><table><thead><tr><th>Saved account</th><th>Bank</th><th>Account no.</th><th></th></tr></thead><tbody>"+list.map(function(a){return "<tr"+(a.id===_paEdit[k]?" style='background:var(--surface-2)'":"")+"><td class='strong'>"+esc(a.name||a.holder||"—")+(a.id===printId?" <span class='pill completed' style='font-size:10.5px'>printed</span>":"")+"</td><td>"+esc(a.bank||"")+(a.method?" · "+esc(a.method):"")+"</td><td class='mono'>"+esc(a.acc||"")+"</td><td><div class='tbl-actions'>"+(a.id===printId?"":"<button style='width:auto;height:auto;padding:5px 9px;font-size:11.5px;font-weight:600;color:var(--sea);border-color:var(--sea);white-space:nowrap' title='Print this account on quotations from now on' onclick=\"paSelect('"+k+"','"+esc(a.id)+"')\">Use on quotations</button>")+"<button class='edit-btn' title='Edit' onclick=\"paEditAcc('"+k+"','"+esc(a.id)+"')\"><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' title='Delete' onclick=\"paEditAcc('"+k+"','"+esc(a.id)+"');paDelete('"+k+"')\"><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td></tr>";}).join("")+"</tbody></table></div>":"";
-      if(typeof labelTables==="function")labelTables(lt);}
+    var sb=document.getElementById("pa_save_"+k);if(sb)sb.textContent=editing?"Update account":"Save account";
+    var db=document.getElementById("pa_del_"+k);if(db)db.style.display=editing?"":"none";
+    var cb=document.getElementById("pa_def_"+k);if(cb){cb.checked=!!(editing&&editing.id===printId);cb.disabled=!editing;}
   });
 }
+function paPick(k,v){if(v==="new")paNew(k);else paEditAcc(k,v);}
+function paDefault(k,on){var id=_paEdit[k];if(!id||id==="new")return;payCfg[k==="in"?"printIn":"printX"]=on?id:"none";persistData();renderPayAccounts();}
 function paSelect(k,id){
   payCfg[k==="in"?"printIn":"printX"]=id||"none";
   if(id&&id!=="none")_paEdit[k]=id;
@@ -9618,12 +9617,12 @@ function profitLogsCard(){
     var checked=_pcSelected[l.id]?" checked":"";
     return "<div class='list-row pc-log-row"+(_pcSelected[l.id]?" sel":"")+"' data-id='"+l.id+"'>"+
       "<input type='checkbox' class='pc-chk' "+checked+" onchange=\"pcToggleSel('"+l.id+"',this.checked)\" style='width:17px;height:17px;flex:none;margin-right:12px;accent-color:#0a6ed1;cursor:pointer'>"+
-      "<div class='meta'><div class='t'>"+tourTitle+"</div>"+
-      "<div class='s'>"+custom+(l.savedAt?"saved "+dShort(l.savedAt):"")+"</div></div>"+
-      "<div style='display:flex;gap:12px;align-items:center;flex-shrink:0'>"+
-        "<div style='text-align:right;min-width:92px'><div style='font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft)'>Profit</div><span class='mono' style='font-weight:700;color:"+(prof>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(prof)+"</span></div>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"editProfitLog('"+l.id+"')\">Edit</button>"+
-        "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteProfitLog('"+l.id+"')\">Delete</button>"+
+      "<div class='meta'><div class='doc-t'>"+tourTitle+"</div>"+
+      "<div class='doc-s'>"+custom+(l.savedAt?"saved "+dShort(l.savedAt):"")+"</div></div>"+
+      "<div class='pc-log-r'>"+
+        "<div class='pc-prof'><div class='pl'>Profit</div><div class='pv mono' style='color:"+(prof>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(prof)+"</div></div>"+
+        "<div class='doc-acts'><button class='btn btn-ghost btn-sm' onclick=\"editProfitLog('"+l.id+"')\">Edit</button>"+
+        "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteProfitLog('"+l.id+"')\">Delete</button></div>"+
       "</div></div>";
   }).join(""):"<div class='empty'>No saved calculations yet — fill in the expenses above and tap <b>Save calculation</b>.</div>";
   var nSel=Object.keys(_pcSelected).filter(function(k){return _pcSelected[k];}).length;
