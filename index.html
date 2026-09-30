@@ -1449,7 +1449,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 303</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 304</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1458,7 +1458,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 303</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 304</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3478,7 +3478,23 @@ function openSubDocKey(subId,key){var s=(_submissions||[]).find(function(x){retu
 function openSubDocIdx(subId,idx){var s=(_submissions||[]).find(function(x){return x.id===subId;});var doc=s&&s.data&&s.data.documents&&s.data.documents[idx];if(doc)openDoc(typeof doc==="string"?doc:doc.url);}
 
 const booked=id=>bookings.filter(b=>b.tour===id).reduce((s,b)=>s+b.party,0);
-const status=t=>booked(t.id)>=t.cap?(t.status==="completed"?"completed":"full"):t.status;
+/* Where a tour stands today, worked out automatically: completed once its last
+   date has passed, once its operation is marked Completed, or when the tour
+   itself was set Completed; ongoing while today falls inside its dates;
+   upcoming (scheduled) otherwise. Session tours use their session dates. */
+function tourDates(t){var ds=(t.tourType==="session"&&t.sessionDates&&t.sessionDates.length)?t.sessionDates.slice().sort():[];return {start:ds[0]||t.start||"",end:ds[ds.length-1]||t.end||t.start||""};}
+function tourDone(t){
+  if(t.status==="completed")return true;
+  if((typeof ops!=="undefined"?ops:[]).some(function(o){return o.fromTour===t.id&&!o.shadowOf&&String(o.status||"").toLowerCase()==="completed";}))return true;
+  var d=tourDates(t);return !!d.end&&d.end<todayISO;
+}
+function tourPhase(t){
+  if(tourDone(t))return "completed";
+  var d=tourDates(t);
+  if(d.start&&d.start<=todayISO&&d.end>=todayISO)return "ongoing";
+  return "upcoming";
+}
+const status=t=>tourDone(t)?"completed":(booked(t.id)>=t.cap?"full":t.status);
 const durNights=t=>Math.round((new Date(t.end)-new Date(t.start))/864e5);
 function pad2(n){return (n<10?"0":"")+n;}
 const dShort=s=>{if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;return pad2(d.getDate())+"/"+pad2(d.getMonth()+1)+"/"+d.getFullYear();};
@@ -3549,7 +3565,7 @@ function tourCodeFromId(id){if(!id)return "";var t=(tours||[]).find(function(x){
 function pill(s){const m={open:"Open",full:"Full",closed:"Closed",completed:"Completed"};return "<span class='pill "+s+"'>"+m[s]+"</span>"}
 /* Seat status derived from ACTUAL bookings vs capacity (not a stored field), so a tour
    with 0 booked never shows "Full". Only "completed" comes from the lifecycle status. */
-function seatStatus(t){if(t.status==="completed")return "completed";var b=booked(t.id);return (t.cap>0&&b>=t.cap)?"full":"open";}
+function seatStatus(t){if(tourDone(t))return "completed";var b=booked(t.id);return (t.cap>0&&b>=t.cap)?"full":"open";}
 function tourHasBooking(t){return bookings.some(function(b){return b.tour===t.id;});}
 function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='lab'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg>"+lab+"</div><div class='val'>"+val+"</div><div class='trend "+dir+"'>"+trend+"</div></div>"}
 
@@ -5273,11 +5289,11 @@ function renderAnalytics(){
 }
 
 /* ===== TOURS ===== */
-let curTab="All";
+let curTab="Upcoming"; /* the board opens on scheduled tours; completed / ongoing move to their own tabs automatically */
 function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
-      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed","Archived","Trash"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
+      "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed","Archived","Trash"].map((t,i)=>"<button class='tab "+(t===curTab?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
       "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button>"+
       "<span class='tz-ctl' style='display:inline-flex;gap:4px;align-items:center'><button class='btn btn-ghost btn-sm' onclick='tourZoom(-1)' title='Zoom out' style='min-width:34px;font-weight:800'>−</button><span class='mono' id='tzPct' style='font-size:11px;color:var(--ink-soft);min-width:36px;text-align:center'>100%</span><button class='btn btn-ghost btn-sm' onclick='tourZoom(1)' title='Zoom in' style='min-width:34px;font-weight:800'>+</button></span>"+
       "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
@@ -5408,11 +5424,8 @@ function ensureTourPocs(){
 /* Which tab does a tour belong to (archived tours live only in Archived). */
 function tourTabOf(t){
   if(t.archived)return "Archived";
-  var s=status(t);
-  if(s==="completed")return "Completed";
-  if(new Date(t.start)>new Date(todayISO))return "Upcoming";
-  if(new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO))return "Ongoing";
-  return "All";
+  var p=tourPhase(t);
+  return p==="completed"?"Completed":(p==="ongoing"?"Ongoing":"Upcoming");
 }
 function refreshTourTabCounts(){
   var c={All:0,Upcoming:0,Ongoing:0,Completed:0,Archived:0,Trash:(trash||[]).length};
@@ -5550,10 +5563,10 @@ function renderTours(filter=curTab){
   refreshTourTabCounts();
   if(filter==="Archived"){renderArchive(grid);applyTourZoom();persistData();return;}
   if(filter==="Trash"){renderTrash(grid);applyTourZoom();return;}
-  const list=tours.filter(t=>{if(t.archived)return false;const s=status(t);
-    if(filter==="Completed")return s==="completed";
-    if(filter==="Upcoming")return s!=="completed"&&new Date(t.start)>new Date(todayISO);
-    if(filter==="Ongoing")return s!=="completed"&&new Date(t.start)<=new Date(todayISO)&&new Date(t.end)>=new Date(todayISO);
+  const list=tours.filter(t=>{if(t.archived)return false;const p=tourPhase(t);
+    if(filter==="Completed")return p==="completed";
+    if(filter==="Upcoming")return p==="upcoming";
+    if(filter==="Ongoing")return p==="ongoing";
     return true;});
   const order=(catalog.cats||[]).map(function(c){return c.id;}).concat(["__sessions"]);
   /* Session tours get their OWN column, regardless of category. */
@@ -8325,22 +8338,32 @@ function opsBoardMarkup(){
 }
 function renderDashOps(){var el=document.getElementById("dashOpsBoard");if(el)el.innerHTML=opsBoardMarkup();if(typeof renderOperations==="function")renderOperations();}
 /* Full Operations view (sidebar) — all operations with All / Upcoming / Ongoing / Completed filters. */
-var _opFilter="All";
+var _opFilter="Upcoming";
 function viewOperations(){
   return "<section class='view' id='v-operations'>"+
     "<div class='section-head'>"+
-      "<div class='tabs' id='opTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(i===0?"active":"")+"' data-action='opFilter' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
+      "<div class='tabs' id='opTabs'>"+["All","Upcoming","Ongoing","Completed"].map((t,i)=>"<button class='tab "+(t===_opFilter?"active":"")+"' data-action='opFilter' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
       "<div style='display:flex;gap:8px'><button class='btn btn-ghost btn-sm' onclick='syncOpsFromTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Sync from Tours</button><button class='btn btn-primary btn-sm' onclick='openAddOp()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Operation</button></div>"+
     "</div>"+
     "<div class='ops-grid' id='opGrid'></div>"+
   "</section>";
 }
 function opFilter(f,el){_opFilter=f;document.querySelectorAll("#opTabs .tab").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");renderOperations();}
+/* Operation phase, automatic like the tours: Completed when marked so or when
+   its last date has passed; Ongoing while In progress or today is inside its
+   dates; Upcoming otherwise. Cancelled / transferred only show under All. */
+function opPhase(o){
+  var s=(o.status||"").toLowerCase(),end=(o.endISO||o.startISO||"");
+  if(s==="cancelled"||s==="transferred")return "closed";
+  if(s==="completed"||(end&&end<todayISO))return "completed";
+  if(s==="in progress"||((o.startISO||"")<=todayISO&&end>=todayISO))return "ongoing";
+  return "upcoming";
+}
 function opMatchesFilter(o,f){
-  var s=(o.status||"").toLowerCase();
-  if(f==="Completed")return s==="completed";
-  if(f==="Upcoming")return s!=="completed"&&s!=="cancelled"&&s!=="transferred"&&(o.startISO||"")>=todayISO;
-  if(f==="Ongoing")return s==="in progress"||((o.startISO||"")<=todayISO&&(o.endISO||o.startISO||"")>=todayISO&&s!=="completed"&&s!=="cancelled"&&s!=="transferred");
+  var p=opPhase(o);
+  if(f==="Completed")return p==="completed";
+  if(f==="Upcoming")return p==="upcoming";
+  if(f==="Ongoing")return p==="ongoing";
   return true;
 }
 function renderOperations(){
