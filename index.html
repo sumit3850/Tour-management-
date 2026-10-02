@@ -1449,7 +1449,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 305</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 306</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1458,7 +1458,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 305</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 306</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -6038,7 +6038,7 @@ function invoiceFromQuote(id){
     quotedTotal:qTotal||0, quotedFrom:(r.qid||""), deposit:qDep,
     fromQuote:id, savedId:null
   };
-  showInvoiceModal(!isSess);
+  showInvoiceModal(false);
 }
 /* Every generated invoice starts with these categories and blank amounts; the
    operator fills in what applies. Labels are matched by lineAmt() for the sheet export. */
@@ -6597,6 +6597,7 @@ function printQuotation() {
   /* Invoice or quotation? The document itself says so. Quotations carry the
      Payment Information page; invoices stay a single page. */
   var isInv=/Invoice\s*#/i.test(body.innerText||body.textContent||"");
+  if(isInv&&typeof invFinalizeView==="function")invFinalizeView();
   try{docSyncFigures();}catch(e){}
   var payHtml=isInv?"":paymentPageHTML();
   /* A printed / downloaded document always lives in its folder: save it first if it isn't yet. */
@@ -7970,7 +7971,7 @@ function generateInvoice(src){
   var qt=isSess?0:(quotedTotal(sel.d,pax)||0);
   _curInvoice={invid:vid,tour:tourName,title:tourName,clientType:clientType,client:JSON.parse(JSON.stringify(qClient)),date:today,
     startDate:startD,endDate:endD,participants:pax,isSess:isSess,sessDur:(isSess?sel.session.dur:""),lines:lines,quotedTotal:qt,deposit:0,savedId:null};
-  showInvoiceModal(!isSess);
+  showInvoiceModal(false);
 }
 /* Build (or rebuild) the invoice modal around the current _curInvoice. Shared by
    the cost-sheet generator and the "Create invoice from accepted quote" path. */
@@ -8035,7 +8036,7 @@ function renderInvoiceDoc(){
     :moneyCell(deposit);
   var settleRows=
     "<tr><td style='padding:9px 12px;color:#5a6b62'>Deposit amount (received)</td>"+depositCell+"</tr>"+
-    "<tr style='background:#fff7ed'><td style='padding:9px 12px;color:#9a3412'><b>Pending amount</b></td>"+moneyCell(pending,"color:#b45309;font-weight:700")+"</tr>";
+    "<tr style='background:#fff7ed'><td style='padding:9px 12px;color:#9a3412'><b>Pending amount (due)</b></td>"+moneyCell(pending,"color:#b45309;font-weight:700")+"</tr>";
   var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
   _invBodyHTML=
     "<style>#quotationBody .itbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden;border-collapse:collapse}#quotationBody .itbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}</style>"+
@@ -8103,8 +8104,17 @@ function invToggleLines(){
   var b=document.getElementById("invLinesBtn");if(b){b.textContent=_invEditLines?"Done editing amounts":"Edit amounts";b.classList.toggle("btn-primary",_invEditLines);b.classList.toggle("btn-ghost",!_invEditLines);}
   renderInvoiceDoc();
 }
+/* Leave "Edit amounts" mode (inputs, delete buttons, Add line item) so what is
+   saved, printed or emailed is the finished document. */
+function invFinalizeView(){
+  if(!_invEditLines)return;
+  _invEditLines=false;
+  var b=document.getElementById("invLinesBtn");if(b){b.textContent="Edit amounts";b.classList.remove("btn-primary");b.classList.add("btn-ghost");}
+  renderInvoiceDoc();
+}
 function saveCurrentInvoice(){
   if(!_curInvoice)return;
+  invFinalizeView();
   applyHeadingTitle(_curInvoice);
   try{docSyncFigures();}catch(e){}
   var body=document.getElementById("quotationBody");
@@ -8187,6 +8197,7 @@ function renderSavedInvoices(){
   }).join("");
 }
 function shareInvoiceEmail(vid,tourName,total,pax){
+  if(typeof invFinalizeView==="function")invFinalizeView();
   try{if(typeof _curInvoice!=="undefined"&&_curInvoice&&!_curInvoice.savedId&&document.getElementById("quotationBody"))saveCurrentInvoice();}catch(e){}
   var subject=encodeURIComponent("Invoice "+vid+" - "+tourName);
   var body=encodeURIComponent(
