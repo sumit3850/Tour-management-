@@ -1449,7 +1449,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 306</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 307</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1458,7 +1458,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 306</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 307</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -7975,18 +7975,56 @@ function generateInvoice(src){
 }
 /* Build (or rebuild) the invoice modal around the current _curInvoice. Shared by
    the cost-sheet generator and the "Create invoice from accepted quote" path. */
+/* ===== Invoice stage: Proforma (advance / deposit request, uploaded with the
+   deposit payment) or Tax invoice (final, uploaded with the balance). Same number
+   throughout; only the stamp, the settlement wording and the pay-now amount change. */
+function invStage(inv){return (inv&&inv.stage==="proforma")?"proforma":"tax";}
+function invStageLabel(st){return st==="proforma"?"Proforma Invoice":"Tax Invoice";}
+function invStageHTML(st){
+  var pro=st==="proforma";
+  return "<div class='doc-stage-wrap' style='text-align:center;margin:-6px 0 14px'><span class='doc-stage' data-stage='"+st+"' style='display:inline-block;padding:4px 14px;border-radius:99px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;"+(pro?"background:#fff7ed;color:#9a3412;border:1px solid #fed7aa":"background:#e9f4ee;color:#15563c;border:1px solid #d3e7db")+"'>"+invStageLabel(st)+(pro?" \u00b7 advance payment request":"")+"</span></div>";
+}
+function invStageLabels(st){return st==="proforma"?{dep:"Deposit amount (payable now)",pen:"Pending amount (payable later)"}:{dep:"Deposit amount (received)",pen:"Pending amount (due)"};}
+/* Stamp + wording on a document already in the DOM (a saved invoice has no line data to re-render from). */
+function invApplyStageToDom(st){
+  var body=document.getElementById("quotationBody");if(!body)return;
+  var wrap=body.querySelector(".doc-stage-wrap");
+  var tmp=document.createElement("div");tmp.innerHTML=invStageHTML(st);
+  if(wrap)wrap.replaceWith(tmp.firstElementChild);
+  else{var kv=body.querySelector(".doc-kv");if(kv)kv.parentNode.insertBefore(tmp.firstElementChild,kv);}
+  var L=invStageLabels(st);
+  Array.prototype.forEach.call(body.querySelectorAll("table tfoot tr, table tr"),function(tr){
+    var c=tr.firstElementChild;if(!c)return;var t=(c.textContent||"").trim();
+    if(/^Deposit amount/i.test(t)){c.textContent=L.dep;}
+    else if(/^Pending amount/i.test(t)){var b=c.querySelector("b");if(b)b.textContent=L.pen;else c.textContent=L.pen;}
+  });
+}
+function invStageBtnPaint(){
+  var st=invStage(_curInvoice);
+  var b=document.getElementById("invStageBtn");if(b){b.textContent=st==="proforma"?"Mark as tax invoice":"Mark as proforma";b.title=st==="proforma"?"Switch to the final tax invoice (deposit shown as received, balance due)":"Stamp this as a proforma / advance payment request for the deposit stage";}
+  var e=document.getElementById("invKindEyebrow");if(e)e.textContent=invStageLabel(st);
+}
+function invToggleStage(){
+  if(!_curInvoice)return;
+  _curInvoice.stage=invStage(_curInvoice)==="proforma"?"tax":"proforma";
+  /* a freshly generated invoice re-renders from its data; a saved one (opened from the folder) is patched in place */
+  if(_curInvoice.rendered){invFinalizeView();renderInvoiceDoc();}else invApplyStageToDom(invStage(_curInvoice));
+  invStageBtnPaint();
+}
 function showInvoiceModal(editLines){
   var inv=_curInvoice;if(!inv)return;
+  inv.rendered=true;
   _invEditLines=!!editLines;
   renderInvoiceDoc();
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'>"+
-      "<div><div class='eyebrow'>Invoice</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+esc0(inv.tour)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+esc0(inv.invid)+"</span> · "+esc0(inv.date)+"</div></div>"+XBTN+
+      "<div><div class='eyebrow' id='invKindEyebrow'>"+invStageLabel(invStage(inv))+"</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+esc0(inv.tour)+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+esc0(inv.invid)+"</span> · "+esc0(inv.date)+"</div></div>"+XBTN+
     "</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'></div></div>"+
     "<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
       "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
       "<button class='btn "+(_invEditLines?"btn-primary":"btn-ghost")+"' id='invLinesBtn' onclick='invToggleLines()'>"+(_invEditLines?"Done editing amounts":"Edit amounts")+"</button>"+
+      "<button class='btn btn-ghost' id='invStageBtn' onclick='invToggleStage()'>"+(invStage(inv)==="proforma"?"Mark as tax invoice":"Mark as proforma")+"</button>"+
       "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit text</button>"+
       "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentInvoice()'>Save invoice</button>"+
       "<button class='btn btn-sea' onclick='shareInvoiceEmail("+JSON.stringify(inv.invid)+","+JSON.stringify(inv.tour)+","+(inv.grandTotal||0)+","+(inv.participants||1)+")'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 9l8 5 8-5'/></svg>Email</button>"+
@@ -8034,13 +8072,15 @@ function renderInvoiceDoc(){
   var depositCell=edit
     ?"<td style='padding:6px 8px;text-align:right;white-space:nowrap'><input type='number' min='0' placeholder='0' value='"+(deposit||"")+"' oninput='invSetDeposit(this.value,true)' onchange='invSetDeposit(this.value)' style='width:130px;"+cellIn+"'></td>"
     :moneyCell(deposit);
+  var stage=invStage(inv),SL=invStageLabels(stage);
   var settleRows=
-    "<tr><td style='padding:9px 12px;color:#5a6b62'>Deposit amount (received)</td>"+depositCell+"</tr>"+
-    "<tr style='background:#fff7ed'><td style='padding:9px 12px;color:#9a3412'><b>Pending amount (due)</b></td>"+moneyCell(pending,"color:#b45309;font-weight:700")+"</tr>";
+    "<tr><td style='padding:9px 12px;color:#5a6b62'>"+SL.dep+"</td>"+depositCell+"</tr>"+
+    "<tr style='background:#fff7ed'><td style='padding:9px 12px;color:#9a3412'><b>"+SL.pen+"</b></td>"+moneyCell(pending,"color:#b45309;font-weight:700")+"</tr>";
   var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
   _invBodyHTML=
     "<style>#quotationBody .itbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden;border-collapse:collapse}#quotationBody .itbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}</style>"+
     quoteHeaderHTML()+
+    invStageHTML(stage)+
     invoiceMetaRow(inv.invid,inv.date,inv.client,inv.startDate,inv.endDate)+
     "<div style='background:#f3f9f5;border:1px solid #dcece3;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px'>"+
       "<div class='doc-title' style='font-weight:700;font-size:15px;margin-bottom:8px;color:#15563c'>"+esc0(inv.tour)+"</div>"+
@@ -8065,7 +8105,7 @@ function renderInvoiceDoc(){
       "</tfoot>"+
     "</table>"+
     (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:16px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
-    payNowHTML(deposit>0?pending:grand)+
+    payNowHTML(stage==="proforma"?(deposit>0?deposit:grand):(deposit>0?pending:grand))+
     policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"GST is charged as itemised above on the taxable value.":"")})+
     "";
   var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
@@ -8127,7 +8167,7 @@ function saveCurrentInvoice(){
     var rec=invoiceLog.find(function(x){return x.id===_curInvoice.savedId;});
     if(rec){
       if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
-      rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;if((_curInvoice.client||{}).name)rec.guest=_curInvoice.client.name;rec.updatedAt=new Date().toISOString();
+      rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;rec.stage=invStage(_curInvoice);if((_curInvoice.client||{}).name)rec.guest=_curInvoice.client.name;rec.updatedAt=new Date().toISOString();
       ["total","grandTotal","gstRate","gstAmount","deposit","pending","quotedTotal","accommodation","travel","food","entry","ship","guide","referral"].forEach(function(k){if(_curInvoice[k]!=null)rec[k]=_curInvoice[k];});
     }
   }else{
@@ -8145,7 +8185,7 @@ function saveCurrentInvoice(){
       referral:_curInvoice.referral, total:_curInvoice.total,
       deposit:_curInvoice.deposit||0, pending:(_curInvoice.pending!=null?_curInvoice.pending:Math.max(0,(_curInvoice.grandTotal||_curInvoice.total||0)-(_curInvoice.deposit||0))), quotedTotal:_curInvoice.quotedTotal||0,
       gstRate:_curInvoice.gstRate||0, gstAmount:_curInvoice.gstAmount||0, grandTotal:_curInvoice.grandTotal||_curInvoice.total,
-      fromQuote:_curInvoice.fromQuote||"", isSess:!!_curInvoice.isSess,
+      fromQuote:_curInvoice.fromQuote||"", isSess:!!_curInvoice.isSess, stage:invStage(_curInvoice),
       html:docHtml, savedAt:new Date().toISOString()
     });
     if(typeof renderAcceptedQuotes==="function")renderAcceptedQuotes();
@@ -8160,17 +8200,19 @@ function saveCurrentInvoice(){
 function openSavedInvoice(id){
   var rec=invoiceLog.find(function(x){return x.id===id;});if(!rec)return;
   _curInvoice={invid:rec.invid,title:rec.title,clientType:rec.clientType,client:{name:rec.guest,address:rec.address,gst:rec.gst},date:rec.date,savedId:rec.id,
-    total:rec.total,grandTotal:rec.grandTotal,gstRate:rec.gstRate,gstAmount:rec.gstAmount,deposit:rec.deposit,pending:rec.pending,quotedTotal:rec.quotedTotal,isSess:!!rec.isSess};
+    total:rec.total,grandTotal:rec.grandTotal,gstRate:rec.gstRate,gstAmount:rec.gstAmount,deposit:rec.deposit,pending:rec.pending,quotedTotal:rec.quotedTotal,isSess:!!rec.isSess,stage:rec.stage||"tax"};
   var foot="<div class='modal-foot' style='display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap'>"+
     "<button class='btn btn-ghost' onclick='closeModal()'>Close</button>"+
+    "<button class='btn btn-ghost' id='invStageBtn' onclick='invToggleStage()'>"+(invStage(_curInvoice)==="proforma"?"Mark as tax invoice":"Mark as proforma")+"</button>"+
     "<button class='btn btn-ghost' id='qEditBtn' onclick='toggleQuoteEdit()'>Edit invoice</button>"+
     "<button class='btn btn-sea' id='qSaveBtn' onclick='saveCurrentInvoice()'>Save changes</button>"+
     "<button class='btn btn-primary' onclick='printQuotation()' style='background:var(--forest)'>PDF / Print</button>"+
   "</div>";
   document.getElementById('modal').innerHTML=
-    "<div class='modal-head'><div><div class='eyebrow'>Saved invoice</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-head'><div><div class='eyebrow' id='invKindEyebrow'>"+invStageLabel(invStage(_curInvoice))+"</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(rec.html||"",invoiceMetaRow(rec.invid,rec.date,{name:rec.guest,address:rec.address,gst:rec.gst},rec.startDate,rec.endDate)),(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
   openScrim();
+  invApplyStageToDom(invStage(_curInvoice)); /* older saved documents get the stamp too */
   _docPrev=null;docPrimeMath();
 }
 function editSavedInvoice(id){openSavedInvoice(id);setTimeout(function(){var b=document.getElementById("qEditBtn");if(b&&b.textContent.indexOf("Done")<0)toggleQuoteEdit();},60);}
@@ -8186,7 +8228,7 @@ function renderSavedInvoices(){
   if(!list.length){el.innerHTML="<div style='padding:18px;text-align:center;color:var(--ink-soft);font-size:13px'>No saved invoices yet. Open the Cost Calculator, press <b>Invoice</b>, then <b>Save invoice</b>.</div>";return;}
   el.innerHTML=list.map(function(r){
     return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap'>"+
-      "<div style='min-width:0'><div class='doc-t'>"+(r.invid||"")+" · "+(r.title||"")+"</div>"+
+      "<div style='min-width:0'><div class='doc-t'>"+(r.invid||"")+" · "+(r.title||"")+(r.stage==="proforma"?" <span class='pill' style='font-size:10px;background:#fff7ed;color:#9a3412'>Proforma</span>":"")+"</div>"+
         "<div class='doc-s'>"+(r.guest?r.guest+" · ":"")+(r.total!=null?fmt(r.total):"")+" · "+(r.date||"")+"</div></div>"+
       "<div class='doc-acts'>"+
         "<button class='btn btn-ghost btn-sm' onclick=\"openSavedInvoice('"+r.id+"')\">Open</button>"+
