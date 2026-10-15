@@ -1359,6 +1359,12 @@ html.dark #anaTip{background:#e6edf7;color:#0f1520}
 .nt-acts{display:flex;gap:6px;flex-shrink:0}.nt-acts .btn[disabled]{opacity:.4}
 .nt-all>.btn{min-width:0}
 @media(max-width:600px){.nt-all{flex-wrap:nowrap}.nt-all>.btn{flex:1 1 0 !important;min-width:0 !important;padding:7px 4px}.nt-acts{width:100%;flex-wrap:nowrap}.nt-acts > .btn{flex:1 1 0 !important;min-width:0 !important;max-width:none !important;padding:7px 4px}}
+.nt-mode{font-size:12px;color:var(--ink-soft);background:var(--surface-2);border-radius:10px;padding:8px 10px;margin-bottom:10px}
+.nt-mode.on{background:#e9f4ee;color:#15563c}
+html.dark .nt-mode.on{background:#173326;color:#8fd3ad}
+.nt-status{font-size:12px;color:var(--sea);background:var(--sea-soft);border-radius:10px;padding:8px 10px;margin-bottom:10px}
+#ieToast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:12px;font-size:13px;font-weight:500;z-index:7000;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:90vw;text-align:center}
+#ieToast.show{opacity:1;transform:translateX(-50%)}
 /* ===== Uniform button groups (console-wide): any block whose children are all
    buttons lays them out at equal width — side by side on wide screens (each capped
    so a lone button doesn't stretch across the page), two per row on phones. ===== */
@@ -1454,7 +1460,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 310</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 311</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1463,7 +1469,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 310</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 311</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8523,7 +8529,7 @@ function opCard(o){
       (o.driver&&o.driver!=="—"?"<button class='btn-edit' onclick=\"shareDriverAppLink('"+o.driver.replace(/'/g,"&#39;")+"')\"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg>Driver OPS</button>":"<button class='btn-edit' disabled style='opacity:.45'>Driver OPS</button>")+
       (function(){var seen={};return (o.legs||[]).filter(function(l){if(!l.driver||l.driver===o.driver||seen[l.driver])return false;seen[l.driver]=1;return true;});})().map(function(l){return "<button class='btn-edit' onclick=\"shareDriverAppLink('"+l.driver.replace(/'/g,"&#39;")+"')\">"+l.driver+" OPS</button>";}).join("")+
     "</div>"+
-    "<div class='op-actions' style='margin-top:6px'><button class='btn-edit' onclick=\"notifyOpTeam('"+o.id+"')\" title='Tell every guide and driver on this operation about the tour (WhatsApp / SMS / email)'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0'/></svg>Notify team"+(o.notified&&Object.keys(o.notified).length?" \u00b7 "+Object.keys(o.notified).length+" sent":"")+"</button></div>"+
+    "<div class='op-actions' style='margin-top:6px'><button class='btn-edit' onclick=\"notifyOpTeam('"+o.id+"','new')\" title='Tell every guide and driver on this operation about the tour (WhatsApp / SMS / email)'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0'/></svg>Notify team"+(o.notified&&Object.keys(o.notified).length?" \u00b7 "+Object.keys(o.notified).length+" sent":"")+"</button></div>"+
   "</div>";
 }
 function renderLog(t="Vehicles & Drivers"){
@@ -8617,7 +8623,7 @@ function saveEditOp(){const id=document.getElementById("modal").dataset.oid;cons
   o.stays=collectOpStays("eo");
   syncOpStay(o);
   o.remarks=document.getElementById("eo_remarks").value;
-  persistData();closeModal();renderDashOps();renderAccCalendar();renderAccommodation();}
+  persistData();closeModal();renderDashOps();renderAccCalendar();renderAccommodation();if(typeof notifyOpUpdated==="function")notifyOpUpdated(o);}
 function deleteOp(id){if(!confirm("Delete this operation?"))return;ops=ops.filter(o=>o.id!==id&&o.shadowOf!==id);persistData();renderDashOps();}
 /* Quick status change straight from the operation card (Scheduled / In progress /
    Completed / …) — saves + syncs immediately and reflects to the guide/driver apps. */
@@ -8920,95 +8926,212 @@ function opTeamPeople(o){
   addDriver(o.driver);(o.legs||[]).forEach(function(l){addDriver(l.driver);});
   return out;
 }
-function opTeamMessage(o,p){
+function opTeamWhen(o){return o.startISO?(dShort(o.startISO)+(o.endISO&&o.endISO!==o.startISO?" – "+dShort(o.endISO):"")):"";}
+function opTeamMessage(o,p,kind){
   var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
   var company=B.company||"Island Explorer Birding Tours";
   var base=location.href.split("#")[0].replace(/[^/]*$/,"");
-  var when=o.startISO?(dShort(o.startISO)+(o.endISO&&o.endISO!==o.startISO?" \u2013 "+dShort(o.endISO):"")):"";
+  var when=opTeamWhen(o);
   var role=p&&p.role?p.role.charAt(0).toUpperCase()+p.role.slice(1):"";
+  var upd=kind==="update";
   return "Dear "+(p&&p.name?p.name:"Team")+",\n\n"+
-    "You have been assigned to a new tour with "+company+".\n\n"+
+    (upd?"Please note that your existing tour with "+company+" has been updated.\n\n":"You have been assigned to a new tour with "+company+".\n\n")+
     "Tour: "+(o.tour||"")+"\n"+
     (when?"Dates: "+when+"\n":"")+
     (role?"Your role: "+role+"\n":"")+
-    (o.pickup?"Pickup: "+o.pickup+(o.pickupDate?" on "+dShort(o.pickupDate):"")+"\n":"")+
-    "\nPlease open your console for the full plan and details:\n"+
+    (o.pickup&&o.pickup!=="—"?"Pickup: "+o.pickup+(o.pickupDate?" on "+dShort(o.pickupDate):"")+"\n":"")+
+    "\nPlease open your console for the "+(upd?"latest":"full")+" plan and details:\n"+
     "Guide console: "+base+"ops-guide.html\n"+
     "Driver console: "+base+"driver-app.html\n\n"+
-    "Kindly confirm once you have reviewed the plan.\n\n"+
-    "Regards,\n"+company+"\n"+(B.phone||"+91 99332 02175")+" \u00b7 "+(typeof brandContactEmail==="function"?brandContactEmail():"info@islandexplorer.in");
+    (upd?"Kindly review the changes and confirm.":"Kindly confirm once you have reviewed the plan.")+"\n\n"+
+    "Regards,\n"+company+"\n"+(B.phone||"+91 99332 02175")+" · "+(typeof brandContactEmail==="function"?brandContactEmail():"info@islandexplorer.in");
 }
-function notifyOpTeam(opId){
+/* ---- messaging gateway (Supabase Edge Function `notify`, see docs/MESSAGING.md) ---- */
+function msgGateway(){return (payCfg&&payCfg.gateway)||{on:false,url:""};}
+function msgGatewayOn(){return !!msgGateway().on&&!!msgGatewayUrl();}
+function msgGatewayUrl(){var g=msgGateway();if(g.url)return g.url;var c=sbConfig();return (c&&c.url)?c.url.replace(/\/$/,"")+"/functions/v1/notify":"";}
+function gatewaySend(channel,people,message,subject,template){
+  var cl=sbClient(),url=msgGatewayUrl();
+  if(!cl||!url)return Promise.reject(new Error("Messaging gateway is not configured"));
+  return cl.auth.getSession().then(function(r){
+    var tok=r&&r.data&&r.data.session&&r.data.session.access_token;
+    if(!tok)throw new Error("Sign in to the console first");
+    return fetch(url,{method:"POST",headers:{"content-type":"application/json","apikey":(sbConfig()||{}).key||"","authorization":"Bearer "+tok},
+      body:JSON.stringify({channel:channel,to:people.map(function(p){return {name:p.name,phone:p.phone,email:p.email};}),message:message,subject:subject||"",template:template||null})});
+  }).then(function(res){return res.json().catch(function(){return {};}).then(function(j){if(!res.ok&&!j.results)throw new Error(j.error||("HTTP "+res.status));return j;});});
+}
+function ieToast(msg){var d=document.getElementById("ieToast");if(!d){d=document.createElement("div");d.id="ieToast";document.body.appendChild(d);}d.textContent=msg;d.classList.add("show");clearTimeout(d._t);d._t=setTimeout(function(){d.classList.remove("show");},3600);}
+var _ntStatus="";
+function ntStatus(msg){_ntStatus=msg||"";var el=document.getElementById("ntStatus");if(el){el.textContent=_ntStatus;el.style.display=_ntStatus?"":"none";}}
+function notifyOpTeam(opId,kind){
   var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
+  kind=kind==="update"?"update":"new";
   var people=opTeamPeople(o);
   var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  var auto=msgGatewayOn();
   var rows=people.length?people.map(function(p,i){
     var n=(o.notified||{})[p.name];
-    return "<div class='nt-row'><div class='nt-who'><b>"+esc(p.name)+"</b><span>"+esc(p.role)+(p.phone?" \u00b7 "+esc(p.phone):"")+(p.email?" \u00b7 "+esc(p.email):"")+"</span>"+(n?"<span class='nt-sent'>\u2713 Sent "+esc(n.via)+" \u00b7 "+dShort(String(n.at).slice(0,10))+"</span>":"")+"</div>"+
+    return "<div class='nt-row'><div class='nt-who'><b>"+esc(p.name)+"</b><span>"+esc(p.role)+(p.phone?" · "+esc(p.phone):"")+(p.email?" · "+esc(p.email):"")+"</span>"+(n?"<span class='nt-sent'>✓ "+(n.kind==="update"?"Update sent":"Sent")+" "+esc(n.via)+" · "+dShort(String(n.at).slice(0,10))+"</span>":"")+"</div>"+
       "<div class='nt-acts'>"+
-        "<button class='btn btn-sea btn-sm' "+(p.phone?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'wa')\">WhatsApp</button>"+
-        "<button class='btn btn-ghost btn-sm' "+(p.phone?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'sms')\">SMS</button>"+
-        "<button class='btn btn-ghost btn-sm' "+(p.email?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'email')\">Email</button>"+
+        "<button class='btn btn-sea btn-sm' "+(p.phone?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'wa','"+kind+"')\">WhatsApp</button>"+
+        "<button class='btn btn-ghost btn-sm' "+(p.phone?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'sms','"+kind+"')\">SMS</button>"+
+        "<button class='btn btn-ghost btn-sm' "+(p.email?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'email','"+kind+"')\">Email</button>"+
       "</div></div>";
   }).join(""):"<div class='empty'>No guide or driver is assigned to this operation yet.</div>";
-  document.getElementById("modal").innerHTML="<div class='modal-head'><div><div class='eyebrow'>Notify team</div><div class='h-sec'>"+esc(o.tour||"Operation")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+esc(o.id)+(o.startISO?" \u00b7 "+dShort(o.startISO):"")+"</div></div>"+XBTN+"</div>"+
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><div class='eyebrow'>"+(kind==="update"?"Tour updated — notify team":"Notify team")+"</div><div class='h-sec'>"+esc(o.tour||"Operation")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+esc(o.id)+(o.startISO?" · "+dShort(o.startISO):"")+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
-      "<div class='field'><label>Message</label><textarea class='input' id='ntMsg' rows='9' style='font-size:13px;line-height:1.5'>"+esc(opTeamMessage(o,{name:"<name>",role:"<role>"}))+"</textarea></div>"+
+      "<div class='nt-mode "+(auto?"on":"")+"'>"+(auto?"⚡ Automatic sending is on — messages go out through WhatsApp Business API, SMS and email as soon as you press a button.":"Manual sending — each button opens WhatsApp, your SMS app or your mail app with the message ready. Turn on automatic sending in Settings → Messaging gateway.")+"</div>"+
+      "<div class='btn-row' style='margin:0 0 10px'><button class='btn "+(kind==="new"?"btn-primary":"btn-ghost")+" btn-sm' onclick=\"notifyOpTeam('"+o.id+"','new')\">New tour notice</button><button class='btn "+(kind==="update"?"btn-primary":"btn-ghost")+" btn-sm' onclick=\"notifyOpTeam('"+o.id+"','update')\">Tour updated notice</button></div>"+
+      "<div class='field'><label>Message</label><textarea class='input' id='ntMsg' rows='9' style='font-size:13px;line-height:1.5'>"+esc(opTeamMessage(o,{name:"<name>",role:"<role>"},kind))+"</textarea></div>"+
       "<p style='font-size:11.5px;color:var(--ink-soft);margin:-4px 0 12px'>&lt;name&gt; and &lt;role&gt; are filled in for each person.</p>"+
+      "<div id='ntStatus' class='nt-status' style='"+(_ntStatus?"":"display:none")+"'>"+esc(_ntStatus)+"</div>"+
       (people.length?"<div class='eyebrow' style='margin-bottom:6px'>Send to everyone</div><div class='btn-row nt-all' style='margin-bottom:10px'>"+
-        "<button class='btn btn-sea btn-sm' onclick=\"notifyOpAll('"+o.id+"','wa')\" title='Opens WhatsApp for each person in turn'>WhatsApp all</button>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"notifyOpAll('"+o.id+"','sms')\" title='One SMS to every phone number'>SMS all</button>"+
-        "<button class='btn btn-ghost btn-sm' onclick=\"notifyOpAll('"+o.id+"','email')\" title='One email to every address'>Email all</button>"+
+        "<button class='btn btn-sea btn-sm' onclick=\"notifyOpAll('"+o.id+"','wa','"+kind+"')\">WhatsApp all</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"notifyOpAll('"+o.id+"','sms','"+kind+"')\">SMS all</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"notifyOpAll('"+o.id+"','email','"+kind+"')\">Email all</button>"+
       "</div><div class='eyebrow' style='margin-bottom:2px'>Or one person at a time</div>":"")+
       rows+
     "</div>"+
     "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button></div>";
   openScrim();
 }
-function notifyOpSend(opId,i,via){
-  var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
-  var p=opTeamPeople(o)[i];if(!p)return;
-  var base=location.href.split("#")[0].replace(/[^/]*$/,"");
-  var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,p);
-  var msg=tpl.replace(/<name>/g,p.name).replace(/<role>/g,p.role.charAt(0).toUpperCase()+p.role.slice(1));
+function ntChannel(via){return via==="wa"?"whatsapp":(via==="sms"?"sms":"email");}
+function ntLabel(via){return via==="wa"?"WhatsApp":(via==="sms"?"SMS":"email");}
+function ntPersonMsg(o,p,kind){
+  var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,p,kind);
+  return tpl.replace(/<name>/g,p.name).replace(/<role>/g,p.role.charAt(0).toUpperCase()+p.role.slice(1));
+}
+function ntTemplate(o,p,kind){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return {kind:kind,params:[p.name,o.tour||"",opTeamWhen(o),base+p.app]};}
+function ntSubject(o,kind){var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";return (kind==="update"?"Tour updated — ":"New tour from ")+company+" — "+(o.tour||"");}
+function ntMark(o,p,label,kind){o.notified=o.notified||{};o.notified[p.name]={via:label,at:new Date().toISOString(),kind:kind||"new"};}
+/* Open the phone's own app with the message (manual path / gateway fallback). */
+function ntOpenApp(o,p,via,msg,kind){
   var num=String(p.phone||"").replace(/\D/g,"");
-  if((via==="wa"||via==="sms")&&!num){alert("No phone number saved for "+p.name+". Add it in "+(p.kind==="guide"?"Logistics \u2192 External Guides":"Logistics \u2192 Vehicles & Drivers")+".");return;}
-  if(via==="email"&&!p.email){alert("No email saved for "+p.name+".");return;}
   if(via==="wa")waShare(msg,num);
   else if(via==="sms"){var sep=/iPhone|iPad|iPod/i.test(navigator.userAgent)?"&":"?";window.open("sms:"+(num?"+"+(num.length===10?"91"+num:num):"")+sep+"body="+encodeURIComponent(msg),"_blank");}
-  else mailSend(p.email,"New tour from Island Explorer \u2014 "+(o.tour||""),msg);
-  o.notified=o.notified||{};o.notified[p.name]={via:(via==="wa"?"WhatsApp":via==="sms"?"SMS":"email"),at:new Date().toISOString()};
-  audit("ops","team-notified",(o.tour||o.id)+" \u2192 "+p.name+" ("+via+")");
-  persistData();renderOperations();notifyOpTeam(opId);
+  else mailSend(p.email,ntSubject(o,kind),msg);
 }
-/* Everyone at once: email and SMS take several recipients in one message;
-   WhatsApp can only open one chat per tap, so WhatsApp all walks through the
-   people one tap at a time (the button says who is next). */
-function notifyOpAll(opId,via){
+function notifyOpSend(opId,i,via,kind){
   var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
-  var people=opTeamPeople(o);
-  var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,null);
-  var teamMsg=tpl.replace(/<name>/g,"Team").replace(/\n?Your role: <role>\n?/g,"\n").replace(/<role>/g,"");
-  var mark=function(p,label){o.notified=o.notified||{};o.notified[p.name]={via:label,at:new Date().toISOString()};};
-  if(via==="email"){
-    var to=people.filter(function(p){return p.email;});
-    if(!to.length){alert("No email addresses saved for this team.");return;}
-    mailSend(to.map(function(p){return p.email;}).join(","),"New tour from "+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours")+" \u2014 "+(o.tour||""),teamMsg);
-    to.forEach(function(p){mark(p,"email");});
-  }else if(via==="sms"){
-    var nums=people.filter(function(p){return String(p.phone||"").replace(/\D/g,"");});
-    if(!nums.length){alert("No phone numbers saved for this team.");return;}
-    var sep=/iPhone|iPad|iPod/i.test(navigator.userAgent)?"&":"?";
-    var list=nums.map(function(p){var n=String(p.phone).replace(/\D/g,"");return "+"+(n.length===10?"91"+n:n);}).join(",");
-    window.open("sms:"+list+sep+"body="+encodeURIComponent(teamMsg),"_blank");
-    nums.forEach(function(p){mark(p,"SMS");});
-  }else{
-    var next=people.find(function(p){return String(p.phone||"").replace(/\D/g,"")&&!((o.notified||{})[p.name]&&(o.notified||{})[p.name].via==="WhatsApp");});
-    if(!next){alert("WhatsApp has been opened for everyone with a phone number.");return;}
-    notifyOpSend(opId,people.indexOf(next),"wa");return;
+  kind=kind==="update"?"update":"new";
+  var p=opTeamPeople(o)[i];if(!p)return;
+  var num=String(p.phone||"").replace(/\D/g,"");
+  if((via==="wa"||via==="sms")&&!num){alert("No phone number saved for "+p.name+". Add it in "+(p.kind==="guide"?"Logistics → External Guides":"Logistics → Vehicles & Drivers")+".");return;}
+  if(via==="email"&&!p.email){alert("No email saved for "+p.name+".");return;}
+  var msg=ntPersonMsg(o,p,kind);
+  var done=function(label){ntMark(o,p,label,kind);audit("ops","team-notified",(o.tour||o.id)+" → "+p.name+" ("+label+")");persistData();renderOperations();notifyOpTeam(opId,kind);};
+  if(msgGatewayOn()){
+    ntStatus("Sending to "+p.name+" via "+ntLabel(via)+"…");
+    gatewaySend(ntChannel(via),[p],msg,ntSubject(o,kind),via==="wa"?ntTemplate(o,p,kind):null).then(function(j){
+      var r=(j.results||[])[0]||{};
+      if(r.ok){ntStatus("✓ Sent to "+p.name+" via "+ntLabel(via));done(ntLabel(via)+" (auto)");}
+      else{ntStatus("Gateway could not send to "+p.name+": "+(r.error||j.error||"unknown error")+" — opened your app instead.");ntOpenApp(o,p,via,msg,kind);done(ntLabel(via));}
+    }).catch(function(e){ntStatus((e&&e.message?e.message:"Gateway error")+" — opened your app instead.");ntOpenApp(o,p,via,msg,kind);done(ntLabel(via));});
+    return;
   }
-  audit("ops","team-notified",(o.tour||o.id)+" \u2192 all ("+via+")");
-  persistData();renderOperations();notifyOpTeam(opId);
+  ntOpenApp(o,p,via,msg,kind);
+  done(ntLabel(via));
+}
+/* Everyone at once. With the gateway on, each person gets their own message
+   (name and role filled in). Manual mode: email and SMS take several recipients
+   in one message; WhatsApp can only open one chat per tap, so WhatsApp all walks
+   through the people one tap at a time. */
+function notifyOpAll(opId,via,kind){
+  var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
+  kind=kind==="update"?"update":"new";
+  var people=opTeamPeople(o);
+  var can=people.filter(function(p){return via==="email"?!!p.email:!!String(p.phone||"").replace(/\D/g,"");});
+  if(!can.length){alert(via==="email"?"No email addresses saved for this team.":"No phone numbers saved for this team.");return;}
+  if(msgGatewayOn()){
+    var okN=0,fail=[];
+    ntStatus("Sending to "+can.length+" people via "+ntLabel(via)+"…");
+    var step=function(idx){
+      if(idx>=can.length){
+        persistData();renderOperations();notifyOpTeam(opId,kind);
+        ntStatus("✓ Sent to "+okN+" of "+can.length+" via "+ntLabel(via)+(fail.length?" — failed: "+fail.join(", "):""));
+        return;
+      }
+      var p=can[idx];
+      gatewaySend(ntChannel(via),[p],ntPersonMsg(o,p,kind),ntSubject(o,kind),via==="wa"?ntTemplate(o,p,kind):null).then(function(j){
+        var r=(j.results||[])[0]||{};if(r.ok){okN++;ntMark(o,p,ntLabel(via)+" (auto)",kind);}else fail.push(p.name+" ("+(r.error||j.error||"error")+")");
+      }).catch(function(e){fail.push(p.name+" ("+(e&&e.message||"error")+")");}).then(function(){step(idx+1);});
+    };
+    audit("ops","team-notified",(o.tour||o.id)+" → all ("+via+", gateway)");
+    step(0);return;
+  }
+  var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,null,kind);
+  var teamMsg=tpl.replace(/<name>/g,"Team").replace(/\n?Your role: <role>\n?/g,"\n").replace(/<role>/g,"");
+  if(via==="email"){
+    mailSend(can.map(function(p){return p.email;}).join(","),ntSubject(o,kind),teamMsg);
+    can.forEach(function(p){ntMark(o,p,"email",kind);});
+  }else if(via==="sms"){
+    var sep=/iPhone|iPad|iPod/i.test(navigator.userAgent)?"&":"?";
+    var list=can.map(function(p){var n=String(p.phone).replace(/\D/g,"");return "+"+(n.length===10?"91"+n:n);}).join(",");
+    window.open("sms:"+list+sep+"body="+encodeURIComponent(teamMsg),"_blank");
+    can.forEach(function(p){ntMark(o,p,"SMS",kind);});
+  }else{
+    var next=can.find(function(p){var n=(o.notified||{})[p.name];return !(n&&/WhatsApp/.test(n.via)&&n.kind===kind);});
+    if(!next){alert("WhatsApp has been opened for everyone with a phone number.");return;}
+    notifyOpSend(opId,people.indexOf(next),"wa",kind);return;
+  }
+  audit("ops","team-notified",(o.tour||o.id)+" → all ("+via+")");
+  persistData();renderOperations();notifyOpTeam(opId,kind);
+}
+/* A tour or operation was edited after the team was told: send the "updated"
+   notice. Gateway on -> automatic, to everyone previously notified, on the
+   channel each person was last reached on. Otherwise open the dialog ready. */
+function notifyOpUpdated(o){
+  if(!o||!o.notified||!Object.keys(o.notified).length)return;
+  var people=opTeamPeople(o).filter(function(p){return !!o.notified[p.name];});
+  if(!people.length)return;
+  if(!msgGatewayOn()){setTimeout(function(){notifyOpTeam(o.id,"update");},80);return;}
+  var okN=0,fail=[];
+  var step=function(idx){
+    if(idx>=people.length){persistData();renderOperations();ieToast("Update notice sent to "+okN+" of "+people.length+(fail.length?" — failed: "+fail.join(", "):""));return;}
+    var p=people[idx];var last=o.notified[p.name].via||"";
+    var via=/WhatsApp/.test(last)?"wa":(/SMS/.test(last)?"sms":(/email/i.test(last)?"email":(p.phone?"wa":"email")));
+    if((via!=="email"&&!p.phone)||(via==="email"&&!p.email)){fail.push(p.name+" (no contact)");step(idx+1);return;}
+    gatewaySend(ntChannel(via),[p],opTeamMessage(o,p,"update"),ntSubject(o,"update"),via==="wa"?ntTemplate(o,p,"update"):null).then(function(j){
+      var r=(j.results||[])[0]||{};if(r.ok){okN++;ntMark(o,p,ntLabel(via)+" (auto)","update");}else fail.push(p.name);
+    }).catch(function(){fail.push(p.name);}).then(function(){step(idx+1);});
+  };
+  audit("ops","team-update-notice",(o.tour||o.id)+" → "+people.length+" people");
+  step(0);
+}
+function notifyTourUpdated(t){var o=(ops||[]).find(function(x){return x.fromTour===t.id&&!x.shadowOf;});if(o)notifyOpUpdated(o);}
+/* Settings -> Messaging gateway */
+function saveGateway(on){
+  var url=((document.getElementById("gw_url")||{}).value||"").trim();
+  payCfg.gateway={on:!!on,url:url};
+  persistData();refreshSettings();
+  ieToast(on?"Automatic sending is on.":"Automatic sending is off — buttons open your apps.");
+}
+function checkGateway(){
+  var url=msgGatewayUrl(),el=document.getElementById("gw_status");
+  if(!url){if(el)el.textContent="No gateway URL — set the Supabase project first.";return;}
+  if(el)el.textContent="Checking "+url+" …";
+  fetch(url).then(function(r){return r.json();}).then(function(j){
+    var p=j.providers||{};
+    if(el)el.innerHTML="Gateway answers. WhatsApp: <b>"+(p.whatsapp?"ready"+(p.whatsapp_template?" (template)":" (text only)"):"not set")+"</b> · SMS: <b>"+(p.sms?"ready":"not set")+"</b> · Email: <b>"+(p.email?"ready":"not set")+"</b>";
+  }).catch(function(e){if(el)el.textContent="Gateway not reachable: "+(e&&e.message||e)+". Deploy supabase/functions/notify (docs/MESSAGING.md).";});
+}
+function testGateway(){
+  var el=document.getElementById("gw_status");
+  var phone=((document.getElementById("gw_phone")||{}).value||"").trim(),email=((document.getElementById("gw_email")||{}).value||"").trim();
+  if(!phone&&!email){if(el)el.textContent="Enter a test phone number and / or email first.";return;}
+  var me={name:"Test",phone:phone,email:email,app:"ops-guide.html"};
+  var o={id:"TEST",tour:"Test message from the ops console",startISO:todayISO,endISO:todayISO,pickup:""};
+  var msg=opTeamMessage(o,{name:"Test",role:"Lead guide"},"new");
+  var jobs=[];
+  if(phone){jobs.push(["whatsapp",ntTemplate(o,me,"new")]);jobs.push(["sms",null]);}
+  if(email)jobs.push(["email",null]);
+  if(el)el.textContent="Sending test…";
+  var out=[];
+  var step=function(i){
+    if(i>=jobs.length){if(el)el.innerHTML=out.join("<br>");return;}
+    gatewaySend(jobs[i][0],[me],msg,ntSubject(o,"new"),jobs[i][1]).then(function(j){var r=(j.results||[])[0]||{};out.push(jobs[i][0]+": "+(r.ok?"✓ sent"+(r.id?" ("+r.id+")":""):"✗ "+(r.error||j.error||"failed")));}).catch(function(e){out.push(jobs[i][0]+": ✗ "+(e&&e.message||e));}).then(function(){step(i+1);});
+  };
+  step(0);
 }
 function shareGuideOpsLink(guideName){
   var g=externalGuides.find(function(x){return x.name===guideName;});
@@ -10411,6 +10534,17 @@ function viewSettings(){
     "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px'><button class='btn btn-sea btn-sm' onclick='testLeadCapture()'>Send test lead</button><button class='btn btn-ghost btn-sm' onclick='toggleLeadCapture()' id='ls_toggle'>…</button><button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='rotateLeadToken()'>Rotate token</button></div>"+
     "<p style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Rotating the token instantly revokes every endpoint above (update n8n/webhooks with the new ones).</p>"+
   "</div>"+
+  (function(){var gw=msgGateway();var def=msgGatewayUrl();return "<div class='card card-pad' style='margin-top:16px'>"+
+    "<div class='eyebrow'>Automation</div><div class='h-sec' style='margin-bottom:6px'>Messaging gateway <span class='pill "+(gw.on?"completed":"plain")+"' style='font-size:11px'>"+(gw.on?"Automatic sending on":"Manual")+"</span></div>"+
+    "<p style='font-size:12.5px;color:var(--ink-soft);margin-bottom:10px'>Sends the Notify team messages through the WhatsApp Business API, SMS (MSG91 / Twilio) and email (Resend) without opening your apps, and sends the tour-updated notice automatically. Setup guide: docs/MESSAGING.md.</p>"+
+    "<div class='form-grid'>"+
+      "<div class='field full'><label>Gateway URL <span style='color:var(--ink-soft);font-weight:400'>(blank = this project's notify function)</span></label><input class='input mono' id='gw_url' value='"+String(gw.url||"").replace(/'/g,"&#39;")+"' placeholder='"+String(def||"https://<project>.supabase.co/functions/v1/notify").replace(/'/g,"")+"'></div>"+
+      "<div class='field'><label>Test phone</label><input class='input mono' id='gw_phone' placeholder='10-digit number'></div>"+
+      "<div class='field'><label>Test email</label><input class='input' id='gw_email' placeholder='you@domain.com'></div>"+
+    "</div>"+
+    "<div class='btn-row'><button class='btn btn-primary btn-sm' onclick='saveGateway(true)'>"+(gw.on?"Save":"Turn on automatic sending")+"</button>"+(gw.on?"<button class='btn btn-ghost btn-sm' onclick='saveGateway(false)'>Turn off</button>":"")+"<button class='btn btn-ghost btn-sm' onclick='checkGateway()'>Check gateway</button><button class='btn btn-sea btn-sm' onclick='testGateway()'>Send test</button></div>"+
+    "<div id='gw_status' style='font-size:12px;margin-top:8px;color:var(--ink-soft)'></div>"+
+  "</div>";})()+
   "<div class='card card-pad' style='margin-top:16px'>"+
     "<div class='eyebrow'>Sharing</div><div class='h-sec' style='margin-bottom:6px'>Review &amp; feedback links</div>"+
     "<div class='form-grid'>"+
@@ -10951,6 +11085,7 @@ function saveEditTour(){
   cascadeTourEdit(t);
   renderAccCalendar();renderAccommodation();
   closeModal();renderTours();renderCalendar();renderBookings();renderCustomers();
+  if(typeof notifyTourUpdated==="function")notifyTourUpdated(t);
   if(typeof renderOperations==="function")renderOperations();
   if(typeof renderDashOps==="function")renderDashOps();
   if(typeof renderReservations==="function")renderReservations();
