@@ -415,6 +415,7 @@ function myTripEntries(){
     var segs=[{start:o.startISO||o.start,end:(o.legs&&o.legs.length)?o.legs[0].start:(o.endISO||o.end),veh:o.veh,reg:o.reg,driver:o.driver}].concat(o.legs||[]);
     segs.forEach(function(seg,idx){
       if((seg.driver||"").trim().toLowerCase()!==mine)return;
+      if(idx===0&&o.legs&&o.legs.length&&seg.start&&seg.end&&seg.end<=seg.start)return; /* legs start on day one: no separate primary stretch */
       var isPrimary=(idx===0);
       entries.push({
         o:o,leg:seg,entryId:o.id+"_"+idx,segKey:segKeyFor(seg,idx),
@@ -468,8 +469,25 @@ var TRIP_FILTERS=["Scheduled","In progress","Completed","Transferred","Declined"
 var _tripFilter="Scheduled";
 function setTripFilter(f){_tripFilter=f;renderTrips();}
 function myStatus(o){return o.driverStatus||o.status||"Scheduled";}
+/* One card per operation: every leg this driver drives on it is listed inside
+   the card (dates · vehicle · reg), and a status change applies to all of them
+   together, so a tour with several date ranges never shows twice. */
+function myTripCards(){
+  var map={},order=[];
+  myTripEntries().forEach(function(e){var k=e.o.id;if(!map[k]){map[k]={o:e.o,segs:[],entryId:e.o.id};order.push(k);}map[k].segs.push(e);});
+  return order.map(function(k){
+    var c=map[k];c.segs.sort(function(a,b){return (a.leg.start||"").localeCompare(b.leg.start||"");});
+    var first=c.segs[0];
+    var fbSeg=c.segs.filter(function(x){return x.fb;})[0];
+    c.status=first.status;c.fb=fbSeg?fbSeg.fb:"";c.fbAt=fbSeg?fbSeg.fbAt:"";
+    c.segKeys=c.segs.map(function(x){return x.segKey;}).join(",");c.segKey=c.segKeys;
+    c.start=first.leg.start;c.end=c.segs[c.segs.length-1].leg.end||first.leg.end;
+    c.leg={start:c.start,end:c.end,veh:first.leg.veh,reg:first.leg.reg};
+    return c;
+  }).sort(function(a,b){return (a.start||"").localeCompare(b.start||"");});
+}
 function renderTrips(){
-  var mine=myTripEntries();
+  var mine=myTripCards();
   var el=document.getElementById("tripsView");
   var subtabs="<div class='tabs' style='overflow-x:auto;flex-wrap:nowrap;gap:4px'>"+TRIP_FILTERS.map(function(f){return "<button class='tab "+(f===_tripFilter?"on":"")+"' style='flex:0 0 auto;white-space:nowrap' onclick=\"setTripFilter('"+f+"')\">"+f+"</button>";}).join("")+"</div>";
   if(!mine.length){el.innerHTML=subtabs+"<div class='empty'>No trips assigned to you yet.</div>";return;}
@@ -479,7 +497,8 @@ function renderTrips(){
     return "<div class='card' id='card_"+eid+"'>"+
       (o.tourId?"<div class='dates mono' style='font-weight:700;color:var(--blue);margin-bottom:2px'>"+o.tourId+"</div>":"")+
       "<div class='top'><b>"+(o.tourName||o.tour||"Trip")+"</b><span class='pill "+opStatusPillClass(e.status)+"' id='statuspill_"+eid+"'>"+e.status+"</span></div>"+
-      "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+"</div>"+
+      "<div class='dates' style='font-weight:700;color:var(--ink)'>"+dmy(lg.start)+(lg.end?" – "+dmy(lg.end):"")+(e.segs.length>1?" <span style='font-weight:500;color:var(--soft);font-size:12px'>· "+e.segs.length+" legs</span>":"")+"</div>"+
+      (e.segs.length>1?"<div class='rows' style='margin-bottom:6px;background:var(--paper,#f5f8fc);border-radius:8px;padding:8px 10px;grid-template-columns:1fr'><span class='k' style='margin-bottom:2px'>My legs</span>"+e.segs.map(function(sg,i){return "<span class='v' style='text-align:left;font-weight:600;margin-top:2px'>"+dmy(sg.leg.start)+(sg.leg.end?" – "+dmy(sg.leg.end):"")+": "+(sg.leg.veh||"—")+(sg.leg.reg?" · "+sg.leg.reg:"")+"</span>";}).join("")+"</div>":"")+
       "<div class='rows'>"+row("Vehicle",lg.veh)+row("Reg. No.",lg.reg)+row("Pax",o.pax)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+row("Guide",o.guide)+row("Guide Contact",o.guidePhone)+"</div>"+
       (function(){var lines=staysLinesForRange(o,lg.start,lg.end);if(!lines.length)return "";return "<div style='margin-top:8px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       (o.remarks?"<div class='rows' style='margin-top:8px'><span class='k'>Remarks</span><span class='v' style='text-align:left'>"+o.remarks+"</span></div>":"")+
@@ -520,14 +539,18 @@ async function clearMyNote(entryId,opId,segKey){
   if(!confirm("Remove this note?"))return;
   var o=allOps.find(function(x){return x.id===opId;});
   var cur="Scheduled";
+  var firstKey=String(segKey||"primary").split(",")[0];
   if(o){
-    if(segKey==="primary")cur=o.driverStatus||o.status||"Scheduled";
-    else{var l=(o.legs||[]).find(function(x){return ((x.start||"")+"|"+(x.driver||""))===segKey;});cur=(l&&l.driverStatus)||o.status||"Scheduled";}
+    if(firstKey==="primary")cur=o.driverStatus||o.status||"Scheduled";
+    else{var l=(o.legs||[]).find(function(x){return ((x.start||"")+"|"+(x.driver||""))===firstKey;});cur=(l&&l.driverStatus)||o.status||"Scheduled";}
   }
   await postOpStatus(entryId,opId,segKey,cur,"",true);
 }
 async function postOpStatus(entryId,opId,segKey,status,reason,clearFeedback){
   showErr("");
+  /* a grouped card carries every leg's key (comma-separated): post one update per leg */
+  var keys=String(segKey||"primary").split(",").map(function(k){return k.trim();}).filter(Boolean);
+  if(keys.length>1){for(var i=0;i<keys.length;i++){await postOpStatus(entryId,opId,keys[i],status,reason,clearFeedback);}return;}
   /* workspace matches the driver_login RPC, which serves the island-explorer data */
   var rec={id:"S"+Date.now()+Math.floor(Math.random()*100000),type:"op_status_update",status:"new",name:myDriver.name,created_at:new Date().toISOString(),workspace:(window.myWs||"island-explorer"),
     data:{opId:opId,newStatus:status,reason:reason,driver:myDriver.name,segKey:segKey||"primary",clearFeedback:!!clearFeedback}};

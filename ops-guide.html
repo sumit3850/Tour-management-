@@ -123,7 +123,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 311</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 312</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -403,7 +403,8 @@ function allStaysLines(o){
    case. */
 function opLegsSummaryHtml(o){
   if(!o.legs||!o.legs.length)return "";
-  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone,driverStatus:o.driverStatus}].concat(o.legs);
+  var rows=[{start:o.startISO||o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone,driverStatus:o.driverStatus}].concat(o.legs);
+  var _iso=function(d){d=String(d||"");var m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+"-"+m[2]+"-"+m[1]:d;};rows=rows.filter(function(l,i){return !(i===0&&l.start&&l.end&&_iso(l.end)<=_iso(l.start));}); /* legs start on day one: no separate first stretch */
   return "<div class='rows' style='margin-top:6px;background:var(--paper);border-radius:8px;padding:8px 10px;grid-template-columns:1fr'><span class='k' style='margin-bottom:2px'>Legs</span>"+
     rows.map(function(l,i){return "<span class='v' style='text-align:left;font-weight:500;margin-top:2px'>Leg "+(i+1)+" ("+(dmy(l.start))+" – "+(dmy(l.end))+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+(l.driverStatus?" <span style='color:#b8860b'>· driver: "+l.driverStatus+"</span>":"")+"</span>";}).join("")+
   "</div>";

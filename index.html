@@ -1460,7 +1460,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 311</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 312</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1469,7 +1469,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 311</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 312</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2277,7 +2277,8 @@ var OPS_COLS=["Tour ID","Tour","Date","Start","End","Pax","POC","POC Phone","Veh
 /* Compact one-cell text for a multi-leg op's vehicle/driver changes ("" when single-leg). */
 function opLegsSheetText(o){
   if(!o.legs||!o.legs.length)return "";
-  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverStatus:o.driverStatus}].concat(o.legs);
+  var rows=[{start:o.startISO||o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverStatus:o.driverStatus}].concat(o.legs);
+  var _iso=function(d){d=String(d||"");var m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+"-"+m[2]+"-"+m[1]:d;};rows=rows.filter(function(l,i){return !(i===0&&l.start&&l.end&&_iso(l.end)<=_iso(l.start));}); /* legs start on day one: no separate first stretch */
   return rows.map(function(l,i){return "Leg "+(i+1)+" ("+(l.start||"—")+" to "+(l.end||"—")+"): "+(l.veh||"—")+(l.reg?" "+l.reg:"")+" / "+(l.driver||"—")+(l.driverStatus?" ["+l.driverStatus+"]":"");}).join(" | ");
 }
 function opSheetRow(o){var v=(vehicles||[]).find(function(x){return x.name===o.veh;})||{};var d=(drivers||[]).find(function(x){return x.name===o.driver;})||{};var g=(externalGuides||[]).find(function(x){return x.name===o.guide;})||{};var t=o.fromTour?(tours||[]).find(function(x){return x.id===o.fromTour;}):null;var pb=t&&t.pocId?(bookings||[]).find(function(b){return b.id===t.pocId;}):null;return {"Tour ID":o.tourId||"","Tour":o.tour||"","Date":o.dateDisplay||o.date||"","Start":o.start||"","End":o.end||"","Pax":o.pax||0,"POC":(pb&&pb.guest)||o.pocName||"","POC Phone":(pb&&pb.phone)||o.pocPhone||"","Vehicle":o.veh||"","Reg. No.":v.reg||o.reg||"","Driver":o.driver||"","Driver No.":d.phone||o.driverPhone||"","Guide":o.guide||"","Guide ID":g.gid||o.gid||"","Guide phone":g.phone||o.guidePhone||"","Guide Role":o.guideRole||"","Guide Fee":(o.guideFee!=null?o.guideFee:""),"Tour Type":opTypeLabel(o.opType),"Other Guides":(o.guides||[]).map(function(x){return x.name+" ("+x.role+(x.fee?" · "+x.fee:"")+")";}).join("; "),"Session Dates":(o.sessions||[]).map(function(x){var gs=(x.guides||[]).map(function(g){return g.name+" "+(g.role||"Lead")+(g.amount!==""&&g.amount!=null?" ₹"+g.amount:"");}).join(", ");return dOpt(x.date)+(x.work?" "+x.work:"")+(gs?" ["+gs+"]":(x.amount!==""&&x.amount!=null?" ₹"+x.amount:""));}).join("; "),"Pickup Date":dOpt(o.pickupDate),"Pickup Location":o.pickupLoc||o.pickup||"","Drop Date":dOpt(o.dropDate),"Drop Location":o.dropLoc||"","Stay":opStaySheetText(o),"Legs":opLegsSheetText(o),"Status":o.status||"","Remarks":o.remarks||"","Guide Feedback":o.guideFeedback||"","Guide Feedback At":o.guideFeedbackAt?dOpt(o.guideFeedbackAt):"","Driver Feedback":o.driverFeedback||"","Driver Feedback At":o.driverFeedbackAt?dOpt(o.driverFeedbackAt):""};}
@@ -2601,7 +2602,8 @@ function opStaySheetText(o){
    the operation card. Nothing to show for the common single-driver case. */
 function opLegsSummaryHtml(o){
   if(!o.legs||!o.legs.length)return "";
-  var rows=[{start:o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone,driverStatus:o.driverStatus}].concat(o.legs);
+  var rows=[{start:o.startISO||o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone,driverStatus:o.driverStatus}].concat(o.legs);
+  var _iso=function(d){d=String(d||"");var m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+"-"+m[2]+"-"+m[1]:d;};rows=rows.filter(function(l,i){return !(i===0&&l.start&&l.end&&_iso(l.end)<=_iso(l.start));}); /* legs start on day one: no separate first stretch */
   return "<div style='margin-top:8px;padding:8px 10px;background:var(--surface-2);border-radius:8px;font-size:12px'><b>Legs:</b>"+
     rows.map(function(l,i){return "<div style='margin-top:4px'>Leg "+(i+1)+" ("+(dShort(l.start)||"—")+" → "+(dShort(l.end)||"—")+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+(l.driverStatus?" <span style='color:#7a5a00;font-weight:600'>· driver: "+l.driverStatus+"</span>":"")+"</div>";}).join("")+
   "</div>";
