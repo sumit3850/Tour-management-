@@ -1460,7 +1460,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 312</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 313</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1469,7 +1469,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 312</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 313</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -9672,7 +9672,14 @@ function renameGuideEverywhere(oldName,newName){
   if(n)audit("guide","renamed",oldName+" → "+newName+" ("+n+" link"+(n===1?"":"s")+")");
   return n;
 }
-function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;var _old=g.name;g.name=document.getElementById("g_name").value.trim();var _n=renameGuideEverywhere(_old,g.name);g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value;g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value;g.address=document.getElementById("g_addr").value;g.adminLocked=true;persistData();closeModal();renderGuides();if(_n){if(typeof renderTours==="function")renderTours();if(typeof renderDashOps==="function")renderDashOps();}}
+function saveEditGuide(){var i=parseInt(document.getElementById("modal").dataset.gi);var g=externalGuides[i];if(!g)return;var _old=g.name;g.name=document.getElementById("g_name").value.trim();var _n=renameGuideEverywhere(_old,g.name);g.expertise=document.getElementById("g_exp").value;g.phone=document.getElementById("g_phone").value.trim();g.code=document.getElementById("g_code").value.trim();g.email=document.getElementById("g_email").value.trim();g.address=document.getElementById("g_addr").value;g.adminLocked=true;persistData();closeModal();renderGuides();pushGuideNow(g);if(_n){if(typeof renderTours==="function")renderTours();if(typeof renderDashOps==="function")renderDashOps();}}
+/* A changed phone / login code must reach the cloud before the guide tries the
+   app, so push straight away (not after the auto-push delay) and say when it is live. */
+function pushGuideNow(g){
+  if(window.__DEMO__||typeof cloudPush!=="function"||!sbClient())return;
+  var who=(g&&g.name)||"The guide";
+  Promise.resolve(cloudPush(true)).then(function(){if(typeof ieToast==="function")ieToast(who+"'s details are live \u2014 they can sign in to the guide app with the saved code now.");}).catch(function(e){if(typeof ieToast==="function")ieToast("Saved here, but the cloud push failed ("+((e&&e.message)||"offline")+"). The app will see the new code after the next sync.");});
+}
 function deleteGuide(i){if(!confirm("Remove this guide?"))return;var g=externalGuides[i];if(g)retireSourceSub(g.fromSub);externalGuides.splice(i,1);persistData();renderGuides();}
 function guideDatalist(){return "<datalist id='guideNameList'>"+(externalGuides||[]).map(function(g){return "<option value=\""+String(g.name||"").replace(/"/g,"&quot;")+"\">";}).join("")+"</datalist>";}
 function guideOptions(sel){return "<option value=''>—</option>"+externalGuides.map(function(g){return "<option "+(g.name===sel?"selected":"")+">"+g.name+"</option>";}).join("");}
