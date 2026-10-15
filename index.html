@@ -1354,6 +1354,10 @@ html.dark #anaTip{background:#e6edf7;color:#0f1520}
 .res-item .ln-parts{color:var(--ink-soft)}.res-item .ln-parts .ln-clear{color:var(--sea)}
 .res-item .ln-addrow{color:var(--ink-soft)}.res-item .ln-addrow .calc-in{color:var(--ink);background:var(--surface)}
 .res-item .ln-addrow .btn{background:var(--sea);color:#fff}
+.nt-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-soft);flex-wrap:wrap}
+.nt-who{min-width:0;display:flex;flex-direction:column;gap:2px;font-size:13px}.nt-who span{font-size:12px;color:var(--ink-soft)}.nt-who .nt-sent{color:var(--forest);font-weight:600}
+.nt-acts{display:flex;gap:6px;flex-shrink:0}.nt-acts .btn[disabled]{opacity:.4}
+@media(max-width:600px){.nt-acts{width:100%;flex-wrap:nowrap}.nt-acts > .btn{flex:1 1 0 !important;min-width:0 !important;max-width:none !important;padding:7px 4px}}
 /* ===== Uniform button groups (console-wide): any block whose children are all
    buttons lays them out at equal width — side by side on wide screens (each capped
    so a lone button doesn't stretch across the page), two per row on phones. ===== */
@@ -1449,7 +1453,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 308</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 309</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1458,7 +1462,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 308</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 309</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8518,6 +8522,7 @@ function opCard(o){
       (o.driver&&o.driver!=="—"?"<button class='btn-edit' onclick=\"shareDriverAppLink('"+o.driver.replace(/'/g,"&#39;")+"')\"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13'/></svg>Driver OPS</button>":"<button class='btn-edit' disabled style='opacity:.45'>Driver OPS</button>")+
       (function(){var seen={};return (o.legs||[]).filter(function(l){if(!l.driver||l.driver===o.driver||seen[l.driver])return false;seen[l.driver]=1;return true;});})().map(function(l){return "<button class='btn-edit' onclick=\"shareDriverAppLink('"+l.driver.replace(/'/g,"&#39;")+"')\">"+l.driver+" OPS</button>";}).join("")+
     "</div>"+
+    "<div class='op-actions' style='margin-top:6px'><button class='btn-edit' onclick=\"notifyOpTeam('"+o.id+"')\" title='Tell every guide and driver on this operation about the tour (WhatsApp / SMS / email)'><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0'/></svg>Notify team"+(o.notified&&Object.keys(o.notified).length?" \u00b7 "+Object.keys(o.notified).length+" sent":"")+"</button></div>"+
   "</div>";
 }
 function renderLog(t="Vehicles & Drivers"){
@@ -8899,6 +8904,65 @@ async function testGuideBackend(guideName){
     }
   }catch(e){lines.push("Could not reach the backend: "+(e.message||e));}
   alert(lines.join("\n"));
+}
+/* ===== Notify team: one tap per person (every guide on the operation and the
+   driver(s)) via WhatsApp, SMS or email — "you have a new tour from Island
+   Explorer, please check your console". The console can't send on its own (no
+   SMS / WhatsApp gateway), so each button opens the phone's own app with the
+   message ready; a Sent mark is kept on the operation per person. ===== */
+function opTeamPeople(o){
+  var out=[],seen={};
+  var addGuide=function(name,role){if(!name||name==="\u2014"||seen["g:"+name])return;seen["g:"+name]=1;var c=guideContact(name,{});out.push({kind:"guide",name:name,role:(role||"Lead")+" guide",phone:c.phone||"",email:c.email||"",app:"ops-guide.html"});};
+  addGuide(o.guide,o.guideRole||"Lead");
+  (o.guides||[]).forEach(function(g){addGuide(g.name,g.role);});
+  var addDriver=function(name){if(!name||name==="\u2014"||seen["d:"+name])return;seen["d:"+name]=1;var d=(drivers||[]).find(function(x){return x.name===name;})||{};out.push({kind:"driver",name:name,role:"Driver",phone:(d.phone&&d.phone!=="\u2014")?d.phone:"",email:d.email||"",app:"driver-app.html"});};
+  addDriver(o.driver);(o.legs||[]).forEach(function(l){addDriver(l.driver);});
+  return out;
+}
+function opTeamMessage(o,p){
+  var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var base=location.href.split("#")[0].replace(/[^/]*$/,"");
+  var when=o.startISO?(dShort(o.startISO)+(o.endISO&&o.endISO!==o.startISO?" \u2013 "+dShort(o.endISO):"")):"";
+  return "Hello "+p.name+", you have a new tour from "+company+": "+(o.tour||"")+(when?" ("+when+")":"")+". Please check your console for details: "+base+p.app;
+}
+function notifyOpTeam(opId){
+  var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
+  var people=opTeamPeople(o);
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  var rows=people.length?people.map(function(p,i){
+    var n=(o.notified||{})[p.name];
+    return "<div class='nt-row'><div class='nt-who'><b>"+esc(p.name)+"</b><span>"+esc(p.role)+(p.phone?" \u00b7 "+esc(p.phone):"")+(p.email?" \u00b7 "+esc(p.email):"")+"</span>"+(n?"<span class='nt-sent'>\u2713 Sent "+esc(n.via)+" \u00b7 "+dShort(String(n.at).slice(0,10))+"</span>":"")+"</div>"+
+      "<div class='nt-acts'>"+
+        "<button class='btn btn-sea btn-sm' "+(p.phone?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'wa')\">WhatsApp</button>"+
+        "<button class='btn btn-ghost btn-sm' "+(p.phone?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'sms')\">SMS</button>"+
+        "<button class='btn btn-ghost btn-sm' "+(p.email?"":"disabled")+" onclick=\"notifyOpSend('"+o.id+"',"+i+",'email')\">Email</button>"+
+      "</div></div>";
+  }).join(""):"<div class='empty'>No guide or driver is assigned to this operation yet.</div>";
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><div class='eyebrow'>Notify team</div><div class='h-sec'>"+esc(o.tour||"Operation")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+esc(o.id)+(o.startISO?" \u00b7 "+dShort(o.startISO):"")+"</div></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<div class='field'><label>Message</label><textarea class='input' id='ntMsg' rows='4'>"+esc(opTeamMessage(o,{name:"<name>",app:"ops-guide.html"}))+"</textarea></div>"+
+      "<p style='font-size:11.5px;color:var(--ink-soft);margin:-4px 0 12px'>&lt;name&gt; and the app link are filled in per person. Each button opens WhatsApp, your SMS app or your mail app with the message ready to send.</p>"+
+      rows+
+    "</div>"+
+    "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button></div>";
+  openScrim();
+}
+function notifyOpSend(opId,i,via){
+  var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
+  var p=opTeamPeople(o)[i];if(!p)return;
+  var base=location.href.split("#")[0].replace(/[^/]*$/,"");
+  var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,p);
+  var msg=tpl.replace(/<name>/g,p.name).replace(/ops-guide\.html|driver-app\.html/g,p.app);
+  if(msg.indexOf(base)<0)msg+=" "+base+p.app;
+  var num=String(p.phone||"").replace(/\D/g,"");
+  if((via==="wa"||via==="sms")&&!num){alert("No phone number saved for "+p.name+". Add it in "+(p.kind==="guide"?"Logistics \u2192 External Guides":"Logistics \u2192 Vehicles & Drivers")+".");return;}
+  if(via==="email"&&!p.email){alert("No email saved for "+p.name+".");return;}
+  if(via==="wa")waShare(msg,num);
+  else if(via==="sms"){var sep=/iPhone|iPad|iPod/i.test(navigator.userAgent)?"&":"?";window.open("sms:"+(num?"+"+(num.length===10?"91"+num:num):"")+sep+"body="+encodeURIComponent(msg),"_blank");}
+  else mailSend(p.email,"New tour from Island Explorer \u2014 "+(o.tour||""),msg);
+  o.notified=o.notified||{};o.notified[p.name]={via:(via==="wa"?"WhatsApp":via==="sms"?"SMS":"email"),at:new Date().toISOString()};
+  audit("ops","team-notified",(o.tour||o.id)+" \u2192 "+p.name+" ("+via+")");
+  persistData();renderOperations();notifyOpTeam(opId);
 }
 function shareGuideOpsLink(guideName){
   var g=externalGuides.find(function(x){return x.name===guideName;});
