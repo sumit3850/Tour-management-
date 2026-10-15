@@ -1357,7 +1357,8 @@ html.dark #anaTip{background:#e6edf7;color:#0f1520}
 .nt-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line-soft);flex-wrap:wrap}
 .nt-who{min-width:0;display:flex;flex-direction:column;gap:2px;font-size:13px}.nt-who span{font-size:12px;color:var(--ink-soft)}.nt-who .nt-sent{color:var(--forest);font-weight:600}
 .nt-acts{display:flex;gap:6px;flex-shrink:0}.nt-acts .btn[disabled]{opacity:.4}
-@media(max-width:600px){.nt-acts{width:100%;flex-wrap:nowrap}.nt-acts > .btn{flex:1 1 0 !important;min-width:0 !important;max-width:none !important;padding:7px 4px}}
+.nt-all>.btn{min-width:0}
+@media(max-width:600px){.nt-all{flex-wrap:nowrap}.nt-all>.btn{flex:1 1 0 !important;min-width:0 !important;padding:7px 4px}.nt-acts{width:100%;flex-wrap:nowrap}.nt-acts > .btn{flex:1 1 0 !important;min-width:0 !important;max-width:none !important;padding:7px 4px}}
 /* ===== Uniform button groups (console-wide): any block whose children are all
    buttons lays them out at equal width — side by side on wide screens (each capped
    so a lone button doesn't stretch across the page), two per row on phones. ===== */
@@ -1453,7 +1454,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 309</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 310</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1462,7 +1463,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 309</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 310</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -8920,10 +8921,22 @@ function opTeamPeople(o){
   return out;
 }
 function opTeamMessage(o,p){
-  var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+  var company=B.company||"Island Explorer Birding Tours";
   var base=location.href.split("#")[0].replace(/[^/]*$/,"");
   var when=o.startISO?(dShort(o.startISO)+(o.endISO&&o.endISO!==o.startISO?" \u2013 "+dShort(o.endISO):"")):"";
-  return "Hello "+p.name+", you have a new tour from "+company+": "+(o.tour||"")+(when?" ("+when+")":"")+". Please check your console for details: "+base+p.app;
+  var role=p&&p.role?p.role.charAt(0).toUpperCase()+p.role.slice(1):"";
+  return "Dear "+(p&&p.name?p.name:"Team")+",\n\n"+
+    "You have been assigned to a new tour with "+company+".\n\n"+
+    "Tour: "+(o.tour||"")+"\n"+
+    (when?"Dates: "+when+"\n":"")+
+    (role?"Your role: "+role+"\n":"")+
+    (o.pickup?"Pickup: "+o.pickup+(o.pickupDate?" on "+dShort(o.pickupDate):"")+"\n":"")+
+    "\nPlease open your console for the full plan and details:\n"+
+    "Guide console: "+base+"ops-guide.html\n"+
+    "Driver console: "+base+"driver-app.html\n\n"+
+    "Kindly confirm once you have reviewed the plan.\n\n"+
+    "Regards,\n"+company+"\n"+(B.phone||"+91 99332 02175")+" \u00b7 "+(typeof brandContactEmail==="function"?brandContactEmail():"info@islandexplorer.in");
 }
 function notifyOpTeam(opId){
   var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
@@ -8940,8 +8953,13 @@ function notifyOpTeam(opId){
   }).join(""):"<div class='empty'>No guide or driver is assigned to this operation yet.</div>";
   document.getElementById("modal").innerHTML="<div class='modal-head'><div><div class='eyebrow'>Notify team</div><div class='h-sec'>"+esc(o.tour||"Operation")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'>"+esc(o.id)+(o.startISO?" \u00b7 "+dShort(o.startISO):"")+"</div></div>"+XBTN+"</div>"+
     "<div class='modal-body'>"+
-      "<div class='field'><label>Message</label><textarea class='input' id='ntMsg' rows='4'>"+esc(opTeamMessage(o,{name:"<name>",app:"ops-guide.html"}))+"</textarea></div>"+
-      "<p style='font-size:11.5px;color:var(--ink-soft);margin:-4px 0 12px'>&lt;name&gt; and the app link are filled in per person. Each button opens WhatsApp, your SMS app or your mail app with the message ready to send.</p>"+
+      "<div class='field'><label>Message</label><textarea class='input' id='ntMsg' rows='9' style='font-size:13px;line-height:1.5'>"+esc(opTeamMessage(o,{name:"<name>",role:"<role>"}))+"</textarea></div>"+
+      "<p style='font-size:11.5px;color:var(--ink-soft);margin:-4px 0 12px'>&lt;name&gt; and &lt;role&gt; are filled in for each person.</p>"+
+      (people.length?"<div class='eyebrow' style='margin-bottom:6px'>Send to everyone</div><div class='btn-row nt-all' style='margin-bottom:10px'>"+
+        "<button class='btn btn-sea btn-sm' onclick=\"notifyOpAll('"+o.id+"','wa')\" title='Opens WhatsApp for each person in turn'>WhatsApp all</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"notifyOpAll('"+o.id+"','sms')\" title='One SMS to every phone number'>SMS all</button>"+
+        "<button class='btn btn-ghost btn-sm' onclick=\"notifyOpAll('"+o.id+"','email')\" title='One email to every address'>Email all</button>"+
+      "</div><div class='eyebrow' style='margin-bottom:2px'>Or one person at a time</div>":"")+
       rows+
     "</div>"+
     "<div class='modal-foot'><button class='btn btn-ghost' onclick='closeModal()'>Close</button></div>";
@@ -8952,8 +8970,7 @@ function notifyOpSend(opId,i,via){
   var p=opTeamPeople(o)[i];if(!p)return;
   var base=location.href.split("#")[0].replace(/[^/]*$/,"");
   var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,p);
-  var msg=tpl.replace(/<name>/g,p.name).replace(/ops-guide\.html|driver-app\.html/g,p.app);
-  if(msg.indexOf(base)<0)msg+=" "+base+p.app;
+  var msg=tpl.replace(/<name>/g,p.name).replace(/<role>/g,p.role.charAt(0).toUpperCase()+p.role.slice(1));
   var num=String(p.phone||"").replace(/\D/g,"");
   if((via==="wa"||via==="sms")&&!num){alert("No phone number saved for "+p.name+". Add it in "+(p.kind==="guide"?"Logistics \u2192 External Guides":"Logistics \u2192 Vehicles & Drivers")+".");return;}
   if(via==="email"&&!p.email){alert("No email saved for "+p.name+".");return;}
@@ -8962,6 +8979,35 @@ function notifyOpSend(opId,i,via){
   else mailSend(p.email,"New tour from Island Explorer \u2014 "+(o.tour||""),msg);
   o.notified=o.notified||{};o.notified[p.name]={via:(via==="wa"?"WhatsApp":via==="sms"?"SMS":"email"),at:new Date().toISOString()};
   audit("ops","team-notified",(o.tour||o.id)+" \u2192 "+p.name+" ("+via+")");
+  persistData();renderOperations();notifyOpTeam(opId);
+}
+/* Everyone at once: email and SMS take several recipients in one message;
+   WhatsApp can only open one chat per tap, so WhatsApp all walks through the
+   people one tap at a time (the button says who is next). */
+function notifyOpAll(opId,via){
+  var o=(ops||[]).find(function(x){return x.id===opId;});if(!o)return;
+  var people=opTeamPeople(o);
+  var tpl=(document.getElementById("ntMsg")||{}).value||opTeamMessage(o,null);
+  var teamMsg=tpl.replace(/<name>/g,"Team").replace(/\n?Your role: <role>\n?/g,"\n").replace(/<role>/g,"");
+  var mark=function(p,label){o.notified=o.notified||{};o.notified[p.name]={via:label,at:new Date().toISOString()};};
+  if(via==="email"){
+    var to=people.filter(function(p){return p.email;});
+    if(!to.length){alert("No email addresses saved for this team.");return;}
+    mailSend(to.map(function(p){return p.email;}).join(","),"New tour from "+((window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours")+" \u2014 "+(o.tour||""),teamMsg);
+    to.forEach(function(p){mark(p,"email");});
+  }else if(via==="sms"){
+    var nums=people.filter(function(p){return String(p.phone||"").replace(/\D/g,"");});
+    if(!nums.length){alert("No phone numbers saved for this team.");return;}
+    var sep=/iPhone|iPad|iPod/i.test(navigator.userAgent)?"&":"?";
+    var list=nums.map(function(p){var n=String(p.phone).replace(/\D/g,"");return "+"+(n.length===10?"91"+n:n);}).join(",");
+    window.open("sms:"+list+sep+"body="+encodeURIComponent(teamMsg),"_blank");
+    nums.forEach(function(p){mark(p,"SMS");});
+  }else{
+    var next=people.find(function(p){return String(p.phone||"").replace(/\D/g,"")&&!((o.notified||{})[p.name]&&(o.notified||{})[p.name].via==="WhatsApp");});
+    if(!next){alert("WhatsApp has been opened for everyone with a phone number.");return;}
+    notifyOpSend(opId,people.indexOf(next),"wa");return;
+  }
+  audit("ops","team-notified",(o.tour||o.id)+" \u2192 all ("+via+")");
   persistData();renderOperations();notifyOpTeam(opId);
 }
 function shareGuideOpsLink(guideName){
