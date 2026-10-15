@@ -17,10 +17,10 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;padding:18px}
 .wrap{max-width:640px;margin:0 auto}
-.head{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px 16px;text-align:center;margin-bottom:16px}
-.head img{max-width:200px;max-height:80px;object-fit:contain;display:block;margin:0 auto}
+.head{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 20px 12px;text-align:center;margin-bottom:14px}
+.head img{max-width:180px;max-height:64px;object-fit:contain;display:block;margin:0 auto}
 .head .brand{font-family:'Calistoga',serif;font-size:20px}.head .brand .ex{color:#1976d2}
-.head h1{font-size:15px;font-weight:600;margin-top:10px;color:var(--soft)}
+.head h1{font-size:14px;font-weight:600;margin-top:6px;color:var(--soft)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px -14px rgba(20,40,80,.2)}
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}.top .head-l{flex:1}
 .top b{font-size:15px}
@@ -99,6 +99,54 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
 #gate .g-saved .tick{width:20px;height:20px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:12px;animation:pop .5s cubic-bezier(.22,1,.36,1) both}
 .err.shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97) both}
 @media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+/* ---- Operation card: "ops sheet" — header with countdown ring, 3-figure strip, tabs, status bar ---- */
+.oc{padding:0;overflow:hidden}
+.oc-head{display:flex;gap:10px;align-items:flex-start;padding:13px 14px 10px}
+.oc-head .head-l{flex:1;min-width:0}
+.oc-head .code-row{margin-bottom:5px}
+.oc-head .name{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+.oc-head .dates{font-size:12.5px;color:var(--soft);margin-top:2px}
+.oc-ring{position:relative;width:54px;height:54px;flex:none}
+.oc-ring svg{width:54px;height:54px;transform:rotate(-90deg)}
+.oc-ring-bg{fill:none;stroke:var(--line);stroke-width:5}
+.oc-ring-fg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s}
+.oc-ring-t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.oc-ring-t b{font-size:12.5px;font-weight:800;white-space:nowrap}.oc-ring-t small{font-size:8px;color:var(--soft);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;white-space:nowrap}
+.oc-strip{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fafbfd}
+.oc-strip div{padding:7px 6px;text-align:center;border-right:1px solid var(--line);min-width:0}
+.oc-strip div:last-child{border-right:0}
+.oc-strip small{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:600}
+.oc-strip b{font-size:14px;font-weight:800;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oc-strip b.ok{color:var(--ok)}
+.oc-tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.oc-tabs::-webkit-scrollbar{display:none}
+.oc-tab{flex:1;min-width:max-content;padding:9px 10px;font-size:12.5px;font-weight:600;color:var(--soft);border:0;border-bottom:2px solid transparent;background:none;cursor:pointer;font-family:inherit;margin-bottom:-1px;white-space:nowrap}
+.oc-tab.on{color:var(--blue);border-bottom-color:var(--blue)}
+.oc-pane{display:none;padding:8px 14px 6px}
+.oc-pane.on{display:block}
+.oc-person{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line)}
+.oc-person:last-child{border-bottom:0}
+.oc-av{width:30px;height:30px;border-radius:50%;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+.oc-person .n{flex:1;min-width:0}.oc-person .n b{display:block;font-size:13.5px;font-weight:600;line-height:1.25;overflow-wrap:break-word}.oc-person .n small{color:var(--soft);font-size:12px;display:block}
+.oc-person .n a{color:var(--soft);text-decoration:none}
+.oc-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#e7f1fb;color:var(--blue);white-space:nowrap;flex:none}
+.oc-badge.lead{background:#e4f3ea;color:var(--ok)}.oc-badge.asst{background:#ede9fe;color:#6e56cf}.oc-badge.guest{background:#fff4e0;color:#b8860b}
+.oc-kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:5px 10px;font-size:13px;padding:2px 0 6px;line-height:1.4}
+.oc-kv span{color:var(--soft);white-space:nowrap}.oc-kv b{font-weight:500;overflow-wrap:break-word;min-width:0}.oc-kv a{color:var(--ink);text-decoration:none}
+.oc-sub{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-weight:700;margin:8px 0 2px}
+.oc-line{font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);line-height:1.4}.oc-line:last-child{border-bottom:0}
+.oc-line b{font-weight:600}.oc-line small{display:block;color:var(--soft);font-size:12px}.oc-line a{color:inherit;text-decoration:none}
+.oc-pane .remarks{margin:6px 0 4px}.oc-pane .fb{margin:6px 0 4px}.oc-pane .sess{margin:4px 0 6px}
+.oc-empty{font-size:12.5px;color:var(--soft);padding:6px 0 8px}
+.oc-foot{padding:10px 14px 12px;border-top:1px solid var(--line);background:#fafbfd}
+.oc-seg{display:grid;grid-template-columns:1fr 1fr 1fr;background:#e9edf3;border-radius:10px;padding:3px;gap:2px}
+.oc-seg button{padding:8px 4px;border:0;border-radius:8px;background:none;font:inherit;font-size:12.5px;font-weight:600;color:var(--soft);cursor:pointer;white-space:nowrap}
+.oc-seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(20,40,80,.18)}
+.oc-seg button.on.done{color:var(--ok)}.oc-seg button.on.live{color:var(--blue)}
+.oc-alt{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.oc-alt button{padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.oc-alt button.on{border-color:#b8860b;color:#b8860b;background:#fff4e0}
+.oc .reasonbox{margin:0;padding:0 14px 12px;background:#fafbfd}
 </style>
 </head>
 <body>
@@ -126,7 +174,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 314</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 315</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -404,13 +452,51 @@ function allStaysLines(o){
    pair in South Andaman, a different pair once the group reaches Great
    Nicobar) — nothing to show for the common single-driver-for-the-whole-tour
    case. */
-function opLegsSummaryHtml(o){
-  if(!o.legs||!o.legs.length)return "";
+function opLegRows(o){
+  if(!o.legs||!o.legs.length)return [];
   var rows=[{start:o.startISO||o.start,end:o.legs[0].start,veh:o.veh,reg:o.reg,driver:o.driver,driverPhone:o.driverPhone,driverStatus:o.driverStatus}].concat(o.legs);
-  var _iso=function(d){d=String(d||"");var m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+"-"+m[2]+"-"+m[1]:d;};rows=rows.filter(function(l,i){return !(i===0&&l.start&&l.end&&_iso(l.end)<=_iso(l.start));}); /* legs start on day one: no separate first stretch */
+  return rows.filter(function(l,i){return !(i===0&&l.start&&l.end&&_isoOf(l.end)<=_isoOf(l.start));}); /* legs start on day one: no separate first stretch */
+}
+function opLegsSummaryHtml(o){
+  var rows=opLegRows(o);if(!rows.length)return "";
   return "<div class='rows' style='margin-top:6px;background:var(--paper);border-radius:8px;padding:8px 10px;grid-template-columns:1fr'><span class='k' style='margin-bottom:2px'>Legs</span>"+
     rows.map(function(l,i){return "<span class='v' style='text-align:left;font-weight:500;margin-top:2px'>Leg "+(i+1)+" ("+(dmy(l.start))+" – "+(dmy(l.end))+"): "+(l.veh||"—")+(l.reg?" · "+l.reg:"")+" — "+(l.driver||"—")+(l.driverPhone?" · "+l.driverPhone:"")+(l.driverStatus?" <span style='color:#b8860b'>· driver: "+l.driverStatus+"</span>":"")+"</span>";}).join("")+
   "</div>";
+}
+/* ---- Ops-sheet card helpers ---- */
+function _esc(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function _isoOf(d){d=String(d||"");var m=d.match(/^(\d{2})\/(\d{2})\/(\d{4})/);return m?m[3]+"-"+m[2]+"-"+m[1]:d.slice(0,10);}
+function _days(a,b){a=new Date(_isoOf(a));b=new Date(_isoOf(b));if(isNaN(a)||isNaN(b))return null;return Math.round((b-a)/864e5);}
+function _ini(n){n=String(n||"").trim().split(/\s+/);return (((n[0]||"")[0]||"")+((n[1]||"")[0]||"")).toUpperCase()||"?";}
+function _hue(n){var h=0;n=String(n||"");for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h;}
+function ocAvatar(n){return "<span class='oc-av' style='background:hsl("+_hue(n)+" 48% 42%)'>"+_ini(n)+"</span>";}
+function ocTel(p){p=String(p||"").trim();if(!p)return "";return "<a href='tel:"+_esc(normPhone(p))+"'>"+_esc(p)+"</a>";}
+/* Countdown ring: days to go before the tour, day N of M while it runs, a tick when done. */
+function ocRingHtml(o){
+  var today=new Date();today=new Date(today.getTime()-today.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  var s=_isoOf(o.startISO||o.start),e=_isoOf(o.endISO||o.end)||s,st=o.status||"Scheduled";
+  var big="",small="",frac=0,col="var(--blue)";
+  if(st==="Completed"){big="\u2713";small="done";frac=1;col="var(--ok)";}
+  else if(st==="Declined"||st==="Transferred"){big="\u2014";small=st==="Declined"?"declined":"moved";frac=0;col="#b8860b";}
+  else if(!s||isNaN(new Date(s))){big="?";small="dates";}
+  else if(today<s){var n=_days(today,s);big=n+"d";small="to go";frac=Math.max(.06,1-Math.min(n,30)/30);}
+  else if(today>e){big="end";small="ended";frac=1;col="#b8860b";}
+  else{var tot=Math.max(1,_days(s,e)+1),dn=Math.min(tot,_days(s,today)+1);big=dn+"/"+tot;small="day";frac=dn/tot;col="var(--ok)";}
+  var r=22,c=(2*Math.PI*r).toFixed(1);
+  return "<div class='oc-ring' title='"+_esc(small)+"'><svg viewBox='0 0 52 52' aria-hidden='true'><circle cx='26' cy='26' r='"+r+"' class='oc-ring-bg'/><circle cx='26' cy='26' r='"+r+"' class='oc-ring-fg' style='stroke:"+col+";stroke-dasharray:"+c+";stroke-dashoffset:"+(c*(1-frac)).toFixed(1)+"'/></svg><div class='oc-ring-t'><b>"+big+"</b><small>"+small+"</small></div></div>";
+}
+var _cardTab={};
+function ocTab(id,t){_cardTab[id]=t;var c=document.getElementById("card_"+id);if(!c)return;c.querySelectorAll(".oc-tab").forEach(function(b){b.classList.toggle("on",b.dataset.t===t);});c.querySelectorAll(".oc-pane").forEach(function(p){p.classList.toggle("on",p.dataset.t===t);});}
+/* Everyone on the tour: guides by role (me marked), then the point of contact. */
+function ocPeople(o,me){
+  var all=[{name:o.guide,role:o.guideRole||"Lead"}].concat(o.guides||[]).filter(function(x){return x&&x.name&&x.name!=="\u2014";});
+  var seen={};all=all.filter(function(x){var k=String(x.name).trim().toLowerCase();if(seen[k])return false;seen[k]=1;return true;});
+  if(me.role){all.forEach(function(x){if(isMe(x.name))x.role=me.role;});}
+  var gc=function(n){try{return (typeof guideContact==="function"?guideContact(n):null)||{};}catch(e){return {};}};
+  var rows=all.map(function(x){var a=/assist/i.test(x.role||"");var c=gc(x.name);var ph=x.phone||c.phone||"";
+    return "<div class='oc-person'>"+ocAvatar(x.name)+"<div class='n'><b>"+_esc(x.name)+(isMe(x.name)?" <span style='color:var(--blue)'>(you)</span>":"")+"</b>"+(ph?"<small>"+ocTel(ph)+"</small>":"")+"</div><span class='oc-badge "+(a?"asst":"lead")+"'>"+(a?"Assistant":"Lead guide")+"</span></div>";});
+  if(o.pocName)rows.push("<div class='oc-person'>"+ocAvatar(o.pocName)+"<div class='n'><b>"+_esc(o.pocName)+"</b>"+(o.pocPhone?"<small>POC \u00b7 "+ocTel(o.pocPhone)+"</small>":"<small>Point of contact</small>")+"</div><span class='oc-badge guest'>Guest</span></div>");
+  return rows.join("");
 }
 
 function renderList(){
@@ -427,25 +513,48 @@ function renderList(){
     var fee=(me.fee!=null&&me.fee!=="")?money(me.fee):"";
     var sess=(o.sessions||[]).filter(function(x){return x&&x.date;});
     var myDates=(me.dates&&me.dates.length)?sess.filter(function(x){return me.dates.indexOf(x.date)>=0;}):sess;if(!myDates.length)myDates=sess;
-    var dateLine=(o.opType==="session"&&myDates.length)?myDates.map(function(x){return dmy(x.date);}).join(" · "):(dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):""));
-    return "<div class='card' id='card_"+o.id+"'><div class='top'><div class='head-l'><div class='code-row'>"+(o.tourId?"<span class='code'>"+o.tourId+"</span>":"")+"<span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
-      "<div class='name'>"+(o.tour||"Tour")+"</div><div class='dates'>"+dateLine+"</div></div></div>"+
-      (fee?"<div class='fee-row'><span>Guide fee</span><b>"+fee+"</b></div>":"")+
-      "<div class='rows'>"+(o.pocName?row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):""):"")+(o.opType?row("Tour type",o.opType==="session"?"Session tour":(o.opType==="mixed"?"Mixed tour":"Group tour")):"")+row("Pax",o.pax)+(function(){var all=[{name:o.guide,role:o.guideRole||"Lead"}].concat(o.guides||[]).filter(function(x){return x&&x.name&&x.name!=="—";});var seen={};all=all.filter(function(x){var k=String(x.name).trim().toLowerCase();if(seen[k])return false;seen[k]=1;return true;});if(me.role){all.forEach(function(x){if(isMe(x.name))x.role=me.role;});}var lead=all.filter(function(x){return !/assist/i.test(x.role||"Lead");}),asst=all.filter(function(x){return /assist/i.test(x.role||"");});var nm=function(x){return x.name+(isMe(x.name)?" (you)":"");};return (lead.length?row(lead.length>1?"Lead guides":"Lead guide",lead.map(nm).join(", ")):"")+(asst.length?row(asst.length>1?"Assistant guides":"Assistant guide",asst.map(nm).join(", ")):"");})()+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
-      (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
-      opLegsSummaryHtml(o)+
-      sessionsHtml(o)+
-      (o.remarks?"<div class='remarks'><b>Remarks:</b> "+o.remarks+"</div>":"")+
-      ((o.itinerary&&o.itinerary.length)?"<div class='remarks'><b>Itinerary</b>"+o.itinerary.map(function(d){return "<div style='margin-top:6px'><b>Day "+d.day+(d.date?" \u00b7 "+dmy(d.date):"")+"</b>"+(d.title?" \u2014 "+String(d.title).replace(/</g,'&lt;'):"")+(d.plan?"<div style='opacity:.85;margin-top:2px;line-height:1.45'>"+String(d.plan).replace(/</g,'&lt;').replace(/\n/g,'<br>')+"</div>":"")+"</div>";}).join("")+"</div>":"")+
-      (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+o.guideFeedback+"</div>":"")+
-      "<div class='acts' id='acts_"+o.id+"'>"+
-        "<button class='"+(o.status==='In progress'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','In progress')\">In Progress</button>"+
-        "<button class='"+(o.status==='Completed'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
-        "<button class='"+(o.status==='Declined'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
-        "<button class='"+(o.status==='Transferred'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
+    var dateLine=(o.opType==="session"&&myDates.length)?myDates.slice().sort(function(a,b){return _isoOf(a.date).localeCompare(_isoOf(b.date));}).map(function(x){return dmy(x.date);}).join(" · "):(dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):""));
+    var kv=function(k,v){return v?"<span>"+k+"</span><b>"+v+"</b>":"";};
+    var tab=_cardTab[o.id]||"team";
+    var nights=(o.opType==="session")?null:_days(o.startISO||o.start,o.endISO||o.end);
+    var typeTxt=o.opType==="session"?"Session tour":(o.opType==="mixed"?"Mixed tour":"Group tour");
+    /* transport pane */
+    var legs=opLegRows(o);
+    var trans="<div class='oc-kv'>"+kv("Vehicle",_esc(o.veh)+((v.reg||o.reg)?" \u00b7 "+_esc(v.reg||o.reg):""))+kv("Driver",_esc(o.driver)+((d.phone||o.driverPhone)?" \u00b7 "+ocTel(d.phone||o.driverPhone):""))+
+      kv("Pickup",(o.pickupDate?dmy(o.pickupDate):"")+((o.pickupLoc||o.pickup)?(o.pickupDate?" \u00b7 ":"")+_esc(o.pickupLoc||o.pickup):""))+kv("Drop",(o.dropDate?dmy(o.dropDate):"")+(o.dropLoc?(o.dropDate?" \u00b7 ":"")+_esc(o.dropLoc):""))+"</div>"+
+      (legs.length?"<div class='oc-sub'>Legs</div>"+legs.map(function(l,i){return "<div class='oc-line'><b>Leg "+(i+1)+" \u00b7 "+dmy(l.start)+" \u2013 "+dmy(l.end)+"</b><small>"+_esc(l.veh||"\u2014")+(l.reg?" \u00b7 "+_esc(l.reg):"")+" \u00b7 "+_esc(l.driver||"\u2014")+(l.driverPhone?" \u00b7 "+ocTel(l.driverPhone):"")+(l.driverStatus?" <span style='color:#b8860b'>\u00b7 driver: "+_esc(l.driverStatus)+"</span>":"")+"</small></div>";}).join(""):"");
+    if(!o.veh&&!o.driver&&!legs.length&&!o.pickupLoc&&!o.pickup&&!o.dropLoc)trans="<div class='oc-empty'>No transport details yet.</div>";
+    /* stays pane */
+    var stayLines=allStaysLines(o);
+    var stays=stayLines.length?stayLines.map(function(t){return "<div class='oc-line'>"+_esc(t)+"</div>";}).join(""):"";
+    /* notes pane: remarks, itinerary, my note */
+    var notes=(o.remarks?"<div class='remarks'><b>Remarks:</b> "+_esc(o.remarks)+"</div>":"")+
+      ((o.itinerary&&o.itinerary.length)?"<div class='remarks'><b>Itinerary</b>"+o.itinerary.map(function(dd){return "<div style='margin-top:6px'><b>Day "+dd.day+(dd.date?" \u00b7 "+dmy(dd.date):"")+"</b>"+(dd.title?" \u2014 "+_esc(dd.title):"")+(dd.plan?"<div style='opacity:.85;margin-top:2px;line-height:1.45'>"+_esc(dd.plan).replace(/\n/g,'<br>')+"</div>":"")+"</div>";}).join("")+"</div>":"")+
+      (o.guideFeedback?"<div class='fb'><b>Your note ("+dmy(o.guideFeedbackAt)+"):</b> "+_esc(o.guideFeedback)+"</div>":"");
+    var sessHtml=sessionsHtml(o);
+    var panes=[["team","Team",ocPeople(o,me)],["transport","Transport",trans]];
+    if(stays)panes.push(["stays","Stays",stays]);
+    if(sessHtml)panes.push(["dates","My dates",sessHtml]);
+    if(notes)panes.push(["notes","Notes",notes]);
+    if(!panes.some(function(p){return p[0]===tab;}))tab="team";
+    var st=o.status||"Scheduled";
+    return "<div class='card oc' id='card_"+o.id+"'><div class='oc-head'><div class='head-l'><div class='code-row'>"+(o.tourId?"<span class='code'>"+_esc(o.tourId)+"</span>":"")+"<span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+_esc(st)+"</span></div>"+
+      "<div class='name'>"+_esc(o.tour||"Tour")+"</div><div class='dates'>"+dateLine+" \u00b7 "+typeTxt+"</div></div>"+ocRingHtml(o)+"</div>"+
+      "<div class='oc-strip'><div><small>Your fee</small><b class='ok'>"+(fee||"\u2014")+"</b></div><div><small>"+(o.opType==="session"?"My dates":"Nights")+"</small><b>"+(o.opType==="session"?myDates.length:(nights!=null?nights:"\u2014"))+"</b></div><div><small>Pax</small><b>"+_esc(o.pax||"\u2014")+"</b></div></div>"+
+      "<div class='oc-tabs'>"+panes.map(function(p){return "<button class='oc-tab "+(p[0]===tab?"on":"")+"' data-t='"+p[0]+"' onclick=\"ocTab('"+o.id+"','"+p[0]+"')\">"+p[1]+"</button>";}).join("")+"</div>"+
+      panes.map(function(p){return "<div class='oc-pane "+(p[0]===tab?"on":"")+"' data-t='"+p[0]+"'>"+p[2]+"</div>";}).join("")+
+      "<div class='oc-foot' id='acts_"+o.id+"'>"+
+        "<div class='oc-seg'>"+
+          "<button class='"+(st==='Scheduled'?'on':'')+"' onclick=\"setOpStatus('"+o.id+"','Scheduled')\">Scheduled</button>"+
+          "<button class='"+(st==='In progress'?'on live':'')+"' onclick=\"setOpStatus('"+o.id+"','In progress')\">In progress</button>"+
+          "<button class='"+(st==='Completed'?'on done':'')+"' onclick=\"setOpStatus('"+o.id+"','Completed')\">Completed</button>"+
+        "</div>"+
+        "<div class='oc-alt'>"+
+          "<button class='"+(st==='Declined'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Declined')\">Decline</button>"+
+          "<button class='"+(st==='Transferred'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Transferred')\">Transfer</button>"+
+        "</div>"+
       "</div>"+
-      ((o.status&&o.status!=='Scheduled')?"<button class='back-btn' onclick=\"setOpStatus('"+o.id+"','Scheduled')\">↺ Move back to Scheduled</button>":"")+
-      "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
+      "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why\u2026'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
     "</div>";
   }).join(""):"<div class='empty'>No operations in this view.</div>");
 }
@@ -466,7 +575,7 @@ async function submitReason(opId){
   if(!text){alert("Please add a short reason before submitting.");return;}
   await postStatus(opId,box.dataset.status,text);
 }
-async function setOpStatus(opId,status){await postStatus(opId,status,"");}
+async function setOpStatus(opId,status){var o=allOps.find(function(x){return x.id===opId;});if(o&&(o.status||"Scheduled")===status)return;await postStatus(opId,status,"");}
 async function postStatus(opId,status,reason){
   showErr("");
   /* workspace matches the guide_login RPC, which serves the island-explorer data */
