@@ -22,18 +22,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .head .brand{font-family:'Calistoga',serif;font-size:20px}.head .brand .ex{color:#1976d2}
 .head h1{font-size:15px;font-weight:600;margin-top:10px;color:var(--soft)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px -14px rgba(20,40,80,.2)}
-.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}.top .head-l{flex:1}
 .top b{font-size:15px}
 .head-l{min-width:0}
 .code{display:inline-block;font-size:12px;font-weight:700;color:var(--blue);background:#e7f1fb;border-radius:6px;padding:1px 8px;margin-bottom:4px}
 .name{font-size:15px;font-weight:700;line-height:1.3}
 .side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.code-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}.code-row .code{margin-bottom:0}
+.fee-row{display:flex;justify-content:space-between;align-items:center;background:#e4f3ea;color:var(--ok);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;margin:0 0 12px}.fee-row b{font-size:15px;font-weight:800}
+.back-btn{width:100%;margin-top:8px;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--soft);font-weight:700;font-size:12.5px;cursor:pointer}
 .fee{font-size:13px;font-weight:700;color:var(--ok);background:#e4f3ea;border-radius:8px;padding:3px 10px;white-space:nowrap}
 .pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:#e7f1fb;color:var(--blue);white-space:nowrap}
 .pill.warn{background:#fbe7e4;color:var(--err)}
 .pill.ok{background:#e4f3ea;color:var(--ok)}
 .dates{font-size:13px;color:var(--soft);margin-top:2px}
-.rows{display:grid;grid-template-columns:max-content 8px minmax(0,1fr);gap:6px 6px;font-size:13px;line-height:1.45;align-items:start}
+.rows{display:grid;grid-template-columns:minmax(96px,max-content) 8px minmax(0,1fr);gap:7px 6px;font-size:13px;line-height:1.45;align-items:start}
 .rows span.k{color:var(--soft);font-weight:500;white-space:nowrap;padding-right:6px}.rows span.c{color:var(--soft)}.rows span.v{font-weight:500;text-align:left;min-width:0;overflow-wrap:break-word}
 .remarks{margin-top:10px;padding:10px 12px;background:var(--paper);border-radius:10px;font-size:13px}
 .pay{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;font-size:12px}
@@ -49,7 +52,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(
 .sess-r .d{font-weight:600;white-space:nowrap}.sess-r .d small,.sess-r .w small{display:block;font-size:11px;color:var(--soft);font-weight:500;white-space:normal}.sess-r .w{color:var(--ink);overflow-wrap:break-word}.sess-r .a{font-weight:700;color:var(--ok);white-space:nowrap}
 .fb{margin-top:8px;padding:10px 12px;background:#fbe7e4;border-radius:10px;font-size:12.5px;color:var(--err)}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.acts button{padding:11px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink)}
+.acts button{min-height:42px;padding:10px 8px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:12.5px;font-weight:700;cursor:pointer;color:var(--ink);font-family:inherit}
 .acts button.on{border-color:var(--blue);background:#e7f1fb;color:var(--blue)}
 .reasonbox{display:none;margin-top:10px}
 .reasonbox textarea{width:100%;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;min-height:70px}
@@ -123,7 +126,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 313</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 314</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -425,10 +428,10 @@ function renderList(){
     var sess=(o.sessions||[]).filter(function(x){return x&&x.date;});
     var myDates=(me.dates&&me.dates.length)?sess.filter(function(x){return me.dates.indexOf(x.date)>=0;}):sess;if(!myDates.length)myDates=sess;
     var dateLine=(o.opType==="session"&&myDates.length)?myDates.map(function(x){return dmy(x.date);}).join(" · "):(dmy(o.startISO||o.start)+(o.endISO||o.end?" – "+dmy(o.endISO||o.end):""));
-    return "<div class='card' id='card_"+o.id+"'><div class='top'><div class='head-l'>"+(o.tourId?"<div class='code'>"+o.tourId+"</div>":"")+"<div class='name'>"+(o.tour||"Tour")+"</div>"+
-      "<div class='dates'>"+dateLine+"</div></div>"+
-      "<div class='side'><span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span>"+(fee?"<span class='fee' title='Guide fee'>Guide fee "+fee+"</span>":"")+"</div></div>"+
-      "<div class='rows'>"+(o.pocName?row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):""):"")+(o.opType?row("Tour type",o.opType==="session"?"Session tour":(o.opType==="mixed"?"Mixed tour":"Group tour")):"")+row("Pax",o.pax)+row("My role",me.role||o.guideRole||"Lead")+(function(){var others=[{name:o.guide,role:o.guideRole||"Lead"}].concat(o.guides||[]).filter(function(x){return x.name&&x.name!=="—"&&!isMe(x.name);});return others.length?row("Other guides",others.map(function(x){return x.name+" ("+x.role+")";}).join(", ")):"";})()+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
+    return "<div class='card' id='card_"+o.id+"'><div class='top'><div class='head-l'><div class='code-row'>"+(o.tourId?"<span class='code'>"+o.tourId+"</span>":"")+"<span class='pill "+pillClass(o.status)+"' id='statuspill_"+o.id+"'>"+(o.status||"Scheduled")+"</span></div>"+
+      "<div class='name'>"+(o.tour||"Tour")+"</div><div class='dates'>"+dateLine+"</div></div></div>"+
+      (fee?"<div class='fee-row'><span>Guide fee</span><b>"+fee+"</b></div>":"")+
+      "<div class='rows'>"+(o.pocName?row("POC",o.pocName)+(o.pocPhone?row("POC Phone",o.pocPhone):""):"")+(o.opType?row("Tour type",o.opType==="session"?"Session tour":(o.opType==="mixed"?"Mixed tour":"Group tour")):"")+row("Pax",o.pax)+(function(){var all=[{name:o.guide,role:o.guideRole||"Lead"}].concat(o.guides||[]).filter(function(x){return x&&x.name&&x.name!=="—";});var seen={};all=all.filter(function(x){var k=String(x.name).trim().toLowerCase();if(seen[k])return false;seen[k]=1;return true;});if(me.role){all.forEach(function(x){if(isMe(x.name))x.role=me.role;});}var lead=all.filter(function(x){return !/assist/i.test(x.role||"Lead");}),asst=all.filter(function(x){return /assist/i.test(x.role||"");});var nm=function(x){return x.name+(isMe(x.name)?" (you)":"");};return (lead.length?row(lead.length>1?"Lead guides":"Lead guide",lead.map(nm).join(", ")):"")+(asst.length?row(asst.length>1?"Assistant guides":"Assistant guide",asst.map(nm).join(", ")):"");})()+row("Vehicle",o.veh)+row("Reg. No.",v.reg||o.reg)+row("Driver",o.driver)+row("Driver No.",d.phone||o.driverPhone)+row("Pickup Date",dmy(o.pickupDate))+row("Pickup Location",o.pickupLoc||o.pickup)+row("Drop Date",dmy(o.dropDate))+row("Drop Location",o.dropLoc)+"</div>"+
       (function(){var lines=allStaysLines(o);if(!lines.length)return "";return "<div style='margin-top:6px'><div class='k' style='color:var(--soft);font-size:13px'>Stay</div>"+lines.map(function(t){return "<div class='v' style='font-weight:600;text-align:left;font-size:13px;margin-top:2px'>"+t+"</div>";}).join("")+"</div>";})()+
       opLegsSummaryHtml(o)+
       sessionsHtml(o)+
@@ -441,7 +444,7 @@ function renderList(){
         "<button class='"+(o.status==='Declined'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Declined')\">Declined</button>"+
         "<button class='"+(o.status==='Transferred'?'on':'')+"' onclick=\"toggleReason('"+o.id+"','Transferred')\">Transferred</button>"+
       "</div>"+
-      ((o.status&&o.status!=='Scheduled')?"<button style='width:100%;margin-top:8px;padding:9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--soft);font-weight:700;font-size:12.5px;cursor:pointer' onclick=\"setOpStatus('"+o.id+"','Scheduled')\">↺ Move back to Scheduled</button>":"")+
+      ((o.status&&o.status!=='Scheduled')?"<button class='back-btn' onclick=\"setOpStatus('"+o.id+"','Scheduled')\">↺ Move back to Scheduled</button>":"")+
       "<div class='reasonbox' id='reason_"+o.id+"'><label>Reason / feedback</label><textarea id='reasontext_"+o.id+"' placeholder='Let Island Explorer know why…'></textarea><button onclick=\"submitReason('"+o.id+"')\">Submit</button></div>"+
     "</div>";
   }).join(""):"<div class='empty'>No operations in this view.</div>");
