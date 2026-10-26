@@ -60,6 +60,34 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
 .head{position:relative}
 .logout-btn{position:absolute;top:16px;right:16px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--soft);cursor:pointer}
 .install-btn{width:100%;margin-top:10px;padding:11px;border:1px dashed var(--blue);border-radius:11px;background:#e7f1fb;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer}
+
+/* ==== Duralux skin (matches the console) ==== */
+:root{--ink:#283c50;--soft:#58667a;--forest:#3454d1;--blue:#3454d1;--paper:#f0f2f8;--surface:#fff;--line:#e5e7eb;--ok:#0f9a4f;--err:#ea4d4d;--amber:#b45309}
+body{color:#4b5563;padding:14px}
+.head{border-radius:8px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);padding:12px 18px 10px}
+.head img{max-height:64px;max-width:180px}
+.head h1{color:var(--ink);font-size:13.5px;margin-top:6px}
+.card{border-radius:8px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);padding:14px}
+.top b{color:var(--ink);font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+.pill{border-radius:4px;font-size:10.5px;letter-spacing:.03em;background:#eceffb;color:var(--blue)}
+.pill.ok{background:#e8faf0;color:var(--ok)}.pill.warn{background:#fdeaea;color:#c43c3c}.pill.mid{background:#fff4e3;color:#b45309}
+.rows{gap:6px 10px}.rows span.k{color:var(--soft)}.rows span.v{color:var(--ink);font-weight:500}
+.tabs{gap:4px}.tab{border-radius:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:9px 6px;color:var(--soft)}
+.tab.on{background:#eceffb;border-color:#eceffb;color:var(--blue)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#eaebef;border-radius:6px;padding:3px}
+.acts button{border:0;border-radius:4px;background:none;color:var(--soft);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:9px 4px}
+.acts button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(20,40,80,.18)}
+.btn,.btn-sm,.reasonbox button,.install-btn{border-radius:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+.btn{background:var(--blue);font-size:12px;padding:12px}
+.btn-sm{font-size:11px}.btn-ghost{background:#eaebef;border:1px solid #dcdee4;color:var(--ink)}
+.install-btn{background:#eceffb;border:1px solid #c9d2f5;color:var(--blue);font-size:11.5px}
+#offlineBtn{border-radius:4px !important;text-transform:uppercase;letter-spacing:.04em;font-size:11.5px !important}
+input,select,textarea{border-radius:6px;border-color:var(--line);font-size:14px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(52,84,209,.14)}
+.logout-btn{border-radius:4px;text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
+.sec-h{color:var(--ink)}
+.fb{border-radius:6px}.err,.ok-box,#netbar,#ctxhint{border-radius:6px}
+.trip-actions button{border-radius:4px}
 </style>
 </head>
 <body>
@@ -94,7 +122,7 @@ input,select{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px
     <div id="savedView" style="display:none"></div>
   </div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v127</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">app v128</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
