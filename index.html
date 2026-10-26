@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Ops Console">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Playfair+Display:wght@600;700;800&family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Playfair+Display:wght@600;700;800&family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   /* HDFC-style banking palette: navy blue + red accent on a light-grey canvas */
@@ -1417,6 +1417,167 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   .btn,.tab,.tour-card,.op-card,.acc-card,.req-card,.lead,.rate-card,.m-cards tbody tr,.btn-edit,.btn-del,.edit-btn,.del-btn,.tc-chip{animation:none !important;transition:none !important}
   .btn:hover,.tab:hover,.tour-card:hover,.op-card:hover,.acc-card:hover,.req-card:hover,.lead:hover,.tabs .tab:hover + .tab,.tabs .tab:has(+ .tab:hover){transform:none !important}
 }
+
+/* ==========================================================================
+   DURALUX SKIN — the console restyled to the Duralux admin design system
+   (theme_ocean): Inter, #3454d1 primary on a #f0f2f8 canvas, white sidebar
+   and header, 8px cards with hairline borders, small-caps buttons, soft-tint
+   badges. Layered last so it overrides the earlier themes; dark mode maps to
+   Duralux's dark skin.
+   ========================================================================== */
+:root{
+  --ink:#283c50;--ink-soft:#58667a;--forest:#2945ba;--forest-deep:#1f369c;
+  --sea:#3454d1;--sea-soft:#eceffb;--amber:#ffa21d;--amber-soft:#fff4e3;
+  --coral:#ea4d4d;--coral-soft:#fdeaea;--paper:#f0f2f8;--surface:#ffffff;--surface-2:#f3f4f6;
+  --line:#e5e7eb;--line-soft:#eef0f3;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.07);
+  --shadow-lg:0 8px 8px -4px rgba(16,24,40,.04),0 20px 24px -4px rgba(16,24,40,.12);
+  --shadow-card:0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);
+  --r:8px;--r-sm:6px;--r-lg:12px;--sidebar-w:260px;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --dx-success:#17c666;--dx-success-soft:#e8faf0;--dx-info:#3dc7be;--dx-info-soft:#e9f9f8;--dx-darken:#001327;--dx-light:#eaebef;--dx-border-2:#dcdee4;
+}
+body{background:var(--paper);font-family:var(--font-body);font-size:14px;color:#4b5563}
+h1,h2,h3,h4,.h-sec,.page-title b,.kpi .val,.tour-card .nm,.tour-card .dt-range{color:var(--ink)}
+::selection{background:var(--sea-soft)}
+/* Sidebar: white, hairline border, logo header, small-caps captions, 5px-radius links */
+.sidebar{background:#fff;border-right:1px solid var(--line)}
+.brand{flex-direction:row;align-items:center;justify-content:center;gap:10px;padding:0 18px;min-height:70px;border-bottom:1px solid var(--line)}
+.brand .brand-logo{max-height:48px;max-width:170px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.brand .name{display:none;font-family:var(--font-body);font-size:14px;font-weight:700;color:var(--ink)}
+.brand .brand-logo[style*="display: none"]~div .name,.brand .brand-logo[style*="display:none"]~div .name{display:block}
+.brand .sub{display:none}
+.brand .build-badge{display:none}
+.nav{padding:8px 12px 16px;perspective:none}
+.nav-group{font-size:10px;font-weight:700;letter-spacing:.07em;color:#5f6f8a;margin:14px 8px 6px}
+.nav .nav-item{padding:10px 14px;margin:0 0 3px;border-radius:5px;font-size:13px;font-weight:600;color:var(--ink);gap:12px;transform:none !important;box-shadow:none !important;animation:navShow .25s linear forwards;animation-delay:calc(.05s + var(--i,0)*.03s)}
+.nav .nav-item svg{width:18px;height:18px;stroke:#8b8d98;stroke-width:1.8}
+.nav .nav-item:hover,.nav .nav-item.active{background:var(--dx-light);color:var(--dx-darken);box-shadow:none !important}
+.nav .nav-item:hover svg,.nav .nav-item.active svg{stroke:var(--dx-darken)}
+.nav-foot{background:#fff;border-top:1px solid var(--line);padding:12px 16px}
+.nav-foot .av{background:var(--sea);color:#fff;border-radius:50%}
+.nav-foot .who{font-size:13px;color:var(--ink)}.nav-foot .role{color:var(--ink-soft)}.nav-foot .uid{color:#8b8d98}
+.nav-foot .iconbtn{border-color:var(--line);border-radius:6px;color:var(--ink-soft)}
+/* Header: white, 70px, hairline bottom, round icon buttons, inline search */
+.topbar{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:1px solid var(--line);box-shadow:none;padding:0 30px;min-height:70px;gap:6px}
+.page-title{margin-right:12px}
+.page-title span{font-size:11.5px;color:#5f6f8a;font-weight:500}
+.page-title b{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.topbar .iconbtn,.topbar .hamburger,.topbar .backbtn{width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:#6b7280;transition:background .2s,color .2s}
+.topbar .iconbtn svg,.topbar .hamburger svg,.topbar .backbtn svg{stroke:#6b7280;width:19px;height:19px}
+.topbar .iconbtn:hover,.topbar .hamburger:hover,.topbar .backbtn:hover{background:var(--dx-light)}
+.topbar .iconbtn:hover svg,.topbar .hamburger:hover svg,.topbar .backbtn:hover svg{stroke:var(--sea)}
+.topbar .iconbtn.gsbtn kbd{display:none}
+.topbar .iconbtn .dot{border-color:#fff}
+.hdr-search{display:flex;align-items:center;gap:9px;height:38px;width:300px;max-width:30vw;padding:0 12px;margin:0 8px 0 auto;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);color:#8b8d98;font-size:13px;font-family:inherit;text-align:left;cursor:text}
+.hdr-search svg{width:16px;height:16px;stroke:#8b8d98;flex:none}
+.hdr-search span{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.hdr-search kbd{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#58667a;border:1px solid var(--dx-border-2);background:#fff;border-radius:4px;padding:1px 5px}
+.hdr-search:hover{border-color:var(--dx-border-2);background:#fff}
+.topbar .gsbtn{display:none}
+@media(max-width:860px){.hdr-search{display:none}.topbar .gsbtn{display:grid}.topbar{min-height:0;padding:12px 16px}.page-title b{font-size:16px}}
+@media(max-width:600px){.topbar{padding:10px 16px 8px}.topbar .page-title b{font-weight:700}.kpi .lab{font-size:11px;letter-spacing:.03em}.kpi .val{font-size:24px}}
+.content{padding:30px}
+@media(max-width:560px){.content{padding:16px}}
+/* Cards */
+.card{border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-card);transition:box-shadow .3s ease}
+.card-pad{padding:22px}
+.section-head{margin-bottom:14px}
+.eyebrow{color:#5f6f8a;letter-spacing:.07em;font-size:10.5px;font-weight:700}
+.h-sec{font-size:16px;font-weight:700}
+/* Buttons: Duralux small-caps, 3px radius, solid primary, light secondary */
+.btn{border-radius:4px;padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;line-height:1.2;gap:7px;transition:color .3s ease,background-color .3s ease,border-color .3s ease,box-shadow .3s ease,transform .3s ease}
+.btn:hover{transform:none}
+.btn svg{width:15px;height:15px;stroke-width:2}
+.btn-primary,.btn-sea{background:var(--sea);color:#fff;box-shadow:none;border:1px solid var(--sea)}
+.btn-primary:hover,.btn-sea:hover{background:var(--forest);border-color:var(--forest);box-shadow:none}
+.btn-ghost{background:var(--dx-light);border:1px solid var(--dx-border-2);color:var(--ink)}
+.btn-ghost:hover{background:#e2e4ea;border-color:#c9ccd5;box-shadow:none}
+.btn-red{background:var(--coral);border:1px solid var(--coral)}.btn-red:hover{background:#d13f3f}
+.btn-sm{padding:7px 12px;font-size:9.5px;border-radius:3px}
+html.dark .btn-primary{background:var(--sea);border-color:var(--sea);color:#fff}
+/* Pills / badges: soft tint, 4px radius */
+.pill{border-radius:4px;font-size:11px;font-weight:600;padding:3px 9px;line-height:1.5}
+.pill.open{background:var(--sea-soft);color:var(--sea)}
+.pill.full{background:var(--coral-soft);color:#c43c3c}
+.pill.completed{background:var(--dx-success-soft);color:#0f9a4f}
+.pill.closed,.pill.plain{background:var(--surface-2);color:var(--ink-soft)}
+.cat{border-radius:4px;font-size:11px}
+/* Tables */
+th{font-size:11px;font-weight:700;letter-spacing:.05em;color:#58667a;padding:12px 16px;border-bottom:1px solid var(--line);background:transparent}
+td{color:#4b5563;font-size:13px;padding:12px 16px;border-bottom:1px solid var(--line-soft)}
+.card td{font-size:12.5px;padding:10px 8px}.card th{padding:10px 8px}
+tbody tr:hover{background:#f8f9fb}
+/* KPI tiles: icon chip, bold figure */
+.kpi{padding:20px 22px}
+.kpi:hover{transform:none;box-shadow:var(--shadow-card)}
+.kpi .lab{font-size:12px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em}
+.kpi .lab svg{width:38px;height:38px;padding:9px;background:var(--sea-soft);border-radius:6px;stroke:var(--sea)}
+.kpi .val{font-family:var(--font-body);font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:12px}
+.kpi .trend{font-size:12px;font-weight:600}
+.up{color:#0f9a4f}
+.stat-strip .s{border:1px solid var(--line);box-shadow:var(--shadow-card);border-radius:var(--r)}
+/* Quick-action tiles */
+.qa-tile{border:1px solid var(--line);box-shadow:var(--shadow-card);border-radius:var(--r)}
+.qa-ic{background:var(--sea-soft);border-radius:6px}.qa-ic svg{stroke:var(--sea)}
+/* Tabs: bordered pill group, soft-primary active */
+.tabs{background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px;gap:2px;box-shadow:none}
+.tab{border-radius:4px;font-size:12.5px;font-weight:600;padding:7px 14px;color:var(--ink-soft)}
+.tab.active{background:var(--sea-soft);color:var(--sea);box-shadow:none}
+/* Forms */
+.field label{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.input{border:1px solid var(--line);border-radius:6px;background:#fff;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.input:focus{border-color:var(--sea);box-shadow:0 0 0 3px rgba(52,84,209,.14);background:#fff}
+.input::placeholder{color:#9aa4b2}
+select.input{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2358667a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+.cal-sel,.cal-nav button{border-radius:6px;border-color:var(--line)}
+/* Modals */
+.scrim{background:rgba(0,19,39,.45);backdrop-filter:none;-webkit-backdrop-filter:none}
+.modal{border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow-lg)}
+.modal-head{padding:20px 25px;border-bottom:1px solid var(--line)}
+.modal-head .x{border-radius:6px;border-color:var(--line)}
+.modal-body{padding:22px 25px}
+.modal-foot{padding:16px 25px;border-top:1px solid var(--line);background:#fff;backdrop-filter:none}
+/* Lists, bars, charts */
+.list-row .ic{background:var(--sea-soft);border-radius:6px}.list-row .ic svg{stroke:var(--sea)}
+.bar{background:var(--surface-2)}.bar>span{background:var(--sea)}
+.chart .stk{background:var(--sea);border-radius:4px 4px 2px 2px}
+.tour-col{border-radius:var(--r);background:var(--surface-2)}
+.tour-card:hover{transform:none;box-shadow:var(--shadow-lg);border-color:var(--dx-border-2)}
+.tour-card .code-tag,.tour-card .tc-id{background:var(--sea-soft);color:var(--sea);border-color:var(--sea-soft)}
+.build-badge{color:var(--sea);background:var(--sea-soft);border-color:transparent}
+/* Phone bottom navigation */
+@media(max-width:768px){
+  .bottom-nav{background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border-top:1px solid var(--line)}
+  .bottom-nav button{color:#6b7280;font-weight:600}
+  .bottom-nav button.active,.bottom-nav button.active svg{color:var(--sea);stroke:var(--sea)}
+}
+/* Duralux dark skin */
+html.dark{
+  --ink:#e2e8f0;--ink-soft:#9aa4b2;--forest:#8da4ff;--forest-deep:#b3c3ff;
+  --sea:#6f8af0;--sea-soft:#1b2340;--amber:#f6b43b;--amber-soft:#2b2410;
+  --coral:#ff7a8a;--coral-soft:#2d1619;--paper:#0e0f12;--surface:#17181d;--surface-2:#1d1e25;
+  --line:#26272e;--line-soft:#202128;--dx-light:#26272e;--dx-border-2:#2f3038;--dx-darken:#ffffff;--dx-success-soft:#0f2a1c;
+  --shadow:0 1px 2px rgba(0,0,0,.4);--shadow-card:0 1px 3px rgba(0,0,0,.4);--shadow-lg:0 0 20px rgba(0,0,0,.5)}
+html.dark body{background:var(--paper);color:#c3cad6}
+html.dark .sidebar,html.dark .nav-foot,html.dark .brand{background:#17181d;border-color:var(--line)}
+html.dark .brand .brand-logo{background:#fff;border-radius:6px;padding:4px 10px}
+html.dark .nav .nav-item{color:#aab4c8}html.dark .nav .nav-item svg{stroke:#8b8d98}
+html.dark .nav .nav-item:hover,html.dark .nav .nav-item.active{background:#26272e;color:#fff}
+html.dark .nav .nav-item:hover svg,html.dark .nav .nav-item.active svg{stroke:#fff}
+html.dark .nav-group{color:#8b8d98}
+html.dark .topbar{background:#17181d;border-bottom-color:var(--line)}
+html.dark .topbar .iconbtn,html.dark .topbar .hamburger,html.dark .topbar .backbtn{background:transparent;border:0}
+html.dark .topbar .iconbtn:hover,html.dark .topbar .hamburger:hover,html.dark .topbar .backbtn:hover{background:#26272e}
+html.dark .hdr-search{background:#0e0f12;border-color:var(--line);color:#8b8d98}html.dark .hdr-search kbd{background:#17181d;color:#9aa4b2;border-color:#2f3038}
+html.dark .card,html.dark .qa-tile,html.dark .stat-strip .s{background:var(--surface);border-color:var(--line)}
+html.dark td{color:#c3cad6}html.dark th{color:#9aa4b2;border-bottom-color:var(--line)}html.dark tbody tr:hover{background:#1d1e25}
+html.dark .btn-ghost{background:#26272e;border-color:#2f3038;color:#e2e8f0}html.dark .btn-ghost:hover{background:#2f3038}
+html.dark .tabs{background:var(--surface);border-color:var(--line)}html.dark .tab.active{background:var(--sea-soft);color:#b3c3ff}
+html.dark .input{background:#0e0f12;border-color:var(--line);color:#e2e8f0}html.dark .input:focus{background:#0e0f12}
+html.dark .modal-foot{background:var(--surface)}html.dark .bottom-nav{background:#17181d;border-top-color:var(--line)}
+html.dark .pill.open{background:var(--sea-soft);color:#b3c3ff}html.dark .pill.completed{color:#5fd59a}html.dark .pill.full{color:#ff9aa0}
+html.dark .kpi .lab svg,html.dark .list-row .ic{background:var(--sea-soft)}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1460,7 +1621,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 315</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 316</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1469,7 +1630,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 315</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 316</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -1483,6 +1644,7 @@ button.tc-chip:hover{transform:translateY(-1px) scale(1.04)}
       <div class="page-title" style="flex:1"><span id="crumb">Overview</span><b id="ptitle">Dashboard</b></div>
       <button class="iconbtn rulerbtn" id="rulerBtn" onclick="toggleRuler()" title="Column ruler — drag to resize table columns" aria-label="Toggle column ruler"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="8" rx="1.5"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></svg></button>
       <button class="iconbtn themebtn" id="themeBtn" onclick="cycleTheme()" title="Theme: day" aria-label="Switch theme"><svg id="themeIco" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <button class="hdr-search" onclick="openSearch()" title="Search (Ctrl+K)" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span>Search tours, guests, invoices…</span><kbd>⌘K</kbd></button>
       <button class="iconbtn gsbtn" onclick="openSearch()" title="Search (Ctrl+K)" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><kbd>⌘K</kbd></button>
       <button class="iconbtn" id="viewRefreshBtn" onclick="refreshCurrentView()" title="Refresh this section" aria-label="Refresh this section"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg></button>
     </header>
