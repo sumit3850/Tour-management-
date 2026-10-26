@@ -147,6 +147,41 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
 .oc-alt button{padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
 .oc-alt button.on{border-color:#b8860b;color:#b8860b;background:#fff4e0}
 .oc .reasonbox{margin:0;padding:0 14px 12px;background:#fafbfd}
+
+/* ==== Duralux skin (matches the console) ==== */
+:root{--ink:#283c50;--soft:#58667a;--forest:#3454d1;--blue:#3454d1;--paper:#f0f2f8;--surface:#fff;--line:#e5e7eb;--ok:#0f9a4f;--err:#ea4d4d}
+body{color:#4b5563;padding:14px}
+.head{border-radius:8px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);padding:12px 18px 10px}
+.head h1{color:var(--ink);font-size:13.5px}
+.card{border-radius:8px;border:1px solid var(--line);box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1)}
+.code{border-radius:4px;background:#eceffb;color:var(--blue);font-size:11px}
+.pill{border-radius:4px;background:#eceffb;color:var(--blue);font-size:10.5px;letter-spacing:.03em}
+.pill.ok{background:#e8faf0;color:var(--ok)}.pill.warn{background:#fdeaea;color:#c43c3c}.pill.mid{background:#fff4e3;color:#b45309}
+.oc-head .name{color:var(--ink)}
+.oc-strip{background:#f8f9fb}.oc-strip b{color:var(--ink)}
+.oc-badge{border-radius:4px;background:#eceffb;color:var(--blue)}
+.oc-badge.lead{background:#e8faf0;color:var(--ok)}.oc-badge.asst{background:#ede9fe;color:#6e56cf}.oc-badge.guest{background:#fff4e3;color:#b45309}
+.oc-person .n b{color:var(--ink)}
+.oc-foot{background:#f8f9fb}
+.oc-seg{background:#eaebef;border-radius:6px}.oc-seg button{border-radius:4px;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.oc-seg button.on{color:var(--ink)}.oc-seg button.on.live{color:var(--blue)}.oc-seg button.on.done{color:var(--ok)}
+.oc-alt button{border-radius:4px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;color:var(--ink);background:#eaebef;border-color:#dcdee4}
+.oc-alt button.on{background:#fff4e3;border-color:#f3c98b;color:#b45309}
+.oc-ring-fg{stroke-width:5}
+.tabs{gap:4px}.tab{border-radius:4px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;color:var(--soft)}
+.tab.on{background:#eceffb;border-color:#eceffb;color:var(--blue)}
+.btn,.reasonbox button,.install-btn{border-radius:4px;text-transform:uppercase;letter-spacing:.05em;font-size:12px;font-weight:700}
+.btn{background:var(--blue)}
+#gate .btn{box-shadow:none}
+.install-btn{background:#eceffb;border:1px solid #c9d2f5;color:var(--blue)}
+#gate .g-alt button,#gate #offlineBtn{border-radius:4px;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+input,textarea,select{border-radius:6px;border-color:var(--line);font-size:14px}
+#gate input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(52,84,209,.14)}
+.logout-btn{border-radius:4px;text-transform:uppercase;letter-spacing:.04em;font-size:10.5px}
+.sess,.pay{border-radius:6px}.sess-h,.pay-h{color:var(--ink);background:#f8f9fb}
+.remarks{border-radius:6px;background:#f3f4f6}.fb{border-radius:6px}
+.err,.ok-box,#netbar{border-radius:6px}
+.empty{color:var(--soft)}
 </style>
 </head>
 <body>
@@ -174,7 +209,7 @@ input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid 
   </div>
   <div id="list" style="display:none"></div>
 </div>
-<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 317</span></div>
+<div class="foot">Island Explorer Birding Tours · +91 99332 02175 · <span id="appver">build 318</span></div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
