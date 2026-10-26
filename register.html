@@ -239,6 +239,7 @@ if(type==="guide"){
   html+=inp("c_name","Full name (as on passport/ID)",{req:1});
   html+=rowOf(inp("c_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("c_email","Email",{req:1,type:"email"}));
   html+=inp("c_address","Full residential Address",{type:"textarea",ph:"Full residential address"});
+  html+=rowOf(inp("c_city","City",{ph:"City / town"}),inp("c_state","State",{ph:"State / province"}));
   html+=rowOf(inp("c_nationality","Nationality",{req:1}),inp("c_dob","Date of birth",{type:"date"}));
   html+=inp("c_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=rowOf(inp("c_idtype","ID type",{select:["Passport","Aadhaar","Other Govt ID","Other"]}),inp("c_idno","ID / passport number",{req:1}));
@@ -258,6 +259,8 @@ if(type==="guide"){
   }
   html+=inp("i_name","Your name",{req:1});
   html+=rowOf(inp("i_phone","Phone / WhatsApp",{req:1,type:"tel"}),inp("i_email","Email",{req:1,type:"email"}));
+  html+=inp("i_address","Full residential address",{type:"textarea",ph:"Full residential address"});
+  html+=rowOf(inp("i_city","City",{ph:"City / town"}),inp("i_state","State",{ph:"State / province"}));
   html+=rowOf(inp("i_country","Country",{req:1}),inp("i_hotel","Hotel / Pickup point",{ph:"Hotel name or where we should pick you up"}));
   html+=inp("i_gender","Gender",{select:["","Male","Female","Other","Prefer not to say"]});
   html+=inp("i_clienttype","Client type",{select:["Indian","Foreigner","Other"]});
@@ -354,7 +357,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
   }else if(type==="client"){
     rec.name=val("c_name");rec.phone=val("c_phone");rec.email=val("c_email");rec.country=val("c_nationality");
     rec.tour=val("c_tour");rec.start_date=val("c_start")||null;rec.end_date=val("c_end")||null;
-    rec.data={address:val("c_address"),gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med"),activity:val("c_activity")};
+    rec.data={address:val("c_address"),city:val("c_city"),state:val("c_state"),gender:val("c_gender"),dob:val("c_dob"),idType:val("c_idtype"),idNo:val("c_idno"),idExpiry:val("c_idexp"),arrival:val("c_arrival"),departure:val("c_departure"),diet:val("c_diet"),room:val("c_room"),emergencyName:val("c_emname"),emergencyPhone:val("c_emphone"),medical:val("c_med"),activity:val("c_activity")};
   }else{
     rec.name=val("i_name");rec.phone=val("i_phone");rec.email=val("i_email");rec.country=val("i_country");
     rec.tour=val("i_tour");
@@ -367,7 +370,7 @@ document.getElementById("theForm").addEventListener("submit",async function(e){
       if(pn||pe||pp)paxs.push({name:pn,gender:pg,email:pe,phone:pp,hotel:ph});
     });
     rec.party=1+paxs.length; /* registrant + additional participants */
-    rec.data={gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel"),activity:val("i_activity"),emergencyName:val("i_emname"),emergencyPhone:val("i_emphone")};
+    rec.data={address:val("i_address"),city:val("i_city"),state:val("i_state"),gender:val("i_gender"),clientType:val("i_clienttype"),message:val("i_msg"),hotel:val("i_hotel"),activity:val("i_activity"),emergencyName:val("i_emname"),emergencyPhone:val("i_emphone")};
     if(dts.length>1)rec.data.dates=dts;
     if(paxs.length)rec.data.participants=paxs;
   }

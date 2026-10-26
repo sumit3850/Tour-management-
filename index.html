@@ -1621,7 +1621,7 @@ html.dark .kpi .lab svg,html.dark .list-row .ic{background:var(--sea-soft)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 316</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 317</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1630,7 +1630,7 @@ html.dark .kpi .lab svg,html.dark .list-row .ic{background:var(--sea-soft)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 316</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 317</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2373,6 +2373,8 @@ function bookingSheetRow(b){
   row["Member (s)"]=names.map(function(s){return (s||"").trim();}).filter(Boolean).join(", ");
   row["Party Size"]=b.party||1;
   row["Country"]=b.country||"";
+  row["City"]=b.city||"";
+  row["State"]=b.state||"";
   row["Email"]=b.email||"";
   row["Phone"]=b.phone||"";
   row["status"]=b.status||"";
@@ -2402,6 +2404,8 @@ function customerSheetRow(c){
   row["Phone / WhatsApp"]=c.phone||d.phone||"";
   row["Email"]=c.email||d.email||"";
   row["Address"]=d.address||"";
+  row["City"]=d.city||"";
+  row["State"]=d.state||"";
   row["Nationality"]=d.nationality||c.country||"";
   row["Date of birth"]=dOpt(d.dob);
   row["Gender"]=d.gender||"";
@@ -2418,8 +2422,8 @@ function customerSheetRow(c){
   return row;
 }
 /* Canonical column order for each tab (used for the full mirror-sync header). */
-var BOOKING_COLS=["Booking ID","BookingDate","Point of Contact (POC)","Tour ID","Tour","Tour Start_Date","Tour End_Date","Member (s)","Party Size","Country","Email","Phone","status","Total Tour Cost","Deposit","Pending Amount","Due Date","Payment Status","Additional Notes"];
-var CUSTOMER_COLS=["Client ID","Type","Client Name (Full name)","Tour ID","Tour Category","Tour Start_Date","Tour End_Date","Phone / WhatsApp","Email","Address","Nationality","Date of birth","Gender","ID type","ID / passport number","Arrival Flight and time","Departure Flight and time","Dietary needs","Room preference","Emergency contact name","Emergency contact phone","Medical notes / mobility","Upload documents (passport / ID / photo) link"];
+var BOOKING_COLS=["Booking ID","BookingDate","Point of Contact (POC)","Tour ID","Tour","Tour Start_Date","Tour End_Date","Member (s)","Party Size","Country","City","State","Email","Phone","status","Total Tour Cost","Deposit","Pending Amount","Due Date","Payment Status","Additional Notes"];
+var CUSTOMER_COLS=["Client ID","Type","Client Name (Full name)","Tour ID","Tour Category","Tour Start_Date","Tour End_Date","Phone / WhatsApp","Email","Address","City","State","Nationality","Date of birth","Gender","ID type","ID / passport number","Arrival Flight and time","Departure Flight and time","Dietary needs","Room preference","Emergency contact name","Emergency contact phone","Medical notes / mobility","Upload documents (passport / ID / photo) link"];
 /* Bookings that belong on the sheet: only the POC per tour (members are summarised in
    the Member(s) column, not as their own rows). Custom/unlinked bookings always show. */
 function bookingsForSheet(){
@@ -3336,7 +3340,7 @@ async function cloudPull(silent){
        Without this, every poll re-downloaded the entire workspace blob even when
        nothing had changed — which is exactly how the Supabase egress quota got
        burned. A manual "Pull from cloud" still always fetches. */
-    if(silent){
+    if(silent&&localUpdated()){ /* nothing local yet (fresh sign-in) -> skip the stamp read, fetch straight away */
       var head=await cl.from("workspaces").select("updated_at").eq("id",c.ws||"default").maybeSingle();
       if(head.error)throw head.error;
       if(!head.data)return "empty";
@@ -3411,6 +3415,10 @@ async function cloudInit(){
        everything keeps working exactly as it did before this layer existed. */
     _perRecordActive=await pullAllRecords();
     if(_perRecordActive&&_recordsChanged)refreshUI();
+    /* The data is in memory now: let the sign-in flow paint every view straight
+       away instead of waiting for the pushes below (that wait was the "blank for
+       ten seconds after sign-in" delay). */
+    try{if(typeof window._onCloudLoaded==="function"){var _h=window._onCloudLoaded;window._onCloudLoaded=null;_h();}}catch(e){}
     _syncBooting=false; /* the decisive comparison is done — normal timestamp bumping resumes */
     /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
        copy) and 'kept-local' (this device's copy was genuinely newer) both make a
@@ -3577,8 +3585,11 @@ var _recordsChanged=false;
 async function pullAllRecords(){
   var cl=sbClient();if(!cl)return false;
   try{
+    /* All tables are read IN PARALLEL (one round trip instead of one per table);
+       a single failure still rejects the whole pull, so nothing is applied partially. */
     var fetched={};
-    for(var i=0;i<_recordKeys.length;i++)fetched[_recordKeys[i]]=await fetchRecordsForKey(_recordKeys[i]);
+    var lists=await Promise.all(_recordKeys.map(fetchRecordsForKey));
+    _recordKeys.forEach(function(k,i){fetched[k]=lists[i];});
     var changed=false;
     var keptLocal=false;
     _recordKeys.forEach(function(key){
@@ -5941,7 +5952,7 @@ function renderBookings(){
       "<td class='bk-tour'>"+(t?"<span class='bk-code'>"+tourCode(t)+"</span>"+tourLabel(t):(x.customTour||"—"))+"</td>"+
       "<td class='bk-dates'>"+dateCell+"</td>"+
       "<td class='num mono'>"+x.party+"</td>"+
-      "<td>"+x.country+"</td>"+
+      "<td>"+x.country+((x.city||x.state)?"<div class='bk-sub'>"+[x.city,x.state].filter(Boolean).join(", ")+"</div>":"")+"</td>"+
       "<td><div class='bk-stack'><span class='pill completed'>"+x.status+"</span><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></div></td>"+
       "<td class='num mono'>"+fmt(bookingTotalCost(x))+"</td>"+
       "<td class='num mono'>"+fmt(bookingDeposit(x))+"</td>"+
@@ -6024,6 +6035,9 @@ function editBooking(id){
     "<div class='field'><label>Party size</label><input class='input mono' type='number' id='eb_party' value='"+b.party+"'></div>"+
     "<div class='field full'><label>Other party members <span style='color:var(--ink-soft);font-weight:400'>(names, comma-separated)</span></label><input class='input' id='eb_members' value='"+(b.members||"").replace(/'/g,"&#39;")+"'></div>"+
     "<div class='field'><label>Country</label><input class='input' id='eb_country' value='"+b.country+"'></div>"+
+    "<div class='field full'><label>Full residential address</label><input class='input' id='eb_address' value='"+String(b.address||"").replace(/'/g,"&#39;")+"'></div>"+
+    "<div class='field'><label>City</label><input class='input' id='eb_city' value='"+String(b.city||"").replace(/'/g,"&#39;")+"'></div>"+
+    "<div class='field'><label>State</label><input class='input' id='eb_state' value='"+String(b.state||"").replace(/'/g,"&#39;")+"'></div>"+
     "<div class='field'><label>Email</label><input class='input' type='email' id='eb_email' value='"+(b.email||"")+"'></div>"+
     "<div class='field'><label>Phone / WhatsApp</label><input class='input' id='eb_phone' value='"+(b.phone||"")+"'></div>"+
     "<div class='field'><label>Status</label><select class='input' id='eb_status'>"+["Confirmed","Pending","Cancelled","Completed"].map(function(s){return "<option "+(s===(b.status||"Confirmed")?"selected":"")+">"+s+"</option>";}).join("")+"</select></div>"+
@@ -6069,6 +6083,7 @@ function saveEditBooking(){
   b.members=document.getElementById("eb_members").value||"";
   b.party=Math.max(parseInt(document.getElementById("eb_party").value)||1,1);
   b.country=document.getElementById("eb_country").value;
+  b.address=(document.getElementById("eb_address")||{}).value||"";b.city=(document.getElementById("eb_city")||{}).value||"";b.state=(document.getElementById("eb_state")||{}).value||"";
   b.email=document.getElementById("eb_email").value;
   b.phone=document.getElementById("eb_phone").value;
   b.status=document.getElementById("eb_status").value;
@@ -9427,7 +9442,7 @@ function renderRequests(){
   body.innerHTML=subs.map(function(s){
     var d=s.data||{};
     var rows="";
-    var LBL={idNo:"ID number",licenseDoc:"Document",idDoc:"ID document",vehicles:"Vehicles",vehicle:"Vehicle",reg:"Reg. no.",seats:"Seats",license:"Licence no.",address:"Address",expertise:"Expertise",clientType:"Client type",organisation:"Organisation",notes:"Notes",message:"Message",tourCode:"Tour ID",tourId:"Tour ID",hotel:"Hotel / pickup point",participants:"Participants",activity:"Tour activity",dates:"Preferred dates",declAccepted:"Declaration accepted",emergencyName:"Emergency contact name",emergencyPhone:"Emergency contact phone",dob:"Date of birth",gender:"Gender",idType:"ID type",idExpiry:"ID expiry",arrival:"Arrival",departure:"Departure",diet:"Dietary",room:"Room preference",medical:"Medical / mobility",nationality:"Nationality",lifeList:"Life list",tourId:"Tour ID",start_date:"Start date",end_date:"End date",party:"Party size",name:"Name",phone:"Phone",email:"Email",country:"Country"};
+    var LBL={idNo:"ID number",licenseDoc:"Document",idDoc:"ID document",vehicles:"Vehicles",vehicle:"Vehicle",reg:"Reg. no.",seats:"Seats",license:"Licence no.",address:"Address",city:"City",state:"State",expertise:"Expertise",clientType:"Client type",organisation:"Organisation",notes:"Notes",message:"Message",tourCode:"Tour ID",tourId:"Tour ID",hotel:"Hotel / pickup point",participants:"Participants",activity:"Tour activity",dates:"Preferred dates",declAccepted:"Declaration accepted",emergencyName:"Emergency contact name",emergencyPhone:"Emergency contact phone",dob:"Date of birth",gender:"Gender",idType:"ID type",idExpiry:"ID expiry",arrival:"Arrival",departure:"Departure",diet:"Dietary",room:"Room preference",medical:"Medical / mobility",nationality:"Nationality",lifeList:"Life list",tourId:"Tour ID",start_date:"Start date",end_date:"End date",party:"Party size",name:"Name",phone:"Phone",email:"Email",country:"Country"};
     Object.keys(d).forEach(function(k){
       var v=d[k];
       if(k==="documents"||v===null||v===undefined||v==="")return;
@@ -9521,7 +9536,7 @@ function addOrUpdateCustomer(s){
   c.pref=d.diet||d.message||c.pref||"—";
   c.details=Object.assign({},c.details||{},{
     email:s.email||(c.details&&c.details.email),phone:s.phone||(c.details&&c.details.phone),nationality:s.country||(c.details&&c.details.nationality),
-    address:d.address||(c.details&&c.details.address)||"",gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
+    address:d.address||(c.details&&c.details.address)||"",city:d.city||(c.details&&c.details.city)||"",state:d.state||(c.details&&c.details.state)||"",gender:d.gender,dob:d.dob,idType:d.idType,idNo:d.idNo,idExpiry:d.idExpiry,arrival:d.arrival,departure:d.departure,
     diet:d.diet,room:d.room,emergencyName:d.emergencyName,emergencyPhone:d.emergencyPhone,medical:d.medical,
     activity:d.activity||(c.details&&c.details.activity)||"",hotel:d.hotel||(c.details&&c.details.hotel)||"",
     documents:d.documents,tourId:d.tourId||(c.details&&c.details.tourId)||"",tourCode:d.tourCode||(c.details&&c.details.tourCode)||"",lastTour:s.tour||"",startDate:s.start_date||(c.details&&c.details.startDate)||"",endDate:s.end_date||(c.details&&c.details.endDate)||"",lastDates:(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"")
@@ -9543,6 +9558,7 @@ function ensureCustomer(name,opts){
   c.details=Object.assign({},c.details||{},{
     email:opts.email||(c.details&&c.details.email),phone:opts.phone||(c.details&&c.details.phone),
     nationality:opts.country||(c.details&&c.details.nationality),
+    address:opts.address||(c.details&&c.details.address)||"",city:opts.city||(c.details&&c.details.city)||"",state:opts.state||(c.details&&c.details.state)||"",
     tourId:opts.tourId||(c.details&&c.details.tourId)||"",
     lastTour:opts.tour||(c.details&&c.details.lastTour),
     startDate:opts.start||(c.details&&c.details.startDate)||"",endDate:opts.end||(c.details&&c.details.endDate)||"",
@@ -9559,7 +9575,7 @@ function syncBookingCustomers(b){
   /* mirror the booking's payment status onto the POC customer record */
   var payMap={"Fully Paid":"Paid","Partial":"Deposit","Unpaid":"Balance due"};
   var pocPay=payMap[bookingPaymentStatus(b)]||"Deposit";
-  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end,pay:pocPay});
+  ensureCustomer(b.guest,{country:b.country,email:b.email,phone:b.phone,address:b.address,city:b.city,state:b.state,tourId:b.tour||"",tour:tourName,start:b.start,end:b.end,pay:pocPay});
   /* every other member of the party inherits the POC's payment status — and because
      ensureCustomer updates pay when it's passed, changing the POC/tour status later
      re-runs this and updates all members too. */
@@ -9576,7 +9592,7 @@ function viewCustomerDetail(name){
   var finB=(cTour&&cTour.pocId)?bookings.find(function(x){return x.id===cTour.pocId;}):(rel[0]||null);
   var finRows=[];
   if(finB){var _tc=bookingTotalCost(finB);if(_tc>0){var _dd=bookingDueDate(finB);finRows=[["Tour total cost",fmt(_tc)],["Deposit / advance",fmt(bookingDeposit(finB))],["Pending amount",fmt(bookingPending(finB))],["Payment due date",_dd?dShort(_dd):""]];}}
-  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Gender",d.gender],["Date of birth",fmtVal(d.dob)],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",fmtVal(d.arrival)],["Departure",fmtVal(d.departure)],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
+  var rows=[["Name",c.name],["Email",c.email||d.email],["Phone",c.phone||d.phone],["Country / nationality",c.country||d.nationality],["Address",d.address],["City",d.city],["State",d.state],["Gender",d.gender],["Date of birth",fmtVal(d.dob)],["ID type",d.idType],["ID / passport no.",d.idNo],["ID / passport expiry",d.idExpiry?dShort(d.idExpiry):""],["Arrival",fmtVal(d.arrival)],["Departure",fmtVal(d.departure)],["Dietary",d.diet],["Room preference",d.room],["Emergency contact",d.emergencyName?(d.emergencyName+(d.emergencyPhone?" · "+d.emergencyPhone:"")):""],["Medical / mobility",d.medical],["Last tour",d.lastTour],["Last dates",d.lastDates],["Past tours",c.tours]].concat(finRows).concat([["Payment status",c.pay],["Preferences",c.pref]]);
   var html="<div class='kv-list'>"+rows.filter(function(r){return r[1];}).map(function(r){return "<span class='k'>"+r[0]+"</span><span class='c'>:</span><span class='v'>"+r[1]+"</span>";}).join("")+"</div><div class='form-grid' style='margin-top:14px'>";
   var lifers=String(d.lifeList||"").split(/\n/).map(function(s){return s.trim();}).filter(Boolean);
   if(lifers.length)html+="<div class='field full'><label>Life list · "+lifers.length+" lifers with us 🐦</label><div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:4px'>"+lifers.map(function(s){return "<span class='pill plain' style='font-size:11.5px'>"+s.replace(/</g,"&lt;")+"</span>";}).join("")+"</div></div>";
@@ -9607,7 +9623,7 @@ function makeBookingFromSub(s){
           bookings.find(function(b){return (b.guest||"").toLowerCase()===(s.name||"").toLowerCase()&&b.tour===(t?t.id:"")&&b.start===(s.start_date||(t?t.start:""));});
   if(!dup){
     var start=s.start_date||(t?t.start:"");var end=s.end_date||(t?t.end:start);
-    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:(s.data&&Array.isArray(s.data.participants)?s.data.participants.map(function(p){return p&&p.name;}).filter(Boolean).join(", "):""),party:s.party||1,country:s.country||"—",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:"",documents:(s.data&&Array.isArray(s.data.documents)?s.data.documents:[])};
+    var nb={id:"B"+Date.now()+Math.floor(Math.random()*100),fromSub:s.id,bookingDate:dShort(new Date()),tour:t?t.id:"",customTour:t?"":(s.tour||""),guest:s.name||"—",members:(s.data&&Array.isArray(s.data.participants)?s.data.participants.map(function(p){return p&&p.name;}).filter(Boolean).join(", "):""),party:s.party||1,country:s.country||"—",address:(s.data&&s.data.address)||"",city:(s.data&&s.data.city)||"",state:(s.data&&s.data.state)||"",email:s.email||"",phone:s.phone||"",status:"Confirmed",pay:"Deposit",notes:(s.data&&(s.data.message||s.data.medical))||"",start:start,end:end,deposit:0,lastPendingDate:"",documents:(s.data&&Array.isArray(s.data.documents)?s.data.documents:[])};
     bookings.unshift(nb);
     addOrUpdateCustomer(s);
     pushBooking(nb);
@@ -10519,6 +10535,8 @@ function editCustomer(name){
     f("Tour start date","ec_start",d.startDate,"date")+f("Tour end date","ec_end",d.endDate,"date")+
     f("Country / nationality","ec_country",c.country)+
     f("Phone / WhatsApp","ec_phone",c.phone||d.phone,"tel")+f("Email","ec_email",c.email||d.email,"email")+
+    "<div class='field full'><label>Full residential address</label><input class='input' id='ec_address' value='"+String(d.address||"").replace(/'/g,"&#39;")+"'></div>"+
+    f("City","ec_city",d.city)+f("State","ec_state",d.state)+
     f("Gender","ec_gender",d.gender)+f("Date of birth","ec_dob",d.dob,"date")+
     "<div class='field'><label>ID type</label><select class='input' id='ec_idtype'>"+["","Passport","Aadhaar","Other Govt ID","Other"].map(function(o){return "<option "+(o===(d.idType||"")?"selected":"")+">"+o+"</option>";}).join("")+"</select></div>"+
     f("ID / passport no.","ec_idno",d.idNo)+f("ID / passport expiry","ec_idexp",d.idExpiry,"date")+
@@ -10540,7 +10558,7 @@ function saveEditCustomer(){
   c.type=g("ec_type")||c.type||"Client";
   c.tours=parseInt(g("ec_tours"))||0;c.pay=g("ec_pay");c.pref=g("ec_pref");
   var es=g("ec_start"),ee=g("ec_end");
-  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,lastTour:g("ec_tour"),startDate:es,endDate:ee,lastDates:(es?dShort(es)+(ee?" – "+dShort(ee):""):(c.details&&c.details.lastDates)),gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med"),lifeList:g("ec_lifelist")});
+  c.details=Object.assign({},c.details||{},{email:c.email,phone:c.phone,nationality:c.country,lastTour:g("ec_tour"),startDate:es,endDate:ee,lastDates:(es?dShort(es)+(ee?" – "+dShort(ee):""):(c.details&&c.details.lastDates)),address:g("ec_address"),city:g("ec_city"),state:g("ec_state"),gender:g("ec_gender"),dob:g("ec_dob"),idType:g("ec_idtype"),idNo:g("ec_idno"),idExpiry:g("ec_idexp"),arrival:g("ec_arrival"),departure:g("ec_departure"),diet:g("ec_diet"),room:g("ec_room"),emergencyName:g("ec_emname"),emergencyPhone:g("ec_emphone"),medical:g("ec_med"),lifeList:g("ec_lifelist")});
   closeModal();renderCustomers();pushCustomer(c);
 }
 function deleteCustomer(name){if(!confirm("Delete "+name+"?"))return;audit("customer","deleted",name);customers=customers.filter(c=>c.name!==name);renderCustomers();persistData();}
@@ -12004,6 +12022,7 @@ function loadOrgContext(){
          _sbApplying so the render's persistData side-effect can't trigger a push. */
       var _did=false;
       var paint=function(){if(_did)return;_did=true;var wa=_sbApplying;_sbApplying=true;try{if(typeof boot==="function")boot(true);}catch(e){}_sbApplying=wa;};
+      window._onCloudLoaded=paint;                                   /* fires as soon as the pull has landed */
       if(ci&&ci.then)ci.then(paint);
       /* Fallback: never leave the screen empty even if the pull hangs or the
          promise never settles — repaint from whatever loaded within 4s. */
