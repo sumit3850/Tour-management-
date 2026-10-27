@@ -1682,6 +1682,7 @@ html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.non
 html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}html.dark .a2-tile{background:var(--surface-2);border-color:var(--line)}
 @media(max-width:900px){.a2-hero-grid{grid-template-columns:1fr}.a2-hero-main .big{font-size:30px}}
 @media(max-width:600px){.a2-hero-tiles{grid-template-columns:1fr 1fr;gap:8px}.a2-tile{padding:10px;gap:8px;flex-direction:column;align-items:flex-start}.a2-tile .v{font-size:17px}.a2-ring{width:40px;height:40px}}
+.a2-live{font-size:11px;color:var(--ink-soft);margin-top:3px}.a2-live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#0f9a4f;margin-right:6px;box-shadow:0 0 0 3px rgba(15,154,79,.18);vertical-align:0}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1725,7 +1726,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 321</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 322</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1734,7 +1735,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 321</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 322</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5604,7 +5605,7 @@ function renderAnalytics(){
   var rangeBtns=A2_RANGES.map(function(r){return "<button class='"+(_a2.range===r[0]?"on":"")+"' onclick=\"a2SetRange('"+r[0]+"')\">"+r[1]+"</button>";}).join("");
   var custom=_a2.range==="custom"?"<div class='a2-custom'><input type='date' class='input mono' id='a2From' value='"+(_a2.from||"")+"' onchange='a2SetCustom()'><span>to</span><input type='date' class='input mono' id='a2To' value='"+(_a2.to||"")+"' onchange='a2SetCustom()'></div>":"";
   el.innerHTML=
-    "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
+    "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div><div class='a2-live'><i></i>Live · computed "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" from "+(tours||[]).length+" tours, "+(bookings||[]).length+" bookings, "+(leads||[]).length+" leads · recalculates on every visit, range change and sync</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
     overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
     "<div class='a2-grid'>"+
       a2Card("profit","Profit by tour","revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
@@ -11924,6 +11925,9 @@ function refreshUI(){
        quotation generated from the panel would use). refreshUI only runs when a
        pull actually applied newer cloud data, so this can't wipe edits on a timer. */
     else if(curView==="calc"&&typeof calc==="function")calc();
+    /* analytics is computed from the live records every time: re-run it when a
+       sync brings newer data while the page is open */
+    else if(curView==="analytics"&&typeof renderAnalytics==="function")renderAnalytics();
     /* dashboard, requests, settings: intentionally no visible refresh */
   }catch(e){}
   _sbApplying=wasApplying;
