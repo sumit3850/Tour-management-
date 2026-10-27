@@ -1594,6 +1594,72 @@ html.dark .kpi .lab svg,html.dark .list-row .ic{background:var(--sea-soft)}
   .stat-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.stat-strip>*{min-width:0}
   .grid-2>*,.card{min-width:0}
 }
+
+/* ==== Analytics v2 ==== */
+.a2-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.a2-range{display:flex;gap:2px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px;overflow-x:auto;scrollbar-width:none;max-width:100%}
+.a2-range::-webkit-scrollbar{display:none}
+.a2-range button{padding:7px 12px;border-radius:4px;font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap;flex:0 0 auto}
+.a2-range button.on{background:var(--sea-soft);color:var(--sea)}
+.a2-custom{display:flex;gap:8px;align-items:center;margin:-4px 0 14px;flex-wrap:wrap}.a2-custom .input{width:150px;font-size:12.5px;padding:7px 10px}.a2-custom span{font-size:12px;color:var(--ink-soft)}
+.a2-card{padding:18px 20px 16px;margin-bottom:16px;animation:cardIn .45s var(--spring) backwards;min-width:0}
+.a2-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.a2-grid>*{min-width:0}.a2-grid .a2-card{margin-bottom:16px}
+.a2-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.a2-head .t{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.01em}.a2-head .st{font-size:12px;color:var(--ink-soft);margin-top:1px}
+.a2-tv{width:30px;height:30px;border-radius:6px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;color:var(--ink-soft);flex:none;cursor:pointer}
+.a2-tv svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.a2-tv.on,.a2-tv:hover{color:var(--sea);border-color:var(--sea)}
+.a2-body{min-width:0}
+.a2-foot{margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-soft);display:flex;gap:8px;align-items:center;flex-wrap:wrap}.a2-foot b{color:var(--ink)}
+.a2-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin:0 0 8px}.a2-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}.a2-legend b{color:var(--ink);font-family:var(--font-mono);font-weight:600;margin-left:3px}
+.a2-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.a2-stat{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:6px;padding:9px 11px;min-width:0}
+.a2-stat .l{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.a2-stat .v{font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.02em;margin-top:3px;overflow-wrap:anywhere}
+.a2-stat .v.up{color:#0f9a4f}.a2-stat .v.down{color:var(--coral)}
+.a2-stat .s{font-size:11px;color:var(--ink-soft);margin-top:1px}
+.a2-chip{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:var(--surface-2);color:var(--ink-soft);margin-left:6px;vertical-align:1px;white-space:nowrap}
+.a2-chip.ok{background:#e8faf0;color:#0f9a4f}.a2-chip.bad{background:var(--coral-soft);color:#c43c3c}
+
+.a2-gl{stroke:var(--line-soft);stroke-width:1}.a2-axis{stroke:var(--line);stroke-width:1}
+.a2-tick{font-size:9.5px;fill:var(--ink-soft);font-family:var(--font-mono)}
+.a2-lab{font-size:10.5px;fill:var(--ink-soft);font-family:var(--font-body)}
+.a2-sub,.a2-val{font-size:10px;fill:var(--ink);font-family:var(--font-mono);font-weight:600}
+.a2-bar{animation:anaGrow .6s var(--spring) backwards;transform-box:fill-box;transform-origin:50% 100%;cursor:pointer}.a2-bar:hover{filter:brightness(1.12)}
+.a2-line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.a2-dot{fill:var(--surface);stroke-width:2;pointer-events:none}
+.a2-hit{fill:transparent;cursor:crosshair}.a2-hit:hover{fill:rgba(52,84,209,.06)}
+.a2-hb .r{padding:7px 0;border-bottom:1px solid var(--line-soft)}.a2-hb .r:last-child{border-bottom:0}
+.a2-hb .l{display:flex;align-items:center;gap:6px;font-size:12.5px;margin-bottom:4px}.a2-hb .l .k{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--ink)}.a2-hb .l b{margin-left:auto;font-weight:600;white-space:nowrap}
+.a2-hb .trk{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}.a2-hb .trk i{display:block;height:100%;border-radius:99px;transform-origin:left;animation:anaWide .7s var(--spring) backwards}
+.a2-hb .s{font-size:11px;color:var(--ink-soft);margin-top:4px}.a2-hb .s b{color:var(--ink)}
+.a2-heat{display:grid;grid-template-columns:44px repeat(12,minmax(0,1fr));gap:3px;align-items:stretch}
+.a2-heat .hd{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);text-align:center;padding-bottom:2px}
+.a2-heat .yl{font-size:11.5px;font-weight:700;color:var(--ink);display:flex;align-items:center}
+.a2-heat .c{aspect-ratio:1.6;border-radius:4px;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;cursor:default;min-height:30px}
+.a2-heat .c.none{background:var(--surface-2)}
+.a2-heat .c span{text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.a2-scale{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-soft);margin-top:10px}.a2-scale i{flex:0 0 120px;height:8px;border-radius:99px;background:linear-gradient(90deg,rgba(52,84,209,.18),#3454d1)}
+.a2-util{display:grid;grid-template-columns:minmax(120px,1.4fr) repeat(var(--a2n,12),minmax(0,1fr));gap:3px;overflow-x:auto}
+.a2-util .hd{font-size:10px;font-weight:700;color:var(--ink-soft);text-align:center}
+.a2-util .yl{font-size:12px;color:var(--ink);min-width:0;padding-right:6px}.a2-util .yl b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.a2-util .yl small{display:block;font-size:10.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a2-util .c{min-height:34px;border-radius:4px;display:grid;place-items:center;color:#fff;font-size:10.5px;font-weight:700}
+.a2-util .c.none{background:var(--surface-2)}
+.a2-funnel{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.a2-funnel .st .bar{height:26px;border-radius:4px;display:flex;align-items:center;padding:0 10px;color:#fff;font-size:12px;font-weight:700;transform-origin:left;animation:anaWide .6s var(--spring) backwards;min-width:40px}
+.a2-funnel .st .lab{font-size:12px;color:var(--ink);margin-top:3px;font-weight:600}.a2-funnel .st .lab em{font-style:normal;color:var(--ink-soft);font-weight:500;margin-left:6px}
+.a2-srcs{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);align-items:center}.a2-srcs .k{font-weight:700;letter-spacing:.05em;text-transform:uppercase;font-size:10px}.a2-srcs i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.a2-srcs b{color:var(--ink)}
+.a2-tbl{overflow-x:auto}.a2-tbl table{font-size:12.5px;min-width:0}.a2-tbl th{padding:8px 10px;font-size:10.5px}.a2-tbl td{padding:8px 10px;white-space:nowrap}.a2-tbl td:first-child{white-space:normal;min-width:120px}.a2-dim{color:var(--ink-soft);font-size:11px}
+.a2-card .ana-donut .lg b{font-family:var(--font-mono)}
+html.dark .a2-range{background:var(--surface);border-color:var(--line)}html.dark .a2-tv{background:var(--surface)}html.dark .a2-stat{background:var(--surface-2);border-color:var(--line)}
+html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.none,html.dark .a2-util .c.none{background:#1d1e25}html.dark .a2-hit:hover{fill:rgba(111,138,240,.1)}
+@media(max-width:900px){.a2-grid{grid-template-columns:1fr}.a2-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+  .a2-card{padding:14px 14px 12px}.a2-stat .v{font-size:17px}
+  .a2-heat{grid-template-columns:34px repeat(12,minmax(0,1fr));gap:2px}.a2-heat .hd{font-size:8px;letter-spacing:0}.a2-heat .c{min-height:22px;font-size:9px;border-radius:3px;aspect-ratio:auto}.a2-heat .yl{font-size:10.5px}
+  .a2-util{grid-template-columns:minmax(96px,1.2fr) repeat(var(--a2n,12),minmax(16px,1fr))}.a2-util .c{min-height:26px;font-size:9px}.a2-util .yl{font-size:11px}
+  .a2-range button{padding:7px 9px;font-size:11.5px}
+}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1637,7 +1703,7 @@ html.dark .kpi .lab svg,html.dark .list-row .ic{background:var(--sea-soft)}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 318</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 319</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1646,7 +1712,7 @@ html.dark .kpi .lab svg,html.dark .list-row .ic{background:var(--sea-soft)}
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 318</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 319</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5302,193 +5368,222 @@ function seasonMonthData(filterFn){
   });
   return m;
 }
+/* ===== ANALYTICS v2 — one date-range filter drives eight cards ======================
+   Cards: 1 Money (revenue / cost / profit by month) · 2 Profit by tour (bars with
+   margin) · 3 Seat occupancy heat-map · 4 Receivables ageing · 5 Cost breakdown ·
+   6 Team utilisation calendar · 7 Sales funnel (leads + quotations) · 8 Guests &
+   markets. Every chart has a tooltip layer and a table view (⊞). Colours follow
+   the entity, never the rank; categorical hues come from a CVD-validated order. */
+var A2_COL=["#3454d1","#eb6834","#1baf7a","#eda100","#e87ba4","#6250d6"];
+var A2_COL_DARK=["#6f8af0","#d95926","#199e70","#c98500","#d55181","#9085e9"];
+function a2col(i){return (document.documentElement.classList.contains("dark")?A2_COL_DARK:A2_COL)[i%6];}
+var A2_RANGES=[["12m","Last 12 months"],["ytd","This year"],["prev","Last year"],["fy","This FY (Apr–Mar)"],["all","All time"],["custom","Custom…"]];
+var _a2=(function(){try{return JSON.parse(localStorage.getItem("ieo_ana2")||"{}")||{};}catch(e){return {};}})();
+if(!_a2.range)_a2.range="12m";
+function a2Save(){try{localStorage.setItem("ieo_ana2",JSON.stringify(_a2));}catch(e){}}
+function a2SetRange(v){_a2.range=v;a2Save();renderAnalytics();}
+function a2SetCustom(){_a2.from=(document.getElementById("a2From")||{}).value||"";_a2.to=(document.getElementById("a2To")||{}).value||"";_a2.range="custom";a2Save();renderAnalytics();}
+function a2Toggle(id){_a2.tbl=_a2.tbl||{};_a2.tbl[id]=!_a2.tbl[id];a2Save();renderAnalytics();}
+function a2Bounds(){
+  var y=new Date().getFullYear(),m=new Date().getMonth();
+  var p=function(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+  switch(_a2.range){
+    case "ytd":return {from:y+"-01-01",to:y+"-12-31",label:"this year"};
+    case "prev":return {from:(y-1)+"-01-01",to:(y-1)+"-12-31",label:String(y-1)};
+    case "fy":{var fy=m>=3?y:y-1;return {from:fy+"-04-01",to:(fy+1)+"-03-31",label:"FY "+fy+"–"+String(fy+1).slice(2)};}
+    case "all":return {from:"",to:"",label:"all time"};
+    case "custom":return {from:_a2.from||"",to:_a2.to||"",label:(_a2.from?dShort(_a2.from):"start")+" – "+(_a2.to?dShort(_a2.to):"today")};
+    default:{var d=new Date(y,m-11,1);return {from:p(d),to:p(new Date(y,m+1,0)),label:"last 12 months"};}
+  }
+}
+function a2In(d,b){d=String(d||"").slice(0,10);if(!d)return false;if(b.from&&d<b.from)return false;if(b.to&&d>b.to)return false;return true;}
+function a2MonthKeys(b){
+  var ks=[];var from=b.from||(function(){var ds=(tours||[]).map(function(t){return t.start||"";}).filter(Boolean).sort();return ds[0]||todayISO;})();
+  var to=b.to||todayISO;var s=new Date(from.slice(0,7)+"-01T00:00:00"),e=new Date(to.slice(0,7)+"-01T00:00:00");
+  for(var d=s;d<=e&&ks.length<36;d=new Date(d.getFullYear(),d.getMonth()+1,1))ks.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));
+  return ks;
+}
+function a2Mon(k){var d=new Date(k+"-01T00:00:00");return d.toLocaleDateString("en-GB",{month:"short"})+(k.slice(5,7)==="01"||k===undefined?" '"+k.slice(2,4):"");}
+function a2Pct(n,d){return d>0?Math.round(n/d*100):0;}
+/* table-view twin: the same numbers as the chart, as a plain table */
+function a2Table(cols,rows){return "<div class='a2-tbl'><table><thead><tr>"+cols.map(function(c,i){return "<th"+(i?" class='num'":"")+">"+anaEsc(c)+"</th>";}).join("")+"</tr></thead><tbody>"+rows.map(function(r){return "<tr>"+r.map(function(c,i){return "<td"+(i?" class='num mono'":"")+">"+c+"</td>";}).join("")+"</tr>";}).join("")+"</tbody></table></div>";}
+function a2Card(id,title,sub,body,tbl,legend,foot){
+  var showT=_a2.tbl&&_a2.tbl[id];
+  return "<div class='card a2-card' id='a2_"+id+"'><div class='a2-head'><div><div class='t'>"+title+"</div>"+(sub?"<div class='st'>"+sub+"</div>":"")+"</div>"+
+    (tbl?"<button class='a2-tv "+(showT?"on":"")+"' onclick=\"a2Toggle('"+id+"')\" title='"+(showT?"Show chart":"Show as table")+"' aria-label='Toggle table view'>"+(showT?"<svg viewBox='0 0 24 24'><path d='M3 3v18h18M7 14l4-4 3 3 5-6'/></svg>":"<svg viewBox='0 0 24 24'><path d='M3 5h18v14H3zM3 10h18M3 15h18M9 5v14'/></svg>")+"</button>":"")+
+    "</div>"+(legend&&!showT?legend:"")+"<div class='a2-body'>"+(showT&&tbl?tbl:body)+"</div>"+(foot?"<div class='a2-foot'>"+foot+"</div>":"")+"</div>";
+}
+function a2Legend(items){return "<div class='a2-legend'>"+items.map(function(x){return "<span><i style='background:"+x[1]+"'></i>"+anaEsc(x[0])+(x[2]!=null?" <b>"+x[2]+"</b>":"")+"</span>";}).join("")+"</div>";}
+/* grouped / stacked bars: series [{name,values,color}], labels[]; opt.stack, opt.fmt, opt.height */
+function a2Bars(labels,series,opt){
+  opt=opt||{};var n=labels.length,ns=series.length;if(!n)return "<div class='empty'>Nothing in this range.</div>";
+  var W=Math.max(anaWidth(),n*(opt.stack||ns===1?28:22*ns)),H=opt.height||190,padT=14,padB=24,padL=46,padR=6,innerH=H-padT-padB;
+  var tot=[];for(var i=0;i<n;i++){var pos=0,neg=0;series.forEach(function(s){var v=s.values[i]||0;if(opt.stack){if(v>=0)pos+=v;else neg+=v;}else{pos=Math.max(pos,v);neg=Math.min(neg,v);}});tot.push([pos,neg]);}
+  var maxV=Math.max.apply(null,tot.map(function(t){return t[0];}).concat([1])),minV=Math.min.apply(null,tot.map(function(t){return t[1];}).concat([0]));
+  var span=maxV-minV||1,scale=innerH/span,zeroY=padT+maxV*scale;
+  var fmt=opt.fmt||anaFmtK;
+  var grid="";[0,0.25,0.5,0.75,1].forEach(function(k){var v=minV+span*k,y=(zeroY-v*scale).toFixed(1);grid+="<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+y+"' y2='"+y+"' class='a2-gl'/><text class='a2-tick' x='"+(padL-6)+"' y='"+(+y+3.5)+"' text-anchor='end'>"+anaEsc(fmt(v))+"</text>";});
+  var slot=(W-padL-padR)/n,gw=opt.stack?1:ns,bw=Math.min((slot*0.7-2*(gw-1))/gw,38);
+  var bars="",labs="";
+  labels.forEach(function(lab,i){
+    var cx=padL+slot*i+slot/2,x0=cx-(bw*gw+2*(gw-1))/2,accP=0,accN=0;
+    series.forEach(function(s,si){
+      var v=s.values[i]||0;if(!v&&opt.stack)return;
+      var h=Math.max(Math.abs(v)*scale,v?1.5:0),x,y;
+      if(opt.stack){if(v>=0){y=zeroY-accP*scale-h;accP+=v;}else{y=zeroY+accN*scale;accN+=Math.abs(v);}x=x0;}
+      else{x=x0+si*(bw+2);y=v>=0?zeroY-h:zeroY;}
+      var isLast=opt.stack?si===series.length-1:true;
+      bars+="<rect class='a2-bar' x='"+x.toFixed(1)+"' y='"+(y+(opt.stack&&si>0?1:0)).toFixed(1)+"' width='"+bw.toFixed(1)+"' height='"+Math.max(h-(opt.stack&&si>0?1:0),0).toFixed(1)+"' rx='"+(isLast?3:0)+"' fill='"+(s.color||a2col(si))+"' style='animation-delay:"+(i*25)+"ms' data-tip='"+anaEsc(lab)+(ns>1?" · "+anaEsc(s.name):"")+": "+anaEsc(fmt(v))+(opt.tipExtra?" "+anaEsc(opt.tipExtra(i,si)):"")+"'/>";
+    });
+    if(slot>=20||i%2===0)labs+="<text class='a2-lab' x='"+cx.toFixed(1)+"' y='"+(H-padB+15)+"' text-anchor='middle'>"+anaEsc(lab)+"</text>";
+    if(opt.sub&&opt.sub[i]!=null&&slot>=26)labs+="<text class='a2-sub' x='"+cx.toFixed(1)+"' y='"+(padT-3)+"' text-anchor='middle'>"+anaEsc(opt.sub[i])+"</text>";
+  });
+  return "<div class='ana-chart'><svg viewBox='0 0 "+W+" "+H+"' width='"+W+"' height='"+H+"'>"+grid+"<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+zeroY.toFixed(1)+"' y2='"+zeroY.toFixed(1)+"' class='a2-axis'/>"+bars+labs+"</svg></div>";
+}
+/* multi-line chart with crosshair tooltip: series [{name,values,color}] */
+function a2Lines(labels,series,opt){
+  opt=opt||{};var n=labels.length;if(!n)return "<div class='empty'>Nothing in this range.</div>";
+  var W=Math.max(anaWidth(),n*26),H=opt.height||200,padT=14,padB=24,padL=46,padR=10,innerH=H-padT-padB;
+  var all=[];series.forEach(function(s){all=all.concat(s.values);});
+  var maxV=Math.max.apply(null,all.concat([1])),minV=Math.min.apply(null,all.concat([0])),span=maxV-minV||1,scale=innerH/span,zeroY=padT+maxV*scale;
+  var step=n>1?(W-padL-padR)/(n-1):0,fmt=opt.fmt||anaFmtK;
+  var grid="";[0,0.25,0.5,0.75,1].forEach(function(k){var v=minV+span*k,y=(zeroY-v*scale).toFixed(1);grid+="<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+y+"' y2='"+y+"' class='a2-gl'/><text class='a2-tick' x='"+(padL-6)+"' y='"+(+y+3.5)+"' text-anchor='end'>"+anaEsc(fmt(v))+"</text>";});
+  var paths="",dots="",hits="";
+  series.forEach(function(s,si){
+    var pts=s.values.map(function(v,i){return [padL+step*i,zeroY-(v||0)*scale];});
+    var d=pts.map(function(p,i){return (i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1);}).join(" ");
+    var col=s.color||a2col(si);
+    if(si===0&&opt.area)paths+="<path d='"+d+" L"+pts[n-1][0].toFixed(1)+" "+zeroY.toFixed(1)+" L"+pts[0][0].toFixed(1)+" "+zeroY.toFixed(1)+" Z' fill='"+col+"' opacity='.08'/>";
+    paths+="<path class='a2-line' d='"+d+"' stroke='"+col+"'"+(s.dash?" stroke-dasharray='5 4'":"")+"/>";
+    pts.forEach(function(p,i){if(s.values[i]==null)return;dots+="<circle class='a2-dot' cx='"+p[0].toFixed(1)+"' cy='"+p[1].toFixed(1)+"' r='3.5' stroke='"+col+"'/>";});
+    if(opt.endLabel!==false&&n>1){var lv=s.values[n-1];if(lv)paths+="<text class='a2-val' x='"+pts[n-1][0].toFixed(1)+"' y='"+(pts[n-1][1]-7).toFixed(1)+"' text-anchor='end'>"+anaEsc(fmt(lv))+"</text>";}
+  });
+  var labs="";
+  labels.forEach(function(lab,i){var x=padL+step*i;if(step>=34||i%2===0||i===n-1)labs+="<text class='a2-lab' x='"+x.toFixed(1)+"' y='"+(H-padB+15)+"' text-anchor='"+(i===0?"start":(i===n-1?"end":"middle"))+"'>"+anaEsc(lab)+"</text>";
+    var tip=anaEsc(lab)+": "+series.map(function(s){return anaEsc(s.name)+" "+anaEsc(fmt(s.values[i]||0));}).join(" · ");
+    hits+="<rect class='a2-hit' x='"+(x-step/2).toFixed(1)+"' y='"+padT+"' width='"+Math.max(step,12).toFixed(1)+"' height='"+innerH+"' data-tip='"+tip+"'/>";});
+  return "<div class='ana-chart'><svg viewBox='0 0 "+W+" "+H+"' width='"+W+"' height='"+H+"'>"+grid+"<line x1='"+padL+"' x2='"+(W-padR)+"' y1='"+zeroY.toFixed(1)+"' y2='"+zeroY.toFixed(1)+"' class='a2-axis'/>"+paths+dots+labs+hits+"</svg></div>";
+}
+/* horizontal bars with a value and an optional status chip */
+function a2HBars(rows,opt){
+  opt=opt||{};var max=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}).concat([1]));
+  return "<div class='a2-hb'>"+rows.map(function(r,i){var pct=Math.max(Math.round(Math.abs(r.v)/max*100),1.5);
+    return "<div class='r' data-tip='"+anaEsc(r.tip||(r.k+": "+(r.d!=null?r.d:r.v)))+"'><div class='l'><span class='k'>"+r.k+"</span>"+(r.chip||"")+"<b class='mono'>"+(r.d!=null?r.d:r.v)+"</b></div><div class='trk'><i style='width:"+pct+"%;background:"+(r.c||a2col(0))+";animation-delay:"+(i*35)+"ms'></i></div>"+(r.s?"<div class='s'>"+r.s+"</div>":"")+"</div>";}).join("")+"</div>";
+}
+function a2Donut(items,opt){
+  opt=opt||{};var tot=items.reduce(function(a,x){return a+x.n;},0)||1,R=52,C=2*Math.PI*R,off=0,segs="";
+  items.forEach(function(x,i){var len=Math.max(x.n/tot*C-2,0);segs+="<circle class='seg' cx='66' cy='66' r='"+R+"' stroke='"+a2col(i)+"' stroke-dasharray='"+len.toFixed(2)+" "+(C-len).toFixed(2)+"' stroke-dashoffset='"+(-off).toFixed(2)+"' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'/>";off+=x.n/tot*C;});
+  return "<div class='ana-donut'><svg viewBox='0 0 132 132'><g transform='rotate(-90 66 66)'>"+segs+"</g><text class='ctr' x='66' y='64' text-anchor='middle'>"+anaEsc(opt.center!=null?opt.center:tot)+"</text><text class='ctr2' x='66' y='80' text-anchor='middle'>"+anaEsc(opt.centerLabel||"total")+"</text></svg><div class='lg'>"+items.map(function(x,i){return "<div><i style='background:"+a2col(i)+"'></i><span>"+anaEsc(x.k)+"</span><b>"+anaEsc(opt.tip?opt.tip(x):x.n)+" · "+Math.round(x.n/tot*100)+"%</b></div>";}).join("")+"</div></div>";
+}
+function a2Stat(l,v,s,cls){return "<div class='a2-stat'><div class='l'>"+l+"</div><div class='v "+(cls||"")+"'>"+v+"</div>"+(s?"<div class='s'>"+s+"</div>":"")+"</div>";}
+/* ---------------- the page ---------------- */
 function renderAnalytics(){
   var el=document.getElementById("anaBody");if(!el)return;
-  /* KPI strip has its own date range (id "kpi") — reuse paymentStats by lending
-     it the range through the dashboard's payFrom/payTo, then restoring them. */
-  var kr=_anaRangeBy.kpi||{};
-  var _pf=payFrom,_pt=payTo;
-  payFrom=kr.from||"";payTo=kr.to||"";
-  var s=paymentStats();
-  payFrom=_pf;payTo=_pt;
-  /* revenue by month (tour start month) — per-card year filters below */
-  var byMonth={},byTour=[];
-  (tours||[]).forEach(function(t){
-    var rev=tourRevenue(t);if(!t.start)return;
-    if(anaYearFilter("rev")(t)){var k=t.start.slice(0,7);byMonth[k]=(byMonth[k]||0)+rev;}
-    if(anaYearFilter("top")(t))byTour.push({n:shortName(t),code:tourCode(t),rev:rev,start:t.start});
-  });
-  var months=Object.keys(byMonth).sort();
-  if(months.length>14)months=months.slice(-14);
-  var maxM=Math.max.apply(null,months.map(function(k){return byMonth[k];}).concat([1]));
-  var monthLabel=function(k){var d=new Date(k+"-01T00:00:00");return d.toLocaleDateString("en-GB",{month:"short"})+" '"+String(d.getFullYear()).slice(2);};
-  var revChart;
-  if(_anaYoY){
-    /* Year-over-year: calendar months of the chosen year vs the year before */
-    var yy=(_anaYearBy.rev&&_anaYearBy.rev!=="all")?_anaYearBy.rev:String(new Date().getFullYear());
-    var py=String(parseInt(yy,10)-1);
-    var cur=[],prev=[];for(var mi=0;mi<12;mi++){cur.push(0);prev.push(0);}
-    (tours||[]).forEach(function(t){if(!t.start||!anaRangeOk(t,"rev"))return;var y=t.start.slice(0,4),m=parseInt(t.start.slice(5,7),10)-1;if(m<0||m>11)return;var rv=tourRevenue(t);if(y===yy)cur[m]+=rv;else if(y===py)prev[m]+=rv;});
-    var maxY=Math.max.apply(null,cur.concat(prev).concat([1]));
-    var fmtK=function(v){return v>=100000?("\u20b9"+(v/100000).toFixed(1)+"L"):("\u20b9"+Math.round(v/1000)+"k");};
-    var totC=cur.reduce(function(a,b){return a+b;},0),totP=prev.reduce(function(a,b){return a+b;},0);
-    var delta=totP>0?Math.round((totC-totP)/totP*100):null;
-    revChart="<div class='ana-legend'><span><i class='yoy-sw cur'></i>"+yy+" \u00b7 <b class='mono'>"+fmt(totC)+"</b></span><span><i class='yoy-sw prev'></i>"+py+" \u00b7 <b class='mono'>"+fmt(totP)+"</b></span>"+(delta!=null?"<span class='pill "+(delta>=0?"completed":"full")+"'>"+(delta>=0?"\u25b2 ":"\u25bc ")+Math.abs(delta)+"% YoY</span>":"")+"</div>"+
-      anaBars({labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],series:[{name:py,values:prev,color:"var(--line)"},{name:yy,values:cur}],tipFmt:fmt});
-  }else revChart=months.length?anaLine({labels:months.map(monthLabel),values:months.map(function(k){return byMonth[k];}),fmt:anaFmtK}):"<div class='empty'>Add tour costs to see revenue by month.</div>";
-  byTour.sort(function(a,b){return b.rev-a.rev;});
-  var top=byTour.filter(function(x){return x.rev>0;}).slice(0,8);
-  /* lead funnel */
-  var funnel=STAGES.map(function(st){return {k:st[0],label:st[1],n:leads.filter(function(l){return l.stage===st[0];}).length};});
-  var totLeads=leads.length||1;
-  var leadConv=Math.round(leads.filter(function(l){return l.stage==="Confirmed";}).length/(leads.length||1)*100);
-  /* quotation conversion */
-  var qc=(typeof quoteConversion==="function")?quoteConversion():{pct:0,counts:{Sent:0,Accepted:0,Lost:0},decided:0};
-  /* guide utilization: tour-days per guide (lead guide + allotted external) */
-  var gd={};
-  (tours||[]).filter(anaYearFilter("guides")).forEach(function(t){
-    var days=durNights(t)+1;
-    [t.guide,t.guideAlloted].forEach(function(g){if(g&&g!=="—")gd[g]=(gd[g]||{tours:0,days:0}),gd[g].tours++,gd[g].days+=days;});
-  });
-  var guides=Object.keys(gd).map(function(g){return {g:g,tours:gd[g].tours,days:gd[g].days};}).sort(function(a,b){return b.days-a.days;}).slice(0,8);
-  var maxG=Math.max.apply(null,guides.map(function(x){return x.days;}).concat([1]));
-  /* lead sources */
-  var srcs={};leads.forEach(function(l){var k=l.src||"—";srcs[k]=(srcs[k]||0)+1;});
-  var srcList=Object.keys(srcs).map(function(k){return {k:k,n:srcs[k]};}).sort(function(a,b){return b.n-a.n;});
-  var _hb=0;
-  var hbar=function(label,val,max,display){var pct=Math.max(Math.round(val/max*100),2);return "<div class='ana-hbar' data-tip='"+anaEsc(String(label).replace(/<[^>]*>/g,""))+": "+anaEsc(display!=null?display:val)+"'><div class='r'><span>"+label+"</span><b class='mono'>"+(display!=null?display:val)+"</b></div><div class='trk'><i style='width:"+pct+"%;animation-delay:"+((_hb++%12)*40)+"ms'></i></div></div>";};
-  var hiddenChips=_anaHidden.length?"<div style='display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;align-items:center'><span style='font-size:11.5px;color:var(--ink-soft)'>Hidden cards:</span>"+_anaHidden.map(function(c){var names={rev:"Revenue by month",top:"Top tours",funnel:"Lead funnel",guides:"Guide utilization",sources:"Lead sources",profit:"Profit by tour",season:"Profit by season",heat:"Season planner",greviews:"Google reviews",cash:"Cash-flow forecast",leadtime:"Booking lead time",guests:"Guest mix"};return "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:3px 10px' onclick=\"showAnaCard('"+c+"')\">+ "+(names[c]||c)+"</button>";}).join("")+"</div>":"";
-  /* ---- Profit by tour (auto): actual > log > cost-sheet estimate ---- */
-  var pRows=(tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(anaYearFilter("profit")).map(function(t){
-    var p=autoTourProfit(t);p.t=t;return p;
-  }).filter(function(p){return p.rev>0||p.exp>0;}).sort(function(a,b){return b.profit-a.profit;});
-  var srcBadge=function(s){return s==="actual"?"<span class='pill completed' style='font-size:10px'>actual costs</span>":(s==="log"?"<span class='pill open' style='font-size:10px'>saved calc</span>":(s==="estimate"?"<span class='pill plain' style='font-size:10px'>cost-sheet est.</span>":"<span class='pill full' style='font-size:10px'>no costs yet</span>"));};
-  var profitBody=pRows.length?pRows.slice(0,12).map(function(p,i){
-    var best=i===0&&p.profit>0,worst=i===pRows.length-1&&pRows.length>1&&p.profit<pRows[0].profit;
-    return "<div style='display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line-soft)'>"+
-      "<div style='min-width:0'><div style='font-size:13px;font-weight:600'>["+tourCode(p.t)+"] "+shortName(p.t)+(best?" <span style='color:var(--forest);font-size:11px'>★ best</span>":"")+(worst?" <span style='color:var(--coral);font-size:11px'>▼ worst</span>":"")+"</div>"+
-      "<div style='font-size:11.5px;color:var(--ink-soft)'>Rev "+fmt(p.rev)+" · Cost "+(p.exp?fmt(p.exp):"—")+" "+srcBadge(p.src)+((p.pct!=null&&p.exp>0&&p.pct<(+prefs.marginMin||0))?" <span class='pill full' style='font-size:10px' title='Below your minimum margin (Settings \u2192 Preferences)'>below "+(+prefs.marginMin)+"% target</span>":"")+"</div></div>"+
-      "<div style='text-align:right;flex-shrink:0'><div class='mono' style='font-weight:700;color:"+(p.profit>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(p.profit)+"</div>"+(p.pct!=null?"<div style='font-size:11px;color:var(--ink-soft)'>"+p.pct+"% margin</div>":"")+"</div></div>";
-  }).join("")
-  :"<div class='empty'>No tours with revenue in this range yet.</div>";
-  /* ---- Profit by season: month-of-start aggregation ---- */
-  var MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  var seas=[];for(var si=0;si<12;si++)seas.push(0);
-  pRows.forEach(function(p){if(p.t.start&&anaYearFilter("season")(p.t))seas[parseInt(p.t.start.slice(5,7),10)-1]+=p.profit;});
-  var maxSeas=Math.max.apply(null,seas.map(Math.abs).concat([1]));
-  var seasonBody=pRows.length?anaBars({labels:MN,series:[{name:"Profit",values:seas}],tipFmt:fmt}):"<div class='empty'>Profit appears here once tours have revenue.</div>";
-  /* ---- Season planner: occupancy heatmap (seats booked / offered per month) ---- */
-  var hm=seasonMonthData(anaYearFilter("heat"));
-  var gapMonths=MN.filter(function(_,i){return hm[i].tours===0;});
-  var heatBody="<div class='ana-heat'>"+hm.map(function(m,i){
-    var util=m.cap>0?Math.round(m.booked/m.cap*100):null;
-    var bg=util==null?"":(util>=80?"linear-gradient(135deg,#1f8f5f,#157a4c)":(util>=50?"linear-gradient(135deg,#7cc08f,#5aa873)":(util>=25?"linear-gradient(135deg,#f0c36b,#e0a83c)":"linear-gradient(135deg,#e8938c,#d9736a)")));
-    return "<div class='m"+(util==null?" none":"")+"' style='"+(bg?"background:"+bg+";":"")+"animation-delay:"+(i*40)+"ms' data-tip='"+MN[i]+": "+(util==null?"no departures":m.booked+" of "+m.cap+" seats booked \u00b7 "+m.tours+" tour"+(m.tours===1?"":"s"))+"'>"+
-      "<div class='mn'>"+MN[i]+"</div>"+
-      (util==null?"<div class='d'>no departures</div>":
-        "<div class='pc'>"+util+"%</div>"+
-        "<div class='d'>"+m.booked+"/"+m.cap+" seats \u00b7 "+m.tours+" tour"+(m.tours===1?"":"s")+"</div><div class='bar'><i style='width:"+Math.min(util,100)+"%'></i></div>")+
-    "</div>";
-  }).join("")+"</div>"+
-  (gapMonths.length?"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'><b>Gap months (no departures):</b> "+gapMonths.join(", ")+" — space to add tours where demand exists.</p>":"<p style='font-size:11.5px;color:var(--ink-soft);margin-top:10px'>Every month has at least one departure.</p>");
-  /* ---- Google reviews by tour: who reviewed, who's still to ask ---- */
-  var grRows=(tours||[]).filter(function(t){return !t.archived&&t.start;}).filter(anaYearFilter("greviews")).map(function(t){
-    var bs=(bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";});
-    if(!bs.length)return null;
-    var done=bs.filter(function(b){return b.reviewDone;});
-    var pend=bs.filter(function(b){return !b.reviewDone;});
-    var ended=t.end&&t.end<(new Date().toISOString().slice(0,10));
-    if(!ended&&!done.length)return null; /* only ended tours (or any with reviews already) */
-    return {t:t,total:bs.length,done:done,pend:pend};
-  }).filter(Boolean).sort(function(a,b){return (b.t.end||"").localeCompare(a.t.end||"");});
-  var greviewsBody=grRows.length?grRows.slice(0,10).map(function(r){
-    var pct=Math.round(r.done.length/r.total*100);
-    var pendNames=r.pend.slice(0,6).map(function(b){return String(b.guest||"—").replace(/</g,"&lt;");}).join(", ")+(r.pend.length>6?" +"+(r.pend.length-6)+" more":"");
-    return "<div style='padding:9px 0;border-bottom:1px solid var(--line-soft)'>"+
-      "<div style='display:flex;justify-content:space-between;gap:10px;align-items:baseline'>"+
-        "<div style='font-size:13px;font-weight:600'>["+tourCode(r.t)+"] "+shortName(r.t)+"</div>"+
-        "<div class='mono' style='font-weight:700;color:"+(pct>=50?"var(--forest)":"var(--amber)")+";white-space:nowrap'>"+r.done.length+"/"+r.total+" reviewed</div>"+
-      "</div>"+
-      "<div style='height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:6px 0'><span style='display:block;height:100%;width:"+Math.max(pct,2)+"%;background:var(--amber);border-radius:99px'></span></div>"+
-      (r.pend.length?"<div style='font-size:11.5px;color:var(--ink-soft)'><b>Yet to review:</b> "+pendNames+"</div>":"<div style='font-size:11.5px;color:var(--forest)'>Everyone reviewed ⭐</div>")+
-    "</div>";
-  }).join("")+"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Mark a guest ⭐ Reviewed in Forms &amp; Reviews when their Google review lands; ask the pending ones from there with one tap.</p>"
-  :"<div class='empty'>No ended tours with guests yet — reviewed counts appear here after departures finish.</div>";
-  /* ---- Cash-flow forecast: next 6 months — money due in (by due date) vs
-     estimated tour costs going out (by departure month) ---- */
-  var cashBody=(function(){
-    var now=new Date();var months6=[];for(var k=0;k<6;k++){var d=new Date(now.getFullYear(),now.getMonth()+k,1);months6.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"));}
-    var inflow={},outflow={},unsched=0;
-    receivables().forEach(function(r){if(!r.due){unsched+=r.pend;return;}var k=r.due.slice(0,7);if(k<months6[0])k=months6[0];inflow[k]=(inflow[k]||0)+r.pend;});
-    (tours||[]).filter(function(t){return !t.archived&&t.start&&status(t)!=="completed";}).forEach(function(t){var k=t.start.slice(0,7);if(months6.indexOf(k)<0)return;var ap=autoTourProfit(t);outflow[k]=(outflow[k]||0)+(ap.exp||0);});
-    var cum=0,rows=months6.map(function(k){var i=inflow[k]||0,o=outflow[k]||0;cum+=i-o;return {k:k,i:i,o:o,net:i-o,cum:cum};});
-    var maxV=Math.max.apply(null,rows.map(function(r){return Math.max(r.i,r.o);}).concat([1]));
-    var lab=function(k){var d=new Date(k+"-01T00:00:00");return d.toLocaleDateString("en-GB",{month:"short"})+" '"+String(d.getFullYear()).slice(2);};
-    if(!rows.some(function(r){return r.i||r.o;}))return "<div class='empty'>Nothing scheduled in the next 6 months yet.</div>";
-    return anaBars({labels:rows.map(function(r){return lab(r.k);}),series:[{name:"Due in",values:rows.map(function(r){return r.i;})},{name:"Costs out",values:rows.map(function(r){return r.o;}),color:"#e8843c"}],tipFmt:fmt,sub:rows.map(function(r){return (r.net>=0?"+":"\u2212")+anaFmtK(Math.abs(r.net)).replace("\u20b9","");}),subColor:function(i){return rows[i].net>=0?"var(--forest)":"var(--coral)";}})+
-      "<div class='ana-legend'><span><i class='yoy-sw' style='background:var(--sea)'></i>Balances due in</span><span><i class='yoy-sw' style='background:#e8843c'></i>Estimated costs out</span><span>Net 6-month position: <b class='mono' style='color:"+(cum>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(cum)+"</b></span>"+(unsched?"<span>Unscheduled balances (no due date): <b class='mono'>"+fmt(unsched)+"</b></span>":"")+"</div>";
-  })();
-  /* ---- Booking lead time: days between booking and departure ---- */
-  var leadTimeBody=(function(){
-    var parseD=function(v){if(!v)return null;var m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(v);if(m)return new Date(+m[3],+m[2]-1,+m[1]);var d=new Date(v);return isNaN(d)?null:d;};
-    var pts=[];
-    (bookings||[]).forEach(function(b){var t=b.tour?tours.find(function(x){return x.id===b.tour;}):null;var st=(t&&t.start)||b.start;var bd=parseD(b.bookingDate);var sd=st?new Date(st+"T00:00:00"):null;if(!bd||!sd||isNaN(sd))return;var days=Math.round((sd-bd)/864e5);if(days<0||days>730)return;pts.push({days:days,m:sd.getMonth()});});
-    if(!pts.length)return "<div class='empty'>Needs bookings with a booking date and a departure date.</div>";
-    var ds=pts.map(function(p){return p.days;}).sort(function(a,b){return a-b;});
-    var avg=Math.round(ds.reduce(function(a,b){return a+b;},0)/ds.length),med=ds[Math.floor(ds.length/2)];
-    var buckets=[["< 15 days",0,14],["15\u201330",15,30],["31\u201360",31,60],["61\u201390",61,90],["90+",91,9999]].map(function(bk){return {label:bk[0],n:pts.filter(function(p){return p.days>=bk[1]&&p.days<=bk[2];}).length};});
-    var maxB=Math.max.apply(null,buckets.map(function(b){return b.n;}).concat([1]));
-    var byM=[];for(var mi=0;mi<12;mi++){var arr=pts.filter(function(p){return p.m===mi;});byM.push(arr.length?Math.round(arr.reduce(function(a,p){return a+p.days;},0)/arr.length):null);}
-    var MN2=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    var tip=byM.some(function(v){return v!=null;})?"<div style='font-size:11.5px;color:var(--ink-soft);margin-top:8px'>Average lead by departure month \u2014 start campaigns this far ahead: "+byM.map(function(v,i){return v!=null?"<b>"+MN2[i]+"</b> "+v+"d":null;}).filter(Boolean).join(" \u00b7 ")+"</div>":"";
-    return "<div class='stat-strip' style='grid-template-columns:repeat(3,1fr);margin-bottom:10px'><div class='s'><div class='v mono'>"+avg+"d</div><div class='l'>Average</div></div><div class='s'><div class='v mono'>"+med+"d</div><div class='l'>Median</div></div><div class='s'><div class='v mono'>"+pts.length+"</div><div class='l'>Bookings</div></div></div>"+
-      buckets.map(function(b){return hbar(b.label,b.n,maxB,b.n+" booking"+(b.n===1?"":"s"));}).join("")+tip;
-  })();
-  /* ---- Guest mix: countries (by pax) and repeat-guest rate ---- */
-  var guestsBody=(function(){
-    var byC={},tot=0;(bookings||[]).forEach(function(b){if(b.status==="Cancelled")return;var c=(b.country||"\u2014").trim()||"\u2014";var n=parseInt(b.party,10)||1;byC[c]=(byC[c]||0)+n;tot+=n;});
-    var list=Object.keys(byC).map(function(k){return {k:k,n:byC[k]};}).sort(function(a,b){return b.n-a.n;}).slice(0,8);
-    var cust=(customers||[]).filter(function(c){return (c.type||"Client")==="Client";});
-    var rep=cust.filter(function(c){return c.repeat||(c.tours||0)>1;}).length;
-    var repPct=cust.length?Math.round(rep/cust.length*100):0;
-    var forn=(bookings||[]).filter(function(b){return b.status!=="Cancelled"&&b.country&&!/india/i.test(b.country);}).reduce(function(s,b){return s+(parseInt(b.party,10)||1);},0);
-    if(!list.length&&!cust.length)return "<div class='empty'>No guests yet.</div>";
-    return "<div class='stat-strip' style='grid-template-columns:repeat(3,1fr);margin-bottom:10px'><div class='s'><div class='v mono'>"+repPct+"%</div><div class='l'>Repeat guests</div></div><div class='s'><div class='v mono'>"+(tot?Math.round(forn/tot*100):0)+"%</div><div class='l'>International pax</div></div><div class='s'><div class='v mono'>"+cust.length+"</div><div class='l'>Customers</div></div></div>"+
-      anaDonut(list,{tip:function(x){return x.n+" pax";},center:tot,centerLabel:"pax"});
-  })();
-  var vis=function(id){return _anaHidden.indexOf(id)<0;};
-  var cards=[];
-  if(vis("rev"))cards.push(anaCard("rev","Revenue by month",revChart,true,"by tour start","<button class='btn btn-sm "+(_anaYoY?"btn-primary":"btn-ghost")+"' onclick='toggleAnaYoY()' title='Compare with the previous year, month by month'>YoY compare</button>"));
-  if(vis("profit"))cards.push(anaCard("profit","Profit by tour",profitBody,true,"auto \u2014 revenue vs costs"));
-  if(vis("heat"))cards.push(anaCard("heat","Season planner",heatBody,true,"seat utilization by month"));
-  if(vis("greviews"))cards.push(anaCard("greviews","Google reviews",greviewsBody,true,"participants reviewed, by tour"));
-  if(vis("cash"))cards.push(anaCard("cash","Cash-flow forecast",cashBody,false,"next 6 months \u2014 balances due in vs estimated costs out"));
-  if(vis("season"))cards.push(anaCard("season","Profit by season",seasonBody,true,"month of departure"));
-  var half=[];
-  if(vis("top"))half.push(anaCard("top","Top tours by revenue",(top.length?top.map(function(x){return hbar("["+x.code+"] "+x.n,x.rev,top[0].rev,fmt(x.rev));}).join(""):"<div class='empty'>No revenue captured yet.</div>"),true));
-  if(vis("funnel"))half.push(anaCard("funnel","Lead funnel",funnel.map(function(f){return hbar(f.label,f.n,totLeads);}).join("")+"<div style='font-size:11.5px;color:var(--ink-soft);margin-top:6px'>"+leadConv+"% of all leads reach Confirmed.</div>",false,"stage by stage"));
-  if(vis("guides"))half.push(anaCard("guides","Guide utilization",(guides.length?guides.map(function(x){return hbar(x.g+" · "+x.tours+" tour"+(x.tours>1?"s":""),x.days,maxG,x.days+" days");}).join(""):"<div class='empty'>No guides assigned yet.</div>"),true,"tour-days"));
-  if(vis("leadtime"))half.push(anaCard("leadtime","Booking lead time",leadTimeBody,false,"booking \u2192 departure"));
-  if(vis("guests"))half.push(anaCard("guests","Guest mix",guestsBody,false,"countries by pax \u00b7 repeat rate"));
-  if(vis("sources"))half.push(anaCard("sources","Lead sources",(srcList.length?anaDonut(srcList.slice(0,8),{tip:function(x){return x.n+" lead"+(x.n===1?"":"s");},center:leads.length,centerLabel:"leads"}):"<div class='empty'>No leads yet.</div>"),false,"where enquiries come from"));
-  var halves="";for(var i=0;i<half.length;i+=2){halves+="<div class='grid-2' style='margin-top:16px'>"+half[i]+(half[i+1]||"")+"</div>";}
+  var b=a2Bounds(),MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var T=(tours||[]).filter(function(t){return !t.archived&&t.start&&a2In(t.start,b);});
+  var isDark=document.documentElement.classList.contains("dark");
+  var GOOD="#0f9a4f",BAD="#ea4d4d",WARN="#b45309",NEUT=isDark?"#3b3d47":"#dcdee4";
+  var pct=function(v){return v==null?"—":v+"%";};
+  /* ---- money by month: revenue / cost / profit ---- */
+  var keys=a2MonthKeys(b),rev={},cost={};
+  T.forEach(function(t){var k=t.start.slice(0,7);var ap=autoTourProfit(t);rev[k]=(rev[k]||0)+ap.rev;cost[k]=(cost[k]||0)+(ap.exp||0);});
+  var revA=keys.map(function(k){return rev[k]||0;}),costA=keys.map(function(k){return cost[k]||0;}),profA=keys.map(function(k,i){return revA[i]-costA[i];});
+  var sumR=revA.reduce(function(a,c){return a+c;},0),sumC=costA.reduce(function(a,c){return a+c;},0),sumP=sumR-sumC;
+  var lbl=keys.map(function(k,i){return MN[parseInt(k.slice(5,7),10)-1]+(i===0||k.slice(5,7)==="01"?" '"+k.slice(2,4):"");});
+  var moneyBody=sumR||sumC?a2Lines(lbl,[{name:"Revenue",values:revA,color:a2col(0)},{name:"Cost",values:costA,color:a2col(1),dash:true},{name:"Profit",values:profA,color:a2col(2)}],{area:true}):"<div class='empty'>Add tour costs (Tours → tour cost) to see money by month.</div>";
+  var moneyTbl=a2Table(["Month","Revenue","Cost","Profit","Margin"],keys.map(function(k,i){return [a2Mon(k),fmt(revA[i]),fmt(costA[i]),fmt(profA[i]),pct(revA[i]?Math.round(profA[i]/revA[i]*100):null)];}));
+  var moneyStats="<div class='a2-stats'>"+a2Stat("Revenue",fmt(sumR),T.length+" tour"+(T.length===1?"":"s"))+a2Stat("Costs",fmt(sumC),"actual, saved or estimated")+a2Stat("Profit",fmt(sumP),sumR?Math.round(sumP/sumR*100)+"% margin":"",sumP>=0?"up":"down")+a2Stat("Per guest",fmt(T.reduce(function(s,t){return s+tourPaxBooked(t);},0)?Math.round(sumR/T.reduce(function(s,t){return s+tourPaxBooked(t);},0)):0),"average revenue")+"</div>";
+  /* ---- profit by tour ---- */
+  var minM=+prefs.marginMin||0;
+  var pRows=T.map(function(t){var p=autoTourProfit(t);p.t=t;return p;}).filter(function(p){return p.rev>0||p.exp>0;}).sort(function(a,c){return c.profit-a.profit;});
+  var srcChip=function(s){return s==="actual"?"<span class='a2-chip ok'>actual</span>":(s==="log"?"<span class='a2-chip'>saved calc</span>":(s==="estimate"?"<span class='a2-chip'>estimate</span>":"<span class='a2-chip bad'>no costs</span>"));};
+  var profitBody=pRows.length?a2HBars(pRows.slice(0,12).map(function(p){var low=p.pct!=null&&p.exp>0&&p.pct<minM;return {k:"["+tourCode(p.t)+"] "+anaEsc(shortName(p.t)),v:p.profit,d:fmt(p.profit),c:p.profit<0?BAD:(low?WARN:a2col(0)),chip:srcChip(p.src)+(low?"<span class='a2-chip bad'>below "+minM+"%</span>":""),s:"Revenue "+fmt(p.rev)+" · cost "+(p.exp?fmt(p.exp):"—")+(p.pct!=null?" · <b>"+p.pct+"% margin</b>":""),tip:shortName(p.t)+": profit "+fmt(p.profit)+(p.pct!=null?" ("+p.pct+"%)":"")};})):"<div class='empty'>No tours with revenue in this range.</div>";
+  var profitTbl=a2Table(["Tour","Revenue","Cost","Profit","Margin"],pRows.map(function(p){return ["["+tourCode(p.t)+"] "+anaEsc(shortName(p.t)),fmt(p.rev),p.exp?fmt(p.exp):"—",fmt(p.profit),pct(p.pct)];}));
+  var below=pRows.filter(function(p){return p.pct!=null&&p.exp>0&&p.pct<minM;}).length;
+  /* ---- occupancy heat-map: months × years in range ---- */
+  var occ={},yrs={};
+  T.forEach(function(t){if(t.tourType==="session")return;var y=t.start.slice(0,4),m=parseInt(t.start.slice(5,7),10)-1;yrs[y]=1;var k=y+"-"+m;occ[k]=occ[k]||{cap:0,booked:0,n:0};occ[k].cap+=(parseInt(t.cap,10)||0);occ[k].booked+=booked(t.id);occ[k].n++;});
+  var yList=Object.keys(yrs).sort();
+  var heatBody=yList.length?"<div class='a2-heat'><div class='hd'></div>"+MN.map(function(m){return "<div class='hd'>"+m+"</div>";}).join("")+yList.map(function(y){return "<div class='yl'>"+y+"</div>"+MN.map(function(m,i){var o=occ[y+"-"+i];if(!o)return "<div class='c none' data-tip='"+m+" "+y+": no departures'></div>";var u=o.cap?Math.min(Math.round(o.booked/o.cap*100),100):0;return "<div class='c' style='background:"+a2col(0)+";opacity:"+(0.18+u/100*0.82).toFixed(2)+"' data-tip='"+m+" "+y+": "+o.booked+" of "+o.cap+" seats ("+u+"%) · "+o.n+" tour"+(o.n===1?"":"s")+"'><span>"+u+"</span></div>";}).join("");}).join("")+"</div><div class='a2-scale'><span>empty</span><i></i><span>full</span></div>":"<div class='empty'>No departures in this range.</div>";
+  var heatTbl=a2Table(["Month"].concat(yList),MN.map(function(m,i){return [m].concat(yList.map(function(y){var o=occ[y+"-"+i];return o?(o.cap?Math.round(o.booked/o.cap*100)+"%":"—")+" <span class='a2-dim'>"+o.booked+"/"+o.cap+"</span>":"—";}));}));
+  var totCap=0,totBk=0;Object.keys(occ).forEach(function(k){totCap+=occ[k].cap;totBk+=occ[k].booked;});
+  var gaps=MN.filter(function(_,i){return !yList.some(function(y){return occ[y+"-"+i];});});
+  /* ---- receivables ageing ---- */
+  var recs=receivables();
+  var buckets=[["Not yet due",function(d){return d!=null&&d>=0;}],["1–7 days late",function(d){return d!=null&&d<0&&d>=-7;}],["8–30 days",function(d){return d!=null&&d<-7&&d>=-30;}],["31–60 days",function(d){return d!=null&&d<-30&&d>=-60;}],["Over 60 days",function(d){return d!=null&&d<-60;}],["No due date",function(d){return d==null;}]];
+  var bk=buckets.map(function(bb,i){var rs=recs.filter(function(r){return bb[1](r.days);});return {k:bb[0],n:rs.length,v:rs.reduce(function(s,r){return s+r.pend;},0),names:rs.slice(0,5).map(function(r){return anaEsc(r.b.guest||"—");}),i:i};});
+  var recTot=bk.reduce(function(s,x){return s+x.v;},0),overdue=bk.slice(1,5).reduce(function(s,x){return s+x.v;},0);
+  var ageCols=[GOOD,"#eda100",WARN,BAD,"#b02a2a",NEUT];
+  var ageBody=recTot?a2HBars(bk.map(function(x){return {k:x.k,v:x.v,d:fmt(x.v),c:ageCols[x.i],s:x.n?x.n+" booking"+(x.n===1?"":"s")+": "+x.names.join(", ")+(x.n>5?" +"+(x.n-5):""):"",tip:x.k+": "+fmt(x.v)+" across "+x.n+" booking"+(x.n===1?"":"s")};})):"<div class='empty'>Nothing outstanding. Every booking is settled.</div>";
+  var ageTbl=a2Table(["Guest","Tour","Due","Days late","Pending"],recs.map(function(r){return [anaEsc(r.b.guest||"—"),r.t?anaEsc(shortName(r.t)):anaEsc(r.b.customTour||"—"),r.due?dShort(r.due):"—",r.days==null?"—":(r.days<0?String(-r.days):"0"),fmt(r.pend)];}));
+  /* ---- cost breakdown per tour (stacked) ---- */
+  var cTours=T.filter(function(t){return tourExpTotal(t)>0||(profitLogs||[]).some(function(x){return x.tourId===t.id;});}).slice(0,10);
+  var expOf=function(t){var e=t.profitExp||{};if(tourExpTotal(t)>0)return e;var log=(profitLogs||[]).filter(function(x){return x.tourId===t.id;}).sort(function(a,c){return (c.savedAt||"").localeCompare(a.savedAt||"");})[0];return (log&&log.exp)||(log&&log.values)||{};};
+  var CATS=[["accom","Stays"],["travel","Transport"],["ship","Ship / ferry"],["food","Food"],["entry","Permits & fees"],["guidefee","Guides"]];
+  var other=function(e){return (+e.guide||0)+(+e.referral||0);};
+  var costSeries=CATS.map(function(c,i){return {name:c[1],values:cTours.map(function(t){return +expOf(t)[c[0]]||0;}),color:a2col(i)};}).concat([{name:"Other",values:cTours.map(function(t){return other(expOf(t));}),color:NEUT}]);
+  var costBody=cTours.length?a2Bars(cTours.map(function(t){return tourCode(t);}),costSeries,{stack:true,height:210}):"<div class='empty'>Enter costs in the Profit Calculator to see the breakdown per tour.</div>";
+  var costLegend=cTours.length?a2Legend(costSeries.map(function(s){return [s.name,s.color];})):"";
+  var costTbl=a2Table(["Tour"].concat(costSeries.map(function(s){return s.name;})).concat(["Total"]),cTours.map(function(t,i){return ["["+tourCode(t)+"] "+anaEsc(shortName(t))].concat(costSeries.map(function(s){return fmt(s.values[i]);})).concat([fmt(costSeries.reduce(function(s,sr){return s+sr.values[i];},0))]);}));
+  var catTot=costSeries.map(function(s){return {k:s.name,v:s.values.reduce(function(a,c){return a+c;},0)};}).sort(function(a,c){return c.v-a.v;});
+  /* ---- team utilisation: days on tour per person per month ---- */
+  var people={};
+  var addDays=function(name,role,s,e){if(!name||name==="—")return;s=String(s||"").slice(0,10);e=String(e||s).slice(0,10);if(!s)return;var d=new Date(s+"T00:00:00"),end=new Date(e+"T00:00:00");if(isNaN(d)||isNaN(end))return;if(end<d)end=d;var p=people[name]=people[name]||{role:role,m:{},days:0,tours:0};p.tours++;for(;d<=end;d=new Date(d.getTime()+864e5)){var k=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");if(keys.indexOf(k)<0)continue;p.m[k]=(p.m[k]||0)+1;p.days++;}};
+  T.forEach(function(t){tourGuides(t).forEach(function(g){addDays(g.name,/assist/i.test(g.role||"")?"Assistant":"Guide",t.start,t.end);});});
+  (ops||[]).filter(function(o){return !o.shadowOf&&a2In(o.startISO||o.start,b);}).forEach(function(o){if(o.driver)addDays(o.driver,"Driver",o.startISO||o.start,o.endISO||o.end);(o.legs||[]).forEach(function(l){if(l.driver&&l.driver!==o.driver)addDays(l.driver,"Driver",l.start,l.end);});});
+  var pl=Object.keys(people).map(function(n){return {n:n,p:people[n]};}).sort(function(a,c){return c.p.days-a.p.days;}).slice(0,10);
+  var daysIn=keys.length*30;
+  var utilBody=pl.length?"<div class='a2-util' style='--a2n:"+keys.length+"'><div class='hd'></div>"+keys.map(function(k){return "<div class='hd'>"+MN[parseInt(k.slice(5,7),10)-1].slice(0,1)+"</div>";}).join("")+pl.map(function(x){var col=x.p.role==="Driver"?a2col(1):(x.p.role==="Assistant"?a2col(5):a2col(0));return "<div class='yl'><b>"+anaEsc(x.n)+"</b><small>"+x.p.role+" · "+x.p.days+"d · "+x.p.tours+" tour"+(x.p.tours===1?"":"s")+"</small></div>"+keys.map(function(k){var d=x.p.m[k]||0;return d?"<div class='c' style='background:"+col+";opacity:"+(0.25+Math.min(d/20,1)*0.75).toFixed(2)+"' data-tip='"+anaEsc(x.n)+" · "+a2Mon(k)+": "+d+" day"+(d===1?"":"s")+" on tour'><span>"+d+"</span></div>":"<div class='c none' data-tip='"+anaEsc(x.n)+" · "+a2Mon(k)+": free'></div>";}).join("");}).join("")+"</div>":"<div class='empty'>No guides or drivers assigned in this range.</div>";
+  var utilLegend=pl.length?a2Legend([["Guide",a2col(0)],["Assistant",a2col(5)],["Driver",a2col(1)]]):"";
+  var utilTbl=a2Table(["Person","Role","Days on tour","Tours","Busiest month"],pl.map(function(x){var best=Object.keys(x.p.m).sort(function(a,c){return x.p.m[c]-x.p.m[a];})[0];return [anaEsc(x.n),x.p.role,String(x.p.days),String(x.p.tours),best?a2Mon(best)+" ("+x.p.m[best]+"d)":"—"];}));
+  /* ---- sales funnel: leads by stage + quotations ---- */
+  var L=(leads||[]);
+  var stageN=STAGES.filter(function(s){return s[0]!=="Lost"&&s[0]!=="Cancelled";}).map(function(s){return {k:s[0],label:s[1],n:L.filter(function(l){return l.stage===s[0];}).length};});
+  var reached=function(i){return stageN.slice(i).reduce(function(s,x){return s+x.n;},0);};
+  var lost=L.filter(function(l){return l.stage==="Lost"||l.stage==="Cancelled";}).length;
+  var fun=stageN.map(function(s,i){return {label:s.label,n:reached(i),here:s.n};});
+  var fmax=Math.max.apply(null,fun.map(function(f){return f.n;}).concat([1]));
+  var funnelBody=L.length?"<div class='a2-funnel'>"+fun.map(function(f,i){var w=Math.max(Math.round(f.n/fmax*100),6);var conv=i?a2Pct(f.n,fun[i-1].n):null;return "<div class='st' data-tip='"+anaEsc(f.label)+": "+f.n+" reached · "+f.here+" sitting here now'><div class='bar' style='width:"+w+"%;background:"+a2col(0)+";opacity:"+(1-i*0.14).toFixed(2)+";animation-delay:"+(i*50)+"ms'><span>"+f.n+"</span></div><div class='lab'>"+anaEsc(f.label)+(conv!=null?" <em>"+conv+"% from previous</em>":"")+"</div></div>";}).join("")+"</div>":"<div class='empty'>No leads yet.</div>";
+  var qc=quoteConversion(),qs=(quotationLog||[]);
+  var qByType={};qs.forEach(function(q){var k=q.typeRaw==="foreign"?"Foreign":"Indian";qByType[k]=qByType[k]||{n:0,acc:0,val:0};qByType[k].n++;if(q.status==="Accepted")qByType[k].acc++;qByType[k].val+=(+q.total||0);});
+  var srcs={};L.forEach(function(l){var k=(l.src&&l.src!=="—")?l.src:"Unknown";srcs[k]=(srcs[k]||0)+1;});
+  var srcList=Object.keys(srcs).map(function(k){return {k:k,n:srcs[k]};}).sort(function(a,c){return c.n-a.n;});var top5=srcList.slice(0,5);if(srcList.length>5)top5.push({k:"Other",n:srcList.slice(5).reduce(function(s,x){return s+x.n;},0)});
+  var funnelStats="<div class='a2-stats four'>"+a2Stat("Leads",String(L.length),lost?lost+" lost / cancelled":"")+a2Stat("Lead → confirmed",a2Pct(L.filter(function(l){return l.stage==="Confirmed";}).length,L.length)+"%","")+a2Stat("Quotes accepted",qc.pct+"%",qc.counts.Accepted+" of "+qc.decided+" decided")+a2Stat("Quote value",fmt(qs.reduce(function(s,q){return s+(+q.total||0);},0)),qs.length+" quotation"+(qs.length===1?"":"s"))+"</div>";
+  var funnelFoot=(top5.length?"<div class='a2-srcs'><span class='k'>Sources</span>"+top5.map(function(x,i){return "<span><i style='background:"+a2col(i)+"'></i>"+anaEsc(x.k)+" <b>"+x.n+"</b></span>";}).join("")+"</div>":"")+
+    (Object.keys(qByType).length?"<div class='a2-srcs'><span class='k'>Quotes</span>"+Object.keys(qByType).map(function(k){var x=qByType[k];return "<span>"+k+" <b>"+x.acc+"/"+x.n+" accepted</b> · "+fmt(x.val)+"</span>";}).join("")+"</div>":"");
+  var funnelTbl=a2Table(["Stage","Reached","Sitting here","From previous"],fun.map(function(f,i){return [anaEsc(f.label),String(f.n),String(f.here),i?a2Pct(f.n,fun[i-1].n)+"%":"—"];}));
+  /* ---- guests & markets ---- */
+  var B=(bookings||[]).filter(function(x){if(x.status==="Cancelled")return false;var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;return a2In((t&&t.start)||x.start,b);});
+  var byC={},paxTot=0,revByC={};
+  B.forEach(function(x){var c=(x.country||"—").trim()||"—";var n=parseInt(x.party,10)||1;byC[c]=(byC[c]||0)+n;paxTot+=n;revByC[c]=(revByC[c]||0)+bookingTotalCost(x);});
+  var cl=Object.keys(byC).map(function(k){return {k:k,n:byC[k],rev:revByC[k]};}).sort(function(a,c){return c.n-a.n;});
+  var top6=cl.slice(0,5);if(cl.length>5)top6.push({k:"Other",n:cl.slice(5).reduce(function(s,x){return s+x.n;},0),rev:cl.slice(5).reduce(function(s,x){return s+x.rev;},0)});
+  var cust=(customers||[]).filter(function(c){return (c.type||"Client")==="Client";});
+  var rep=cust.filter(function(c){return c.repeat||(c.tours||0)>1;}).length;
+  var forn=B.filter(function(x){return x.country&&!/india/i.test(x.country);}).reduce(function(s,x){return s+(parseInt(x.party,10)||1);},0);
+  var avgParty=B.length?(paxTot/B.length).toFixed(1):"—";
+  var guestsStats="<div class='a2-stats four'>"+a2Stat("Guests",String(paxTot),B.length+" booking"+(B.length===1?"":"s"))+a2Stat("International",a2Pct(forn,paxTot)+"%","of guests")+a2Stat("Repeat guests",a2Pct(rep,cust.length)+"%",rep+" of "+cust.length+" customers")+a2Stat("Avg. party",String(avgParty),"guests per booking")+"</div>";
+  var guestsBody=cl.length?a2Donut(top6,{tip:function(x){return x.n+" pax · "+fmt(x.rev);},center:paxTot,centerLabel:"guests"}):"<div class='empty'>No guests in this range.</div>";
+  var guestsTbl=a2Table(["Market","Guests","Share","Revenue","Per guest"],cl.map(function(x){return [anaEsc(x.k),String(x.n),a2Pct(x.n,paxTot)+"%",fmt(x.rev),fmt(x.n?Math.round(x.rev/x.n):0)];}));
+  /* ---- assemble ---- */
+  var rangeBtns=A2_RANGES.map(function(r){return "<button class='"+(_a2.range===r[0]?"on":"")+"' onclick=\"a2SetRange('"+r[0]+"')\">"+r[1]+"</button>";}).join("");
+  var custom=_a2.range==="custom"?"<div class='a2-custom'><input type='date' class='input mono' id='a2From' value='"+(_a2.from||"")+"' onchange='a2SetCustom()'><span>to</span><input type='date' class='input mono' id='a2To' value='"+(_a2.to||"")+"' onchange='a2SetCustom()'></div>":"";
   el.innerHTML=
-    "<div class='ana-head' style='align-items:center'><div><div class='t'>Overview</div><div class='st'>"+((kr.from||kr.to)?"for the chosen dates":"all time")+"</div></div>"+
-      "<div class='ana-filters' style='margin:0'>"+
-        "<input type='date' class='input mono' id='af_kpi' value='"+(kr.from||"")+"' onchange=\"setAnaRange('kpi')\" title='From date'>"+
-        "<input type='date' class='input mono' id='at_kpi' value='"+(kr.to||"")+"' onchange=\"setAnaRange('kpi')\" title='To date'>"+
-        ((kr.from||kr.to)?"<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"clearAnaRange('kpi')\">Clear dates</button>":"")+
-      "</div></div>"+
-    "<div class='kpis ana-kpis'>"+
-      kpi("Net Tour Cost",fmt(s.val),"all tours in range","up","M3 3v18h18M7 14l4-4 3 3 5-6")+
-      kpi("Collected",fmt(s.dep),"deposits / advances","up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
-      kpi("Pending",fmt(s.pend),"still to collect",s.pend>0?"down":"up","M3 6h18v12H3zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z")+
-      kpi("Quote conversion",qc.pct+"%",qc.counts.Accepted+" accepted of "+qc.decided+" decided","","M3 3v18h18M7 14l4-4 3 3 5-6")+
-      kpi("Lead conversion",leadConv+"%",leads.filter(function(l){return l.stage==="Confirmed";}).length+" confirmed of "+leads.length,"","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
+    "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
+    a2Card("money","Money by month","revenue, costs and profit by tour start",moneyStats+moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
+    "<div class='a2-grid'>"+
+      a2Card("profit","Profit by tour","revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
+      a2Card("age","Receivables ageing","money still to collect, by how late it is",ageBody,ageTbl,"",recTot?"<b>"+fmt(recTot)+"</b> outstanding · <b style='color:"+BAD+"'>"+fmt(overdue)+"</b> overdue":"")+
     "</div>"+
-    hiddenChips+
-    (cards.length?"<div class='ana-stack'>"+cards.join("")+"</div>":"")+
-    halves;
+    a2Card("heat","Seat occupancy","seats booked of seats offered, by departure month",heatBody,heatTbl,"",yList.length?"<b>"+a2Pct(totBk,totCap)+"%</b> of "+totCap+" seats sold in this range"+(gaps.length?" · no departures in <b>"+gaps.join(", ")+"</b>":""):"")+
+    "<div class='a2-grid'>"+
+      a2Card("cost","Cost breakdown","where each tour's money goes",costBody,costTbl,costLegend,catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%)":"")+
+      a2Card("util","Team utilisation","days on tour per person per month",utilBody,utilTbl,utilLegend,pl.length?"Busiest: <b>"+anaEsc(pl[0].n)+"</b> "+pl[0].p.days+" days":"")+
+    "</div>"+
+    "<div class='a2-grid'>"+
+      a2Card("funnel","Sales funnel","leads by stage, quotations, sources",funnelStats+funnelBody,funnelTbl,"",funnelFoot)+
+      a2Card("guests","Guests & markets","who travels with you",guestsStats+guestsBody,guestsTbl,"","")+
+    "</div>";
   anaBindTips(el);
 }
 
