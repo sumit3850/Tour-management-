@@ -1695,6 +1695,17 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
 .a2-dash .a2-tile{padding:10px 12px;gap:10px}.a2-dash .a2-tile .v{font-size:18px}.a2-dash .a2-ring{width:42px;height:42px}
 @media(max-width:900px){.a2-dash-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.a2-dash-main{gap:8px}.a2-dash-hero .big{font-size:24px}.a2-dash .a2-tile{flex-direction:column;align-items:flex-start;gap:6px;padding:10px}.a2-dash .a2-tile .v{font-size:16px}}
+/* Phone KPI tiles: icon on the left, the number beside it, the title under both on its own line (words never split) */
+.kpi .lab span{min-width:0;overflow-wrap:normal;word-break:normal;hyphens:none}
+@media(max-width:860px){
+  .kpi{display:grid;grid-template-columns:40px minmax(0,1fr);grid-template-areas:"ic val" "lab lab" "tr tr";column-gap:12px;row-gap:2px;align-items:center;padding:14px 16px}
+  .kpi .lab{display:contents}
+  .kpi .lab svg{grid-area:ic;width:40px;height:40px;padding:9px}
+  .kpi .lab span{grid-area:lab;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px;white-space:normal;overflow-wrap:normal;word-break:keep-all;line-height:1.3}
+  .kpi .val{grid-area:val;font-size:26px;margin:0;line-height:1.1;text-align:left}
+  .kpi .trend{grid-area:tr;margin-top:2px}
+}
+@media(max-width:400px){.kpi .val{font-size:23px}.kpi{column-gap:10px;padding:12px 12px}.kpi .lab svg{width:36px;height:36px;padding:8px}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1738,7 +1749,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 323</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 324</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1747,7 +1758,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 323</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 324</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3872,7 +3883,7 @@ function pill(s){const m={open:"Open",full:"Full",closed:"Closed",completed:"Com
    with 0 booked never shows "Full". Only "completed" comes from the lifecycle status. */
 function seatStatus(t){if(tourDone(t))return "completed";var b=booked(t.id);return (t.cap>0&&b>=t.cap)?"full":"open";}
 function tourHasBooking(t){return bookings.some(function(b){return b.tour===t.id;});}
-function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='lab'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg>"+lab+"</div><div class='val'>"+val+"</div><div class='trend "+dir+"'>"+trend+"</div></div>"}
+function kpi(lab,val,trend,dir,icon){return "<div class='card kpi'><div class='lab'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='"+icon+"'/></svg><span>"+lab+"</span></div><div class='val'>"+val+"</div><div class='trend "+dir+"'>"+trend+"</div></div>"}
 
 /* ===== NAV + history ===== */
 const NAV=[
@@ -5062,11 +5073,11 @@ function viewDashboard(){
       kpi("Active Leads",leads.filter(l=>["Lost","Confirmed","Cancelled"].indexOf(l.stage)<0).length,"in pipeline","","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z")+
       kpi("Confirmed Bookings",visibleConfirmed,"confirmed","up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
+    "<div id='payPanel' style='margin-top:16px'></div>"+
     "<div class='grid-2' style='margin-top:16px'>"+todayCard()+underbookedCard()+"</div>"+
     "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
     alertsCard()+
     "<div class='card card-pad' id='dashOpsBoard' style='margin-top:16px'>"+opsBoardMarkup()+"</div>"+
-    "<div id='payPanel' style='margin-top:16px'></div>"+
     (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
     "<div class='card card-pad' style='margin-top:16px'>"+
       "<div class='section-head'><div class='h-sec'>Occupancy by departure</div></div>"+
