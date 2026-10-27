@@ -1749,7 +1749,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 324</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 325</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1758,7 +1758,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 324</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 325</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3372,6 +3372,33 @@ function sbStatus(msg,kind){var el=document.getElementById("sbStatus");if(el){el
 /* Every blob push carries the operations with their guide shadows up to date
    (a console that was only opened, never edited, still has to serve the
    additional guides); every pull rebuilds them from the fresh data. */
+/* ---- Sign-in load trace: how long each step of the first load took and how
+   much it downloaded, shown under Settings → Sync status. ---- */
+var _lt=(function(){try{return JSON.parse(localStorage.getItem("ieo_loadtrace")||"null");}catch(e){return null;}})();
+function _ltStart(){_lt={at:new Date().toISOString(),t0:performance.now(),steps:{}};}
+function _ltMark(key,t0,obj){
+  if(!_lt||!_lt.steps||_lt.steps[key])return;
+  var kb=0;if(obj!=null){try{kb=Math.round(JSON.stringify(obj).length/1024);}catch(e){}}
+  _lt.steps[key]={ms:Math.round(performance.now()-t0),kb:kb,at:Math.round(performance.now()-_lt.t0)};
+  try{localStorage.setItem("ieo_loadtrace",JSON.stringify(_lt));}catch(e){}
+  try{console.log("[load] "+key+": "+_lt.steps[key].ms+" ms"+(kb?" · "+kb+" KB":"")+" (t+"+_lt.steps[key].at+" ms)");}catch(e){}
+}
+function _ltSummary(){
+  if(!_lt||!_lt.steps)return "";
+  var S=_lt.steps,sec=function(ms){return (ms/1000).toFixed(1)+"s";},kb=function(k){return k>=1024?(k/1024).toFixed(1)+" MB":k+" KB";};
+  var parts=[];
+  if(S.org)parts.push("account "+sec(S.org.ms));
+  if(S.blob)parts.push("workspace data "+sec(S.blob.ms)+" ("+kb(S.blob.kb)+")");
+  if(S.tables)parts.push("record tables "+sec(S.tables.ms)+" ("+kb(S.tables.kb)+")");
+  if(S.screen)parts.push("<b>screen ready at "+sec(S.screen.at)+"</b>");
+  if(S.push)parts.push("upload "+sec(S.push.ms));
+  if(S.subs)parts.push("inbox "+sec(S.subs.ms)+" ("+kb(S.subs.kb)+")");
+  var hints=[];
+  if(S.blob&&S.blob.kb>1500)hints.push("The workspace data is large ("+kb(S.blob.kb)+") — saved quotations and invoices keep their full documents inside it.");
+  if(S.subs&&S.subs.kb>1500)hints.push("Form attachments in the inbox weigh "+kb(S.subs.kb)+"; they are now downloaded only when a submission is new or changed.");
+  if(S.org&&S.org.ms>2500)hints.push("The account check alone took "+sec(S.org.ms)+" — that is the server waking up or a slow connection, not the amount of data.");
+  return "<span>"+parts.join(" · ")+"</span>"+(hints.length?"<div style='margin-top:4px;font-size:11.5px;color:var(--ink-soft)'>"+hints.join(" ")+"</div>":"");
+}
 function sbCollect(){if(typeof enrichAllOps==="function")try{enrichAllOps();}catch(e){}var o=collectStore();o.trips=(typeof tripLogs!=="undefined"?tripLogs:[]);return o;}
 function sbApply(d,cloudTs){
   if(!d)return;
@@ -3446,8 +3473,10 @@ async function cloudPush(silent){
   if(!silent)sbStatus("Pushing to cloud…","");
   try{
     var ts=new Date().toISOString();
+    var _tp=performance.now();
     var res=await cl.from("workspaces").upsert({id:c.ws||"default",data:sbCollect(),updated_at:ts});
     if(res.error)throw res.error;
+    _ltMark("push",_tp,null);
     setLocalUpdated(ts);
     _lastKnownCloudTotal=totalRecordCount();
     if(!_perRecordActive){_localDirty=false;try{localStorage.removeItem("ieo_record_pending");}catch(e){}} /* blob mode: this push carried the change up */
@@ -3475,8 +3504,10 @@ async function cloudPull(silent){
       var hTs=head.data.updated_at||"",lTs=localUpdated();
       if(lTs&&!(hTs&&hTs>lTs))return "kept-local";
     }
+    var _tb=performance.now();
     var res=await cl.from("workspaces").select("data,updated_at").eq("id",c.ws||"default").maybeSingle();
     if(res.error)throw res.error;
+    _ltMark("blob",_tb,res.data&&res.data.data);
     if(!res.data){if(!silent)sbStatus("Nothing saved in the cloud yet — Push from one device first.","");return "empty";}
     var cd=res.data.data||{};
     _lastKnownCloudTotal=countDataset(cd);
@@ -3535,6 +3566,7 @@ async function cloudInit(){
        and a device that is genuinely behind never pushes a stale blob over the
        cloud's newer one. The unpushed records are then flushed. */
     var result=await cloudPull(true);
+    if(result==="applied"||result==="kept-local"){try{if(typeof window._onCloudLoaded==="function")window._onCloudLoaded();}catch(e){}}
     try{if(localStorage.getItem("ieo_record_pending")==="1")await pushAllRecords();}catch(e){}
     /* Per-record tables (if the SQL in docs/DATABASE_SCHEMA.md has been run) are the
        more precise source of truth for the list collections — read them after the
@@ -3542,11 +3574,9 @@ async function cloudInit(){
        per-record state. If the tables don't exist yet, this just fails harmlessly and
        everything keeps working exactly as it did before this layer existed. */
     _perRecordActive=await pullAllRecords();
-    if(_perRecordActive&&_recordsChanged)refreshUI();
-    /* The data is in memory now: let the sign-in flow paint every view straight
-       away instead of waiting for the pushes below (that wait was the "blank for
-       ten seconds after sign-in" delay). */
-    try{if(typeof window._onCloudLoaded==="function"){var _h=window._onCloudLoaded;window._onCloudLoaded=null;_h();}}catch(e){}
+    /* The tables are the precise source for the list collections: when they
+       differ from the blob, repaint (sign-in hook) or refresh the open view. */
+    if(_perRecordActive&&_recordsChanged){if(typeof window._onCloudLoaded==="function"){try{window._onCloudLoaded();}catch(e){}}else refreshUI();}
     _syncBooting=false; /* the decisive comparison is done — normal timestamp bumping resumes */
     /* Only push after a pull that actually succeeded. 'applied' (took the newer cloud
        copy) and 'kept-local' (this device's copy was genuinely newer) both make a
@@ -3557,7 +3587,10 @@ async function cloudInit(){
        which then loaded as "the newest data" on every later login, permanently
        masking a wrong-workspace or RLS mix-up behind a fresh empty row. If both
        sides are empty there is nothing to sync; tell the user instead. */
-    if(result==="applied"||result==="kept-local")await cloudPush(true);
+    /* 'applied' means this device now holds exactly the cloud copy — uploading it
+       straight back was a full extra round trip on every sign-in for nothing.
+       Push only when this device actually has something newer. */
+    if(result==="kept-local"||(result==="applied"&&_localDirty))await cloudPush(true);
     else if(result==="empty"){
       /* Brand-new workspace: a non-IE company must not inherit Island Explorer's
          rate card from the shipped defaults — blank the cost sheet before any
@@ -3716,7 +3749,9 @@ async function pullAllRecords(){
     /* All tables are read IN PARALLEL (one round trip instead of one per table);
        a single failure still rejects the whole pull, so nothing is applied partially. */
     var fetched={};
+    var _tt=performance.now();
     var lists=await Promise.all(_recordKeys.map(fetchRecordsForKey));
+    _ltMark("tables",_tt,lists);
     _recordKeys.forEach(function(k,i){fetched[k]=lists[i];});
     var changed=false;
     var keptLocal=false;
@@ -9580,16 +9615,35 @@ function markSubDeleted(id){
   var a=_delSet();if(a.indexOf(id)===-1){a.push(id);try{localStorage.setItem("ieo_deleted_subs",JSON.stringify(a));}catch(e){}}
   if((deletedSubs||[]).indexOf(id)===-1){deletedSubs.push(id);if(typeof persistData==="function")persistData();} /* synced — the delete sticks on every device */
 }
+var _subRowCache={}; /* id -> {updated_at,data}: rows already downloaded this session */
 function loadSubmissions(force){
   var cl=(typeof sbClient==="function")?sbClient():null;
   var body=document.getElementById("reqBody");
   if(!cl){if(body)body.innerHTML="<div class='empty'>Cloud not connected — set up Supabase in Settings to receive form submissions.</div>";return;}
   if(body&&force)body.innerHTML="<div class='empty'>Loading…</div>";
-  /* one row per submission (id like sub_%) + legacy single-row list, merged */
+  /* One row per submission (id like sub_%) + legacy single-row list, merged.
+     Each row carries its attachments as inline data, so re-reading every row on
+     every sync was the heaviest download in the app. Read just id + updated_at
+     first and fetch only the rows this session has not seen (or that changed). */
+  var _ts=performance.now(),_bytes=0;
+  var rowsP=cl.from("workspaces").select("id,updated_at").like("id","sub_%").then(function(h){
+    if(h.error)return h;
+    var heads=h.data||[],ids={};
+    heads.forEach(function(x){ids[x.id]=1;});
+    Object.keys(_subRowCache).forEach(function(id){if(!ids[id])delete _subRowCache[id];});
+    var need=heads.filter(function(x){var c=_subRowCache[x.id];return !c||c.updated_at!==(x.updated_at||"");}).map(function(x){return x.id;});
+    var chunks=[];for(var i=0;i<need.length;i+=40)chunks.push(need.slice(i,i+40));
+    return Promise.all(chunks.map(function(ch){return cl.from("workspaces").select("id,data,updated_at").in("id",ch);})).then(function(rs){
+      var bad=rs.find(function(x){return x.error;});if(bad)return bad;
+      rs.forEach(function(x){(x.data||[]).forEach(function(row){try{_bytes+=JSON.stringify(row.data).length;}catch(e){}_subRowCache[row.id]={updated_at:row.updated_at||"",data:row.data};});});
+      return {data:heads.map(function(x){var c=_subRowCache[x.id];return c?{id:x.id,data:c.data}:null;}).filter(Boolean)};
+    });
+  });
   Promise.all([
-    cl.from("workspaces").select("id,data").like("id","sub_%"),
+    rowsP,
     cl.from("workspaces").select("data").eq("id","ieo_submissions").maybeSingle()
   ]).then(function(r){
+    if(_lt&&_lt.steps&&!_lt.steps.subs){_ltMark("subs",_ts,null);_lt.steps.subs.kb=Math.round(_bytes/1024);try{localStorage.setItem("ieo_loadtrace",JSON.stringify(_lt));}catch(e){}}
     /* An RLS/permission failure used to be silently coerced to an empty inbox —
        indistinguishable from "no submissions yet". Surface it instead. */
     var err=(r[0]&&r[0].error)||(r[1]&&r[1].error);
@@ -10943,6 +10997,7 @@ function viewSettings(){
       "<span style='color:var(--ink-soft)'>Auto-sync</span><b id='diagAuto'>"+(sbc.auto?"On":"Off")+"</b>"+
       "<span style='color:var(--ink-soft)'>Records on this device</span><b class='mono' id='diagCount'>"+totalRecordCount()+"</b>"+
       "<span style='color:var(--ink-soft)'>Last synced (this device)</span><b id='diagLast'>"+(localUpdated()?dShort(localUpdated())+" "+new Date(localUpdated()).toLocaleTimeString():"never")+"</b>"+
+      (typeof _ltSummary==="function"&&_ltSummary()?"<span style='color:var(--ink-soft)'>Last sign-in load</span><span id='diagLoad' style='font-size:12.5px'>"+_ltSummary()+"</span>":"")+
     "</div>"+
     "<div style='display:flex;flex-wrap:wrap;gap:10px;align-items:center'>"+
       "<button class='btn btn-sea btn-sm' onclick='forceFullResync()'>Force full re-sync ↓</button>"+
@@ -12158,8 +12213,10 @@ function maybeWelcome(org){
 var _orgLoaded=false;
 function loadOrgContext(){
   var cl=authClient();if(!cl){hideLogin();return;}
+  _ltStart();var _tOrg=performance.now();
   var r;try{r=cl.rpc("my_org");}catch(e){hideLogin();return;}
   r.then(function(res){
+    _ltMark("org",_tOrg,null);
     if(res&&res.error){hideLogin();return;}              /* my_org() not installed -> behave as before */
     var org=res&&res.data;
     if(!org){showPendingApproval();return;}               /* signed in but no company yet */
@@ -12206,13 +12263,16 @@ function loadOrgContext(){
          (exactly what the in-app ⟳ does) so the dashboard and whatever page the
          user opens are populated without any manual refresh. Guarded by
          _sbApplying so the render's persistData side-effect can't trigger a push. */
-      var _did=false;
-      var paint=function(){if(_did)return;_did=true;var wa=_sbApplying;_sbApplying=true;try{if(typeof boot==="function")boot(true);}catch(e){}_sbApplying=wa;};
-      window._onCloudLoaded=paint;                                   /* fires as soon as the pull has landed */
-      if(ci&&ci.then)ci.then(paint);
+      var _painted=0;
+      var paint=function(){_painted++;if(_painted===1)_ltMark("screen",_lt?_lt.t0:performance.now(),null);var wa=_sbApplying;_sbApplying=true;try{if(typeof boot==="function")boot(true);}catch(e){}_sbApplying=wa;};
+      /* Paint as soon as the workspace blob has landed, and again when the
+         per-record tables bring newer rows — the screen fills one round trip
+         earlier than waiting for everything. */
+      window._onCloudLoaded=paint;
+      if(ci&&ci.then)ci.then(function(){window._onCloudLoaded=null;if(!_painted)paint();});
       /* Fallback: never leave the screen empty even if the pull hangs or the
          promise never settles — repaint from whatever loaded within 4s. */
-      setTimeout(paint,4000);
+      setTimeout(function(){if(!_painted)paint();},4000);
     }
   }).catch(function(){hideLogin();});
 }
