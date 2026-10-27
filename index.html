@@ -1660,6 +1660,28 @@ html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.non
   .a2-util{grid-template-columns:minmax(96px,1.2fr) repeat(var(--a2n,12),minmax(16px,1fr))}.a2-util .c{min-height:26px;font-size:9px}.a2-util .yl{font-size:11px}
   .a2-range button{padding:7px 9px;font-size:11.5px}
 }
+
+.a2-hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.6fr);gap:20px;align-items:stretch}
+.a2-hero-main{background:linear-gradient(160deg,var(--sea) 0%,#2945ba 70%,#1f369c 100%);color:#fff;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.a2-hero-main .l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.a2-hero-main .big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:4px;overflow-wrap:anywhere}
+.a2-hero-main .s{font-size:12px;opacity:.85;margin-top:4px}
+.a2-split{display:flex;height:10px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.18);margin-top:16px;gap:2px}
+.a2-split i{display:block;height:100%;transform-origin:left;animation:anaWide .8s var(--spring) backwards}
+.a2-split i.rec{background:#5fe3a1}.a2-split i.pen{background:#ffd166}.a2-split i.exp{background:#ff9f6e}.a2-split i.prof{background:#5fe3a1}.a2-split i.loss{background:#ff6b6b}
+.a2-split.exp{margin-top:14px}
+.a2-split-lg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;opacity:.95;margin-top:7px}.a2-split-lg b{font-weight:700}
+.a2-split-lg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}.a2-split-lg i.rec{background:#5fe3a1}.a2-split-lg i.pen{background:#ffd166}.a2-split-lg i.exp{background:#ff9f6e}.a2-split-lg i.prof{background:#5fe3a1}.a2-split-lg i.loss{background:#ff6b6b}
+.a2-hero-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.a2-tile{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;min-width:0;animation:cardIn .5s var(--spring) backwards}
+.a2-tile .tx{min-width:0}.a2-tile .l{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.a2-tile .v{font-size:20px;font-weight:800;color:var(--ink);letter-spacing:-.02em;margin-top:2px;overflow-wrap:anywhere}.a2-tile.bad .v{color:var(--coral)}
+.a2-tile .s{font-size:11px;color:var(--ink-soft);margin-top:1px}
+.a2-ring{width:48px;height:48px;flex:none}.a2-ring circle{fill:none;stroke-width:5;stroke:var(--line);transform:rotate(-90deg);transform-origin:50% 50%}.a2-ring circle+circle{stroke-linecap:round;transition:stroke-dashoffset .8s var(--spring)}
+.a2-ring text{font-size:11px;font-weight:700;fill:var(--ink);font-family:var(--font-body)}
+html.dark .a2-hero-main{background:linear-gradient(160deg,#2f49c4 0%,#1f369c 70%,#172a7a 100%)}html.dark .a2-tile{background:var(--surface-2);border-color:var(--line)}
+@media(max-width:900px){.a2-hero-grid{grid-template-columns:1fr}.a2-hero-main .big{font-size:30px}}
+@media(max-width:600px){.a2-hero-tiles{grid-template-columns:1fr 1fr;gap:8px}.a2-tile{padding:10px;gap:8px;flex-direction:column;align-items:flex-start}.a2-tile .v{font-size:17px}.a2-ring{width:40px;height:40px}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1703,7 +1725,7 @@ html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.non
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 319</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 320</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1712,7 +1734,7 @@ html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.non
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 319</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 320</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5377,9 +5399,9 @@ function seasonMonthData(filterFn){
 var A2_COL=["#3454d1","#eb6834","#1baf7a","#eda100","#e87ba4","#6250d6"];
 var A2_COL_DARK=["#6f8af0","#d95926","#199e70","#c98500","#d55181","#9085e9"];
 function a2col(i){return (document.documentElement.classList.contains("dark")?A2_COL_DARK:A2_COL)[i%6];}
-var A2_RANGES=[["12m","Last 12 months"],["ytd","This year"],["prev","Last year"],["fy","This FY (Apr–Mar)"],["all","All time"],["custom","Custom…"]];
+var A2_RANGES=[["all","All time"],["12m","Last 12 months"],["ytd","This year"],["prev","Last year"],["fy","This FY (Apr–Mar)"],["custom","Custom…"]];
 var _a2=(function(){try{return JSON.parse(localStorage.getItem("ieo_ana2")||"{}")||{};}catch(e){return {};}})();
-if(!_a2.range)_a2.range="12m";
+if(!_a2.range||_a2.v!==2){_a2.range="all";_a2.v=2;}
 function a2Save(){try{localStorage.setItem("ieo_ana2",JSON.stringify(_a2));}catch(e){}}
 function a2SetRange(v){_a2.range=v;a2Save();renderAnalytics();}
 function a2SetCustom(){_a2.from=(document.getElementById("a2From")||{}).value||"";_a2.to=(document.getElementById("a2To")||{}).value||"";_a2.range="custom";a2Save();renderAnalytics();}
@@ -5492,6 +5514,19 @@ function renderAnalytics(){
   var lbl=keys.map(function(k,i){return MN[parseInt(k.slice(5,7),10)-1]+(i===0||k.slice(5,7)==="01"?" '"+k.slice(2,4):"");});
   var moneyBody=sumR||sumC?a2Lines(lbl,[{name:"Revenue",values:revA,color:a2col(0)},{name:"Cost",values:costA,color:a2col(1),dash:true},{name:"Profit",values:profA,color:a2col(2)}],{area:true}):"<div class='empty'>Add tour costs (Tours → tour cost) to see money by month.</div>";
   var moneyTbl=a2Table(["Month","Revenue","Cost","Profit","Margin"],keys.map(function(k,i){return [a2Mon(k),fmt(revA[i]),fmt(costA[i]),fmt(profA[i]),pct(revA[i]?Math.round(profA[i]/revA[i]*100):null)];}));
+  /* ---- revenue overview: the money of the chosen range in one glance ---- */
+  var _pf=payFrom,_pt=payTo;payFrom=b.from||"";payTo=b.to||"";var ps=paymentStats();payFrom=_pf;payTo=_pt;
+  var ovTotal=ps.val,ovRec=ps.dep,ovPend=ps.pend,ovExp=sumC,ovProfit=ovTotal-ovExp,ovGuests=T.reduce(function(s,t){return s+tourPaxBooked(t);},0);
+  var pRec=a2Pct(ovRec,ovTotal),pPend=Math.max(0,100-pRec),pExp=ovTotal?Math.min(Math.round(ovExp/ovTotal*100),999):0,pMargin=ovTotal?Math.round(ovProfit/ovTotal*100):null;
+  var ring=function(pc,col){var r=20,c=(2*Math.PI*r).toFixed(1),f=Math.max(0,Math.min(Math.abs(pc||0),100))/100;return "<svg class='a2-ring' viewBox='0 0 48 48'><circle cx='24' cy='24' r='"+r+"'/><circle cx='24' cy='24' r='"+r+"' style='stroke:"+col+";stroke-dasharray:"+c+";stroke-dashoffset:"+(c*(1-f)).toFixed(1)+"'/><text x='24' y='27.5' text-anchor='middle'>"+(pc==null?"—":pc+"%")+"</text></svg>";};
+  var tile=function(l,v,s,pc,col,cls){return "<div class='a2-tile "+(cls||"")+"' data-tip='"+anaEsc(l)+": "+anaEsc(v)+(s?" · "+anaEsc(s):"")+"'>"+ring(pc,col)+"<div class='tx'><div class='l'>"+l+"</div><div class='v'>"+v+"</div><div class='s'>"+s+"</div></div></div>";};
+  var overview="<div class='card a2-card a2-hero'><div class='a2-head'><div><div class='t'>Revenue overview</div><div class='st'>total tour cost, money received and pending, expenses and profit · "+b.label+"</div></div></div>"+
+    "<div class='a2-hero-grid'><div class='a2-hero-main'><div class='l'>Total tour cost</div><div class='big'>"+fmt(ovTotal)+"</div><div class='s'>"+T.length+" tour"+(T.length===1?"":"s")+" · "+ovGuests+" guest"+(ovGuests===1?"":"s")+(ovGuests?" · "+fmt(Math.round(ovTotal/ovGuests))+" per guest":"")+"</div>"+
+      "<div class='a2-split' data-tip='Received "+anaEsc(fmt(ovRec))+" ("+pRec+"%) · Pending "+anaEsc(fmt(ovPend))+" ("+pPend+"%)'><i class='rec' style='width:"+pRec+"%'></i><i class='pen' style='width:"+pPend+"%'></i></div>"+
+      "<div class='a2-split-lg'><span><i class='rec'></i>Received <b>"+fmt(ovRec)+"</b> · "+pRec+"%</span><span><i class='pen'></i>Pending <b>"+fmt(ovPend)+"</b> · "+pPend+"%</span></div>"+
+      "<div class='a2-split exp' data-tip='Expenses "+anaEsc(fmt(ovExp))+" ("+pExp+"%) · Profit "+anaEsc(fmt(ovProfit))+(pMargin!=null?" ("+pMargin+"%)":"")+"'><i class='exp' style='width:"+Math.min(pExp,100)+"%'></i><i class='"+(ovProfit>=0?"prof":"loss")+"' style='width:"+(ovProfit>=0?Math.max(100-pExp,0):Math.min(pExp-100,100))+"%'></i></div>"+
+      "<div class='a2-split-lg'><span><i class='exp'></i>Expenses <b>"+fmt(ovExp)+"</b> · "+pExp+"%</span><span><i class='"+(ovProfit>=0?"prof":"loss")+"'></i>"+(ovProfit>=0?"Profit":"Loss")+" <b>"+fmt(Math.abs(ovProfit))+"</b>"+(pMargin!=null?" · "+pMargin+"% margin":"")+"</span></div></div>"+
+      "<div class='a2-hero-tiles'>"+tile("Advance received",fmt(ovRec),pRec+"% of tour cost collected",pRec,GOOD)+tile("Pending",fmt(ovPend),pPend+"% still to collect",pPend,"#eda100")+tile("Total tour expense",fmt(ovExp),pExp+"% of tour cost · actual, saved or estimated",pExp,a2col(1))+tile(ovProfit>=0?"Tour profit":"Tour loss",fmt(Math.abs(ovProfit)),pMargin!=null?pMargin+"% margin · target "+(+prefs.marginMin||0)+"%":"no revenue yet",pMargin,ovProfit>=0?GOOD:BAD,ovProfit>=0?"":"bad")+"</div></div></div>";
   var moneyStats="<div class='a2-stats'>"+a2Stat("Revenue",fmt(sumR),T.length+" tour"+(T.length===1?"":"s"))+a2Stat("Costs",fmt(sumC),"actual, saved or estimated")+a2Stat("Profit",fmt(sumP),sumR?Math.round(sumP/sumR*100)+"% margin":"",sumP>=0?"up":"down")+a2Stat("Per guest",fmt(T.reduce(function(s,t){return s+tourPaxBooked(t);},0)?Math.round(sumR/T.reduce(function(s,t){return s+tourPaxBooked(t);},0)):0),"average revenue")+"</div>";
   /* ---- profit by tour ---- */
   var minM=+prefs.marginMin||0;
@@ -5570,7 +5605,7 @@ function renderAnalytics(){
   var custom=_a2.range==="custom"?"<div class='a2-custom'><input type='date' class='input mono' id='a2From' value='"+(_a2.from||"")+"' onchange='a2SetCustom()'><span>to</span><input type='date' class='input mono' id='a2To' value='"+(_a2.to||"")+"' onchange='a2SetCustom()'></div>":"";
   el.innerHTML=
     "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
-    a2Card("money","Money by month","revenue, costs and profit by tour start",moneyStats+moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
+    overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
     "<div class='a2-grid'>"+
       a2Card("profit","Profit by tour","revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
       a2Card("age","Receivables ageing","money still to collect, by how late it is",ageBody,ageTbl,"",recTot?"<b>"+fmt(recTot)+"</b> outstanding · <b style='color:"+BAD+"'>"+fmt(overdue)+"</b> overdue":"")+
