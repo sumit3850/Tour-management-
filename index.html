@@ -1662,16 +1662,16 @@ html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.non
 }
 
 .a2-hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1.6fr);gap:20px;align-items:stretch}
-.a2-hero-main{background:linear-gradient(160deg,var(--sea) 0%,#2945ba 70%,#1f369c 100%);color:#fff;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center;min-width:0}
-.a2-hero-main .l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.a2-hero-main{background:var(--surface-2);border:1px solid var(--line-soft);color:var(--ink);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.a2-hero-main .l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
 .a2-hero-main .big{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:4px;overflow-wrap:anywhere}
-.a2-hero-main .s{font-size:12px;opacity:.85;margin-top:4px}
-.a2-split{display:flex;height:10px;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.18);margin-top:16px;gap:2px}
+.a2-hero-main .s{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.a2-split{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--line);margin-top:16px;gap:2px}
 .a2-split i{display:block;height:100%;transform-origin:left;animation:anaWide .8s var(--spring) backwards}
-.a2-split i.rec{background:#5fe3a1}.a2-split i.pen{background:#ffd166}.a2-split i.exp{background:#ff9f6e}.a2-split i.prof{background:#5fe3a1}.a2-split i.loss{background:#ff6b6b}
+.a2-split i.rec{background:#0f9a4f}.a2-split i.pen{background:#eda100}.a2-split i.exp{background:#eb6834}.a2-split i.prof{background:#0f9a4f}.a2-split i.loss{background:#ea4d4d}
 .a2-split.exp{margin-top:14px}
-.a2-split-lg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;opacity:.95;margin-top:7px}.a2-split-lg b{font-weight:700}
-.a2-split-lg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}.a2-split-lg i.rec{background:#5fe3a1}.a2-split-lg i.pen{background:#ffd166}.a2-split-lg i.exp{background:#ff9f6e}.a2-split-lg i.prof{background:#5fe3a1}.a2-split-lg i.loss{background:#ff6b6b}
+.a2-split-lg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink-soft);margin-top:7px}.a2-split-lg b{font-weight:700;color:var(--ink)}
+.a2-split-lg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}.a2-split-lg i.rec{background:#0f9a4f}.a2-split-lg i.pen{background:#eda100}.a2-split-lg i.exp{background:#eb6834}.a2-split-lg i.prof{background:#0f9a4f}.a2-split-lg i.loss{background:#ea4d4d}
 .a2-hero-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .a2-tile{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;min-width:0;animation:cardIn .5s var(--spring) backwards}
 .a2-tile .tx{min-width:0}.a2-tile .l{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
@@ -1679,7 +1679,7 @@ html.dark .a2-chip.ok{background:#0f2a1c;color:#5fd59a}html.dark .a2-heat .c.non
 .a2-tile .s{font-size:11px;color:var(--ink-soft);margin-top:1px}
 .a2-ring{width:48px;height:48px;flex:none}.a2-ring circle{fill:none;stroke-width:5;stroke:var(--line);transform:rotate(-90deg);transform-origin:50% 50%}.a2-ring circle+circle{stroke-linecap:round;transition:stroke-dashoffset .8s var(--spring)}
 .a2-ring text{font-size:11px;font-weight:700;fill:var(--ink);font-family:var(--font-body)}
-html.dark .a2-hero-main{background:linear-gradient(160deg,#2f49c4 0%,#1f369c 70%,#172a7a 100%)}html.dark .a2-tile{background:var(--surface-2);border-color:var(--line)}
+html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}html.dark .a2-tile{background:var(--surface-2);border-color:var(--line)}
 @media(max-width:900px){.a2-hero-grid{grid-template-columns:1fr}.a2-hero-main .big{font-size:30px}}
 @media(max-width:600px){.a2-hero-tiles{grid-template-columns:1fr 1fr;gap:8px}.a2-tile{padding:10px;gap:8px;flex-direction:column;align-items:flex-start}.a2-tile .v{font-size:17px}.a2-ring{width:40px;height:40px}}
 </style>
@@ -1725,7 +1725,7 @@ html.dark .a2-hero-main{background:linear-gradient(160deg,#2f49c4 0%,#1f369c 70%
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 320</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 321</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1734,7 +1734,7 @@ html.dark .a2-hero-main{background:linear-gradient(160deg,#2f49c4 0%,#1f369c 70%
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 320</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 321</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
