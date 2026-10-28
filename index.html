@@ -143,6 +143,7 @@ html.dark .cat[style*="--cc"]{background:color-mix(in srgb,var(--cc) 32%,transpa
 #quotationBody .doc-kv td{font-weight:400 !important}
 #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important}
 #quotationBody .doc-title,#payPage .doc-title{font-size:14px !important}
+#quotationBody .pay-amt,#payPage .pay-amt{font-size:26px !important;font-weight:700;letter-spacing:-.01em}#quotationBody .pay-h,#payPage .pay-h{font-size:14px !important}
 #quotationBody img,#payPage img{font-size:0 !important}
 .doc-kv{border-collapse:collapse;font-size:13px;align-self:flex-start;display:block}.doc-kv td{border:0 !important;background:transparent !important}
 /* header grid: two "Label : value" pairs per row on wide screens, one per row on phones */
@@ -1719,7 +1720,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
 .bl-qr-box img{width:100%;height:100%;object-fit:contain}.bl-qr-box span{font-size:11px;color:var(--ink-soft)}
 .bl-qr-acts{flex:1;min-width:0}
 @media(max-width:900px){.bl-grid,.bl-two{grid-template-columns:1fr}}
-@media(max-width:600px){.bl-qr{flex-direction:column}#quotationBody .pay-grid{grid-template-columns:1fr !important}}
+@media(max-width:600px){.bl-qr{flex-direction:column}#quotationBody .pay-grid{grid-template-columns:1fr !important}#quotationBody .pay-online-body{justify-content:center;padding:14px !important}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1763,7 +1764,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 327</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 328</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1772,7 +1773,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 327</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 328</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2074,6 +2075,8 @@ function refreshDocMeta(html,metaHtml,onlyOld){
 function refreshDocTerms(html,mode,opts){
   html=stripDocFooter(html);
   if(!html)return html||"";
+  var incRe=/<div class=['"]doc-inc['"][^>]*>[\s\S]*?<\/div>/;
+  if(incRe.test(html)){html=html.replace(incRe,policyIncludesHTML(mode));opts=Object.assign({},opts||{},{noIncludes:true});}
   var starts=[/<div style=['"]font-size:12px;color:#5a6b62;margin-bottom:1[46]px['"]><span/, /<div style=['"]font-size:12px;color:var\(--ink-soft\);margin-bottom:16px['"]>/,
               /<table style=['"][^'"]*['"]><thead><tr><th colspan=['"]2['"][^>]*>(Payment Terms|Booking &amp; Payment)/, /<div style=['"]font-size:11px;color:#5a6b62;background:#fafcfb[^'"]*['"]>\s*<div[^>]*>Terms/];
   var ends=[/<div style=['"]text-align:center;margin-top:20px;padding-top:12px;border-top:2px solid #143a2e['"]>/, /<div style=['"]margin-top:20px;padding:14px;background:var\(--surface-2\)/];
@@ -2092,6 +2095,13 @@ function refreshDocTerms(html,mode,opts){
   }
   return html.slice(0,si)+policyDocHTML(mode,opts||{})+html.slice(ei);
 }
+/* The "Includes" line on its own (class doc-inc so refreshDocTerms can find and
+   refresh it where it sits above the payment details of an invoice). */
+function policyIncludesHTML(mode){
+  var P=policyCfg[mode==="session"?"session":"group"]||policyCfg.group;if(!P||!P.includes)return "";
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+  return "<div class='doc-inc' style='font-size:12.5px;color:#5a6b62;margin-bottom:16px;line-height:1.6'><span style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em'>Includes</span><br>"+esc(P.includes)+"</div>";
+}
 function policyDocHTML(mode,opts){
   opts=opts||{};var P=policyCfg[mode==="session"?"session":"group"]||policyCfg.group;
   var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
@@ -2100,7 +2110,7 @@ function policyDocHTML(mode,opts){
   var box=function(inner){return "<div style='font-size:11px;color:#5a6b62;background:#fafcfb;border:1px solid #e6efe9;border-radius:10px;padding:11px 14px;line-height:1.7;margin-bottom:12px'>"+inner+"</div>";};
   var lines=function(arr){return (arr||[]).filter(function(x){return String(x).trim();}).map(function(b){return "• "+esc(b);}).join("<br>");};
   var html="";
-  if(P.includes)html+="<div style='font-size:12px;color:#5a6b62;margin-bottom:14px'><span style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em'>Includes</span><br>"+esc(P.includes)+"</div>";
+  if(P.includes&&!opts.noIncludes)html+="<div style='font-size:12px;color:#5a6b62;margin-bottom:14px'><span style='font-weight:700;color:#20302b;font-size:11px;text-transform:uppercase;letter-spacing:.06em'>Includes</span><br>"+esc(P.includes)+"</div>";
   var tierRows=tiers.map(function(t){var on=opts.tier&&t.id===opts.tier;
     return "<tr"+(on?" style='background:#eaf4ee;font-weight:700'":"")+"><td style='padding:7px 12px;border-bottom:1px solid #eef4f0'>"+esc(t.text)+(on?" <span style='font-size:10px;color:#1f8f5f'>● applies</span>":"")+"</td><td style='padding:7px 12px;border-bottom:1px solid #eef4f0;text-align:right;white-space:nowrap'>"+esc(t.label)+" "+(mode==="session"?"advance":"deposit")+"</td></tr>";}).join("");
   html+="<table style='width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:12px'>"+
@@ -7080,23 +7090,9 @@ function paymentPageHTML(){
   var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:7px 12px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:7px 12px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
   var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
     "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:13px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
-  var _pc=payCardsHTML();
-  var A=payAccountFor("in"),X=payAccountFor("x");
-  var inCard=A?card("Bank Transfer — India",
-    row("Account holder",A.holder)+
-    row("Account number",A.acc,1)+
-    row("Bank",A.bank)+
-    row("Branch",A.branch)+
-    row("IFSC",A.ifsc,1)+
-    row("Bank address",A.addr)):"";
-  var xCard=X?card("International Payment"+(X.method?" — "+esc(X.method):""),
-    row("Account holder",X.holder)+
-    row("Payment method",X.method)+
-    row("Account number",X.acc,1)+
-    row("Routing code",X.routing,1)+
-    row("Routing type",X.routingType)+
-    row("Bank",X.bank)+
-    row("Bank address",X.addr)):"";
+  var _q=(typeof _curQuote!=="undefined"&&_curQuote)||{};
+  var _pc=payCardsHTML({amount:(parseFloat(_q.deposit)||0),amountLabel:"Deposit to confirm",ref:_q.qid||""});
+  var inCard=_pc.inCard,xCard=_pc.xCard;
   if(!_pc.any)return "";
   var html="<div id='payPage' style='padding:24px;background:#fff;color:#20302b'>"+
     "<div style='border-bottom:2px solid #143a2e;padding-bottom:10px;margin-bottom:16px'>"+
@@ -7141,6 +7137,7 @@ function printQuotation() {
         #quotationBody .doc-kv td{font-weight:400 !important}
         #quotationBody .doc-client,#payPage .doc-client{font-weight:700 !important}
         #quotationBody .doc-title,#payPage .doc-title{font-size:14px !important}
+#quotationBody .pay-amt,#payPage .pay-amt{font-size:26px !important;font-weight:700;letter-spacing:-.01em}#quotationBody .pay-h,#payPage .pay-h{font-size:14px !important}
         .doc-kv{border-collapse:collapse;font-size:13px;display:block}.doc-kv td{border:0 !important;background:transparent !important}
         .doc-kv tbody{display:grid;grid-template-columns:max-content max-content minmax(0,1fr) max-content max-content minmax(0,1fr);align-items:start}
         .doc-kv tr{display:contents}.doc-kv td{display:block}
@@ -8477,13 +8474,14 @@ function amountInWords(n){
 }
 function rupeesInWords(n){return "Rupees "+amountInWords(n)+" Only";}
 /* The payment cards printed on documents: default India account, default
-   international account, and the pay-online block (link, UPI ID, UPI QR). */
+   international account (full-width tables, one under the other), and the
+   pay-online panel (large UPI QR, amount, UPI ID, payment link). */
 function payCardsHTML(opt){
   opt=opt||{};
   var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
-  var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:6px 10px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:130px'>"+k+"</td><td style='padding:6px 10px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
-  var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden'>"+
-    "<thead><tr><th colspan='2' style='text-align:left;padding:8px 10px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:12px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
+  var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:8px 14px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:8px 14px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace;font-size:13px'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
+  var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
+    "<thead><tr><th colspan='2' style='text-align:left;padding:10px 14px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:13px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
   var A=payAccountFor("in"),X=payAccountFor("x");
   var inCard=A?card("Bank transfer — India",row("Account holder",A.holder)+row("Account number",A.acc,1)+row("Bank",A.bank)+row("Branch",A.branch)+row("IFSC",A.ifsc,1)+row("Bank address",A.addr)):"";
   var xCard=X?card("International payment"+(X.method?" — "+esc(X.method):""),row("Account holder",X.holder)+row("Payment method",X.method)+row("Account number",X.acc,1)+row("Routing code",X.routing,1)+row("Routing type",X.routingType)+row("Bank",X.bank)+row("Bank address",X.addr)):"";
@@ -8492,22 +8490,36 @@ function payCardsHTML(opt){
   var qr=(payCfg.printQr!==false&&payCfg.upiQr)?payCfg.upiQr:"";
   var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
   var upiUrl=upi?("upi://pay?pa="+encodeURIComponent(upi)+"&pn="+encodeURIComponent(company)+(opt.amount>0?"&am="+Math.round(opt.amount):"")+"&cu=INR"):"";
-  var online=(link||upi||qr)?"<div style='display:flex;gap:14px;align-items:center;border:1px solid #e2efe8;border-left:4px solid #1f8f5f;border-radius:10px;padding:12px 14px;background:#f3f9f5'>"+
-      (qr?"<img src='"+qr+"' alt='UPI QR code' style='width:118px;height:118px;object-fit:contain;background:#fff;border:1px solid #d3e7db;border-radius:8px;flex:none'>":"")+
-      "<div style='flex:1;min-width:0'><div style='font-weight:700;font-size:13px;color:#15563c;margin-bottom:4px'>Pay online"+(opt.amount>0?" · "+fmt(opt.amount):"")+"</div>"+
-      (qr?"<div style='font-size:12px;margin-bottom:3px'>Scan the QR with any UPI app — GPay, PhonePe, Paytm, BHIM.</div>":"")+
-      (upi?"<div style='font-size:12px'>UPI ID: <b style='font-family:monospace'>"+esc(upi)+"</b>"+(upiUrl?" · <a href='"+upiUrl+"' style='color:#1f8f5f'>tap to pay</a>":"")+"</div>":"")+
-      (link?"<div style='font-size:12px'>Cards / netbanking: <a href='"+link.replace(/'/g,"")+"' style='color:#0a6ed1;font-weight:700'>"+esc(link.replace(/^https?:\/\//,""))+"</a></div>":"")+
-      "</div></div>":"";
+  var pc="-webkit-print-color-adjust:exact;print-color-adjust:exact;";
+  var lab=function(t){return "<div style='font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#5a6b62;font-weight:700;margin-bottom:3px'>"+t+"</div>";};
+  var online=(link||upi||qr)?
+    "<div class='pay-online' style='border:1px solid #cfe5d8;border-radius:14px;overflow:hidden;margin:2px 0 16px;background:#fff;"+pc+"'>"+
+      "<div style='background:#15563c;color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;"+pc+"'>"+
+        "<div class='pay-h' style='font-weight:700;font-size:14px;letter-spacing:.02em'>Pay online</div>"+
+        "<div style='font-size:11.5px;opacity:.9'>"+(qr||upi?"UPI":"")+(link?(qr||upi?" · ":"")+"Cards · Netbanking":"")+"</div>"+
+      "</div>"+
+      "<div class='pay-online-body' style='display:flex;gap:24px;padding:18px 20px;align-items:center;flex-wrap:wrap;background:linear-gradient(180deg,#f7fbf8,#fff);"+pc+"'>"+
+        (qr?"<div style='flex:none;text-align:center;margin:0 auto'>"+
+          "<img src='"+qr+"' alt='UPI QR code' style='display:block;width:224px;height:224px;object-fit:contain;background:#fff;border:1px solid #d3e7db;border-radius:14px;padding:8px;box-shadow:0 3px 12px rgba(21,86,60,.12)'>"+
+          "<div style='font-size:11px;color:#15563c;margin-top:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase'>Scan to pay</div>"+
+        "</div>":"")+
+        "<div style='flex:1;min-width:220px'>"+
+          (opt.amount>0?lab(opt.amountLabel||"Amount payable")+"<div class='pay-amt' style='font-size:26px;font-weight:700;color:#15563c;line-height:1.15;margin-bottom:10px'>"+fmt(opt.amount)+"</div>":"")+
+          (qr?"<div style='font-size:12.5px;color:#20302b;margin-bottom:12px;line-height:1.5'>Scan the QR with <b>GPay, PhonePe, Paytm, BHIM</b> or any UPI app.</div>":"")+
+          (upi?"<div style='margin-bottom:12px'>"+lab("UPI ID")+"<span style='display:inline-block;font-family:monospace;font-weight:700;font-size:13.5px;color:#15563c;background:#eef7f1;border:1px solid #cfe5d8;border-radius:8px;padding:6px 12px'>"+esc(upi)+"</span>"+(upiUrl?" <a href='"+upiUrl+"' style='font-size:12px;color:#1f8f5f;font-weight:600;margin-left:6px'>tap to pay</a>":"")+"</div>":"")+
+          (link?"<div style='margin-bottom:10px'>"+lab("Cards / netbanking")+"<a href='"+link.replace(/'/g,"")+"' style='display:inline-block;background:#1f8f5f;color:#fff;font-weight:700;font-size:12.5px;padding:8px 16px;border-radius:8px;text-decoration:none;"+pc+"'>Pay securely online →</a>"+
+            "<div style='font-size:11px;color:#5a6b62;margin-top:5px;overflow-wrap:anywhere'>"+esc(link.replace(/^https?:\/\//,""))+"</div></div>":"")+
+          "<div style='font-size:11px;color:#5a6b62;margin-top:4px'>Please mention "+(opt.ref?"<b>"+esc(opt.ref)+"</b>":"the document number")+" in your payment reference.</div>"+
+        "</div>"+
+      "</div>"+
+    "</div>":"";
   return {inCard:inCard,xCard:xCard,online:online,any:!!(inCard||xCard||online)};
 }
-/* "Payment details" block printed on invoices: the bank cards side by side + pay online. */
-function payNowHTML(amount){
-  var c=payCardsHTML({amount:amount});if(!c.any)return "";
-  var both=c.inCard&&c.xCard;
-  return "<div style='margin-bottom:16px'><div class='doc-title' style='font-weight:700;font-size:13px;color:#15563c;margin-bottom:8px'>Payment details"+(amount>0?" · amount payable "+fmt(amount):"")+"</div>"+
-    ((c.inCard||c.xCard)?"<div class='pay-grid' style='display:grid;grid-template-columns:"+(both?"minmax(0,1fr) minmax(0,1fr)":"1fr")+";gap:12px;margin-bottom:12px'>"+c.inCard+c.xCard+"</div>":"")+
-    c.online+"</div>";
+/* "Payment details" block printed on invoices: bank cards one under the other, then pay online. */
+function payNowHTML(amount,ref){
+  var c=payCardsHTML({amount:amount,ref:ref});if(!c.any)return "";
+  return "<div style='margin-bottom:16px'><div class='doc-title' style='font-weight:700;font-size:13px;color:#15563c;margin-bottom:10px'>Payment details"+(amount>0?" · amount payable "+fmt(amount):"")+"</div>"+
+    c.inCard+c.xCard+c.online+"</div>";
 }
 function payNowHTML_legacy(amount){
   if(!payCfg.upi&&!payCfg.payPage)return "";
@@ -8699,8 +8711,9 @@ function renderInvoiceDoc(){
     "</table>"+
     (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:12px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
     feeNote+
-    payNowHTML(stage==="proforma"?(deposit>0?deposit:grand):(deposit>0?pending:grand))+
-    policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"GST is charged as itemised above on the taxable value.":"")})+
+    policyIncludesHTML(inv.isSess?"session":"group")+
+    payNowHTML(stage==="proforma"?(deposit>0?deposit:grand):(deposit>0?pending:grand),inv.invid)+
+    policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"GST is charged as itemised above on the taxable value.":""),noIncludes:true})+
     "";
   var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
 }
