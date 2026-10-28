@@ -1706,6 +1706,20 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   .kpi .trend{grid-area:tr;margin-top:2px}
 }
 @media(max-width:400px){.kpi .val{font-size:23px}.kpi{column-gap:10px;padding:12px 12px}.kpi .lab svg{width:36px;height:36px;padding:8px}}
+
+/* Billing & instructions layout */
+.bl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;margin-top:4px}
+.bl-card{margin-top:16px}.bl-grid .bl-card{margin-top:0}
+.bl-card .h-sec{margin-bottom:2px}
+.bl-sub{font-size:12px;color:var(--ink-soft);margin-bottom:12px}
+.bl-two{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.bl-col{min-width:0}.bl-col>.eyebrow{margin-top:0 !important}
+.bl-qr{display:flex;gap:16px;align-items:flex-start;margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.bl-qr-box{width:120px;height:120px;flex:none;border:1px solid var(--line);border-radius:8px;background:#fff;display:grid;place-items:center;overflow:hidden}
+.bl-qr-box img{width:100%;height:100%;object-fit:contain}.bl-qr-box span{font-size:11px;color:var(--ink-soft)}
+.bl-qr-acts{flex:1;min-width:0}
+@media(max-width:900px){.bl-grid,.bl-two{grid-template-columns:1fr}}
+@media(max-width:600px){.bl-qr{flex-direction:column}#quotationBody .pay-grid{grid-template-columns:1fr !important}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1749,7 +1763,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 325</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 326</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1758,7 +1772,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 325</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 326</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2163,7 +2177,7 @@ var SHEET_DATA_EPOCH=2;
 let sheetEpoch=0;
 /* Payments & GST config (per workspace): drives the GST break-up on invoices,
    the Pay-now links, and the payment-reminder messages. */
-let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""};
+let payCfg={gstin:"",stateCode:"35",gstRate:0,hsn:"9985",feeOn:true,feeIndian:3,feeForeign:1.18,upiQr:"",printQr:true,upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""};
 var payAccounts=[]; /* saved bank accounts (India + international) — see PAYMENT ACCOUNTS */
 /* Integrations switchboard (Settings → Integrations): real gates, synced.
    sheets off → no Google-Sheet pushes; whatsapp/email off → those share/send
@@ -2234,7 +2248,7 @@ const STORE=[
   {k:"quoteSeqEpoch",get:function(){return quoteSeqEpoch;},set:function(v){quoteSeqEpoch=parseInt(v,10)||0;}},
   {k:"sheetChangeLog",arr:1,get:function(){return sheetChangeLog;},set:function(v){sheetChangeLog=v;}},
   {k:"payAccounts",arr:1,get:function(){return payAccounts;},set:function(v){if(Array.isArray(v))payAccounts=v;}},
-  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
+  {k:"payCfg",get:function(){return payCfg;},set:function(v){if(v&&typeof v==="object")payCfg=Object.assign({gstin:"",stateCode:"35",gstRate:0,hsn:"9985",feeOn:true,feeIndian:3,feeForeign:1.18,upiQr:"",printQr:true,upi:"",payPage:"",reviewUrl:"",feedbackUrl:"",ebirdKey:"",bkHolder:"",bkAcc:"",bkBank:"",bkBranch:"",bkIfsc:"",bkAddr:"",xHolder:"",xMethod:"",xAcc:"",xRouting:"",xRoutingType:"",xBank:"",xAddr:""},v);}},
   {k:"sessRates",get:function(){return sessRates;},set:function(v){if(v&&typeof v==="object")sessRates=Object.assign({},sessRates,v);}},
   {k:"catalog",get:function(){return catalog;},set:function(v){if(v&&typeof v==="object")catalog=v;rebuildCatalog();}},
   {k:"policyCfg",get:function(){return policyCfg;},set:function(v){policyCfg=policyMerge(v);rebuildTiers();}},
@@ -6565,6 +6579,9 @@ function docRecalcQuote(root,prev,live){
   var changed=0;
   var put=function(row,j,txt){if(!row)return;var c=row.children[j];if(!c||c===focus||c.querySelector("input"))return;if(docCellText(c)!==txt){c.textContent=txt;changed++;}};
   var n=totRow.children.length-1;
+  var feeRow=docFindRow(root,/^(platform|payment gateway|gateway) fee/i),igRow=docFindRow(root,/^IGST/i),cgRow=docFindRow(root,/^CGST/i),sgRow=docFindRow(root,/^SGST/i),grandRow=docFindRow(root,/^grand total/i);
+  var feePct=0;var fmm=feeRow&&docCellText(feeRow.firstElementChild).match(/([\d.]+)\s*%/);if(fmm)feePct=parseFloat(fmm[1])||0;
+  var gRate=0;var grm=(igRow&&docCellText(igRow.firstElementChild).match(/([\d.]+)\s*%/))||(cgRow&&docCellText(cgRow.firstElementChild).match(/([\d.]+)\s*%/));if(grm)gRate=parseFloat(grm[1])*(igRow?1:2);
   var lab=docCellText(depRow&&depRow.firstElementChild);
   var pm=lab.match(/\(\s*([\d.]+)\s*%\s*\)/);var pct=pm?parseFloat(pm[1]):null;
   var pPct=prev?prev.pct:null;
@@ -6583,14 +6600,22 @@ function docRecalcQuote(root,prev,live){
       if(total!=null&&total!==p.total&&(pp===p.pp||pp==null)){pp=Math.round(total/size);put(ppRow,j,fmt(pp));}
       else if(pp!=null&&pp!==p.pp&&(total===p.total||total==null)){total=Math.round(pp*size);put(totRow,j,fmt(total));}
     }
-    if(total!=null&&depRow){
-      if(dep==null&&pct!=null){dep=Math.round(total*pct/100);put(depRow,j,fmt(dep));}
-      else if(prev&&pct!=null&&pPct!=null&&pct!==pPct&&dep===p.dep){dep=Math.round(total*pct/100);put(depRow,j,fmt(dep));}
-      if(dep!=null&&total>0&&j===1)pctFromDep=dep/total*100;
+    /* platform fee + GST + grand total follow the tour price; the deposit is taken on the grand total */
+    var fee=0,tax=0,grand=total;
+    if(total!=null){
+      if(feeRow){fee=Math.round(total*feePct)/100;put(feeRow,j,fmt(fee));}
+      if(gRate>0){tax=Math.round((total+fee)*gRate)/100;if(igRow)put(igRow,j,fmt(tax));if(cgRow)put(cgRow,j,fmt(Math.round(tax*50)/100));if(sgRow)put(sgRow,j,fmt(Math.round(tax*50)/100));}
+      grand=Math.round((total+fee+tax)*100)/100;if(grandRow)put(grandRow,j,fmt(grand));
     }
-    var pending=(total!=null&&dep!=null)?Math.max(0,total-dep):null;
+    var base=(grandRow&&grand!=null)?grand:total;
+    if(base!=null&&depRow){
+      if(dep==null&&pct!=null){dep=Math.round(base*pct/100);put(depRow,j,fmt(dep));}
+      else if(prev&&((pct!=null&&pPct!=null&&pct!==pPct&&dep===p.dep)||(total!==p.total&&dep===p.dep&&pct!=null))){dep=Math.round(base*pct/100);put(depRow,j,fmt(dep));}
+      if(dep!=null&&base>0&&j===1)pctFromDep=dep/base*100;
+    }
+    var pending=(base!=null&&dep!=null)?Math.max(0,base-dep):null;
     if(pending!=null)put(penRow,j,fmt(pending));
-    cols.push({size:size,pp:pp,total:total,dep:dep,pending:pending});
+    cols.push({size:size,pp:pp,total:total,fee:fee,tax:tax,grand:grand,dep:dep,pending:pending});
   }
   /* the "(x%)" in the deposit label follows the first column's deposit */
   if(depRow&&pctFromDep!=null&&(pct==null||Math.abs(pctFromDep-pct)>0.06)&&depRow.firstElementChild!==focus){
@@ -6616,23 +6641,31 @@ function docRecalcInvoice(root,prev,live){
     if(amt!=null){entered=true;sum+=amt;}
   });
   var totRow=docFindRow(table,/^(grand total|total amount)/i);
+  var subRow=docFindRow(table,/^sub-?total/i);
+  var feeRow=docFindRow(table,/^(platform|payment gateway|gateway) fee/i);
   var taxRow=docFindRow(table,/^taxable value/i);
   var igRow=docFindRow(table,/^IGST/i),cgRow=docFindRow(table,/^CGST/i),sgRow=docFindRow(table,/^SGST/i);
   var depRow=docFindRow(table,/^deposit amount/i);
   var penRow=docFindRow(table,/^pending amount/i);
-  var total=entered?sum:(taxRow?docNum(taxRow.lastElementChild):(totRow?docNum(totRow.lastElementChild):null));
+  var wordsRow=docFindRow(table,/^amount in words/i);
+  var total=entered?sum:(subRow?docNum(subRow.lastElementChild):(taxRow?docNum(taxRow.lastElementChild):(totRow?docNum(totRow.lastElementChild):null)));
   if(total==null)total=0;
+  var feePct=0;var fmm=feeRow&&docCellText(feeRow.firstElementChild).match(/([\d.]+)\s*%/);if(fmm)feePct=parseFloat(fmm[1])||0;
+  var fee=feeRow?Math.round(total*feePct)/100:0;
+  var taxable=Math.round((total+fee)*100)/100;
   var rate=0;var rm=(igRow&&docCellText(igRow.firstElementChild).match(/([\d.]+)\s*%/))||(cgRow&&docCellText(cgRow.firstElementChild).match(/([\d.]+)\s*%/));
   if(rm)rate=parseFloat(rm[1])*(igRow?1:2);
-  var tax=rate>0?Math.round(total*rate)/100:0;
-  var grand=Math.round((total+tax)*100)/100;
+  var tax=rate>0?Math.round(taxable*rate)/100:0;
+  var grand=Math.round((taxable+tax)*100)/100;
   var dep=depRow?docNum(depRow.lastElementChild):null;
   var pending=depRow?Math.max(0,grand-(dep||0)):null;
-  if(taxRow){put(taxRow,fmt(total));put(igRow,fmt(igRow?tax:0));put(cgRow,fmt(Math.round(tax*50)/100));put(sgRow,fmt(Math.round(tax*50)/100));}
-  if(totRow&&(entered||taxRow))put(totRow,fmt(grand));
+  put(subRow,fmt(total));put(feeRow,fmt(fee));
+  if(taxRow){put(taxRow,fmt(taxable));put(igRow,fmt(igRow?tax:0));put(cgRow,fmt(Math.round(tax*50)/100));put(sgRow,fmt(Math.round(tax*50)/100));}
+  if(totRow&&(entered||taxRow||subRow))put(totRow,fmt(grand));
   if(depRow&&dep==null)put(depRow,fmt(0));
   if(penRow&&pending!=null)put(penRow,fmt(pending));
-  return {kind:"invoice",lines:lines,entered:entered,total:total,rate:rate,tax:tax,grand:grand,deposit:dep,pending:pending,changed:changed};
+  if(wordsRow)put(wordsRow,rupeesInWords(grand));
+  return {kind:"invoice",lines:lines,entered:entered,total:total,fee:fee,feePct:feePct,taxable:taxable,rate:rate,tax:tax,grand:grand,deposit:dep,pending:pending,changed:changed};
 }
 /* A quotation printed without a deposit row still owes a deposit figure: the stored % of its total. */
 function docQuoteFill(c,pct){if(c&&c.dep==null&&c.total!=null&&pct!=null&&isFinite(parseFloat(pct))){c.dep=Math.round(c.total*parseFloat(pct)/100);c.pending=Math.max(0,c.total-c.dep);}return c;}
@@ -6666,7 +6699,7 @@ function docSyncFigures(){
       if(r.lines.length)inv.lines=r.lines;
       if(!r.entered)inv.quotedTotal=r.total;
       if(r.deposit!=null)inv.deposit=r.deposit;
-      inv.total=r.total;inv.grandTotal=r.grand;inv.gstRate=r.rate;inv.gstAmount=r.tax;inv.pending=(r.pending!=null?r.pending:Math.max(0,r.grand-(inv.deposit||0)));
+      inv.total=r.total;inv.fee=r.fee;inv.feePct=r.feePct;inv.taxable=r.taxable;inv.grandTotal=r.grand;inv.gstRate=r.rate;inv.gstAmount=r.tax;inv.pending=(r.pending!=null?r.pending:Math.max(0,r.grand-(inv.deposit||0)));
       inv.accommodation=lineAmt(inv,"Accommodation");inv.travel=lineAmt(inv,"Transportation and Logistics","Travel and Logistics");inv.food=lineAmt(inv,"Food and Water Bottles","Food");inv.entry=lineAmt(inv,"Entry Fee","Entry tickets");inv.ship=lineAmt(inv,"Ship tickets");inv.guide=lineAmt(inv,"Guide Fee");inv.referral=lineAmt(inv,"Referral amount");
     }
     return r;
@@ -6675,6 +6708,7 @@ function docSyncFigures(){
   if(typeof _curQuote!=="undefined"&&_curQuote&&q.cols[0]){
     var c=docQuoteFill(q.cols[0],q.pct!=null?q.pct:_curQuote.depositPct);
     if(c.total!=null)_curQuote.total=c.total;
+    if(c.grand!=null)_curQuote.grand=c.grand;if(c.fee!=null)_curQuote.fee=c.fee;if(c.tax!=null)_curQuote.gstAmount=c.tax;
     if(c.pp!=null)_curQuote.perPerson=c.pp;
     if(c.dep!=null)_curQuote.deposit=c.dep;
     if(c.pending!=null)_curQuote.pending=c.pending;else if(c.total!=null&&c.dep!=null)_curQuote.pending=Math.max(0,c.total-c.dep);
@@ -6800,7 +6834,7 @@ function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
   var name=esc(client.name)||"Guest Name";
   return docKvGrid(
     [["Quotation To","<span class='doc-client'>"+name+"</span>"],["Address",esc(client.address)],["GST No.",esc(client.gst)]],
-    [["Quotation #",qid],["Date",today],["Valid Until",validUntil]]);
+    [["Quotation #",qid],["Date",today],["Valid Until",validUntil]].concat(payCfg.gstin?[["Our GSTIN",esc(payCfg.gstin)]]:[]));
 }
 function generateQuotation(){
   const sel = calcSelection();
@@ -6820,8 +6854,15 @@ function generateQuotation(){
   const row = (label,val)=>`<tr style="border-bottom:1px solid var(--line-soft)"><td style="padding:8px 4px">${label}</td><td style="padding:8px 4px;text-align:right;font-variant-numeric:tabular-nums">${fmt(val||0)}</td></tr>`;
   const pricePerPerson = fmt(d.perPerson);
   const qTotal = quotedTotal(d,pax); /* per-person × pax — tallies exactly on the document */
+  const feePct=platformFeePct(clientType),feeAmt=Math.round(qTotal*feePct)/100;
+  const qGst=gstBreakup(qTotal+feeAmt,qClient.gst);
+  const qGrand=Math.round(qGst?qGst.grand:(qTotal+feeAmt));
   _curQuote={qid:qid,kind:"tour",tour:tourName,title:tourName,clientType:clientType,pax:pax,client:JSON.parse(JSON.stringify(qClient)),date:today,validUntil:validUntil,departure:"",savedId:null,
-    participants:pax,total:qTotal,perPerson:d.perPerson,depositPct:50,deposit:Math.round(qTotal*0.5),pending:qTotal-Math.round(qTotal*0.5)};
+    participants:pax,total:qTotal,perPerson:d.perPerson,fee:feeAmt,feePct:feePct,gstRate:qGst?qGst.rate:0,gstAmount:qGst?qGst.tax:0,grand:qGrand,depositPct:50,deposit:Math.round(qGrand*0.5),pending:qGrand-Math.round(qGrand*0.5)};
+  const chargeRows=(feePct>0?row(feeLabel(feePct),feeAmt):"")+
+    (qGst?(qGst.inter?row('IGST @ '+qGst.rate+'%',qGst.igst):row('CGST @ '+(qGst.rate/2)+'%',qGst.cgst)+row('SGST/UTGST @ '+(qGst.rate/2)+'%',qGst.sgst)):"")+
+    ((feePct>0||qGst)?`<tr class="qtot"><td style="padding:11px 12px;font-size:14px"><b>Grand total${qGst?' (incl. GST)':''}</b></td><td style="padding:11px 12px;text-align:right;font-size:15px;font-weight:700">${fmt(qGrand)}</td></tr>`:"")+
+    row('Deposit to confirm (50%)',Math.round(qGrand*0.5))+row('Pending amount',qGrand-Math.round(qGrand*0.5));
 
   const html = `
     <div class="modal-head">
@@ -6868,6 +6909,7 @@ function generateQuotation(){
           </tbody>
           <tfoot>
             <tr class="qtot"><td style="padding:11px 12px;font-size:14px"><b>Total tour cost (${pax} pax)</b></td><td style="padding:11px 12px;text-align:right;font-size:15px;font-weight:700">${fmt(qTotal)}</td></tr>
+            ${chargeRows}
             <tr class="qtot"><td style="padding:9px 12px;font-size:14px"><b>Price per person</b></td><td style="padding:9px 12px;text-align:right;font-size:18px;font-family:'Calistoga',serif;color:#15563c"><b>${pricePerPerson}</b></td></tr>
           </tfoot>
         </table>
@@ -6983,6 +7025,7 @@ function paymentPageHTML(){
   var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:7px 12px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:190px'>"+k+"</td><td style='padding:7px 12px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
   var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12.5px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden;margin-bottom:14px'>"+
     "<thead><tr><th colspan='2' style='text-align:left;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:13px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
+  var _pc=payCardsHTML();
   var A=payAccountFor("in"),X=payAccountFor("x");
   var inCard=A?card("Bank Transfer — India",
     row("Account holder",A.holder)+
@@ -6999,22 +7042,12 @@ function paymentPageHTML(){
     row("Routing type",X.routingType)+
     row("Bank",X.bank)+
     row("Bank address",X.addr)):"";
-  if(!inCard&&!xCard&&!link&&!upi)return "";
+  if(!_pc.any)return "";
   var html="<div id='payPage' style='padding:24px;background:#fff;color:#20302b'>"+
     "<div style='border-bottom:2px solid #143a2e;padding-bottom:10px;margin-bottom:16px'>"+
       "<div style='font-family:\"Calistoga\",serif;font-size:20px;color:#15563c'>Payment Information</div>"+
       "<div style='font-size:12px;color:#5a6b62;margin-top:2px'>Please mention the quotation number in your payment reference.</div>"+
-    "</div>"+inCard+xCard;
-  if(link||upi){
-    html+="<div style='display:flex;gap:16px;align-items:center;border:1px solid #e2efe8;border-left:4px solid #1f8f5f;border-radius:10px;padding:14px;background:#f3f9f5'>"+
-      "<div style='flex:1;min-width:0'>"+
-        "<div style='font-weight:700;font-size:14px;color:#15563c;margin-bottom:5px'>Pay Online — UPI · Cards (Visa, Mastercard, RuPay, Amex) · NetBanking</div>"+
-        (link?"<div style='font-size:13px;margin-bottom:4px'>Click to pay securely: <a href='"+link+"' style='color:#0a6ed1;font-weight:700;text-decoration:underline'>"+link.replace(/^https?:\/\//,"")+"</a></div>":"")+
-        (upi?"<div style='font-size:12.5px'>UPI ID: <b style='font-family:monospace'>"+upi+"</b></div>":"")+
-        "<div style='font-size:11.5px;color:#5a6b62;margin-top:5px'>Supports all major UPI apps, Visa, Mastercard, RuPay and Amex cards, and net-banking.</div>"+
-      "</div>"+
-    "</div>";
-  }
+    "</div>"+inCard+xCard+_pc.online;
   html+="</div>";
   return html;
 }
@@ -7799,6 +7832,7 @@ function savePayDetails(){
   var l=document.getElementById("pd_link");
   if(l){var lv=l.value.trim();if(lv&&!/^https?:\/\//i.test(lv))lv="https://"+lv.replace(/^\/+/,"");payCfg.payPage=lv;l.value=lv;}
   var u=document.getElementById("pd_upi");if(u)payCfg.upi=u.value.trim();
+  var pq=document.getElementById("pd_printqr");if(pq)payCfg.printQr=!!pq.checked;
   audit("costsheet","payment-details","updated");
   persistData();
   var btn=event&&event.target;if(btn&&btn.tagName==="BUTTON"){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1300);}
@@ -8057,7 +8091,7 @@ function gqTermsCard(q){
   }).join("");
   return "<div style='margin-top:16px;padding:14px;border:1px solid var(--line-soft);border-radius:10px'>"+
     "<div style='font-weight:700;font-size:13px;margin-bottom:8px'>Payment Terms</div>"+rows+
-    "<div style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Deposit amounts above use "+q.pct+"% of the total tour price"+(q.departure?" · departure "+dmy(new Date(q.departure+"T00:00:00")):"")+".</div>"+
+    "<div style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Deposit amounts above use "+q.pct+"% of the total tour price"+(q.departure?" · departure "+dmy(new Date(q.departure+"T00:00:00")):"")+"."+(function(){var fp=platformFeePct(q.type==="foreign"?"Foreigner":"Indian"),gr=parseFloat(payCfg.gstRate)||0;return (fp>0||gr>0)?" The quotation adds "+(fp>0?"a "+fp+"% platform fee":"")+(fp>0&&gr>0?" and ":"")+(gr>0?gr+"% GST":"")+" on top and takes the deposit on the grand total.":"";})()+"</div>"+
   "</div>";
 }
 function generateGroupQuotation(){
@@ -8080,9 +8114,14 @@ function generateGroupQuotation(){
     if(isSess)dueText=dmy(new Date(new Date(q.departure+"T00:00:00").getTime()-864e5));
     else{var dueDays=(GQ_TIERS.find(function(t){return t.pct>=100;})||{max:15}).max;dueText=dmy(new Date(new Date(q.departure+"T00:00:00").getTime()-dueDays*864e5));}
   }
-  var _v0=valid[0]||{};var _pend0=(_v0.total!=null&&_v0.deposit!=null)?_v0.total-_v0.deposit:null;
+  /* platform fee + GST on top of the tour price; the deposit is taken on the grand total */
+  var _fp=platformFeePct(q.type==="foreign"?"Foreigner":"Indian");
+  var _calc=function(rw){if(rw.total==null)return {fee:null,gst:null,grand:null,dep:rw.deposit};var fee=Math.round(rw.total*_fp)/100;var g=gstBreakup(rw.total+fee,qClient.gst);var grand=Math.round(g?g.grand:(rw.total+fee));var edited=rw.deposit!=null&&Math.abs(rw.deposit-Math.round(rw.total*q.pct/100))>1;var dep=edited?rw.deposit:Math.round(grand*q.pct/100);return {fee:fee,gst:g,grand:grand,dep:dep};};
+  q.rows.forEach(function(rw){var c=_calc(rw);rw.fee=c.fee;rw.gst=c.gst;rw.grand=c.grand;if(c.dep!=null)rw.deposit=c.dep;});
+  var _g0=q.rows[0]&&q.rows[0].gst;
+  var _v0=valid[0]||{};var _pend0=(_v0.grand!=null&&_v0.deposit!=null)?_v0.grand-_v0.deposit:null;
   _curQuote={qid:qid,kind:(isSess?"session":"group"),tour:q.key,title:(isSess?q.label:q.title),clientType:(q.type==="foreign"?"Foreigner":"Indian"),client:JSON.parse(JSON.stringify(qClient)),date:today,validUntil:validUntil,departure:depText,endDate:endText,savedId:null,
-    participants:_v0.size,total:_v0.total,perPerson:_v0.perPerson,depositPct:q.pct,deposit:_v0.deposit,pending:_pend0,
+    participants:_v0.size,total:_v0.total,perPerson:_v0.perPerson,fee:_v0.fee||0,feePct:_fp,gstRate:_g0?_g0.rate:0,gstAmount:(_v0.gst?_v0.gst.tax:0),grand:_v0.grand,depositPct:q.pct,deposit:_v0.deposit,pending:_pend0,
     /* carried so an accepted quote can seed a matching invoice */
     costKey:q.key,typeRaw:q.type,invMode:q.mode,basis:(q.basis||""),pp:(isSess?(parseFloat(gqSessPP)||0):null),pax:_v0.size,startISO:(q.departure||""),endISO:(q.end||"")};
   var headCells=q.rows.map(function(rw){return "<th style='text-align:right;padding:10px 12px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>"+rw.size+" guest"+(rw.size===1?"":"s")+"</th>";}).join("");
@@ -8090,7 +8129,13 @@ function generateGroupQuotation(){
   var perRow=q.rows.map(function(rw){return cell(rw.perPerson);}).join("");
   var totRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;font-weight:700'>"+(rw.total!=null?fmt(rw.total):"—")+"</td>";}).join("");
   var depRow=q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;color:#1f7a54;font-weight:600'>"+(rw.deposit!=null?fmt(rw.deposit):"—")+"</td>";}).join("");
-  var pendRow=q.rows.map(function(rw){var pv=(rw.total!=null&&rw.deposit!=null)?rw.total-rw.deposit:null;return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;color:#b45309'>"+(pv!=null?fmt(pv):"—")+"</td>";}).join("");
+  var pendRow=q.rows.map(function(rw){var pv=(rw.grand!=null&&rw.deposit!=null)?rw.grand-rw.deposit:null;return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;color:#b45309'>"+(pv!=null?fmt(pv):"—")+"</td>";}).join("");
+  var feeRowH=_fp>0?"<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>"+feeLabel(_fp)+"</td>"+q.rows.map(function(rw){return cell(rw.fee);}).join("")+"</tr>":"";
+  var gstRowsH=_g0?(_g0.inter
+      ?"<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>IGST @ "+_g0.rate+"%</td>"+q.rows.map(function(rw){return cell(rw.gst?rw.gst.igst:null);}).join("")+"</tr>"
+      :"<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>CGST @ "+(_g0.rate/2)+"%</td>"+q.rows.map(function(rw){return cell(rw.gst?rw.gst.cgst:null);}).join("")+"</tr>"+
+       "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>SGST/UTGST @ "+(_g0.rate/2)+"%</td>"+q.rows.map(function(rw){return cell(rw.gst?rw.gst.sgst:null);}).join("")+"</tr>"):"";
+  var grandRowH=(_fp>0||_g0)?"<tr style='background:#eaf4ee'><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;font-weight:700'>Grand total"+(_g0?" (incl. GST)":"")+"</td>"+q.rows.map(function(rw){return "<td style='text-align:right;padding:10px 12px;border-bottom:1px solid #eef4f0;font-variant-numeric:tabular-nums;font-weight:700;color:#15563c'>"+(rw.grand!=null?fmt(rw.grand):"—")+"</td>";}).join("")+"</tr>":"";
   var termRows=(q.tiers||[]).map(function(t){
     var on=t.id===q.tier.id;
     return "<tr"+(on?" style='background:#eaf4ee;font-weight:700'":"")+"><td style='padding:9px 12px;border-bottom:1px solid #eef4f0'>"+t.text+(on?" <span style='font-size:10px;color:#1f8f5f'>● applies</span>":"")+"</td><td style='padding:9px 12px;border-bottom:1px solid #eef4f0;text-align:right;color:#15563c'>"+t.label+" deposit</td></tr>";
@@ -8124,6 +8169,7 @@ function generateGroupQuotation(){
           "<tbody>"+
             "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;color:#5a6b62'>Price per person</td>"+perRow+"</tr>"+
             "<tr style='background:#f5faf7'><td style='padding:10px 12px;border-bottom:1px solid #eef4f0;font-weight:700'>Total "+(isSess?"session":"tour")+" price</td>"+totRow+"</tr>"+
+            feeRowH+gstRowsH+grandRowH+
             "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0'>Deposit to confirm ("+q.pct+"%)</td>"+depRow+"</tr>"+
             "<tr><td style='padding:10px 12px;border-bottom:1px solid #eef4f0'>Pending amount</td>"+pendRow+"</tr>"+
           "</tbody>"+
@@ -8355,8 +8401,60 @@ function gstBreakup(taxable,clientGst){
   var tax=Math.round(taxable*rate)/100;
   return {rate:rate,inter:inter,igst:inter?tax:0,cgst:inter?0:Math.round(tax*50)/100,sgst:inter?0:Math.round(tax*50)/100,tax:tax,grand:Math.round((taxable+tax)*100)/100};
 }
-/* "Pay now" block printed on invoices — UPI deep link + hosted payment page. */
+/* Platform / payment-gateway fee: a separate line on every new quotation and
+   invoice — Indian clients 3%, foreign nationals 1.18% by default (Billing &
+   instructions → Tax & charges). GST is charged on the tour price plus this fee. */
+function platformFeePct(clientType){
+  if(payCfg.feeOn===false)return 0;
+  var f=/foreign/i.test(String(clientType||""))?payCfg.feeForeign:payCfg.feeIndian;
+  f=parseFloat(f);return isFinite(f)&&f>0?f:0;
+}
+function feeLabel(pct){return "Platform fee ("+(pct%1===0?pct:String(pct).replace(/0+$/,""))+"%)";}
+/* Indian-system amount in words: "Rupees Twelve Lakh Seventy-Eight Thousand Five Hundred Only" */
+function amountInWords(n){
+  n=Math.round(Math.abs(+n||0));if(!n)return "Zero";
+  var a=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"],b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  var two=function(x){return x<20?a[x]:b[Math.floor(x/10)]+(x%10?"-"+a[x%10]:"");};
+  var three=function(x){return (x>=100?a[Math.floor(x/100)]+" Hundred"+(x%100?" ":""):"")+(x%100?two(x%100):"");};
+  var out=[];var cr=Math.floor(n/1e7);n%=1e7;var la=Math.floor(n/1e5);n%=1e5;var th=Math.floor(n/1000);n%=1000;
+  if(cr)out.push(three(cr)+" Crore");if(la)out.push(two(la)+" Lakh");if(th)out.push(two(th)+" Thousand");if(n)out.push(three(n));
+  return out.join(" ");
+}
+function rupeesInWords(n){return "Rupees "+amountInWords(n)+" Only";}
+/* The payment cards printed on documents: default India account, default
+   international account, and the pay-online block (link, UPI ID, UPI QR). */
+function payCardsHTML(opt){
+  opt=opt||{};
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;");};
+  var row=function(k,v,mono){if(!v)return "";return "<tr><td style='padding:6px 10px;color:#5a6b62;white-space:nowrap;border-bottom:1px solid #eef4f0;width:130px'>"+k+"</td><td style='padding:6px 10px;font-weight:600;border-bottom:1px solid #eef4f0'>"+(mono?"<span style='font-family:monospace'>"+esc(v)+"</span>":esc(v))+"</td></tr>";};
+  var card=function(title,rows){if(!rows)return "";return "<table style='width:100%;border-collapse:collapse;font-size:12px;border:1px solid #e2efe8;border-radius:10px;overflow:hidden'>"+
+    "<thead><tr><th colspan='2' style='text-align:left;padding:8px 10px;background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db;font-size:12px'>"+title+"</th></tr></thead><tbody>"+rows+"</tbody></table>";};
+  var A=payAccountFor("in"),X=payAccountFor("x");
+  var inCard=A?card("Bank transfer — India",row("Account holder",A.holder)+row("Account number",A.acc,1)+row("Bank",A.bank)+row("Branch",A.branch)+row("IFSC",A.ifsc,1)+row("Bank address",A.addr)):"";
+  var xCard=X?card("International payment"+(X.method?" — "+esc(X.method):""),row("Account holder",X.holder)+row("Payment method",X.method)+row("Account number",X.acc,1)+row("Routing code",X.routing,1)+row("Routing type",X.routingType)+row("Bank",X.bank)+row("Bank address",X.addr)):"";
+  var link=(payCfg.payPage||"").trim();if(link&&!/^https?:\/\//i.test(link))link="https://"+link.replace(/^\/+/,"");
+  var upi=(payCfg.upi||"").trim();
+  var qr=(payCfg.printQr!==false&&payCfg.upiQr)?payCfg.upiQr:"";
+  var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var upiUrl=upi?("upi://pay?pa="+encodeURIComponent(upi)+"&pn="+encodeURIComponent(company)+(opt.amount>0?"&am="+Math.round(opt.amount):"")+"&cu=INR"):"";
+  var online=(link||upi||qr)?"<div style='display:flex;gap:14px;align-items:center;border:1px solid #e2efe8;border-left:4px solid #1f8f5f;border-radius:10px;padding:12px 14px;background:#f3f9f5'>"+
+      (qr?"<img src='"+qr+"' alt='UPI QR code' style='width:118px;height:118px;object-fit:contain;background:#fff;border:1px solid #d3e7db;border-radius:8px;flex:none'>":"")+
+      "<div style='flex:1;min-width:0'><div style='font-weight:700;font-size:13px;color:#15563c;margin-bottom:4px'>Pay online"+(opt.amount>0?" · "+fmt(opt.amount):"")+"</div>"+
+      (qr?"<div style='font-size:12px;margin-bottom:3px'>Scan the QR with any UPI app — GPay, PhonePe, Paytm, BHIM.</div>":"")+
+      (upi?"<div style='font-size:12px'>UPI ID: <b style='font-family:monospace'>"+esc(upi)+"</b>"+(upiUrl?" · <a href='"+upiUrl+"' style='color:#1f8f5f'>tap to pay</a>":"")+"</div>":"")+
+      (link?"<div style='font-size:12px'>Cards / netbanking: <a href='"+link.replace(/'/g,"")+"' style='color:#0a6ed1;font-weight:700'>"+esc(link.replace(/^https?:\/\//,""))+"</a></div>":"")+
+      "</div></div>":"";
+  return {inCard:inCard,xCard:xCard,online:online,any:!!(inCard||xCard||online)};
+}
+/* "Payment details" block printed on invoices: the bank cards side by side + pay online. */
 function payNowHTML(amount){
+  var c=payCardsHTML({amount:amount});if(!c.any)return "";
+  var both=c.inCard&&c.xCard;
+  return "<div style='margin-bottom:16px'><div class='doc-title' style='font-weight:700;font-size:13px;color:#15563c;margin-bottom:8px'>Payment details"+(amount>0?" · amount payable "+fmt(amount):"")+"</div>"+
+    ((c.inCard||c.xCard)?"<div class='pay-grid' style='display:grid;grid-template-columns:"+(both?"minmax(0,1fr) minmax(0,1fr)":"1fr")+";gap:12px;margin-bottom:12px'>"+c.inCard+c.xCard+"</div>":"")+
+    c.online+"</div>";
+}
+function payNowHTML_legacy(amount){
   if(!payCfg.upi&&!payCfg.payPage)return "";
   var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
   var upiUrl=payCfg.upi?("upi://pay?pa="+encodeURIComponent(payCfg.upi)+"&pn="+encodeURIComponent(company)+(amount>0?"&am="+amount:"")+"&cu=INR"):"";
@@ -8472,12 +8570,14 @@ function renderInvoiceDoc(){
   var inv=_curInvoice;if(!inv)return;
   var fromLines=invLinesEntered();
   var total=invTotal();
-  var gst=gstBreakup(total,inv.client&&inv.client.gst);
-  var grand=gst?gst.grand:total;
+  var feePct=(inv.feePct!=null&&inv.feePctLocked)?inv.feePct:platformFeePct(inv.clientType);
+  var fee=Math.round(total*feePct)/100,taxable=Math.round((total+fee)*100)/100;
+  var gst=gstBreakup(taxable,inv.client&&inv.client.gst);
+  var grand=gst?gst.grand:taxable;
   var deposit=Math.max(0,parseFloat(inv.deposit)||0);
   var pending=Math.max(0,grand-deposit);
   /* keep the saved figures in step with the (possibly edited) lines */
-  inv.total=total;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
+  inv.total=total;inv.fee=fee;inv.feePct=feePct;inv.taxable=taxable;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
   inv.accommodation=lineAmt(inv,"Accommodation");inv.travel=lineAmt(inv,"Transportation and Logistics","Travel and Logistics");inv.food=lineAmt(inv,"Food and Water Bottles","Food");inv.entry=lineAmt(inv,"Entry Fee","Entry tickets");inv.ship=lineAmt(inv,"Ship tickets");inv.guide=lineAmt(inv,"Guide Fee");inv.referral=lineAmt(inv,"Referral amount");
   var edit=_invEditLines;
   var blank=function(l){return l.amount===""||l.amount==null||isNaN(parseFloat(l.amount));};
@@ -8522,13 +8622,16 @@ function renderInvoiceDoc(){
       "<thead><tr><th style='text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Description</th><th style='text-align:right;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Amount</th></tr></thead>"+
       "<tbody>"+bodyRows+"</tbody>"+
       "<tfoot>"+
-        (gst?("<tr><td style='padding:9px 12px;color:#5a6b62'>Taxable value"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":"")+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(total)+"</td></tr>"+
+        ((feePct>0||gst)?"<tr><td style='padding:9px 12px;color:#5a6b62'>Sub-total</td><td style='padding:9px 12px;text-align:right'>"+fmt(total)+"</td></tr>":"")+
+        (feePct>0?"<tr><td style='padding:9px 12px;color:#5a6b62'>"+feeLabel(feePct)+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(fee)+"</td></tr>":"")+
+        (gst?("<tr><td style='padding:9px 12px;color:#5a6b62'>Taxable value"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":"")+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(taxable)+"</td></tr>"+
           (gst.inter
             ?"<tr><td style='padding:9px 12px;color:#5a6b62'>IGST @ "+gst.rate+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.igst)+"</td></tr>"
             :"<tr><td style='padding:9px 12px;color:#5a6b62'>CGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.cgst)+"</td></tr>"+
              "<tr><td style='padding:9px 12px;color:#5a6b62'>SGST/UTGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.sgst)+"</td></tr>")):"")+
         "<tr style='background:#eaf4ee'><td style='padding:11px 12px;font-size:14px'><b>"+(gst?"Grand Total (incl. GST)":"Total Amount")+"</b></td>"+totalCell+"</tr>"+
         settleRows+
+        "<tr><td style='padding:9px 12px;color:#5a6b62;white-space:nowrap'>Amount in words</td><td style='padding:9px 12px;text-align:right;font-style:italic;color:#20302b'>"+rupeesInWords(grand)+"</td></tr>"+
       "</tfoot>"+
     "</table>"+
     (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:16px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
@@ -8547,9 +8650,10 @@ function invSetQuoted(v,live){if(_curInvoice){_curInvoice.quotedTotal=Math.max(0
 /* Refresh only the money figures (total / GST / pending) while an input keeps focus. */
 function invLiveTotals(){
   var inv=_curInvoice;if(!inv)return;
-  var total=invTotal();var gst=gstBreakup(total,inv.client&&inv.client.gst);var grand=gst?gst.grand:total;
+  var total=invTotal();var feePct=inv.feePct||0;var fee=Math.round(total*feePct)/100,taxable=Math.round((total+fee)*100)/100;
+  var gst=gstBreakup(taxable,inv.client&&inv.client.gst);var grand=gst?gst.grand:taxable;
   var deposit=Math.max(0,parseFloat(inv.deposit)||0);var pending=Math.max(0,grand-deposit);
-  inv.total=total;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
+  inv.total=total;inv.fee=fee;inv.taxable=taxable;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
   var tf=document.querySelector("#quotationBody .itbl tfoot");if(!tf)return;
   var rows=tf.querySelectorAll("tr");
   rows.forEach(function(tr){
@@ -8557,7 +8661,10 @@ function invLiveTotals(){
     if(/^Pending amount/.test(lab))cell.textContent=fmt(pending);
     else if(/^Deposit amount/.test(lab))cell.textContent=fmt(deposit);
     else if(/^(Grand Total|Total Amount)/.test(lab))cell.textContent=fmt(grand);
-    else if(/^Taxable value/.test(lab))cell.textContent=fmt(total);
+    else if(/^Taxable value/.test(lab))cell.textContent=fmt(taxable);
+    else if(/^Sub-?total/i.test(lab))cell.textContent=fmt(total);
+    else if(/^Platform fee/i.test(lab))cell.textContent=fmt(fee);
+    else if(/^Amount in words/i.test(lab))cell.textContent=rupeesInWords(grand);
     else if(/^IGST/.test(lab))cell.textContent=fmt(gst?gst.igst:0);
     else if(/^CGST/.test(lab))cell.textContent=fmt(gst?gst.cgst:0);
     else if(/^SGST/.test(lab))cell.textContent=fmt(gst?gst.sgst:0);
@@ -8595,7 +8702,7 @@ function saveCurrentInvoice(){
     if(rec){
       if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
       rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;rec.stage=invStage(_curInvoice);if((_curInvoice.client||{}).name)rec.guest=_curInvoice.client.name;rec.updatedAt=new Date().toISOString();
-      ["total","grandTotal","gstRate","gstAmount","deposit","pending","quotedTotal","accommodation","travel","food","entry","ship","guide","referral"].forEach(function(k){if(_curInvoice[k]!=null)rec[k]=_curInvoice[k];});
+      ["total","fee","feePct","taxable","grandTotal","gstRate","gstAmount","deposit","pending","quotedTotal","accommodation","travel","food","entry","ship","guide","referral"].forEach(function(k){if(_curInvoice[k]!=null)rec[k]=_curInvoice[k];});
     }
   }else{
     /* folder-driven number; keep the legacy counter aligned */
@@ -11077,22 +11184,75 @@ function viewSettings(){
    Payment / GST details and the policies & terms printed on every document.
    (Moved here from Settings.) */
 function paymentSettingsCard(){
-  return "<div class='card card-pad' style='margin-top:16px'>"+
-    "<div class='eyebrow'>Billing</div><div class='h-sec' style='margin-bottom:6px'>Payments &amp; GST</div>"+
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  return "<div class='card card-pad bl-card'>"+
+    "<div class='eyebrow'>1 · Tax &amp; charges</div><div class='h-sec'>GST and platform fee</div><div class='bl-sub'>Printed on every quotation and invoice.</div>"+
     "<div class='form-grid'>"+
-      "<div class='field'><label>GSTIN</label><input class='input mono' id='pg_gstin' value='"+(payCfg.gstin||"")+"' placeholder='35XXXXXXXXXXXZ5'></div>"+
-      "<div class='field'><label>State code <span style='color:var(--ink-soft);font-weight:400'>(35 = Andaman &amp; Nicobar)</span></label><input class='input mono' id='pg_state' value='"+(payCfg.stateCode||"35")+"'></div>"+
-      "<div class='field'><label>GST rate % <span style='color:var(--ink-soft);font-weight:400'>(tour operator: usually 5)</span></label><input class='input mono' type='number' id='pg_rate' value='"+(payCfg.gstRate||0)+"'></div>"+
-      "<div class='field'><label>SAC / HSN code</label><input class='input mono' id='pg_hsn' value='"+(payCfg.hsn||"9985")+"'></div>"+
-      "<div class='field'><label>UPI ID</label><input class='input mono' id='pg_upi' value='"+(payCfg.upi||"")+"' placeholder='islandexplorer@okhdfcbank'></div>"+
-      "<div class='field'><label>Payment page link</label><input class='input' id='pg_page' value='"+(payCfg.payPage||"")+"' placeholder='https://rzp.io/l/…'></div>"+
+      "<div class='field'><label>GSTIN</label><input class='input mono' id='pg_gstin' value='"+esc(payCfg.gstin)+"' placeholder='35XXXXXXXXXXXZ5'></div>"+
+      "<div class='field'><label>State code</label><input class='input mono' id='pg_state' value='"+esc(payCfg.stateCode||"35")+"'></div>"+
+      "<div class='field'><label>GST rate %</label><input class='input mono' type='number' step='0.01' id='pg_rate' value='"+(payCfg.gstRate||0)+"'></div>"+
+      "<div class='field'><label>SAC / HSN code</label><input class='input mono' id='pg_hsn' value='"+esc(payCfg.hsn||"9985")+"'></div>"+
+      "<div class='field full'><label class='pa-def' style='margin:4px 0 0'><input type='checkbox' id='pg_feeon' "+(payCfg.feeOn===false?"":"checked")+"> Add a platform fee line on new quotations and invoices</label></div>"+
+      "<div class='field'><label>Platform fee · Indian clients %</label><input class='input mono' type='number' step='0.01' id='pg_feein' value='"+(payCfg.feeIndian!=null?payCfg.feeIndian:3)+"'></div>"+
+      "<div class='field'><label>Platform fee · Foreign nationals %</label><input class='input mono' type='number' step='0.01' id='pg_feex' value='"+(payCfg.feeForeign!=null?payCfg.feeForeign:1.18)+"'></div>"+
     "</div>"+
-    "<button class='btn btn-primary btn-sm' style='margin-top:6px' onclick='savePayCfg()'>Save payment settings</button>"+
+    "<div class='btn-row' style='margin-top:10px'><button class='btn btn-primary btn-sm' onclick='savePayCfg()'>Save tax &amp; charges</button></div>"+
+  "</div>";
+}
+function payOnlineCard(){
+  var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;");};
+  var qr=payCfg.upiQr||"";
+  return "<div class='card card-pad bl-card'>"+
+    "<div class='eyebrow'>2 · Pay online</div><div class='h-sec'>UPI, QR code and payment link</div><div class='bl-sub'>Shown in the Payment details block of invoices and on quotation page 2.</div>"+
+    "<div class='form-grid'>"+
+      "<div class='field'><label>UPI ID</label><input class='input mono' id='pd_upi' value='"+esc(payCfg.upi)+"' placeholder='name@bank'></div>"+
+      "<div class='field'><label>Payment link</label><input class='input' id='pd_link' value='"+esc(payCfg.payPage)+"' placeholder='https://razorpay.me/@yourcompany'></div>"+
+    "</div>"+
+    "<div class='bl-qr'>"+
+      "<div class='bl-qr-box'>"+(qr?"<img src='"+qr+"' alt='UPI QR'>":"<span>No QR yet</span>")+"</div>"+
+      "<div class='bl-qr-acts'>"+
+        "<div style='font-weight:600;font-size:13px'>UPI QR image</div><div class='bl-sub' style='margin:2px 0 8px'>Upload the QR from your payment app (Razorpay, PhonePe, GPay). It prints on invoices and quotations.</div>"+
+        "<div class='btn-row'><label class='btn btn-primary btn-sm' style='cursor:pointer'>"+(qr?"Replace QR":"Upload QR")+"<input type='file' accept='image/*' style='display:none' onchange='blQrPick(this)'></label>"+(qr?"<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick='blQrRemove()'>Remove</button>":"")+"</div>"+
+        "<label class='pa-def' style='margin-top:10px'><input type='checkbox' id='pd_printqr' "+(payCfg.printQr===false?"":"checked")+"> Print the QR on quotations and invoices</label>"+
+      "</div>"+
+    "</div>"+
+    "<div class='btn-row' style='margin-top:10px'><button class='btn btn-primary btn-sm' onclick='savePayDetails()'>Save pay-online details</button></div>"+
+  "</div>";
+}
+function bankAccountsCard(){
+  return "<div class='card card-pad bl-card'>"+
+    "<div class='eyebrow'>3 · Bank accounts</div><div class='h-sec'>Bank transfer details</div><div class='bl-sub'>The account ticked as default prints on invoices and on quotation page 2. Keep one for India and one for international transfers.</div>"+
+    "<div class='bl-two'><div class='bl-col'>"+payAccountsFormHTML("in")+"</div><div class='bl-col'>"+payAccountsFormHTML("x")+"</div></div>"+
   "</div>";
 }
 function viewBilling(){
-  return "<section class='view' id='v-billing'>"+calcTabsBar('billing')+paymentSettingsCard().replace("style='margin-top:16px'","")+payDetailsCard()+policySettingsCard()+"</section>";
+  return "<section class='view' id='v-billing'>"+calcTabsBar('billing')+
+    "<div class='bl-grid'>"+paymentSettingsCard()+payOnlineCard()+"</div>"+
+    bankAccountsCard()+
+    policySettingsCard().replace("<div class='eyebrow'>Documents</div>","<div class='eyebrow'>4 · Documents</div>")+
+  "</section>";
 }
+/* UPI QR upload: shrunk to 700px on a white background and kept with the
+   payment settings (synced per workspace), so every device prints the same QR. */
+function blQrPick(inp){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var max=700,w=img.width,h=img.height,sc=Math.min(1,max/Math.max(w,h,1));
+      var c=document.createElement("canvas");c.width=Math.max(1,Math.round(w*sc));c.height=Math.max(1,Math.round(h*sc));
+      var cx=c.getContext("2d");cx.fillStyle="#fff";cx.fillRect(0,0,c.width,c.height);cx.drawImage(img,0,0,c.width,c.height);
+      var url;try{url=c.toDataURL("image/jpeg",0.88);}catch(e){url=rd.result;}
+      payCfg.upiQr=url;payCfg.printQr=true;
+      audit("costsheet","upi-qr","uploaded");persistData();refreshBilling();
+    };
+    img.onerror=function(){alert("That file could not be read as an image. Please upload a PNG or JPG of the QR.");};
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(f);inp.value="";
+}
+function blQrRemove(){if(!confirm("Remove the saved QR image?"))return;payCfg.upiQr="";audit("costsheet","upi-qr","removed");persistData();refreshBilling();}
 /* Re-render the module so its inputs show the saved values (called on every visit). */
 function refreshBilling(){
   var el=document.getElementById("v-billing");if(!el)return;
@@ -11142,10 +11302,13 @@ function previewPolicy(mode){
 function savePayCfg(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
   /* review/feedback links live in their own settings card (saveReviewLinks) — keep them */
-  payCfg=Object.assign({},payCfg,{gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",upi:g("pg_upi"),payPage:g("pg_page")}); /* keeps bank accounts, print choices and review links */
-  audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.upi||""));
+  var feeOnEl=document.getElementById("pg_feeon");
+  var upd={gstin:g("pg_gstin"),stateCode:g("pg_state")||"35",gstRate:parseFloat(g("pg_rate"))||0,hsn:g("pg_hsn")||"9985",feeOn:feeOnEl?!!feeOnEl.checked:(payCfg.feeOn!==false),feeIndian:Math.max(0,parseFloat(g("pg_feein"))||0),feeForeign:Math.max(0,parseFloat(g("pg_feex"))||0)};
+  if(document.getElementById("pg_upi"))upd.upi=g("pg_upi");if(document.getElementById("pg_page"))upd.payPage=g("pg_page");
+  payCfg=Object.assign({},payCfg,upd); /* keeps bank accounts, QR, print choices and review links */
+  audit("settings","payments-updated",(payCfg.gstin?("GSTIN "+payCfg.gstin+" · "):"")+(payCfg.gstRate?("GST "+payCfg.gstRate+"% · "):"")+(payCfg.feeOn!==false?("fee "+payCfg.feeIndian+"% / "+payCfg.feeForeign+"%"):"no fee"));
   persistData();
-  alert("Saved. Invoices now show "+(payCfg.gstRate>0?("the GST break-up @ "+payCfg.gstRate+"%"):"no GST line")+(payCfg.upi||payCfg.payPage?" and a Pay-now block.":"."));
+  var btn=event&&event.target;if(btn&&btn.tagName==="BUTTON"){var old=btn.textContent;btn.textContent="Saved ✓";setTimeout(function(){btn.textContent=old;},1300);}
 }
 function saveReviewLinks(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():"";};
