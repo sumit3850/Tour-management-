@@ -1451,7 +1451,8 @@ h1,h2,h3,h4,.h-sec,.page-title b,.kpi .val,.tour-card .nm,.tour-card .dt-range{c
 .brand .name{display:none;font-family:var(--font-body);font-size:14px;font-weight:700;color:var(--ink)}
 .brand .brand-logo[style*="display: none"]~div .name,.brand .brand-logo[style*="display:none"]~div .name{display:block}
 .brand .sub{display:none}
-.brand .build-badge{display:none}
+.brand .build-badge{display:inline-block;margin:0;font-family:var(--font-body);font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:capitalize;color:#58667a;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;padding:3px 8px;line-height:1.3;white-space:nowrap}
+html.dark .brand .build-badge{color:#aab0bd;background:#26272e;border-color:#33353d}
 .nav{padding:8px 12px 16px;perspective:none}
 .nav-group{font-size:10px;font-weight:700;letter-spacing:.07em;color:#5f6f8a;margin:14px 8px 6px}
 .nav .nav-item{padding:10px 14px;margin:0 0 3px;border-radius:5px;font-size:13px;font-weight:600;color:var(--ink);gap:12px;transform:none !important;box-shadow:none !important;animation:navShow .25s linear forwards;animation-delay:calc(.05s + var(--i,0)*.03s)}
@@ -1729,6 +1730,56 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
 .bl-qr-acts{flex:1;min-width:0}
 @media(max-width:900px){.bl-grid,.bl-two{grid-template-columns:1fr}}
 @media(max-width:600px){.bl-qr{flex-direction:column}#quotationBody .pay-grid{grid-template-columns:1fr !important}#quotationBody .pay-online-body{justify-content:center;padding:14px !important}}
+
+/* ==== Dashboard departures card ==== */
+.dep-week{margin:4px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line-soft)}
+.dep-sub{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:4px 0 2px}
+.dep-row{align-items:flex-start;gap:12px}
+.dep-date{width:46px;flex:none;text-align:center;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:6px;padding:5px 0 4px}
+.dep-date b{display:block;font-size:17px;line-height:1.05;color:var(--ink)}.dep-date span{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--ink-soft)}
+.dep-code{font-size:11px;color:var(--ink-soft);margin-left:4px}.dep-n{display:inline-block;font-size:10.5px;font-weight:700;color:var(--sea);background:var(--sea-soft);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.dep-fill{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.dep-fill .fr-bar{flex:0 0 120px;margin:0}
+.dep-seats{font-size:11.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.dep-risk{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:4px;background:#fff3dc;color:#9a5b00}.dep-risk.red{background:#fdecec;color:#b42318}
+/* ==== Bookings ==== */
+.btn-soft{border:1px solid transparent;box-shadow:none !important;background:#f3f4f6;color:#283c50}
+.btn-soft.blue{background:#e8edfb;color:#2945ba}.btn-soft.blue:hover{background:#dde4f9}
+.btn-soft.green{background:#e3f7ec;color:#0f7a43}.btn-soft.green:hover{background:#d4f1e1}
+.btn-soft.amber{background:#fff3dc;color:#9a5b00}.btn-soft.grey{background:#f3f4f6;color:#283c50}.btn-soft.grey:hover{background:#e9ebf0}
+.bk-summary{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.bk-head-acts{display:flex;gap:8px;flex-wrap:wrap}
+.bk-tools{margin-bottom:14px;padding:6px 18px}
+.bk-tool{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 0}.bk-tool+.bk-tool{border-top:1px solid var(--line-soft)}
+.bk-tool-l{font-size:12.5px;font-weight:600;color:var(--ink);flex:0 0 220px}
+.bk-tool-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;min-width:0}.bk-tool-r .input{flex:1;min-width:200px;max-width:420px}
+.bk-tool-k{font-size:12px;color:var(--ink-soft);margin-left:6px}.bk-tool-k:first-child{margin-left:0}
+.bk-filterbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px 10px}
+.bk-filters{display:flex;gap:6px;flex-wrap:wrap}
+.bk-f{padding:6px 12px;border-radius:99px;background:#f3f4f6;color:#4b5563;font-size:12px;font-weight:600;border:0;cursor:pointer}.bk-f b{font-weight:700;margin-left:3px;color:inherit;opacity:.75}.bk-f.on{background:#e8edfb;color:#2945ba}
+.bk-search{max-width:280px;padding:8px 12px;font-size:13px}
+.bk-table th{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5f6f8a;padding:10px 8px}
+.bk-table td{padding:12px 8px;vertical-align:middle;border-bottom:1px solid var(--line-soft)}
+.bk-person{display:flex;align-items:center;gap:10px;min-width:0}
+.bk-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.bk-pinfo{min-width:0}.bk-name{font-weight:600;color:var(--ink);font-size:13.5px}
+.bk-tname{display:block;font-size:12.5px;margin-top:3px}
+.bk-chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;background:#f3f4f6;color:#4b5563;white-space:nowrap}
+.bk-chip.ok{background:#e3f7ec;color:#0f7a43}.bk-chip.info{background:#e8edfb;color:#2945ba}.bk-chip.warn{background:#fff3dc;color:#9a5b00}.bk-chip.bad{background:#fdecec;color:#b42318}.bk-chip.muted{background:#f3f4f6;color:#6b7280}
+.bk-table .bk-quick-row .btn{padding:6px 10px;font-size:12px}
+html.dark .btn-soft.blue{background:#1e2a4d;color:#9fb3f7}html.dark .btn-soft.green{background:#15301f;color:#7fd3a0}html.dark .btn-soft.grey,html.dark .btn-soft{background:#26272e;color:#d6d8de}
+html.dark .bk-f{background:#26272e;color:#b7bcc8}html.dark .bk-f.on{background:#1e2a4d;color:#9fb3f7}
+html.dark .bk-chip{background:#26272e;color:#b7bcc8}html.dark .bk-chip.ok{background:#15301f;color:#7fd3a0}html.dark .bk-chip.info{background:#1e2a4d;color:#9fb3f7}html.dark .bk-chip.warn{background:#3b2f0e;color:#f0c96a}html.dark .bk-chip.bad{background:#3b1a1a;color:#ff9aa0}
+html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{background:#3b2f0e;color:#f0c96a}html.dark .dep-risk.red{background:#3b1a1a;color:#ff9aa0}
+@media(max-width:860px){.bk-tool-l{flex-basis:100%}.bk-filterbar{padding:12px 14px 8px}.bk-search{max-width:none;width:100%}.m-cards td.bk-guest{max-width:none}}
+/* ==== Analytics cost breakdown ==== */
+.a2-costwrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.a2-costwrap .ana-donut{flex:0 0 150px}
+.a2-costlist{flex:1;min-width:200px}.a2-costlist .r{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line-soft)}.a2-costlist .r:last-child{border-bottom:0}
+.a2-costlist i{width:10px;height:10px;border-radius:3px;flex:none}.a2-costlist .k{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.a2-costlist b{font-family:var(--font-mono);font-weight:600}.a2-costlist .p{width:42px;text-align:right;color:var(--ink-soft);font-size:11.5px}
+
+/* Money due rows: compact action buttons so the guest and tour keep their width */
+.md-row .md-act > .btn{flex:none !important;min-width:0 !important;max-width:none !important;padding:5px 10px;font-size:11.5px;white-space:nowrap}
+.md-row .meta{flex:1 1 160px}
+.a2-costwrap .ana-donut .lg{display:none}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1772,7 +1823,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 330</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 331</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1781,7 +1832,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 330</span></div></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 331</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3909,7 +3960,9 @@ function tourWhenLabel(t){
 const dmy=dShort;
 /* Display rule: the database keeps ISO (YYYY-MM-DD, sortable) but the console
    always SHOWS DD/MM/YYYY — run free-text values through this before printing. */
-const fmtVal=v=>(typeof v==="string"&&/^\d{4}-\d{2}-\d{2}(T[\d:.+\-]*Z?)?$/.test(v.trim()))?dShort(v.trim()):v;
+/* DD-MM-YYYY, as printed on the inbox cards (lists of dates included). */
+const dDash=s=>{if(!s)return "—";var d=new Date(s);if(isNaN(d))return s;return pad2(d.getDate())+"-"+pad2(d.getMonth()+1)+"-"+d.getFullYear();};
+const fmtVal=v=>(typeof v==="string")?v.replace(/\d{4}-\d{2}-\d{2}(?:T[\d:.+\-]*Z?)?/g,function(m){return dDash(m);}):v;
 const tourColor=id=>TOURCOLORS[Math.abs(tours.findIndex(t=>t.id===id))%TOURCOLORS.length];
 const accColor=i=>TOURCOLORS[Math.abs(i)%TOURCOLORS.length];
 /* Exact short codes for each tour (used on cards, calendar, etc.) */
@@ -3966,7 +4019,7 @@ const NAV=[
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["operations","Operations","M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h4"],
   ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
-  ["calc","Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01"],
+  ["costsheet","Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
   ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
@@ -3974,7 +4027,7 @@ const NAV=[
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
 ];
 const TITLES={dashboard:["Overview","Dashboard"],analytics:["Overview","Analytics"],catalog:["Overview","Categories"],tours:["Sales & Ops","Tours"],calendar:["Overview","Departure Calendar"],bookings:["Sales & Ops","Bookings"],
-  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Tour costing","Cost Calculator"],ratecards:["Tour costing","Cost Sheet Categories"],invoices:["Tour costing","Invoices"],profit:["Tour costing","Profit Calculator"],groupquote:["Tour costing","Quotations"],costsheet:["Tour costing","Tour Cost Sheet"],billing:["Tour costing","Billing & instructions"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Overview","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Forms, Review & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
+  accommodation:["Sales & Ops","Accommodation"],operations:["Sales & Ops","Operations"],calc:["Tour costing","Cost look-up"],ratecards:["Overview","Categories"],invoices:["Tour costing","Invoices"],profit:["Tour costing","Cost based analysis"],groupquote:["Tour costing","Quotations"],costsheet:["Tour costing","Tour Cost Sheet"],billing:["Tour costing","Billing & instructions"],logistics:["Sales & Ops","Logistics & Operations"],crm:["Sales & Ops","Leads Pipeline"],requests:["Overview","Inbox"],reservations:["Sales & Ops","Reservation Pipeline"],customers:["Sales & Ops","Customers"],reviews:["Sales & Ops","Forms, Review & Feedback"],social:["Growth","Social Media"],ai:["Growth","AI Assistant"],settings:["","Settings"]};
 let curView="dashboard",navStack=[];
 function buildNav(){
   var nav=document.getElementById("nav");var _ni=0;nav.innerHTML=NAV.map(n=>n[0]==="group"?`<div class='nav-group'>${n[1]}</div>`:`<button class='nav-item' data-v='${n[0]}' style='--i:${_ni++}'><svg viewBox='0 0 24 24' fill='none' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='${n[2]}'/></svg>${n[1]}</button>`).join("");nav.onclick=function(e){var b=e.target.closest('.nav-item');if(b)go(b.dataset.v);};
@@ -4265,6 +4318,7 @@ function dispatchAction(e){
     else if(a==='gotoAlert'){var ga=t.dataset.arg.split('|');gotoAlert(ga[0],ga[1]);}
 }
 function go(v,isBack){
+  if(v==="ratecards")v="catalog";   /* cost sheet categories moved to Overview → Categories */
   if(!isBack&&v!==curView)navStack.push(curView);
   setTimeout(attachClickHandlers,50);
   curView=v;
@@ -4618,6 +4672,42 @@ function underbookedCard(){
         "<span class='fr-bar'><span style='width:"+r.pct+"%'></span></span></div>";
     }).join("")+"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Flags group tours under "+(+prefs.fillWarnPct||50)+"% full within "+(+prefs.fillWarnDays||45)+" days, or below their cost-sheet break-even. Thresholds: Settings → Preferences.</p>"
     :"<div class='empty'>No underbooked departures in the warning window. ✓</div>")+
+  "</div>";
+}
+/* Departures card: everything about upcoming departures in one place — the
+   next 7 days strip (departures, pickups, returns), then every upcoming
+   departure with dates, seats, guide, contact and the fill-risk warning. The
+   payments due live in Money due next to it, so nothing is listed twice. */
+function departuresCard(){
+  var esc=function(x){return String(x||"").replace(/</g,"&lt;");};
+  var in7=function(d){if(!d)return false;var n=daysBetween(todayISO,d);return n>=0&&n<=7;};
+  var live=tours.filter(function(t){return !t.archived;});
+  var lab=function(d){var n=daysBetween(todayISO,d);return n===0?"Today":(n===1?"Tomorrow":dShort(d));};
+  var item=function(txt,tag,act,arg,cls){return "<div class='list-row td-row' "+(act?"data-action='"+act+"' data-arg='"+arg+"' style='cursor:pointer'":"")+"><span class='td-tag "+(cls||"")+"'>"+tag+"</span><div class='meta'><div class='t' style='font-weight:500'>"+txt+"</div></div></div>";};
+  var week=[]
+    .concat(live.filter(function(t){return in7(t.start);}).sort(function(a,b){return a.start.localeCompare(b.start);}).map(function(t){return item("Departs · "+esc(shortName(t))+" · "+booked(t.id)+"/"+t.cap+" pax"+(t.guide&&t.guide!=="—"?" · "+esc(t.guide):""),lab(t.start),"openTour",t.id,"dep");}))
+    .concat(realOps().filter(opActive).filter(function(o){return in7(o.pickupDate);}).sort(function(a,b){return String(a.pickupDate).localeCompare(String(b.pickupDate));}).map(function(o){return item("Pickup · "+esc(o.tour)+(o.pickupLoc?" · "+esc(o.pickupLoc):"")+(o.driver&&o.driver!=="—"?" · "+esc(o.driver):""),lab(o.pickupDate),"gotoAlert","op|"+o.id,"pick");}))
+    .concat(live.filter(function(t){return in7(t.end)&&t.end!==t.start;}).sort(function(a,b){return a.end.localeCompare(b.end);}).map(function(t){return item("Returns · "+esc(shortName(t)),lab(t.end),"openTour",t.id,"ret");}));
+  var ups=live.filter(function(t){return t.start&&t.start>=todayISO&&status(t)!=="completed";}).sort(function(a,b){return a.start.localeCompare(b.start);}).slice(0,8);
+  var MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  var anyRisk=false;
+  var rows=ups.map(function(t){
+    var d=new Date(t.start+"T00:00:00"),n=daysBetween(todayISO,t.start),bk=booked(t.id),cap=parseInt(t.cap,10)||0,pct=cap?Math.min(Math.round(bk/cap*100),100):0;
+    var r=fillRisk(t);if(r)anyRisk=true;
+    var pb=t.pocId?bookings.find(function(b){return b.id===t.pocId;}):null;
+    var bits=[dShort(t.start)+(t.end&&t.end!==t.start?" – "+dShort(t.end):""),n===0?"today":(n===1?"tomorrow":"in "+n+" days"),(t.guide&&t.guide!=="—")?esc(t.guide):"",pb&&pb.guest?esc(pb.guest):""].filter(Boolean);
+    return "<div class='list-row dep-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'>"+
+      "<div class='dep-date'><b>"+d.getDate()+"</b><span>"+MON[d.getMonth()]+"</span></div>"+
+      "<div class='meta'><div class='t'>"+esc(shortName(t))+" <span class='dep-code mono'>"+tourCode(t)+"</span>"+(t.tourType==="session"?"":"<span class='dep-n'>"+durNights(t)+"N</span>")+"</div>"+
+        "<div class='s'>"+bits.join(" · ")+"</div>"+
+        (cap?"<div class='dep-fill'><span class='fr-bar'><span style='width:"+pct+"%;background:"+(r?(r.level==="red"?"var(--coral)":"#e8843c"):"var(--sea)")+"'></span></span><span class='dep-seats'>"+bk+"/"+cap+" seats · "+pct+"%</span>"+(r?"<span class='dep-risk "+r.level+"'>"+(r.breakEven!=null&&r.booked<r.breakEven?"needs "+r.breakEven+" pax to break even":"underbooked")+"</span>":"")+"</div>":"")+
+      "</div></div>";
+  }).join("");
+  return "<div class='card card-pad' id='depCard'>"+
+    "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>"+new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})+"</div><div class='h-sec' style='font-size:15px'>Departures</div></div><span class='pill plain'>"+ups.length+" upcoming</span></div>"+
+    (week.length?"<div class='dep-week'><div class='dep-sub'>Next 7 days</div>"+week.join("")+"</div>":"")+
+    (rows||"<div class='empty'>No upcoming departures.</div>")+
+    (anyRisk?"<p style='font-size:11px;color:var(--ink-soft);margin-top:8px'>Orange and red bars: under "+(+prefs.fillWarnPct||50)+"% full within "+(+prefs.fillWarnDays||45)+" days, or below the cost-sheet break-even. Thresholds: Settings → Preferences.</p>":"")+
   "</div>";
 }
 /* Today & next 7 days: departures, pickups, returns and payments falling due. */
@@ -5109,18 +5199,11 @@ function viewDashboard(){
   const totalParticipants=bookings.reduce((s,b)=>s+(b.party||0),0);
   /* count the same bookings shown in the list (POC only when a POC is marked) */
   const visibleConfirmed=bookings.filter(function(b){if(b.status!=="Confirmed")return false;if(!b.tour)return true;var t=tours.find(function(x){return x.id===b.tour;});if(!t||!t.pocId)return true;return b.id===t.pocId;}).length;
-  const occ=tours.filter(t=>status(t)!=="completed").slice(0,5).map(t=>({n:shortName(t).split(" ")[0],pct:Math.round(booked(t.id)/t.cap*100)}));
   const pend=pendingBookings();
   const totalPending=pend.reduce(function(s,b){return s+bookingPending(b);},0);
   const clashes=detectClashes();
   const deps=upcomingDepartures();
   const rollup=referralRollup();
-  var alerts="";
-  alerts+=moneyDueCard();
-  alerts+="<div class='card card-pad'>"+
-    "<div class='h-sec' style='font-size:15px;margin-bottom:8px'>Upcoming departures</div>"+
-    (deps.length?deps.map(function(t){return "<div class='list-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'><div class='meta'><div class='t'>"+dShort(t.start)+" · "+tourLabel(t)+"</div><div class='s'>"+booked(t.id)+"/"+t.cap+" booked · "+t.guide+"</div></div><span class='pill open'>"+durNights(t)+"N</span></div>";}).join(""):"<div class='empty'>No upcoming departures.</div>")+
-  "</div>";
   return "<section class='view' id='v-dashboard'>"+
     (typeof installHintCard==="function"?installHintCard():"")+
     "<div class='qa-grid'>"+
@@ -5128,7 +5211,7 @@ function viewDashboard(){
       qaTile("Add booking","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11","openAddBooking()")+
       qaTile("Accommodation","M3 21h18M5 21V8l7-4 7 4v13M9 12h1M9 16h1M14 12h1M14 16h1","go('accommodation')")+
       qaTile("Logistics","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z","go('logistics')")+
-      qaTile("Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01","go('calc')")+
+      qaTile("Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01","go('costsheet')")+
       qaTile("Calendar","M3 4h18v18H3zM3 9h18M8 2v4M16 2v4","go('calendar')")+
       qaTile("Inbox","M22 12h-6l-2 3h-4l-2-3H2M5.5 5.5h13l3.5 6.5v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6z","go('requests')")+
       qaTile("Google Sheet","M3 3h18v18H3zM3 9h18M9 3v18","openSheet()")+
@@ -5141,15 +5224,10 @@ function viewDashboard(){
       kpi("Confirmed Bookings",visibleConfirmed,"confirmed","up","M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11")+
     "</div>"+
     "<div id='payPanel' style='margin-top:16px'></div>"+
-    "<div class='grid-2' style='margin-top:16px'>"+todayCard()+underbookedCard()+"</div>"+
-    "<div class='grid-2' style='margin-top:16px'>"+alerts+"</div>"+
+    "<div class='grid-2' style='margin-top:16px'>"+departuresCard()+moneyDueCard()+"</div>"+
     alertsCard()+
     "<div class='card card-pad' id='dashOpsBoard' style='margin-top:16px'>"+opsBoardMarkup()+"</div>"+
     (rollup.length?"<div class='card card-pad' style='margin-top:16px'><div class='h-sec' style='font-size:15px;margin-bottom:8px'>Referral commissions owed</div>"+rollup.map(function(r){return "<div class='list-row'><div class='meta'><div class='t'>"+r.by+"</div></div><b class='mono'>"+fmt(r.total)+"</b></div>";}).join("")+"</div>":"")+
-    "<div class='card card-pad' style='margin-top:16px'>"+
-      "<div class='section-head'><div class='h-sec'>Occupancy by departure</div></div>"+
-      "<div class='chart'>"+occ.map(d=>"<div class='col'><div class='stk' style='height:"+Math.max(d.pct,6)+"%'></div><div class='cl'>"+d.n+"<br><b class='mono'>"+d.pct+"%</b></div></div>").join("")+"</div>"+
-    "</div>"+
     "<div class='grid-2' style='margin-top:16px'>"+
       "<div class='card card-pad'>"+
         "<div class='h-sec' style='margin-bottom:8px;font-size:15px'>Pending follow-ups</div>"+
@@ -5185,7 +5263,7 @@ function renderCatalog(){
   el.innerHTML=
     "<div class='card card-pad' style='margin-bottom:16px'>"+
       "<div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Base catalog</div><div class='h-sec'>Tour categories</div></div></div>"+
-      "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;max-width:760px'>Rename these to match what you run — treks, dives, safaris, workshops. Every tour picks one, the Tours page groups by them, and a category linked to a rate card (Tour costing → Cost Sheet Categories) uses that card's costs for every estimate.</p>"+
+      "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;max-width:760px'>Rename these to match what you run — treks, dives, safaris, workshops. Every tour picks one, the Tours page groups by them, and a category linked to a rate card (Cost sheet categories, below) uses that card's costs for every estimate.</p>"+
       "<div class='tbl-wrap'><table><thead><tr><th>Colour</th><th>Category</th><th>Tours</th><th>Rate card for costs</th><th></th></tr></thead><tbody>"+
         cats.map(function(c,i){return "<tr>"+
           "<td><input type='color' value='"+esc(c.color||"#3a527d")+"' onchange=\"catSetColor('"+esc(c.id)+"',this.value)\" title='Colour' style='width:36px;height:28px;border:1px solid var(--line);border-radius:6px;background:none;padding:0'></td>"+
@@ -5206,7 +5284,7 @@ function renderCatalog(){
       "</div>"+
       "<label style='display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);margin-top:8px;cursor:pointer'><input type='checkbox' id='catNewRate' checked> Also create a cost-sheet rate card with this name and link it — the category then appears at once in the Cost Calculator, Quotations, Invoice and Cost Sheet dropdowns</label>"+
     "</div>"+
-    "<div class='grid-2' style='margin-bottom:16px'>"+
+    "<div class='grid-2' style='margin-bottom:16px;align-items:start'>"+
       "<div class='card card-pad'>"+
         "<div class='eyebrow'>What you offer</div><div class='h-sec' style='margin-bottom:8px'>Activities</div>"+
         "<p style='font-size:12.5px;color:var(--ink-soft);margin:0 0 10px'>The Activity dropdown when you create or edit a tour.</p>"+
@@ -5222,6 +5300,7 @@ function renderCatalog(){
         "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:10px'><input class='input' id='sessNewName' placeholder='Session name' style='flex:2;min-width:140px'><input class='input' id='sessNewDur' placeholder='Duration, e.g. Half Day' style='flex:1;min-width:120px' onkeydown=\"if(event.key==='Enter')sessAdd()\"><button class='btn btn-primary btn-sm' onclick='sessAdd()'>Add</button></div>"+
       "</div>"+
     "</div>"+
+    "<div id='rateCardsBody'></div>"+
     "";
   if(typeof labelTables==="function")labelTables(el);
   if(typeof renderRateCards==="function")renderRateCards();
@@ -5229,7 +5308,7 @@ function renderCatalog(){
 /* ===== COST SHEET CATEGORIES (Tour costing → tab next to the Cost Calculator) ==
    The rate cards the cost sheet prices by group size: add / rename / delete,
    the downloadable template and the upload that reads it back. */
-function viewRateCards(){return "<section class='view' id='v-ratecards'>"+calcTabsBar('ratecards')+"<div id='rateCardsBody'></div></section>";}
+function viewRateCards(){return "";} /* the rate cards live on the Categories page now */
 function renderRateCards(){
   var el=document.getElementById("rateCardsBody");if(!el)return;
   var esc=function(x){return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/'/g,"&#39;").replace(/"/g,"&quot;");};
@@ -5239,7 +5318,7 @@ function renderRateCards(){
   var IC_DEL="<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg>";
   el.innerHTML=
     "<div class='card card-pad'>"+
-      "<div class='section-head' style='margin-bottom:6px;flex-wrap:wrap;gap:8px'><div><div class='eyebrow'>Tour costing</div><div class='h-sec'>Cost Sheet Categories</div></div>"+
+      "<div class='section-head' style='margin-bottom:6px;flex-wrap:wrap;gap:8px'><div><div class='eyebrow'>Rate cards</div><div class='h-sec'>Cost sheet categories</div></div>"+
         "<div style='display:flex;gap:8px;flex-wrap:wrap'>"+
           "<button class='btn btn-ghost btn-sm' id='catTplBtn' onclick=\"downloadRatesTemplate('catTplBtn')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download template (.xlsx)</button>"+
           "<button class='btn btn-ghost btn-sm' id='catDlBtn' onclick=\"downloadRatesXlsx(null,'All-rate-cards-'+new Date().toISOString().slice(0,10),'catDlBtn')\">Download my rates</button>"+
@@ -5634,17 +5713,18 @@ function renderAnalytics(){
   var moneyStats="<div class='a2-stats'>"+a2Stat("Revenue",fmt(sumR),T.length+" tour"+(T.length===1?"":"s"))+a2Stat("Costs",fmt(sumC),"actual, saved or estimated")+a2Stat("Profit",fmt(sumP),sumR?Math.round(sumP/sumR*100)+"% margin":"",sumP>=0?"up":"down")+a2Stat("Per guest",fmt(T.reduce(function(s,t){return s+tourPaxBooked(t);},0)?Math.round(sumR/T.reduce(function(s,t){return s+tourPaxBooked(t);},0)):0),"average revenue")+"</div>";
   /* ---- profit by tour ---- */
   var minM=+prefs.marginMin||0;
-  var pRows=T.map(function(t){var p=autoTourProfit(t);p.t=t;return p;}).filter(function(p){return p.rev>0||p.exp>0;}).sort(function(a,c){return c.profit-a.profit;});
+  var pRows=T.filter(function(t){return status(t)==="completed";}).map(function(t){var p=autoTourProfit(t);p.t=t;return p;}).filter(function(p){return p.rev>0||p.exp>0;}).sort(function(a,c){return c.profit-a.profit;});
   var srcChip=function(s){return s==="actual"?"<span class='a2-chip ok'>actual</span>":(s==="log"?"<span class='a2-chip'>saved calc</span>":(s==="estimate"?"<span class='a2-chip'>estimate</span>":"<span class='a2-chip bad'>no costs</span>"));};
-  var profitBody=pRows.length?a2HBars(pRows.slice(0,12).map(function(p){var low=p.pct!=null&&p.exp>0&&p.pct<minM;return {k:"["+tourCode(p.t)+"] "+anaEsc(shortName(p.t)),v:p.profit,d:fmt(p.profit),c:p.profit<0?BAD:(low?WARN:a2col(0)),chip:srcChip(p.src)+(low?"<span class='a2-chip bad'>below "+minM+"%</span>":""),s:"Revenue "+fmt(p.rev)+" · cost "+(p.exp?fmt(p.exp):"—")+(p.pct!=null?" · <b>"+p.pct+"% margin</b>":""),tip:shortName(p.t)+": profit "+fmt(p.profit)+(p.pct!=null?" ("+p.pct+"%)":"")};})):"<div class='empty'>No tours with revenue in this range.</div>";
+  var profitBody=pRows.length?a2HBars(pRows.slice(0,12).map(function(p){var low=p.pct!=null&&p.exp>0&&p.pct<minM;return {k:"["+tourCode(p.t)+"] "+anaEsc(shortName(p.t)),v:p.profit,d:fmt(p.profit),c:p.profit<0?BAD:(low?WARN:a2col(0)),chip:srcChip(p.src)+(low?"<span class='a2-chip bad'>below "+minM+"%</span>":""),s:"Revenue "+fmt(p.rev)+" · cost "+(p.exp?fmt(p.exp):"—")+(p.pct!=null?" · <b>"+p.pct+"% margin</b>":""),tip:shortName(p.t)+": profit "+fmt(p.profit)+(p.pct!=null?" ("+p.pct+"%)":"")};})):"<div class='empty'>No completed tours with revenue in this range — profit is only shown once a tour has ended.</div>";
   var profitTbl=a2Table(["Tour","Revenue","Cost","Profit","Margin"],pRows.map(function(p){return ["["+tourCode(p.t)+"] "+anaEsc(shortName(p.t)),fmt(p.rev),p.exp?fmt(p.exp):"—",fmt(p.profit),pct(p.pct)];}));
   var below=pRows.filter(function(p){return p.pct!=null&&p.exp>0&&p.pct<minM;}).length;
   /* ---- occupancy heat-map: months × years in range ---- */
   var occ={},yrs={};
   T.forEach(function(t){if(t.tourType==="session")return;var y=t.start.slice(0,4),m=parseInt(t.start.slice(5,7),10)-1;yrs[y]=1;var k=y+"-"+m;occ[k]=occ[k]||{cap:0,booked:0,n:0};occ[k].cap+=(parseInt(t.cap,10)||0);occ[k].booked+=booked(t.id);occ[k].n++;});
   var yList=Object.keys(yrs).sort();
-  var heatBody=yList.length?"<div class='a2-heat'><div class='hd'></div>"+MN.map(function(m){return "<div class='hd'>"+m+"</div>";}).join("")+yList.map(function(y){return "<div class='yl'>"+y+"</div>"+MN.map(function(m,i){var o=occ[y+"-"+i];if(!o)return "<div class='c none' data-tip='"+m+" "+y+": no departures'></div>";var u=o.cap?Math.min(Math.round(o.booked/o.cap*100),100):0;return "<div class='c' style='background:"+a2col(0)+";opacity:"+(0.18+u/100*0.82).toFixed(2)+"' data-tip='"+m+" "+y+": "+o.booked+" of "+o.cap+" seats ("+u+"%) · "+o.n+" tour"+(o.n===1?"":"s")+"'><span>"+u+"</span></div>";}).join("");}).join("")+"</div><div class='a2-scale'><span>empty</span><i></i><span>full</span></div>":"<div class='empty'>No departures in this range.</div>";
-  var heatTbl=a2Table(["Month"].concat(yList),MN.map(function(m,i){return [m].concat(yList.map(function(y){var o=occ[y+"-"+i];return o?(o.cap?Math.round(o.booked/o.cap*100)+"%":"—")+" <span class='a2-dim'>"+o.booked+"/"+o.cap+"</span>":"—";}));}));
+  var maxBk=1;Object.keys(occ).forEach(function(k){if(occ[k].booked>maxBk)maxBk=occ[k].booked;});
+  var heatBody=yList.length?"<div class='a2-heat'><div class='hd'></div>"+MN.map(function(m){return "<div class='hd'>"+m+"</div>";}).join("")+yList.map(function(y){return "<div class='yl'>"+y+"</div>"+MN.map(function(m,i){var o=occ[y+"-"+i];if(!o)return "<div class='c none' data-tip='"+m+" "+y+": no departures'></div>";var u=Math.round(o.booked/maxBk*100);return "<div class='c' style='background:"+a2col(0)+";opacity:"+(0.22+u/100*0.78).toFixed(2)+"' data-tip='"+m+" "+y+": "+o.booked+" guest"+(o.booked===1?"":"s")+" on "+o.n+" tour"+(o.n===1?"":"s")+" · "+o.cap+" seats offered'><span>"+o.booked+"</span></div>";}).join("");}).join("")+"</div><div class='a2-scale'><span>fewer guests</span><i></i><span>more guests</span></div>":"<div class='empty'>No departures in this range.</div>";
+  var heatTbl=a2Table(["Month"].concat(yList),MN.map(function(m,i){return [m].concat(yList.map(function(y){var o=occ[y+"-"+i];return o?o.booked+" <span class='a2-dim'>"+o.n+" tour"+(o.n===1?"":"s")+" · "+o.cap+" seats</span>":"—";}));}));
   var totCap=0,totBk=0;Object.keys(occ).forEach(function(k){totCap+=occ[k].cap;totBk+=occ[k].booked;});
   var gaps=MN.filter(function(_,i){return !yList.some(function(y){return occ[y+"-"+i];});});
   /* ---- receivables ageing ---- */
@@ -5661,8 +5741,11 @@ function renderAnalytics(){
   var CATS=[["accom","Stays"],["travel","Transport"],["ship","Ship / ferry"],["food","Food"],["entry","Permits & fees"],["guidefee","Guides"]];
   var other=function(e){return (+e.guide||0)+(+e.referral||0);};
   var costSeries=CATS.map(function(c,i){return {name:c[1],values:cTours.map(function(t){return +expOf(t)[c[0]]||0;}),color:a2col(i)};}).concat([{name:"Other",values:cTours.map(function(t){return other(expOf(t));}),color:NEUT}]);
-  var costBody=cTours.length?a2Bars(cTours.map(function(t){return tourCode(t);}),costSeries,{stack:true,height:210}):"<div class='empty'>Enter costs in the Profit Calculator to see the breakdown per tour.</div>";
-  var costLegend=cTours.length?a2Legend(costSeries.map(function(s){return [s.name,s.color];})):"";
+  var catSum=costSeries.map(function(sr){return {k:sr.name,n:sr.values.reduce(function(a,c){return a+c;},0),c:sr.color};}).filter(function(x){return x.n>0;}).sort(function(a,c){return c.n-a.n;});
+  var catAll=catSum.reduce(function(a,x){return a+x.n;},0);
+  var costBody=catSum.length?"<div class='a2-costwrap'>"+a2Donut(catSum,{tip:function(x){return fmt(x.n)+" · "+a2Pct(x.n,catAll)+"%";},center:fmt(catAll),centerLabel:"total cost"})+
+    "<div class='a2-costlist'>"+catSum.map(function(x,i){return "<div class='r'><i style='background:"+a2col(i)+"'></i><span class='k'>"+anaEsc(x.k)+"</span><b>"+fmt(x.n)+"</b><span class='p'>"+a2Pct(x.n,catAll)+"%</span></div>";}).join("")+"</div></div>":"<div class='empty'>Enter costs in Cost based analysis to see where the money goes.</div>";
+  var costLegend="";
   var costTbl=a2Table(["Tour"].concat(costSeries.map(function(s){return s.name;})).concat(["Total"]),cTours.map(function(t,i){return ["["+tourCode(t)+"] "+anaEsc(shortName(t))].concat(costSeries.map(function(s){return fmt(s.values[i]);})).concat([fmt(costSeries.reduce(function(s,sr){return s+sr.values[i];},0))]);}));
   var catTot=costSeries.map(function(s){return {k:s.name,v:s.values.reduce(function(a,c){return a+c;},0)};}).sort(function(a,c){return c.v-a.v;});
   /* ---- team utilisation: days on tour per person per month ---- */
@@ -5711,18 +5794,15 @@ function renderAnalytics(){
     "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div><div class='a2-live'><i></i>Live · computed "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" from "+(tours||[]).length+" tours, "+(bookings||[]).length+" bookings, "+(leads||[]).length+" leads · recalculates on every visit, range change and sync</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
     overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
     "<div class='a2-grid'>"+
-      a2Card("profit","Profit by tour","revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
-      a2Card("age","Receivables ageing","money still to collect, by how late it is",ageBody,ageTbl,"",recTot?"<b>"+fmt(recTot)+"</b> outstanding · <b style='color:"+BAD+"'>"+fmt(overdue)+"</b> overdue":"")+
+      a2Card("profit","Profit by tour","completed tours only · revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
+      a2Card("cost","Cost breakdown","share of each cost head across the tours in this range · table: per tour",costBody,costTbl,costLegend,(catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%) · ":"")+"<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'>Export (.xlsx)</button>")+
     "</div>"+
-    a2Card("heat","Seat occupancy","seats booked of seats offered, by departure month",heatBody,heatTbl,"",yList.length?"<b>"+a2Pct(totBk,totCap)+"%</b> of "+totCap+" seats sold in this range"+(gaps.length?" · no departures in <b>"+gaps.join(", ")+"</b>":""):"")+
+    a2Card("heat","Guests by month","guests booked, by departure month",heatBody,heatTbl,"",yList.length?"<b>"+totBk+"</b> guest"+(totBk===1?"":"s")+" on "+totCap+" seats offered in this range"+(gaps.length?" · no departures in <b>"+gaps.join(", ")+"</b>":""):"")+
     "<div class='a2-grid'>"+
-      a2Card("cost","Cost breakdown","where each tour's money goes",costBody,costTbl,costLegend,catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%)":"")+
       a2Card("util","Team utilisation","days on tour per person per month",utilBody,utilTbl,utilLegend,pl.length?"Busiest: <b>"+anaEsc(pl[0].n)+"</b> "+pl[0].p.days+" days":"")+
-    "</div>"+
-    "<div class='a2-grid'>"+
       a2Card("funnel","Sales funnel","leads by stage, quotations, sources",funnelStats+funnelBody,funnelTbl,"",funnelFoot)+
-      a2Card("guests","Guests & markets","who travels with you",guestsStats+guestsBody,guestsTbl,"","")+
-    "</div>";
+    "</div>"+
+    a2Card("guests","Guests & markets","who travels with you",guestsStats+guestsBody,guestsTbl,"","");
   anaBindTips(el);
 }
 
@@ -6154,30 +6234,25 @@ function renderCalendar(){
 }
 
 /* ===== BOOKINGS ===== */
+var _bkFilter="all",_bkQuery="";
+function bkSetFilter(f){_bkFilter=f;renderBookings();}
+function bkSearch(q){_bkQuery=String(q||"").trim().toLowerCase();renderBookings();}
 function viewBookings(){
   return "<section class='view' id='v-bookings'>"+
-    "<div class='section-head'><div class='h-sec'>All bookings</div><div style='display:flex;gap:8px'>"+dlBtn('exportBookingsCSV')+"<button class='btn btn-primary' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Booking</button></div></div>"+
-    "<div class='card card-pad' style='margin-bottom:14px'>"+
-      "<div class='eyebrow' style='margin-bottom:10px'>Message every guest on a tour</div>"+
-      "<select class='input' id='bkBulkTour' style='width:100%;margin-bottom:10px'></select>"+
-      "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px'>"+
-        "<button class='btn btn-sea' style='justify-content:center' onclick='waAllBooked()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5z'/></svg>WhatsApp all</button>"+
-        "<button class='btn btn-ghost' style='justify-content:center' onclick='emailAllBooked()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:16px;height:16px'><path d='M4 4h16v16H4zM4 7l8 6 8-6'/></svg>Email all</button>"+
-      "</div>"+
-      "<div class='eyebrow' style='margin:16px 0 8px'>After the tour</div>"+
-      "<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px'>"+
-        "<div style='display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px'>"+
-          "<span style='font-size:13px;font-weight:700;white-space:nowrap'>⭐ Review link</span>"+
-          "<span style='display:flex;gap:6px'><button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('review','wa')\">WA</button><button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('review','em')\">Email</button></span>"+
-        "</div>"+
-        "<div style='display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px'>"+
-          "<span style='font-size:13px;font-weight:700;white-space:nowrap'>📝 Feedback form</span>"+
-          "<span style='display:flex;gap:6px'><button class='btn btn-sea btn-sm' onclick=\"shareLinkVia('feedback','wa')\">WA</button><button class='btn btn-ghost btn-sm' onclick=\"shareLinkVia('feedback','em')\">Email</button></span>"+
-        "</div>"+
-      "</div>"+
+    "<div class='section-head' style='flex-wrap:wrap;gap:10px'><div><div class='eyebrow'>Sales</div><div class='h-sec'>Bookings</div><div class='bk-summary' id='bkSummary'></div></div>"+
+      "<div class='bk-head-acts'>"+dlBtn('exportBookingsCSV')+"<button class='btn btn-soft blue' onclick='openAddBooking()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add booking</button></div></div>"+
+    "<div class='card card-pad bk-tools'>"+
+      "<div class='bk-tool'><div class='bk-tool-l'>Message every guest on a tour</div><div class='bk-tool-r'><select class='input' id='bkBulkTour'></select>"+
+        "<button class='btn btn-soft green' onclick='waAllBooked()'>WhatsApp all</button><button class='btn btn-soft blue' onclick='emailAllBooked()'>Email all</button></div></div>"+
+      "<div class='bk-tool'><div class='bk-tool-l'>After the tour</div><div class='bk-tool-r'>"+
+        "<span class='bk-tool-k'>Review link</span><button class='btn btn-soft green btn-sm' onclick=\"shareLinkVia('review','wa')\">WhatsApp</button><button class='btn btn-soft blue btn-sm' onclick=\"shareLinkVia('review','em')\">Email</button>"+
+        "<span class='bk-tool-k'>Feedback form</span><button class='btn btn-soft green btn-sm' onclick=\"shareLinkVia('feedback','wa')\">WhatsApp</button><button class='btn btn-soft blue btn-sm' onclick=\"shareLinkVia('feedback','em')\">Email</button></div></div>"+
     "</div>"+
     msgPanelMarkup()+
-    "<div class='card'><div class='tbl-wrap'><table class='bk-table'><thead><tr><th class='bk-guest'>Guest</th><th class='bk-tour'>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total</th><th class='num'>Deposit</th><th class='num'>Pending</th><th class='bk-notes'>Notes</th><th class='bk-quick'></th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div></div>"+
+    "<div class='card'>"+
+      "<div class='bk-filterbar'><div class='bk-filters' id='bkFilters'></div><input class='input bk-search' id='bkSearch' placeholder='Search guest, tour, country…' oninput='bkSearch(this.value)'></div>"+
+      "<div class='tbl-wrap'><table class='bk-table'><thead><tr><th class='bk-guest'>Guest</th><th class='bk-tour'>Tour</th><th>Dates</th><th class='num'>Party</th><th>Country</th><th>Status</th><th class='num'>Total</th><th class='num'>Deposit</th><th class='num'>Pending</th><th class='bk-notes'>Notes</th><th class='bk-quick'></th><th></th></tr></thead><tbody id='bkBody'></tbody></table></div>"+
+    "</div>"+
   "</section>";
 }
 function renderBookings(){
@@ -6186,7 +6261,16 @@ function renderBookings(){
   /* When a tour has a Point of Contact marked, only the POC shows here — the other
      team members who submitted forms stay in the Customer Database but drop off the
      bookings list (their names are listed under the POC instead). */
-  var rows=bookings.filter(function(x){if(!x.tour)return true;var t=tours.find(function(y){return y.id===x.tour;});if(!t||!t.pocId)return true;return x.id===t.pocId;});
+  var all=bookings.filter(function(x){if(!x.tour)return true;var t=tours.find(function(y){return y.id===x.tour;});if(!t||!t.pocId)return true;return x.id===t.pocId;});
+  var FILT=[["all","All"],["Confirmed","Confirmed"],["Pending","Pending"],["due","Balance due"],["paid","Fully paid"],["Completed","Completed"],["Cancelled","Cancelled"]];
+  var countOf=function(f){return all.filter(function(x){return bkMatch(x,f);}).length;};
+  var fb=document.getElementById("bkFilters");if(fb)fb.innerHTML=FILT.map(function(f){var n=countOf(f[0]);if(!n&&f[0]!=="all")return "";return "<button class='bk-f "+(_bkFilter===f[0]?"on":"")+"' onclick=\"bkSetFilter('"+f[0]+"')\">"+f[1]+" <b>"+n+"</b></button>";}).join("");
+  var rows=all.filter(function(x){return bkMatch(x,_bkFilter);});
+  if(_bkQuery){rows=rows.filter(function(x){var t=tours.find(function(y){return y.id===x.tour;});return [x.guest,x.members,x.country,x.city,x.state,x.email,x.phone,t?shortName(t):x.customTour,t?tourCode(t):""].join(" ").toLowerCase().indexOf(_bkQuery)>-1;});}
+  var sm=document.getElementById("bkSummary");if(sm){var gu=rows.reduce(function(s,x){return s+(parseInt(x.party,10)||1);},0),pe=rows.reduce(function(s,x){return s+bookingPending(x);},0);sm.textContent=rows.length+" booking"+(rows.length===1?"":"s")+" · "+gu+" guest"+(gu===1?"":"s")+(pe>0?" · "+fmt(pe)+" pending":"");}
+  var ini=function(n){return String(n||"?").trim().split(/\s+/).slice(0,2).map(function(w){return w.charAt(0).toUpperCase();}).join("")||"?";};
+  var hue=function(n){var h=0;String(n||"").split("").forEach(function(c){h=(h*31+c.charCodeAt(0))%360;});return h;};
+  if(!rows.length){b.innerHTML="<tr><td colspan='12'><div class='empty'>"+(all.length?"No bookings match this filter.":"No bookings yet — tap Add booking or share the registration form.")+"</div></td></tr>";renderBulkTourSelect();if(typeof renderMsgPanel==="function")renderMsgPanel();return;}
   b.innerHTML=rows.map(x=>{const t=tours.find(y=>y.id===x.tour);const _due=bookingDueDate(x);const lp=_due?dShort(_due):"—";
     var names=[];if(x.members)names=names.concat(String(x.members).split(/[,\n]/));
     if(t&&t.pocId===x.id)names=names.concat(bookings.filter(function(o){return o.tour===x.tour&&o.id!==x.id;}).map(function(o){return o.guest;}));
@@ -6197,18 +6281,22 @@ function renderBookings(){
     if(t&&t.tourType==="session"){var sd=(t.sessionDates&&t.sessionDates.length?t.sessionDates:[x.start||t.start]).filter(Boolean);dateCell=sd.length?dShort(sd[0])+sd.slice(1).map(function(d){return "<span class='bk-sess'>"+dShort(d)+"</span>";}).join(""):"—";}
     else dateCell=x.start?"<span class='bk-d'>"+dShort(x.start)+"</span> → <span class='bk-d'>"+dShort(x.end)+"</span>":"—";
     var pend=bookingPending(x);
+    var st=String(x.status||"Confirmed");st=st.charAt(0).toUpperCase()+st.slice(1);
+    var sc=st==="Cancelled"?"bad":(st==="Pending"?"warn":(st==="Completed"?"muted":"ok"));
+    var pc=bookingPaymentStatusClass(x);pc=pc==="completed"?"ok":(pc==="open"?"info":"bad");
+    var contact=[x.phone,x.email].filter(Boolean).join(" · ");
     return "<tr>"+
-      "<td class='bk-guest strong'>"+x.guest+mem+"</td>"+
-      "<td class='bk-tour'>"+(t?"<span class='bk-code'>"+tourCode(t)+"</span>"+tourLabel(t):(x.customTour||"—"))+"</td>"+
+      "<td class='bk-guest'><div class='bk-person'><span class='bk-av' style='background:hsl("+hue(x.guest)+",45%,92%);color:hsl("+hue(x.guest)+",45%,32%)'>"+ini(x.guest)+"</span><div class='bk-pinfo'><div class='bk-name'>"+esc0(x.guest)+"</div>"+(contact?"<div class='bk-sub'>"+esc0(contact)+"</div>":"")+mem+"</div></div></td>"+
+      "<td class='bk-tour'>"+(t?"<span class='bk-code'>"+tourCode(t)+"</span><span class='bk-tname'>"+esc0(tourLabel(t))+"</span>":esc0(x.customTour||"—"))+"</td>"+
       "<td class='bk-dates'>"+dateCell+"</td>"+
       "<td class='num mono'>"+x.party+"</td>"+
-      "<td>"+x.country+((x.city||x.state)?"<div class='bk-sub'>"+[x.city,x.state].filter(Boolean).join(", ")+"</div>":"")+"</td>"+
-      "<td><div class='bk-stack'><span class='pill completed'>"+x.status+"</span><span class='pill "+bookingPaymentStatusClass(x)+"'>"+bookingPaymentStatus(x)+"</span></div></td>"+
+      "<td>"+esc0(x.country||"—")+((x.city||x.state)?"<div class='bk-sub'>"+esc0([x.city,x.state].filter(Boolean).join(", "))+"</div>":"")+"</td>"+
+      "<td><div class='bk-stack'><span class='bk-chip "+sc+"'>"+esc0(st)+"</span><span class='bk-chip "+pc+"'>"+bookingPaymentStatus(x)+"</span></div></td>"+
       "<td class='num mono'>"+fmt(bookingTotalCost(x))+"</td>"+
       "<td class='num mono'>"+fmt(bookingDeposit(x))+"</td>"+
-      "<td class='num mono' style='color:var(--coral)'>"+fmt(pend)+(lp!=="—"?"<div class='bk-sub' style='color:var(--ink-soft)'>due "+lp+"</div>":"")+"</td>"+
-      "<td class='bk-notes' style='color:var(--ink-soft)' title=\""+String(x.notes||"").replace(/"/g,"&quot;")+"\">"+(x.notes||"—")+"</td>"+
-      "<td class='bk-quick m-nolabel'><div class='bk-quick-row'>"+(x.phone?"<a class='btn btn-ghost btn-sm' href='tel:"+String(x.phone).replace(/[^\d+]/g,"")+"'>📞 Call</a><button class='btn btn-sea btn-sm' onclick=\"quickWA('"+x.id+"')\">WhatsApp</button>":"")+(pend>0?"<button class='btn btn-primary btn-sm' onclick=\"markBookingPaid('"+x.id+"')\">Mark paid</button>":"")+"</div></td>"+
+      "<td class='num mono' style='color:"+(pend>0?"#b45309":"var(--ink-soft)")+"'>"+fmt(pend)+(lp!=="—"&&pend>0?"<div class='bk-sub'>due "+lp+"</div>":"")+"</td>"+
+      "<td class='bk-notes' title=\""+String(x.notes||"").replace(/"/g,"&quot;")+"\">"+(x.notes?esc0(x.notes):"<span style='color:var(--ink-soft)'>—</span>")+"</td>"+
+      "<td class='bk-quick m-nolabel'><div class='bk-quick-row'>"+(x.phone?"<a class='btn btn-soft grey btn-sm' href='tel:"+String(x.phone).replace(/[^\d+]/g,"")+"'>Call</a><button class='btn btn-soft green btn-sm' onclick=\"quickWA('"+x.id+"')\">WhatsApp</button>":"")+(pend>0?"<button class='btn btn-soft blue btn-sm' onclick=\"markBookingPaid('"+x.id+"')\">Mark paid</button>":"")+"</div></td>"+
       "<td><div class='tbl-actions'><button class='edit-btn' data-action='editBooking' data-arg='"+x.id+"' title='Edit'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z'/></svg></button><button class='del-btn' data-action='deleteBooking' data-arg='"+x.id+"' title='Delete'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6'/></svg></button></div></td>"+
     "</tr>"}).join("");
   renderBulkTourSelect();
@@ -6218,6 +6306,12 @@ function renderBookings(){
 /* ---- Message every guest on a tour (bulk WhatsApp / Email by tour code) -------
    Targets ALL non-cancelled bookings of the tour — including team members hidden
    behind a POC in the table above — so every registered number/email is reached. */
+function bkMatch(x,f){
+  if(f==="all")return true;
+  if(f==="due")return x.status!=="Cancelled"&&bookingPending(x)>0;
+  if(f==="paid")return x.status!=="Cancelled"&&bookingPending(x)<=0;
+  return String(x.status||"Confirmed").toLowerCase()===String(f).toLowerCase();
+}
 function renderBulkTourSelect(){
   var sel=document.getElementById("bkBulkTour");if(!sel)return;
   var keep=sel.value;
@@ -6374,7 +6468,7 @@ function deleteBooking(id){
 /* ===== CALCULATOR ===== */
 /* Tab bar shared by the Cost Calculator and the Profit Calculator (which now lives
    as a sub-tab of Cost Calculator rather than its own sidebar item). */
-function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='calc'?'active':'')+"' onclick=\"go('calc')\">Cost Calculator</button><button class='tab "+(active==='ratecards'?'active':'')+"' onclick=\"go('ratecards')\">Cost Sheet Categories</button><button class='tab "+(active==='invoices'?'active':'')+"' onclick=\"go('invoices')\">Invoices</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Quotations</button><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost Sheet</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Profit Calculator</button><button class='tab "+(active==='billing'?'active':'')+"' onclick=\"go('billing')\">Billing &amp; instructions</button></div>";}
+function calcTabsBar(active){return "<div class='tabs' style='margin-bottom:16px'><button class='tab "+(active==='costsheet'?'active':'')+"' onclick=\"go('costsheet')\">Cost sheet</button><button class='tab "+(active==='groupquote'?'active':'')+"' onclick=\"go('groupquote')\">Quotations</button><button class='tab "+(active==='invoices'?'active':'')+"' onclick=\"go('invoices')\">Invoices</button><button class='tab "+(active==='profit'?'active':'')+"' onclick=\"go('profit')\">Cost based analysis</button><button class='tab "+(active==='billing'?'active':'')+"' onclick=\"go('billing')\">Billing &amp; instructions</button>"+(active==='calc'?"<button class='tab active'>Cost look-up</button>":"")+"</div>";}
 function viewCalc(){
   if(!currentCalcTourId)currentCalcTourId=firstTourKey();
   const tourOpts=tourOptions(currentCalcTourId);
@@ -7222,6 +7316,7 @@ function viewCostSheet(){
           "<button class='btn btn-primary btn-sm' onclick='addCustomTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>New custom tour</button>"+
           "<button class='btn btn-ghost btn-sm' id='csDlSelBtn' onclick='downloadSelectedXlsx()' title='Download only the tour selected below (Indian + Foreign)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download this tour</button>"+
           "<button class='btn btn-ghost btn-sm' id='csDlBtn' onclick='downloadRatesXlsx()' title='Download every tour as one workbook'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Download all (.xlsx)</button>"+
+          "<button class='btn btn-ghost btn-sm' onclick=\"go('calc')\" title='Cost per group size for one tour, with quotation / invoice shortcuts'>Cost look-up</button>"+
         "</div>"+
       "</div>"+
       "<div class='cost-grid'>"+
@@ -9986,7 +10081,7 @@ function renderRequests(){
         return nm+(doc.note?" ("+doc.note+")":"");
       }).join(" · ")+"</b></div>";
     }
-    var dates=(s.start_date?dShort(s.start_date)+(s.end_date?" – "+dShort(s.end_date):""):"");
+    var dates=(s.start_date?dDash(s.start_date)+(s.end_date?" – "+dDash(s.end_date):""):"");
     var statusPill="<span class='pill "+(s.status==="accepted"?"completed":s.status==="declined"?"full":"open")+"'>"+(s.status||"new")+"</span>";
     var acts="";
     if(s.type==="interest")acts="<button class='btn btn-primary btn-sm' onclick=\"convertToLead('"+s.id+"')\">Add as lead</button><button class='btn btn-sea btn-sm' onclick=\"convertToBooking('"+s.id+"')\">Create booking</button>";
@@ -10610,10 +10705,11 @@ function tourProfit(t){return tourRevenue(t)-tourExpTotal(t);}
 var PROFIT_COLS=["Tour ID","Tour","Total Tour Cost"].concat(PROFIT_EXP_FIELDS.map(function(f){return f[1];})).concat(["Total Expenses","Profit"]);
 function profitSheetRow(t){var e=(t.profitExp)||{};var row={"Tour ID":tourCode(t),"Tour":tourLabel(t),"Total Tour Cost":tourRevenue(t)};PROFIT_EXP_FIELDS.forEach(function(f){row[f[1]]=+e[f[0]]||0;});row["Total Expenses"]=tourExpTotal(t);row["Profit"]=tourProfit(t);return row;}
 function viewProfitCalc(){
-  if(!tours.length)return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+"<div class='empty'>Create a tour first to use the profit calculator.</div></section>";
+  if(!tours.length)return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+"<div class='empty'>Create a tour first to use the cost based analysis.</div></section>";
   return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+
-    "<div class='section-head'><div><div class='eyebrow'>Finance</div><div class='h-sec'>Profit Calculator</div></div>"+
-      "<select class='input' style='width:auto' id='pc_tour' onchange='pcTourChanged()'>"+tours.map(function(t){return "<option value='"+t.id+"'>"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"</select>"+
+    "<div class='section-head' style='flex-wrap:wrap;gap:10px'><div><div class='eyebrow'>Finance</div><div class='h-sec'>Cost based analysis</div></div>"+
+      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'><select class='input' style='width:auto' id='pc_tour' onchange='pcTourChanged()'>"+tours.map(function(t){return "<option value='"+t.id+"'>"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"</select>"+
+      "<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export (.xlsx)</button></div>"+
     "</div>"+
     "<div id='pcBody'></div>"+
   "</section>";
@@ -10640,7 +10736,7 @@ function renderProfitCalc(){
   el.innerHTML="<div class='card card-pad pc-panel'>"+
     (window._pcEditId?"<div class='eyebrow' style='color:var(--amber);margin-bottom:8px'>Editing a saved calculation</div>":"")+
     "<div class='pc-stats'>"+
-      "<div class='s'><div class='l'>Total Tour Cost</div><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='h'>from bookings</div></div>"+
+      "<div class='s'><div class='l'>Total Tour Cost</div><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='h'>from bookings"+(status(t)==="completed"?"":" · tour not completed yet")+"</div></div>"+
       "<div class='s'><div class='l'>Total Expenses</div><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div></div>"+
       "<div class='s'><div class='l'>Profit</div><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div></div>"+
     "</div>"+
@@ -10782,7 +10878,7 @@ function profitBriefCard(){
     return "<div class='list-row'><div class='meta'><div class='t'>"+tourCode(t)+" · "+tourLabel(t)+"</div><div class='s'>"+(pb?pb.guest:"No POC set")+"</div></div>"+
       "<div style='display:flex;gap:18px;align-items:baseline;text-align:right'><span class='mono' style='min-width:88px'>"+fmt(tourRevenue(t))+"</span><b class='mono' style='min-width:88px;color:"+(tourProfit(t)>=0?"var(--forest)":"var(--coral)")+"'>"+fmt(tourProfit(t))+"</b></div></div>";
   }).join("");
-  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Finance</div><div class='h-sec' style='font-size:15px'>Profit by tour</div></div><button class='btn btn-ghost btn-sm' onclick=\"go('profit')\">Open calculator</button></div>"+rows+"</div>";
+  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:6px'><div><div class='eyebrow'>Finance</div><div class='h-sec' style='font-size:15px'>Profit by tour</div></div><button class='btn btn-ghost btn-sm' onclick=\"go('profit')\">Cost based analysis</button></div>"+rows+"</div>";
 }
 function setGuideRole(id,role){var t=tours.find(function(x){return x.id===id;});if(!t)return;t.guideRole=role;persistData();openTour(id);}
 /* Share a Guide-Service reservation link for a specific tour (creates/reuses one). */
@@ -12300,7 +12396,7 @@ function boot(keepView){
   if(typeof migratePayAccounts==="function")migratePayAccounts();
   if(typeof migrateDocNumbers==="function")migrateDocNumbers();
   buildNav();
-  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewCatalog(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewRateCards(),viewBilling(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
+  document.getElementById("content").innerHTML=[viewDashboard(),viewAnalytics(),viewCatalog(),viewTours(),viewCalendar(),viewBookings(),viewAccommodation(),viewOperations(),viewCalc(),viewInvoices(),viewProfitCalc(),viewGroupQuote(),viewCostSheet(),viewBilling(),viewLogistics(),viewCRM(),viewRequests(),viewReservations(),viewCustomers(),viewReviews(),viewSettings()].join("");
   renderTours();renderCalendar();renderBookings();renderAccommodation();renderOperations();calc();renderProfitCalc();renderGroupQuote();renderCostSheet();renderLog();renderCRM();renderCustomers();renderReviews();renderOperators();renderReservations();
   if(keepView&&TITLES[curView]){
     /* In-place rebuild: no navigation, no history reset — and visually silent.
