@@ -1842,7 +1842,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 333</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 334</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1851,7 +1851,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 333</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 334</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5698,6 +5698,39 @@ function a2Donut(items,opt){
   items.forEach(function(x,i){var len=Math.max(x.n/tot*C-2,0);segs+="<circle class='seg' cx='66' cy='66' r='"+R+"' stroke='"+a2col(i)+"' stroke-dasharray='"+len.toFixed(2)+" "+(C-len).toFixed(2)+"' stroke-dashoffset='"+(-off).toFixed(2)+"' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'/>";off+=x.n/tot*C;});
   return "<div class='ana-donut'><svg viewBox='0 0 132 132'><g transform='rotate(-90 66 66)'>"+segs+"</g><text class='ctr' x='66' y='64' text-anchor='middle'>"+anaEsc(opt.center!=null?opt.center:tot)+"</text><text class='ctr2' x='66' y='80' text-anchor='middle'>"+anaEsc(opt.centerLabel||"total")+"</text></svg><div class='lg'>"+items.map(function(x,i){return "<div><i style='background:"+a2col(i)+"'></i><span>"+anaEsc(x.k)+"</span><b>"+anaEsc(opt.tip?opt.tip(x):x.n)+" · "+Math.round(x.n/tot*100)+"%</b></div>";}).join("")+"</div></div>";
 }
+/* Country as typed on bookings is free text ("Indian", "British", "UK").
+   Normalise it to one country name so the markets chart does not split. */
+var COUNTRY_ALIAS={"india":"India","indian":"India","bharat":"India","in":"India","uk":"United Kingdom","u.k.":"United Kingdom","u.k":"United Kingdom","united kingdom":"United Kingdom","great britain":"United Kingdom","britain":"United Kingdom","british":"United Kingdom","england":"United Kingdom","english":"United Kingdom","scotland":"United Kingdom","scottish":"United Kingdom","wales":"United Kingdom","welsh":"United Kingdom","usa":"United States","u.s.a.":"United States","us":"United States","u.s.":"United States","united states":"United States","united states of america":"United States","american":"United States","america":"United States","germany":"Germany","german":"Germany","deutschland":"Germany","france":"France","french":"France","australia":"Australia","australian":"Australia","aussie":"Australia","netherlands":"Netherlands","the netherlands":"Netherlands","holland":"Netherlands","dutch":"Netherlands","switzerland":"Switzerland","swiss":"Switzerland","spain":"Spain","spanish":"Spain","italy":"Italy","italian":"Italy","japan":"Japan","japanese":"Japan","canada":"Canada","canadian":"Canada","singapore":"Singapore","singaporean":"Singapore","sweden":"Sweden","swedish":"Sweden","denmark":"Denmark","danish":"Denmark","norway":"Norway","norwegian":"Norway","finland":"Finland","finnish":"Finland","belgium":"Belgium","belgian":"Belgium","austria":"Austria","austrian":"Austria","ireland":"Ireland","irish":"Ireland","israel":"Israel","israeli":"Israel","china":"China","chinese":"China","thailand":"Thailand","thai":"Thailand","malaysia":"Malaysia","malaysian":"Malaysia","sri lanka":"Sri Lanka","sri lankan":"Sri Lanka","nepal":"Nepal","nepali":"Nepal","nepalese":"Nepal","bangladesh":"Bangladesh","bangladeshi":"Bangladesh","russia":"Russia","russian":"Russia","poland":"Poland","polish":"Poland","czech republic":"Czechia","czechia":"Czechia","czech":"Czechia","portugal":"Portugal","portuguese":"Portugal","brazil":"Brazil","brazilian":"Brazil","mexico":"Mexico","mexican":"Mexico","south africa":"South Africa","south african":"South Africa","new zealand":"New Zealand","kiwi":"New Zealand","uae":"United Arab Emirates","u.a.e.":"United Arab Emirates","united arab emirates":"United Arab Emirates","emirati":"United Arab Emirates","dubai":"United Arab Emirates","hong kong":"Hong Kong","taiwan":"Taiwan","taiwanese":"Taiwan","south korea":"South Korea","korea":"South Korea","korean":"South Korea","indonesia":"Indonesia","indonesian":"Indonesia","philippines":"Philippines","filipino":"Philippines","vietnam":"Vietnam","vietnamese":"Vietnam","turkey":"Turkey","turkish":"Turkey","greece":"Greece","greek":"Greece","hungary":"Hungary","hungarian":"Hungary","argentina":"Argentina","argentinian":"Argentina","chile":"Chile","chilean":"Chile","colombia":"Colombia","colombian":"Colombia","kenya":"Kenya","kenyan":"Kenya","egypt":"Egypt","egyptian":"Egypt","saudi arabia":"Saudi Arabia","saudi":"Saudi Arabia","oman":"Oman","omani":"Oman","qatar":"Qatar","qatari":"Qatar","pakistan":"Pakistan","pakistani":"Pakistan","bhutan":"Bhutan","bhutanese":"Bhutan","maldives":"Maldives","maldivian":"Maldives"};
+function normCountry(c){
+  var raw=String(c==null?"":c).trim();if(!raw||raw==="—")return "Unknown";
+  var k=raw.toLowerCase().replace(/[.]/g,function(m){return m;}).replace(/\s+/g," ");
+  if(COUNTRY_ALIAS[k])return COUNTRY_ALIAS[k];
+  var k2=k.replace(/[^a-z ]/g,"").trim();if(COUNTRY_ALIAS[k2])return COUNTRY_ALIAS[k2];
+  return raw.charAt(0).toUpperCase()+raw.slice(1);
+}
+/* One key per real person: the customer record when phone, email or name
+   matches one; else the phone, else the email, else the cleaned name. */
+function personKey(name,email,phone){
+  var c=(typeof findCustomer==="function")?findCustomer(name,email,phone):null;
+  if(c)return "c:"+((customers||[]).indexOf(c));
+  var ph=String(phone||"").replace(/\D/g,"");if(ph.length>=7)return "p:"+ph.slice(-10);
+  var em=String(email||"").toLowerCase().trim();if(em)return "e:"+em;
+  var nm=String(name||"").toLowerCase().replace(/\b(dr|mr|mrs|ms|miss|prof)\.?\s+/g,"").replace(/[^a-z ]/g,"").replace(/\s+/g," ").trim();
+  return nm?"n:"+nm:"";
+}
+/* Every person on a booking: the contact, the named party members, and one
+   anonymous slot per unnamed seat (so the count never drops below the seats
+   actually booked for people nobody has named yet). */
+function bookingPersons(b){
+  var out=[],seen={};
+  var add=function(k){if(k&&!seen[k]){seen[k]=1;out.push(k);}};
+  add(personKey(b.guest,b.email,b.phone));
+  String(b.members||"").split(/[,\n]/).map(function(x){return x.trim();}).filter(Boolean).forEach(function(nm){add(personKey(nm,"",""));});
+  var party=Math.max(parseInt(b.party,10)||1,1);
+  if(out.length>party)out=out.slice(0,party);   /* never more people than seats on the booking */
+  for(var i=out.length;i<party;i++)out.push("a:"+b.id+"#"+i);
+  return out;
+}
 /* Big donut with the share printed on every slice that is wide enough, the
    total in the middle and a legend of name · value · share (+ a sub line). */
 function a2Pie(items,opt){
@@ -5805,18 +5838,18 @@ function renderAnalytics(){
   var funnelTbl=a2Table(["Stage","Reached","Sitting here","From previous"],fun.map(function(f,i){return [anaEsc(f.label),String(f.n),String(f.here),i?a2Pct(f.n,fun[i-1].n)+"%":"—"];}));
   /* ---- guests & markets ---- */
   var B=(bookings||[]).filter(function(x){if(x.status==="Cancelled")return false;var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;return a2In((t&&t.start)||x.start,b);});
-  var byC={},paxTot=0,revByC={};
-  B.forEach(function(x){var c=(x.country||"—").trim()||"—";var n=parseInt(x.party,10)||1;byC[c]=(byC[c]||0)+n;paxTot+=n;revByC[c]=(revByC[c]||0)+bookingTotalCost(x);});
+  var byC={},paxTot=0,revByC={},seatTot=0,persons={};
+  B.forEach(function(x){var c=normCountry(x.country);seatTot+=parseInt(x.party,10)||1;revByC[c]=(revByC[c]||0)+bookingTotalCost(x);bookingPersons(x).forEach(function(k){if(persons[k])return;persons[k]=c;byC[c]=(byC[c]||0)+1;paxTot++;});});
   var cl=Object.keys(byC).map(function(k){return {k:k,n:byC[k],rev:revByC[k]};}).sort(function(a,c){return c.n-a.n;});
   var top6=cl.slice(0,5);if(cl.length>5)top6.push({k:"Other",n:cl.slice(5).reduce(function(s,x){return s+x.n;},0),rev:cl.slice(5).reduce(function(s,x){return s+x.rev;},0)});
   var cust=(customers||[]).filter(function(c){return (c.type||"Client")==="Client";});
   var rep=cust.filter(function(c){return c.repeat||(c.tours||0)>1;}).length;
-  var forn=B.filter(function(x){return x.country&&!/india/i.test(x.country);}).reduce(function(s,x){return s+(parseInt(x.party,10)||1);},0);
-  var avgParty=B.length?(paxTot/B.length).toFixed(1):"—";
+  var forn=Object.keys(persons).filter(function(k){return persons[k]!=="India"&&persons[k]!=="Unknown";}).length;
+  var avgParty=B.length?(seatTot/B.length).toFixed(1):"—";
   var indN=paxTot-forn;
-  var guestsStats="<div class='a2-stats five'>"+a2Stat("Guests",String(paxTot),B.length+" booking"+(B.length===1?"":"s"))+a2Stat("Indian clients",String(indN),a2Pct(indN,paxTot)+"% of guests")+a2Stat("International",String(forn),a2Pct(forn,paxTot)+"% of guests")+a2Stat("Repeat guests",a2Pct(rep,cust.length)+"%",rep+" of "+cust.length+" customers")+a2Stat("Avg. party",String(avgParty),"guests per booking")+"</div>";
-  var guestsBody=cl.length?a2Pie(top6.map(function(x,i){return {k:x.k,n:x.n,c:a2col(i),s:fmt(x.rev)};}),{tip:function(x){return x.n+" guest"+(x.n===1?"":"s")+" · "+x.s;},val:function(x){return x.n+" pax";},center:paxTot,centerLabel:"guests"}):"<div class='empty'>No guests in this range.</div>";
-  var guestsTbl=a2Table(["Market","Guests","Share","Revenue","Per guest"],cl.map(function(x){return [anaEsc(x.k),String(x.n),a2Pct(x.n,paxTot)+"%",fmt(x.rev),fmt(x.n?Math.round(x.rev/x.n):0)];}));
+  var guestsStats="<div class='a2-stats five'>"+a2Stat("Clients",String(paxTot),"unique people · "+seatTot+" seat"+(seatTot===1?"":"s")+" on "+B.length+" booking"+(B.length===1?"":"s"))+a2Stat("Indian clients",String(indN),a2Pct(indN,paxTot)+"% of clients")+a2Stat("International",String(forn),a2Pct(forn,paxTot)+"% of clients")+a2Stat("Repeat guests",a2Pct(rep,cust.length)+"%",rep+" of "+cust.length+" customers")+a2Stat("Avg. party",String(avgParty),"guests per booking")+"</div>";
+  var guestsBody=cl.length?a2Pie(top6.map(function(x,i){return {k:x.k,n:x.n,c:a2col(i),s:fmt(x.rev)};}),{tip:function(x){return x.n+" client"+(x.n===1?"":"s")+" · "+x.s;},val:function(x){return x.n+(x.n===1?" client":" clients");},center:paxTot,centerLabel:"clients"}):"<div class='empty'>No guests in this range.</div>";
+  var guestsTbl=a2Table(["Market","Clients","Share","Revenue","Per client"],cl.map(function(x){return [anaEsc(x.k),String(x.n),a2Pct(x.n,paxTot)+"%",fmt(x.rev),fmt(x.n?Math.round(x.rev/x.n):0)];}));
   /* ---- collections by month: received vs pending, by tour start ---- */
   var colRec={},colPen={};
   (bookings||[]).filter(function(x){if(x.status==="Cancelled")return false;if(!x.tour)return true;var t=tours.find(function(y){return y.id===x.tour;});if(!t||!t.pocId)return true;return x.id===t.pocId;}).forEach(function(x){var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;var d=(t&&t.start)||x.start||"";if(!d||!a2In(d,b))return;var k=d.slice(0,7);colRec[k]=(colRec[k]||0)+bookingDeposit(x);colPen[k]=(colPen[k]||0)+bookingPending(x);});
@@ -5843,7 +5876,7 @@ function renderAnalytics(){
   var guideTbl=a2Table(["Guide","Role","Tours","Revenue","Per tour"],gRows.map(function(x){return [anaEsc(x.k),x.role,String(x.n),fmt(Math.round(x.rev)),fmt(Math.round(x.rev/x.n))];}));
   /* ---- guests by year: first-time vs returning ---- */
   var seenG={},yrNew={},yrRet={};
-  (bookings||[]).filter(function(x){return x.status!=="Cancelled";}).map(function(x){var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;return {x:x,d:(t&&t.start)||x.start||""};}).filter(function(o){return o.d;}).sort(function(a,c){return a.d.localeCompare(c.d);}).forEach(function(o){var nm=String(o.x.guest||"").trim().toLowerCase();var y=o.d.slice(0,4),n=parseInt(o.x.party,10)||1;if(nm&&seenG[nm]){yrRet[y]=(yrRet[y]||0)+n;}else{yrNew[y]=(yrNew[y]||0)+n;}if(nm)seenG[nm]=1;});
+  (bookings||[]).filter(function(x){return x.status!=="Cancelled";}).map(function(x){var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;return {x:x,d:(t&&t.start)||x.start||""};}).filter(function(o){return o.d;}).sort(function(a,c){return a.d.localeCompare(c.d);}).forEach(function(o){var y=o.d.slice(0,4);bookingPersons(o.x).forEach(function(k){var anon=k.charAt(0)==="a";if(!anon&&seenG[k]){yrRet[y]=(yrRet[y]||0)+1;}else{yrNew[y]=(yrNew[y]||0)+1;}if(!anon)seenG[k]=1;});});
   var yrs2=Object.keys(Object.assign({},yrNew,yrRet)).sort();
   var yrBody=yrs2.length?a2Bars(yrs2,[{name:"First-time",values:yrs2.map(function(y){return yrNew[y]||0;}),color:a2col(0)},{name:"Returning",values:yrs2.map(function(y){return yrRet[y]||0;}),color:a2col(2)}],{stack:true,height:190}):"<div class='empty'>No bookings yet.</div>";
   var yrTbl=a2Table(["Year","First-time","Returning","Returning share"],yrs2.map(function(y){var a=yrNew[y]||0,r=yrRet[y]||0;return [y,String(a),String(r),pct((a+r)?Math.round(r/(a+r)*100):null)];}));
@@ -5855,7 +5888,7 @@ function renderAnalytics(){
     overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
     "<div class='a2-grid'>"+
       a2Card("cost","Cost breakdown","share of each cost head across the tours in this range · table: per tour",costBody,costTbl,costLegend,(catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%) · ":"")+"<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'>Export (.xlsx)</button>")+
-      a2Card("guests","Guests & markets","who travels with you · by nationality",guestsStats+guestsBody,guestsTbl,"","")+
+      a2Card("guests","Clients & markets","unique people, matched by phone, email and name · by nationality",guestsStats+guestsBody,guestsTbl,"","")+
     "</div>"+
     a2Card("profit","Profit by tour","completed tours only · revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
     a2Card("heat","Guests by month","guests booked, by departure month",heatBody,heatTbl,"",yList.length?"<b>"+totBk+"</b> guest"+(totBk===1?"":"s")+" on "+totCap+" seats offered in this range"+(gaps.length?" · no departures in <b>"+gaps.join(", ")+"</b>":""):"")+
@@ -5871,7 +5904,7 @@ function renderAnalytics(){
       a2Card("util","Team utilisation","days on tour per person per month",utilBody,utilTbl,utilLegend,pl.length?"Busiest: <b>"+anaEsc(pl[0].n)+"</b> "+pl[0].p.days+" days":"")+
       a2Card("funnel","Sales funnel","leads by stage, quotations, sources",funnelStats+funnelBody,funnelTbl,"",funnelFoot)+
     "</div>"+
-    a2Card("years","Guests by year","first-time and returning guests, all time",yrBody,yrTbl,yrs2.length?a2Legend([["First-time",a2col(0)],["Returning",a2col(2)]]):"",yrs2.length?"Returning guests in <b>"+yrs2[yrs2.length-1]+"</b>: <b>"+(yrRet[yrs2[yrs2.length-1]]||0)+"</b>":"");
+    a2Card("years","Clients by year","first-time and returning people, all time · matched by phone, email and name",yrBody,yrTbl,yrs2.length?a2Legend([["First-time",a2col(0)],["Returning",a2col(2)]]):"",yrs2.length?"Returning guests in <b>"+yrs2[yrs2.length-1]+"</b>: <b>"+(yrRet[yrs2[yrs2.length-1]]||0)+"</b>":"");
   anaBindTips(el);
 }
 
