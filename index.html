@@ -1763,7 +1763,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 326</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 327</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1772,7 +1772,7 @@ html.dark .a2-hero-main{background:var(--surface-2);border-color:var(--line)}htm
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 326</span></div></div>
+      <div style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub" style="margin-top:3px">Ops Console</div><div style="margin-top:6px"><span class="build-badge" id="sideBuild">build 327</span></div></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -6447,7 +6447,8 @@ function invoiceFromQuote(id){
   var qTotal=(r.total!=null)?r.total:((r.perPerson!=null)?r.perPerson*pax:0);
   var perP=(r.perPerson!=null)?r.perPerson:(qTotal&&pax?Math.round(qTotal/pax):qTotal);
   var isSess=(r.invMode==="session")||(r.kind==="session");
-  var lineLabel=(r.tour||"Tour package")+(pax>1&&perP?" ("+pax+" × "+fmt(perP)+")":"");
+  var perLine=(pax>1&&perP&&Math.abs(perP*pax-qTotal)<1);
+  var lineLabel=(r.tour||"Tour package");
   /* Deposit: the quotation's own figure, else its % of the total; pending follows. */
   var qDep=(r.deposit!=null&&r.deposit!=="")?(parseFloat(r.deposit)||0):((r.depositPct!=null&&qTotal)?Math.round(qTotal*(parseFloat(r.depositPct)||0)/100):0);
   _curInvoice={
@@ -6456,7 +6457,7 @@ function invoiceFromQuote(id){
     client:{name:r.guest||"",address:r.address||"",gst:r.gst||"",country:""},
     date:today, startDate:startD, endDate:endD, participants:pax,
     isSess:isSess, sessDur:"",
-    lines:isSess?[{label:lineLabel, amount:qTotal||0}]:invDefaultLines(),
+    lines:isSess?[{label:lineLabel, qty:(perLine?pax:1), rate:(perLine?perP:(qTotal||0)), amount:qTotal||0}]:invDefaultLines(),
     quotedTotal:qTotal||0, quotedFrom:(r.qid||""), deposit:qDep,
     fromQuote:id, savedId:null
   };
@@ -6465,7 +6466,31 @@ function invoiceFromQuote(id){
 /* Every generated invoice starts with these categories and blank amounts; the
    operator fills in what applies. Labels are matched by lineAmt() for the sheet export. */
 var INV_DEFAULT_CATS=["Accommodation","Transportation and Logistics","Food and Water Bottles","Entry Fee","Guide Fee"];
-function invDefaultLines(){return INV_DEFAULT_CATS.map(function(l){return {label:l,amount:""};});}
+function invDefaultLines(){return INV_DEFAULT_CATS.map(function(l){return {label:l,qty:1,rate:"",amount:""};});}
+/* Each line is qty × rate = amount (the amount is what older records stored on
+   its own: qty 1, rate = amount). */
+function invLineBlank(l){return !l||l.amount===""||l.amount==null||isNaN(parseFloat(l.amount));}
+function invLineQty(l){var q=parseFloat(l&&l.qty);return (isFinite(q)&&q>0)?q:1;}
+function invLineRate(l){
+  if(l&&l.rate!=null&&l.rate!==""&&isFinite(parseFloat(l.rate)))return parseFloat(l.rate);
+  if(invLineBlank(l))return "";
+  return Math.round(parseFloat(l.amount)/invLineQty(l)*100)/100;
+}
+/* The platform fee on an invoice is not a row of its own: it is added to the
+   guide charge — the line whose label mentions "guide", else the only / last
+   line with an amount. Stored line amounts stay net of the fee; the document
+   shows the carrier line with the fee inside it. */
+function invFeeInfo(inv){
+  var pct=(inv.feePct!=null&&inv.feePctLocked)?inv.feePct:platformFeePct(inv.clientType);
+  var base=invTotal();
+  var fee=Math.round(base*pct/100);
+  var L=inv.lines||[],carrier=-1;
+  if(invLinesEntered()){
+    for(var i=0;i<L.length;i++){if(/guide/i.test(L[i].label||"")&&!invLineBlank(L[i])){carrier=i;break;}}
+    if(carrier<0){for(var j=L.length-1;j>=0;j--){if(!invLineBlank(L[j])){carrier=j;break;}}}
+  }
+  return {pct:pct,fee:fee,base:base,taxable:Math.round((base+fee)*100)/100,carrier:carrier};
+}
 /* Total of the line items, or null when every amount is still blank. */
 function invLinesEntered(){return (_curInvoice&&_curInvoice.lines||[]).some(function(l){return l.amount!==""&&l.amount!=null&&!isNaN(parseFloat(l.amount));});}
 /* Selection for the standalone Invoices module (mirrors calcSelection). */
@@ -6635,9 +6660,16 @@ function docRecalcInvoice(root,prev,live){
   var put=function(row,txt){if(!row)return;var c=row.lastElementChild;if(!c||c===focus)return;if(docCellText(c)!==txt){c.textContent=txt;changed++;}};
   var lines=[];var entered=false;var sum=0;
   Array.prototype.forEach.call(table.querySelectorAll("tbody tr"),function(tr){
-    if(tr.children.length<2)return;
-    var amt=docNum(tr.lastElementChild);
-    lines.push({label:docCellText(tr.firstElementChild),amount:(amt==null?"":amt)});
+    var C=tr.children;if(C.length<2)return;
+    var amt=docNum(tr.lastElementChild),qty=null,rate=null;
+    if(C.length>=4){
+      qty=docNum(C[1]);rate=docNum(C[2]);
+      /* a qty or rate being typed re-derives the line total */
+      if(qty!=null&&rate!=null&&focus&&(focus===C[1]||focus===C[2])){var nt=Math.round(qty*rate*100)/100;if(docCellText(C[3])!==fmt(nt)){C[3].textContent=fmt(nt);changed++;}amt=nt;}
+    }
+    var ln={label:docCellText(C[0]),amount:(amt==null?"":amt)};
+    if(qty!=null&&qty>0)ln.qty=qty;if(rate!=null)ln.rate=rate;
+    lines.push(ln);
     if(amt!=null){entered=true;sum+=amt;}
   });
   var totRow=docFindRow(table,/^(grand total|total amount)/i);
@@ -6656,16 +6688,16 @@ function docRecalcInvoice(root,prev,live){
   var rate=0;var rm=(igRow&&docCellText(igRow.firstElementChild).match(/([\d.]+)\s*%/))||(cgRow&&docCellText(cgRow.firstElementChild).match(/([\d.]+)\s*%/));
   if(rm)rate=parseFloat(rm[1])*(igRow?1:2);
   var tax=rate>0?Math.round(taxable*rate)/100:0;
-  var grand=Math.round((taxable+tax)*100)/100;
+  var grand=Math.round(taxable+tax);
   var dep=depRow?docNum(depRow.lastElementChild):null;
   var pending=depRow?Math.max(0,grand-(dep||0)):null;
   put(subRow,fmt(total));put(feeRow,fmt(fee));
-  if(taxRow){put(taxRow,fmt(taxable));put(igRow,fmt(igRow?tax:0));put(cgRow,fmt(Math.round(tax*50)/100));put(sgRow,fmt(Math.round(tax*50)/100));}
+  put(taxRow,fmt(taxable));put(igRow,fmt(igRow?tax:0));put(cgRow,fmt(Math.round(tax*50)/100));put(sgRow,fmt(Math.round(tax*50)/100));
   if(totRow&&(entered||taxRow||subRow))put(totRow,fmt(grand));
   if(depRow&&dep==null)put(depRow,fmt(0));
   if(penRow&&pending!=null)put(penRow,fmt(pending));
   if(wordsRow)put(wordsRow,rupeesInWords(grand));
-  return {kind:"invoice",lines:lines,entered:entered,total:total,fee:fee,feePct:feePct,taxable:taxable,rate:rate,tax:tax,grand:grand,deposit:dep,pending:pending,changed:changed};
+  return {kind:"invoice",lines:lines,entered:entered,total:total,fee:fee,feePct:feePct,feeRow:!!feeRow,taxable:taxable,rate:rate,tax:tax,grand:grand,deposit:dep,pending:pending,changed:changed};
 }
 /* A quotation printed without a deposit row still owes a deposit figure: the stored % of its total. */
 function docQuoteFill(c,pct){if(c&&c.dep==null&&c.total!=null&&pct!=null&&isFinite(parseFloat(pct))){c.dep=Math.round(c.total*parseFloat(pct)/100);c.pending=Math.max(0,c.total-c.dep);}return c;}
@@ -6696,10 +6728,18 @@ function docSyncFigures(){
     var r=docRecalcInvoice(body,_docPrev,false);if(!r)return null;_docPrev=r;
     if(typeof _curInvoice!=="undefined"&&_curInvoice){
       var inv=_curInvoice;
-      if(r.lines.length)inv.lines=r.lines;
-      if(!r.entered)inv.quotedTotal=r.total;
+      /* the document shows the platform fee inside the guide line; the record
+         keeps line amounts net of it (r.fee is only set by a printed fee row) */
+      var hid=(r.feeRow?0:(parseFloat(inv.fee)||0));
+      if(r.lines.length){
+        if(hid>0&&r.entered){var ci=(inv.feeCarrier!=null&&r.lines[inv.feeCarrier]&&r.lines[inv.feeCarrier].amount!=="")?inv.feeCarrier:-1;
+          if(ci<0){for(var k=r.lines.length-1;k>=0;k--){if(r.lines[k].amount!==""){ci=k;break;}}}
+          if(ci>=0){var cl=r.lines[ci];cl.amount=Math.max(0,Math.round((cl.amount-hid)*100)/100);if(cl.rate!=null)cl.rate=Math.round(cl.amount/(cl.qty||1)*100)/100;}}
+        inv.lines=r.lines;
+      }
+      if(!r.entered)inv.quotedTotal=Math.max(0,r.total-hid);
       if(r.deposit!=null)inv.deposit=r.deposit;
-      inv.total=r.total;inv.fee=r.fee;inv.feePct=r.feePct;inv.taxable=r.taxable;inv.grandTotal=r.grand;inv.gstRate=r.rate;inv.gstAmount=r.tax;inv.pending=(r.pending!=null?r.pending:Math.max(0,r.grand-(inv.deposit||0)));
+      inv.total=Math.max(0,r.total-hid);inv.fee=(r.feeRow?r.fee:hid);inv.feePct=(r.feeRow?r.feePct:inv.feePct);inv.taxable=r.taxable;inv.grandTotal=r.grand;inv.gstRate=r.rate;inv.gstAmount=r.tax;inv.pending=(r.pending!=null?r.pending:Math.max(0,r.grand-(inv.deposit||0)));
       inv.accommodation=lineAmt(inv,"Accommodation");inv.travel=lineAmt(inv,"Transportation and Logistics","Travel and Logistics");inv.food=lineAmt(inv,"Food and Water Bottles","Food");inv.entry=lineAmt(inv,"Entry Fee","Entry tickets");inv.ship=lineAmt(inv,"Ship tickets");inv.guide=lineAmt(inv,"Guide Fee");inv.referral=lineAmt(inv,"Referral amount");
     }
     return r;
@@ -6755,7 +6795,7 @@ function syncDocFigures(){
     box.innerHTML=r.html;
     var v=docRecalcInvoice(box,null,false);if(!v)return;
     var upd=function(k,val){if(val!=null&&r[k]!==val){r[k]=val;changed++;}};
-    upd("total",v.total);upd("grandTotal",v.grand);upd("gstAmount",v.tax);upd("deposit",v.deposit);upd("pending",v.pending);
+    upd("total",v.feeRow?v.total:Math.max(0,v.total-(parseFloat(r.fee)||0)));upd("grandTotal",v.grand);upd("gstAmount",v.tax);upd("deposit",v.deposit);upd("pending",v.pending);
     if(v.changed){r.html=box.innerHTML;changed++;}
   });
   if(changed){audit("documents","figures synced",changed+" figure(s) brought in line with the document text");if(typeof persistData==="function")persistData();}
@@ -6794,7 +6834,22 @@ function brandContactEmail(){
   }
   return e||"info@islandexplorer.in";
 }
-/* Branded letterhead: logo + CIN + registered address + contact line. */
+/* CIN line of the letterhead, with the GSTIN right under it in the same style
+   (Billing & instructions → Tax & charges). */
+function docRegLines(cin){
+  var st="color:#c0622a;font-weight:600;font-size:12.5px;letter-spacing:.02em";
+  var g=String((typeof payCfg!=="undefined"&&payCfg&&payCfg.gstin)||"").trim().replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  return "<div style='"+st+";margin-top:6px'>CIN: "+cin+"</div>"+(g?"<div style='"+st+";margin-top:2px'>GSTIN: "+g+"</div>":"");
+}
+/* A saved document keeps its letterhead; swap the CIN (+ GSTIN) lines for the
+   current ones so an older snapshot shows the GSTIN too. */
+function refreshDocReg(html){
+  html=String(html||"");
+  var re=/<div style=["'][^"']*#c0622a[^"']*["']>\s*CIN:\s*([^<]*)<\/div>(\s*<div style=["'][^"']*#c0622a[^"']*["']>\s*GSTIN:[^<]*<\/div>)?/i;
+  var m=re.exec(html);if(!m)return html;
+  return html.slice(0,m.index)+docRegLines(String(m[1]).trim())+html.slice(m.index+m[0].length);
+}
+/* Branded letterhead: logo + CIN + GSTIN + registered address + contact line. */
 function quoteHeaderHTML(){
   var B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
   var company=B.company||"Island Explorer Birding Tours";
@@ -6805,7 +6860,7 @@ function quoteHeaderHTML(){
   var logoUrl=(function(){try{return new URL(logoRel,location.href).href;}catch(e){return logoRel;}})();
   return "<div style='text-align:center;border-bottom:2px solid #143a2e;padding-bottom:14px;margin-bottom:20px'>"+
     "<img src='"+logoUrl+"' alt='"+company+"' style='max-width:300px;max-height:130px;object-fit:contain;margin:0 auto 6px' onerror=\"if(this.src.indexOf('logo.png')>-1){this.src=this.src.replace('logo.png','logo.jpg');}else{this.style.display='none';}\">"+
-    "<div style='color:#c0622a;font-weight:600;font-size:12.5px;margin-top:6px;letter-spacing:.02em'>CIN: "+cin+"</div>"+
+    docRegLines(cin)+
     "<div style='font-size:12.5px;color:#3a4a43;margin-top:4px;line-height:1.55'>"+address+"</div>"+
     "<div style='font-size:12.5px;color:#3a4a43;margin-top:3px'>"+contact+"</div>"+
   "</div>";
@@ -6834,7 +6889,7 @@ function quoteMetaRow(qid,today,validUntil,departure,client,dueDate){
   var name=esc(client.name)||"Guest Name";
   return docKvGrid(
     [["Quotation To","<span class='doc-client'>"+name+"</span>"],["Address",esc(client.address)],["GST No.",esc(client.gst)]],
-    [["Quotation #",qid],["Date",today],["Valid Until",validUntil]].concat(payCfg.gstin?[["Our GSTIN",esc(payCfg.gstin)]]:[]));
+    [["Quotation #",qid],["Date",today],["Valid Until",validUntil]]);
 }
 function generateQuotation(){
   const sel = calcSelection();
@@ -8306,7 +8361,7 @@ function openSavedQuote(id){
   "</div>";
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'><div><div class='eyebrow'>Saved quotation</div><div class='h-sec' id='qhTitle' title='Press Edit quotation to rename'>"+rec.tour+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+rec.qid+"</span> · "+rec.date+"</div></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(rec.html||"",quoteMetaRow(rec.qid,rec.date,rec.validUntil,rec.departure,{name:rec.guest,address:rec.address,gst:rec.gst})),(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(refreshDocReg(rec.html||""),quoteMetaRow(rec.qid,rec.date,rec.validUntil,rec.departure,{name:rec.guest,address:rec.address,gst:rec.gst})),(rec.kind==="session"||rec.invMode==="session")?"session":"group",{tier:(function(){var ts=(rec.kind==="session"||rec.invMode==="session")?SQ_TIERS:GQ_TIERS;var t=ts.find(function(x){return +x.pct===+rec.depositPct;});return t&&t.id;})()})+"</div></div>"+
     foot;
   openScrim();
   _docPrev=null;docPrimeMath();
@@ -8383,7 +8438,6 @@ function invoiceMetaRow(vid,today,client,startD,endD){
   var esc=function(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
   var right=[["Invoice #",vid],["Date",today]];
   if(startD)right.push(["Tour dates",startD+(endD?" – "+endD:"")]);
-  if(payCfg.gstin)right.push(["Our GSTIN",esc(payCfg.gstin)]);
   if(payCfg.gstin&&payCfg.hsn)right.push(["SAC",esc(payCfg.hsn)]);
   return docKvGrid(
     [["Invoice To","<span class='doc-client'>"+(esc(client.name)||"Guest Name")+"</span>"],["Address",esc(client.address)],["GST No.",esc(client.gst)]],
@@ -8401,9 +8455,10 @@ function gstBreakup(taxable,clientGst){
   var tax=Math.round(taxable*rate)/100;
   return {rate:rate,inter:inter,igst:inter?tax:0,cgst:inter?0:Math.round(tax*50)/100,sgst:inter?0:Math.round(tax*50)/100,tax:tax,grand:Math.round((taxable+tax)*100)/100};
 }
-/* Platform / payment-gateway fee: a separate line on every new quotation and
-   invoice — Indian clients 3%, foreign nationals 1.18% by default (Billing &
-   instructions → Tax & charges). GST is charged on the tour price plus this fee. */
+/* Platform / payment-gateway fee — Indian clients 3%, foreign nationals 1.18%
+   by default (Billing & instructions → Tax & charges). Quotations print it as
+   its own line; invoices never name it: the amount is carried inside the guide
+   charge (see invFeeInfo). GST is charged on the tour price plus this fee. */
 function platformFeePct(clientType){
   if(payCfg.feeOn===false)return 0;
   var f=/foreign/i.test(String(clientType||""))?payCfg.feeForeign:payCfg.feeIndian;
@@ -8490,7 +8545,7 @@ function generateInvoice(src){
   var endD=_de?dmy(new Date(_de+"T00:00:00")):(linkTour?dmy(new Date(linkTour.end+"T00:00:00")):"");
   /* Line items as data so rows can be edited / deleted with live totals. */
   var lines=isSess
-    ?[{label:'Guided session charges — guide, vehicle, hotel pick-up & drop '+(sel.basis==="session"?'(flat, whole group)':'('+pax+' × '+fmt(sel.pp)+')'),amount:isSess?(sel.basis==="session"?Math.round(sel.pp):Math.round(sel.pp*(parseInt(pax,10)||1))):0}]
+    ?[{label:'Guided session charges — guide, vehicle, hotel pick-up & drop'+(sel.basis==="session"?' (flat, whole group)':''),qty:(sel.basis==="session"?1:(parseInt(pax,10)||1)),rate:Math.round(sel.pp),amount:(sel.basis==="session"?Math.round(sel.pp):Math.round(sel.pp*(parseInt(pax,10)||1)))}]
     :invDefaultLines();
   /* Group invoices: the rate card's quoted price fills the total until line amounts are typed in. */
   var qt=isSess?0:(quotedTotal(sel.d,pax)||0);
@@ -8569,43 +8624,53 @@ function invTotal(){return invLinesEntered()?invLinesTotal():(parseFloat(_curInv
 function renderInvoiceDoc(){
   var inv=_curInvoice;if(!inv)return;
   var fromLines=invLinesEntered();
-  var total=invTotal();
-  var feePct=(inv.feePct!=null&&inv.feePctLocked)?inv.feePct:platformFeePct(inv.clientType);
-  var fee=Math.round(total*feePct)/100,taxable=Math.round((total+fee)*100)/100;
+  var F=invFeeInfo(inv);
+  var total=F.base,feePct=F.pct,fee=F.fee,taxable=F.taxable;
   var gst=gstBreakup(taxable,inv.client&&inv.client.gst);
-  var grand=gst?gst.grand:taxable;
+  var grand=Math.round(gst?gst.grand:taxable);
   var deposit=Math.max(0,parseFloat(inv.deposit)||0);
   var pending=Math.max(0,grand-deposit);
   /* keep the saved figures in step with the (possibly edited) lines */
-  inv.total=total;inv.fee=fee;inv.feePct=feePct;inv.taxable=taxable;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
+  inv.total=total;inv.fee=fee;inv.feePct=feePct;inv.feeCarrier=F.carrier;inv.taxable=taxable;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
   inv.accommodation=lineAmt(inv,"Accommodation");inv.travel=lineAmt(inv,"Transportation and Logistics","Travel and Logistics");inv.food=lineAmt(inv,"Food and Water Bottles","Food");inv.entry=lineAmt(inv,"Entry Fee","Entry tickets");inv.ship=lineAmt(inv,"Ship tickets");inv.guide=lineAmt(inv,"Guide Fee");inv.referral=lineAmt(inv,"Referral amount");
   var edit=_invEditLines;
-  var blank=function(l){return l.amount===""||l.amount==null||isNaN(parseFloat(l.amount));};
+  var blank=invLineBlank;
   var cellIn="padding:7px 9px;border:1px solid #d3e7db;border-radius:8px;font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums";
+  var num=function(h,extra){return "<td class='num' style='padding:9px 12px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;"+(extra||"")+"'>"+h+"</td>";};
   var bodyRows=(inv.lines||[]).map(function(l,i){
+    var q=invLineQty(l),rt=invLineRate(l),amt=blank(l)?"":(parseFloat(l.amount)||0);
     if(edit){
       return "<tr style='border-bottom:1px solid #eef4f0'>"+
-        "<td style='padding:6px 8px'><input value=\""+String(l.label||"").replace(/"/g,"&quot;")+"\" onchange='invLineLabel("+i+",this.value)' style='width:100%;padding:7px 9px;border:1px solid #d3e7db;border-radius:8px;font-size:12.5px'></td>"+
-        "<td style='padding:6px 8px;text-align:right;white-space:nowrap'><input type='number' min='0' placeholder='0' value='"+(blank(l)?"":(parseFloat(l.amount)||0))+"' oninput='invLineAmt("+i+",this.value,true)' onchange='invLineAmt("+i+",this.value)' style='width:110px;"+cellIn+"'>"+
+        "<td style='padding:6px 8px'><input value=\""+String(l.label||"").replace(/"/g,"&quot;")+"\" onchange='invLineLabel("+i+",this.value)' style='width:100%;min-width:120px;padding:7px 9px;border:1px solid #d3e7db;border-radius:8px;font-size:12.5px'></td>"+
+        "<td style='padding:6px 4px;text-align:right;white-space:nowrap'><input type='number' min='0' step='any' value='"+q+"' oninput='invLineQtyRate("+i+",\"qty\",this.value,true)' onchange='invLineQtyRate("+i+",\"qty\",this.value)' style='width:58px;"+cellIn+"'></td>"+
+        "<td style='padding:6px 4px;text-align:right;white-space:nowrap'><input type='number' min='0' step='any' placeholder='0' value='"+(rt===""?"":rt)+"' oninput='invLineQtyRate("+i+",\"rate\",this.value,true)' onchange='invLineQtyRate("+i+",\"rate\",this.value)' style='width:100px;"+cellIn+"'></td>"+
+        "<td style='padding:6px 8px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums'><span class='inv-amt' style='display:inline-block;min-width:80px;font-weight:600'>"+(amt===""?"":fmt(amt))+"</span>"+
         " <button type='button' onclick='invDeleteLine("+i+")' title='Delete row' style='padding:6px 9px;border:1px solid #f0c2bb;border-radius:8px;background:#fff;color:#c0392b;font-weight:700;cursor:pointer'>✕</button></td>"+
       "</tr>";
     }
-    return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:9px 12px'>"+esc0(l.label||"")+"</td><td style='padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums'>"+(blank(l)?"":fmt(parseFloat(l.amount)||0))+"</td></tr>";
+    /* the printed document carries the platform fee inside the guide charge */
+    var shown=amt;if(i===F.carrier&&fee>0&&amt!=="")shown=Math.round((amt+fee)*100)/100;
+    var shownRate=(shown===""||rt==="")?"":Math.round(shown/q*100)/100;
+    return "<tr style='border-bottom:1px solid #eef4f0'><td style='padding:9px 12px'>"+esc0(l.label||"")+"</td>"+
+      num(amt===""?"":String(q))+num(shownRate===""?"":fmt(shownRate))+num(shown===""?"":fmt(shown))+"</tr>";
   }).join("");
-  var moneyCell=function(v,extra){return "<td style='padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;"+(extra||"")+"'>"+fmt(v)+"</td>";};
+  var moneyCell=function(v,extra){return "<td style='padding:9px 12px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;"+(extra||"")+"'>"+fmt(v)+"</td>";};
+  var lab=function(h,extra){return "<td colspan='3' style='padding:9px 12px;color:#5a6b62;"+(extra||"")+"'>"+h+"</td>";};
   var totalCell=(edit&&!fromLines)
     ?"<td style='padding:6px 8px;text-align:right;white-space:nowrap'><input type='number' min='0' placeholder='0' value='"+(inv.quotedTotal?(parseFloat(inv.quotedTotal)||0):"")+"' oninput='invSetQuoted(this.value,true)' onchange='invSetQuoted(this.value)' style='width:130px;font-weight:700;"+cellIn+"'></td>"
-    :"<td style='padding:11px 12px;text-align:right;font-size:16px;font-weight:700;font-family:\"Calistoga\",serif;color:#15563c'>"+fmt(grand)+"</td>";
+    :"<td style='padding:11px 12px;text-align:right;white-space:nowrap;font-size:16px;font-weight:700;font-family:\"Calistoga\",serif;color:#15563c'>"+fmt(grand)+"</td>";
   var depositCell=edit
     ?"<td style='padding:6px 8px;text-align:right;white-space:nowrap'><input type='number' min='0' placeholder='0' value='"+(deposit||"")+"' oninput='invSetDeposit(this.value,true)' onchange='invSetDeposit(this.value)' style='width:130px;"+cellIn+"'></td>"
     :moneyCell(deposit);
   var stage=invStage(inv),SL=invStageLabels(stage);
   var settleRows=
-    "<tr><td style='padding:9px 12px;color:#5a6b62'>"+SL.dep+"</td>"+depositCell+"</tr>"+
-    "<tr style='background:#fff7ed'><td style='padding:9px 12px;color:#9a3412'><b>"+SL.pen+"</b></td>"+moneyCell(pending,"color:#b45309;font-weight:700")+"</tr>";
+    "<tr>"+lab(SL.dep)+depositCell+"</tr>"+
+    "<tr style='background:#fff7ed'>"+lab("<b>"+SL.pen+"</b>","color:#9a3412")+moneyCell(pending,"color:#b45309;font-weight:700")+"</tr>";
+  var th=function(t,right){return "<th"+(right?" class='num'":"")+" style='text-align:"+(right?"right":"left")+";padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap'>"+t+"</th>";};
   var company=(window.APP_CONFIG&&window.APP_CONFIG.brand&&window.APP_CONFIG.brand.company)||"Island Explorer Birding Tours";
+  var feeNote=(edit&&fee>0)?"<div id='invFeeNote' style='font-size:12px;color:#5a6b62;margin:-2px 0 12px'>"+invFeeNoteText(inv,F)+"</div>":"";
   _invBodyHTML=
-    "<style>#quotationBody .itbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden;border-collapse:collapse}#quotationBody .itbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}</style>"+
+    "<style>#quotationBody .itbl{border:1px solid #e2efe8;border-radius:10px;overflow:hidden;border-collapse:collapse;table-layout:auto}#quotationBody .itbl thead th{background:#e9f4ee;color:#15563c;border-bottom:1px solid #d3e7db}#quotationBody .itbl td.num,#quotationBody .itbl th.num{width:1%;white-space:nowrap}@media(max-width:600px){#quotationBody .itbl td,#quotationBody .itbl th{padding-left:7px !important;padding-right:7px !important;font-size:12px}}</style>"+
     quoteHeaderHTML()+
     invStageHTML(stage)+
     invoiceMetaRow(inv.invid,inv.date,inv.client,inv.startDate,inv.endDate)+
@@ -8617,43 +8682,63 @@ function renderInvoiceDoc(){
         (inv.isSess?"<div><span style='color:#5a6b62'>Duration:</span> <b>"+esc0(inv.sessDur)+"</b></div><div><span style='color:#5a6b62'>Guide:</span> <b>Will be allotted</b></div>":"")+
       "</div>"+
     "</div>"+
-    
+
     "<table class='itbl' style='width:100%;font-size:13px;margin-bottom:"+(edit?"8px":"16px")+"'>"+
-      "<thead><tr><th style='text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Description</th><th style='text-align:right;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em'>Amount</th></tr></thead>"+
+      "<thead><tr>"+th("Description")+th("Qty",1)+th("Rate",1)+th("Total",1)+"</tr></thead>"+
       "<tbody>"+bodyRows+"</tbody>"+
       "<tfoot>"+
-        ((feePct>0||gst)?"<tr><td style='padding:9px 12px;color:#5a6b62'>Sub-total</td><td style='padding:9px 12px;text-align:right'>"+fmt(total)+"</td></tr>":"")+
-        (feePct>0?"<tr><td style='padding:9px 12px;color:#5a6b62'>"+feeLabel(feePct)+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(fee)+"</td></tr>":"")+
-        (gst?("<tr><td style='padding:9px 12px;color:#5a6b62'>Taxable value"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":"")+"</td><td style='padding:9px 12px;text-align:right'>"+fmt(taxable)+"</td></tr>"+
+        (gst?("<tr>"+lab("Sub-total"+(payCfg.hsn?" (SAC "+payCfg.hsn+")":""))+moneyCell(taxable)+"</tr>"+
           (gst.inter
-            ?"<tr><td style='padding:9px 12px;color:#5a6b62'>IGST @ "+gst.rate+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.igst)+"</td></tr>"
-            :"<tr><td style='padding:9px 12px;color:#5a6b62'>CGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.cgst)+"</td></tr>"+
-             "<tr><td style='padding:9px 12px;color:#5a6b62'>SGST/UTGST @ "+(gst.rate/2)+"%</td><td style='padding:9px 12px;text-align:right'>"+fmt(gst.sgst)+"</td></tr>")):"")+
-        "<tr style='background:#eaf4ee'><td style='padding:11px 12px;font-size:14px'><b>"+(gst?"Grand Total (incl. GST)":"Total Amount")+"</b></td>"+totalCell+"</tr>"+
+            ?"<tr>"+lab("IGST @ "+gst.rate+"%")+moneyCell(gst.igst)+"</tr>"
+            :"<tr>"+lab("CGST @ "+(gst.rate/2)+"%")+moneyCell(gst.cgst)+"</tr>"+
+             "<tr>"+lab("SGST/UTGST @ "+(gst.rate/2)+"%")+moneyCell(gst.sgst)+"</tr>")):"")+
+        "<tr style='background:#eaf4ee'>"+lab("<b>"+(gst?"Grand Total (incl. GST)":"Total Amount")+"</b>","font-size:14px;color:#20302b")+totalCell+"</tr>"+
         settleRows+
-        "<tr><td style='padding:9px 12px;color:#5a6b62;white-space:nowrap'>Amount in words</td><td style='padding:9px 12px;text-align:right;font-style:italic;color:#20302b'>"+rupeesInWords(grand)+"</td></tr>"+
+        "<tr><td style='padding:9px 12px;color:#5a6b62;white-space:nowrap'>Amount in words</td><td colspan='3' style='padding:9px 12px;text-align:right;font-style:italic;color:#20302b;white-space:normal'>"+rupeesInWords(grand)+"</td></tr>"+
       "</tfoot>"+
     "</table>"+
-    (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:16px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
+    (edit?"<button type='button' onclick='invAddLine()' style='margin-bottom:12px;padding:8px 14px;border:1px dashed #1f8f5f;border-radius:10px;background:#f3f9f5;color:#15563c;font-weight:700;font-size:12.5px;cursor:pointer'>+ Add line item</button>":"")+
+    feeNote+
     payNowHTML(stage==="proforma"?(deposit>0?deposit:grand):(deposit>0?pending:grand))+
     policyDocHTML(inv.isSess?"session":"group",{gstLine:(gst?"GST is charged as itemised above on the taxable value.":"")})+
     "";
   var qb=document.getElementById("quotationBody");if(qb)qb.innerHTML=_invBodyHTML;
 }
+/* Edit-mode reminder: where the fee goes on the printed document. */
+function invFeeNoteText(inv,F){
+  var L=inv.lines||[],c=F.carrier>=0?L[F.carrier]:null;
+  if(!c)return "Platform fee "+F.pct+"% ("+fmt(F.fee)+") is included in the printed total.";
+  var shown=Math.round(((parseFloat(c.amount)||0)+F.fee)*100)/100;
+  return "Platform fee "+F.pct+"% ("+fmt(F.fee)+") is added to “"+esc0(c.label||"")+"” on the printed invoice, which shows "+fmt(shown)+".";
+}
 function lineAmt(inv,label,alt){var l=(inv.lines||[]).find(function(x){return x.label===label||(alt&&x.label===alt);});return l?(parseFloat(l.amount)||0):0;}
 function invLineLabel(i,v){if(_curInvoice&&_curInvoice.lines[i])_curInvoice.lines[i].label=v;}
 /* live=true: called on every keystroke — update the figures without re-rendering
    (which would steal focus from the input); the full redraw happens on change. */
-function invLineAmt(i,v,live){if(_curInvoice&&_curInvoice.lines[i]){_curInvoice.lines[i].amount=(String(v).trim()==="")?"":Math.max(0,parseFloat(v)||0);if(live)invLiveTotals();else renderInvoiceDoc();}}
+function invLineAmt(i,v,live){if(_curInvoice&&_curInvoice.lines[i]){var l=_curInvoice.lines[i];l.amount=(String(v).trim()==="")?"":Math.max(0,parseFloat(v)||0);l.rate=(l.amount===""?"":Math.round(l.amount/invLineQty(l)*100)/100);if(live)invLiveTotals();else renderInvoiceDoc();}}
+/* Qty or rate typed: the line amount is always qty × rate. */
+function invLineQtyRate(i,field,v,live){
+  if(!_curInvoice||!_curInvoice.lines[i])return;
+  var l=_curInvoice.lines[i];
+  if(field==="qty"){var q=parseFloat(v);l.qty=(isFinite(q)&&q>0)?q:1;}
+  else l.rate=(String(v).trim()==="")?"":Math.max(0,parseFloat(v)||0);
+  var rt=invLineRate(l);
+  l.amount=(rt===""?"":Math.round(invLineQty(l)*rt*100)/100);
+  if(live){
+    var tr=document.querySelectorAll("#quotationBody .itbl tbody tr")[i];var sp=tr&&tr.querySelector(".inv-amt");if(sp)sp.textContent=(l.amount===""?"":fmt(l.amount));
+    invLiveTotals();
+  }else renderInvoiceDoc();
+}
 function invSetDeposit(v,live){if(_curInvoice){_curInvoice.deposit=Math.max(0,parseFloat(v)||0);if(live)invLiveTotals();else renderInvoiceDoc();}}
 function invSetQuoted(v,live){if(_curInvoice){_curInvoice.quotedTotal=Math.max(0,parseFloat(v)||0);if(live)invLiveTotals();else renderInvoiceDoc();}}
 /* Refresh only the money figures (total / GST / pending) while an input keeps focus. */
 function invLiveTotals(){
   var inv=_curInvoice;if(!inv)return;
-  var total=invTotal();var feePct=inv.feePct||0;var fee=Math.round(total*feePct)/100,taxable=Math.round((total+fee)*100)/100;
-  var gst=gstBreakup(taxable,inv.client&&inv.client.gst);var grand=gst?gst.grand:taxable;
+  var F=invFeeInfo(inv);var total=F.base,fee=F.fee,taxable=F.taxable;
+  var gst=gstBreakup(taxable,inv.client&&inv.client.gst);var grand=Math.round(gst?gst.grand:taxable);
   var deposit=Math.max(0,parseFloat(inv.deposit)||0);var pending=Math.max(0,grand-deposit);
-  inv.total=total;inv.fee=fee;inv.taxable=taxable;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
+  inv.total=total;inv.fee=fee;inv.feePct=F.pct;inv.feeCarrier=F.carrier;inv.taxable=taxable;inv.grandTotal=grand;inv.gstRate=gst?gst.rate:0;inv.gstAmount=gst?gst.tax:0;inv.deposit=deposit;inv.pending=pending;
+  var note=document.getElementById("invFeeNote");if(note)note.textContent=fee>0?invFeeNoteText(inv,F).replace(/\u201c|\u201d/g,"\""):"";
   var tf=document.querySelector("#quotationBody .itbl tfoot");if(!tf)return;
   var rows=tf.querySelectorAll("tr");
   rows.forEach(function(tr){
@@ -8662,7 +8747,7 @@ function invLiveTotals(){
     else if(/^Deposit amount/.test(lab))cell.textContent=fmt(deposit);
     else if(/^(Grand Total|Total Amount)/.test(lab))cell.textContent=fmt(grand);
     else if(/^Taxable value/.test(lab))cell.textContent=fmt(taxable);
-    else if(/^Sub-?total/i.test(lab))cell.textContent=fmt(total);
+    else if(/^Sub-?total/i.test(lab))cell.textContent=fmt(taxable);
     else if(/^Platform fee/i.test(lab))cell.textContent=fmt(fee);
     else if(/^Amount in words/i.test(lab))cell.textContent=rupeesInWords(grand);
     else if(/^IGST/.test(lab))cell.textContent=fmt(gst?gst.igst:0);
@@ -8671,7 +8756,7 @@ function invLiveTotals(){
   });
 }
 function invDeleteLine(i){if(_curInvoice&&_curInvoice.lines){_curInvoice.lines.splice(i,1);renderInvoiceDoc();}}
-function invAddLine(){if(_curInvoice){_curInvoice.lines.push({label:"New line item",amount:""});renderInvoiceDoc();}}
+function invAddLine(){if(_curInvoice){_curInvoice.lines.push({label:"New line item",qty:1,rate:"",amount:""});renderInvoiceDoc();}}
 function invToggleLines(){
   var _b=document.getElementById("quotationBody");if(_b&&_b.getAttribute("contenteditable")==="true"){try{docSyncFigures();}catch(e){}}
   _invEditLines=!_invEditLines;
@@ -8702,7 +8787,7 @@ function saveCurrentInvoice(){
     if(rec){
       if(editedNo&&editedNo!==rec.invid){audit("invoice","renumbered",rec.invid+" → "+editedNo);rec.invid=editedNo;}
       rec.html=docHtml;rec.title=_curInvoice.title;rec.tour=_curInvoice.title;rec.stage=invStage(_curInvoice);if((_curInvoice.client||{}).name)rec.guest=_curInvoice.client.name;rec.updatedAt=new Date().toISOString();
-      ["total","fee","feePct","taxable","grandTotal","gstRate","gstAmount","deposit","pending","quotedTotal","accommodation","travel","food","entry","ship","guide","referral"].forEach(function(k){if(_curInvoice[k]!=null)rec[k]=_curInvoice[k];});
+      ["total","fee","feePct","feeCarrier","taxable","grandTotal","gstRate","gstAmount","deposit","pending","quotedTotal","accommodation","travel","food","entry","ship","guide","referral"].forEach(function(k){if(_curInvoice[k]!=null)rec[k]=_curInvoice[k];});
     }
   }else{
     /* folder-driven number; keep the legacy counter aligned */
@@ -8717,6 +8802,7 @@ function saveCurrentInvoice(){
       participants:_curInvoice.participants, accommodation:_curInvoice.accommodation, travel:_curInvoice.travel,
       food:_curInvoice.food, entry:_curInvoice.entry, ship:_curInvoice.ship, guide:_curInvoice.guide,
       referral:_curInvoice.referral, total:_curInvoice.total,
+      fee:_curInvoice.fee||0, feePct:_curInvoice.feePct||0, feeCarrier:(_curInvoice.feeCarrier!=null?_curInvoice.feeCarrier:-1), taxable:(_curInvoice.taxable!=null?_curInvoice.taxable:_curInvoice.total),
       deposit:_curInvoice.deposit||0, pending:(_curInvoice.pending!=null?_curInvoice.pending:Math.max(0,(_curInvoice.grandTotal||_curInvoice.total||0)-(_curInvoice.deposit||0))), quotedTotal:_curInvoice.quotedTotal||0,
       gstRate:_curInvoice.gstRate||0, gstAmount:_curInvoice.gstAmount||0, grandTotal:_curInvoice.grandTotal||_curInvoice.total,
       fromQuote:_curInvoice.fromQuote||"", isSess:!!_curInvoice.isSess, stage:invStage(_curInvoice),
@@ -8744,7 +8830,7 @@ function openSavedInvoice(id){
   "</div>";
   document.getElementById('modal').innerHTML=
     "<div class='modal-head'><div><div class='eyebrow' id='invKindEyebrow'>"+invStageLabel(invStage(_curInvoice))+"</div><div class='h-sec' id='qhTitle' title='Press Edit text to rename'>"+(rec.title||"")+"</div><div style='font-size:12px;color:var(--ink-soft);margin-top:2px'><span id='qhNo'>"+(rec.invid||"")+"</span> · "+(rec.date||"")+"</div></div>"+XBTN+"</div>"+
-    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(docFinalizeHtml(rec.html||""),invoiceMetaRow(rec.invid,rec.date,{name:rec.guest,address:rec.address,gst:rec.gst},rec.startDate,rec.endDate)),(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
+    "<div class='modal-body' style='padding:0'><div id='quotationBody' style='padding:24px;background:#fff;color:#20302b'>"+refreshDocTerms(refreshDocMeta(refreshDocReg(docFinalizeHtml(rec.html||"")),invoiceMetaRow(rec.invid,rec.date,{name:rec.guest,address:rec.address,gst:rec.gst},rec.startDate,rec.endDate)),(rec.isSess||/session/i.test(rec.title||""))?"session":"group",{gstLine:((+rec.gstRate||0)>0?"GST is charged as itemised above on the taxable value.":"")})+"</div></div>"+foot;
   openScrim();
   invApplyStageToDom(invStage(_curInvoice)); /* older saved documents get the stamp too */
   _docPrev=null;docPrimeMath();
