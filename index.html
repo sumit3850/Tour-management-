@@ -1780,6 +1780,25 @@ html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{
 .md-row .md-act > .btn{flex:none !important;min-width:0 !important;max-width:none !important;padding:5px 10px;font-size:11.5px;white-space:nowrap}
 .md-row .meta{flex:1 1 160px}
 .a2-costwrap .ana-donut .lg{display:none}
+
+/* ==== Analytics big pies ==== */
+.a2-pie{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.a2-pie svg{width:230px;height:230px;flex:none;margin:0 auto}
+.a2-pie .seg{fill:none;stroke-width:34;cursor:pointer;transition:stroke-width .15s;animation:anaFade .8s ease-out backwards}.a2-pie .seg:hover{stroke-width:40}
+.a2-pie .pl{font-size:11px;font-weight:700;fill:#fff;font-family:var(--font-body);pointer-events:none;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.a2-pie .ctr{font-size:17px;font-weight:700;fill:var(--ink);font-family:var(--font-body)}.a2-pie .ctr2{font-size:9.5px;fill:var(--ink-soft);font-family:var(--font-body)}
+.a2-pie .pg{flex:1;min-width:200px}
+.a2-pie .pg .r{display:flex;align-items:center;gap:9px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line-soft);cursor:default}.a2-pie .pg .r:last-child{border-bottom:0}
+.a2-pie .pg i{width:11px;height:11px;border-radius:3px;flex:none}
+.a2-pie .pg .k{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--ink)}.a2-pie .pg .k small{display:block;font-weight:400;color:var(--ink-soft);font-size:11px}
+.a2-pie .pg b{font-family:var(--font-mono);font-weight:600;white-space:nowrap}.a2-pie .pg .p{width:40px;text-align:right;color:var(--ink-soft);font-size:11.5px;flex:none}
+.a2-stats.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+.pc-pick{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.pc-pick label{font-size:12px;font-weight:600;color:var(--ink-soft)}.pc-pick .input{flex:1;min-width:220px}
+.pc-state{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#e3f7ec;color:#0f7a43;white-space:nowrap}.pc-state.edit{background:#fff3dc;color:#9a5b00}
+.pc-ro{font-size:13.5px;min-width:100px;display:inline-block;text-align:right}
+@media(max-width:900px){.a2-stats.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.a2-pie{gap:12px}.a2-pie svg{width:210px;height:210px}.a2-pie .pg{flex-basis:100%}.a2-stats.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
+html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{background:#3b2f0e;color:#f0c96a}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1823,7 +1842,7 @@ html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 332</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 333</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1832,7 +1851,7 @@ html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 332</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 333</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4015,13 +4034,12 @@ const NAV=[
   ["catalog","Categories","M4 6h16M4 12h16M4 18h9M18 16l2 2 4-4"],
   ["group","Sales & Ops"],
   ["tours","Tours","M3 7l9-4 9 4-9 4zM3 7v10l9 4 9-4V7M12 11v10"],
+  ["costsheet","Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01"],
+  ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
   ["bookings","Bookings","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["accommodation","Accommodation","M2 12h20M2 6h20M2 18h20"],
   ["operations","Operations","M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 12h6M9 16h4"],
-  ["logistics","Logistics & Ops","M3 13h13V6H3zM16 8h3l3 3v2h-6zM7.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM20.5 18a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"],
-  ["costsheet","Tour costing","M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01"],
   ["crm","Leads (CRM)","M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM3 21v-2a6 6 0 0 1 12 0v2M19 8v6M22 11h-6"],
-  ["reservations","Reservations","M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
   ["customers","Customers","M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"],
   ["reviews","Forms & Reviews","M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"],
   ["settings","Settings","M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.6 1.6 0 0 0 .3 1.8 2 2 0 1 1-2.8 2.8 1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0 1.6 1.6 0 0 0-2.6-1.1 2 2 0 1 1-2.8-2.8A1.6 1.6 0 0 0 5 13.6a2 2 0 0 1 0-4 1.6 1.6 0 0 0 1.5-2.6 2 2 0 1 1 2.8-2.8A1.6 1.6 0 0 0 12 5.1a2 2 0 0 1 4 0 1.6 1.6 0 0 0 2.6 1.5 2 2 0 1 1 2.8 2.8A1.6 1.6 0 0 0 22 12a2 2 0 0 1-2.6 3z"],
@@ -5680,6 +5698,18 @@ function a2Donut(items,opt){
   items.forEach(function(x,i){var len=Math.max(x.n/tot*C-2,0);segs+="<circle class='seg' cx='66' cy='66' r='"+R+"' stroke='"+a2col(i)+"' stroke-dasharray='"+len.toFixed(2)+" "+(C-len).toFixed(2)+"' stroke-dashoffset='"+(-off).toFixed(2)+"' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'/>";off+=x.n/tot*C;});
   return "<div class='ana-donut'><svg viewBox='0 0 132 132'><g transform='rotate(-90 66 66)'>"+segs+"</g><text class='ctr' x='66' y='64' text-anchor='middle'>"+anaEsc(opt.center!=null?opt.center:tot)+"</text><text class='ctr2' x='66' y='80' text-anchor='middle'>"+anaEsc(opt.centerLabel||"total")+"</text></svg><div class='lg'>"+items.map(function(x,i){return "<div><i style='background:"+a2col(i)+"'></i><span>"+anaEsc(x.k)+"</span><b>"+anaEsc(opt.tip?opt.tip(x):x.n)+" · "+Math.round(x.n/tot*100)+"%</b></div>";}).join("")+"</div></div>";
 }
+/* Big donut with the share printed on every slice that is wide enough, the
+   total in the middle and a legend of name · value · share (+ a sub line). */
+function a2Pie(items,opt){
+  opt=opt||{};var tot=items.reduce(function(a,x){return a+x.n;},0)||1,R=78,C=2*Math.PI*R,off=0,segs="",labels="";
+  items.forEach(function(x,i){var f=x.n/tot,len=Math.max(f*C-2.5,0),col=x.c||a2col(i);
+    segs+="<circle class='seg' cx='110' cy='110' r='"+R+"' stroke='"+col+"' stroke-dasharray='"+len.toFixed(2)+" "+(C-len).toFixed(2)+"' stroke-dashoffset='"+(-off).toFixed(2)+"' style='animation-delay:"+(i*60)+"ms' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(f*100)+"%)'/>";
+    if(f>=0.06){var a=(off+f*C/2)/C*2*Math.PI;var lx=110+R*Math.sin(a),ly=110-R*Math.cos(a);labels+="<text class='pl' x='"+lx.toFixed(1)+"' y='"+(ly+3.8).toFixed(1)+"' text-anchor='middle'>"+Math.round(f*100)+"%</text>";}
+    off+=f*C;});
+  return "<div class='a2-pie'><svg viewBox='0 0 220 220'><g transform='rotate(-90 110 110)'>"+segs+"</g>"+labels+
+    "<text class='ctr' x='110' y='107' text-anchor='middle'>"+anaEsc(opt.center!=null?opt.center:tot)+"</text><text class='ctr2' x='110' y='125' text-anchor='middle'>"+anaEsc(opt.centerLabel||"total")+"</text></svg>"+
+    "<div class='pg'>"+items.map(function(x,i){return "<div class='r' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'><i style='background:"+(x.c||a2col(i))+"'></i><span class='k'>"+anaEsc(x.k)+(x.s?"<small>"+anaEsc(x.s)+"</small>":"")+"</span><b>"+anaEsc(opt.val?opt.val(x):x.n)+"</b><span class='p'>"+Math.round(x.n/tot*100)+"%</span></div>";}).join("")+"</div></div>";
+}
 function a2Stat(l,v,s,cls){return "<div class='a2-stat'><div class='l'>"+l+"</div><div class='v "+(cls||"")+"'>"+v+"</div>"+(s?"<div class='s'>"+s+"</div>":"")+"</div>";}
 /* ---------------- the page ---------------- */
 function renderAnalytics(){
@@ -5743,8 +5773,7 @@ function renderAnalytics(){
   var costSeries=CATS.map(function(c,i){return {name:c[1],values:cTours.map(function(t){return +expOf(t)[c[0]]||0;}),color:a2col(i)};}).concat([{name:"Other",values:cTours.map(function(t){return other(expOf(t));}),color:NEUT}]);
   var catSum=costSeries.map(function(sr){return {k:sr.name,n:sr.values.reduce(function(a,c){return a+c;},0),c:sr.color};}).filter(function(x){return x.n>0;}).sort(function(a,c){return c.n-a.n;});
   var catAll=catSum.reduce(function(a,x){return a+x.n;},0);
-  var costBody=catSum.length?"<div class='a2-costwrap'>"+a2Donut(catSum,{tip:function(x){return fmt(x.n)+" · "+a2Pct(x.n,catAll)+"%";},center:fmt(catAll),centerLabel:"total cost"})+
-    "<div class='a2-costlist'>"+catSum.map(function(x,i){return "<div class='r'><i style='background:"+a2col(i)+"'></i><span class='k'>"+anaEsc(x.k)+"</span><b>"+fmt(x.n)+"</b><span class='p'>"+a2Pct(x.n,catAll)+"%</span></div>";}).join("")+"</div></div>":"<div class='empty'>Enter costs in Cost based analysis to see where the money goes.</div>";
+  var costBody=catSum.length?a2Pie(catSum.map(function(x,i){return {k:x.k,n:x.n,c:a2col(i)};}),{tip:function(x){return fmt(x.n);},val:function(x){return fmt(x.n);},center:fmt(catAll),centerLabel:"total cost · "+cTours.length+" tour"+(cTours.length===1?"":"s")}):"<div class='empty'>Enter costs in Cost based analysis to see where the money goes.</div>";
   var costLegend="";
   var costTbl=a2Table(["Tour"].concat(costSeries.map(function(s){return s.name;})).concat(["Total"]),cTours.map(function(t,i){return ["["+tourCode(t)+"] "+anaEsc(shortName(t))].concat(costSeries.map(function(s){return fmt(s.values[i]);})).concat([fmt(costSeries.reduce(function(s,sr){return s+sr.values[i];},0))]);}));
   var catTot=costSeries.map(function(s){return {k:s.name,v:s.values.reduce(function(a,c){return a+c;},0)};}).sort(function(a,c){return c.v-a.v;});
@@ -5784,9 +5813,40 @@ function renderAnalytics(){
   var rep=cust.filter(function(c){return c.repeat||(c.tours||0)>1;}).length;
   var forn=B.filter(function(x){return x.country&&!/india/i.test(x.country);}).reduce(function(s,x){return s+(parseInt(x.party,10)||1);},0);
   var avgParty=B.length?(paxTot/B.length).toFixed(1):"—";
-  var guestsStats="<div class='a2-stats four'>"+a2Stat("Guests",String(paxTot),B.length+" booking"+(B.length===1?"":"s"))+a2Stat("International",a2Pct(forn,paxTot)+"%","of guests")+a2Stat("Repeat guests",a2Pct(rep,cust.length)+"%",rep+" of "+cust.length+" customers")+a2Stat("Avg. party",String(avgParty),"guests per booking")+"</div>";
-  var guestsBody=cl.length?a2Donut(top6,{tip:function(x){return x.n+" pax · "+fmt(x.rev);},center:paxTot,centerLabel:"guests"}):"<div class='empty'>No guests in this range.</div>";
+  var indN=paxTot-forn;
+  var guestsStats="<div class='a2-stats five'>"+a2Stat("Guests",String(paxTot),B.length+" booking"+(B.length===1?"":"s"))+a2Stat("Indian clients",String(indN),a2Pct(indN,paxTot)+"% of guests")+a2Stat("International",String(forn),a2Pct(forn,paxTot)+"% of guests")+a2Stat("Repeat guests",a2Pct(rep,cust.length)+"%",rep+" of "+cust.length+" customers")+a2Stat("Avg. party",String(avgParty),"guests per booking")+"</div>";
+  var guestsBody=cl.length?a2Pie(top6.map(function(x,i){return {k:x.k,n:x.n,c:a2col(i),s:fmt(x.rev)};}),{tip:function(x){return x.n+" guest"+(x.n===1?"":"s")+" · "+x.s;},val:function(x){return x.n+" pax";},center:paxTot,centerLabel:"guests"}):"<div class='empty'>No guests in this range.</div>";
   var guestsTbl=a2Table(["Market","Guests","Share","Revenue","Per guest"],cl.map(function(x){return [anaEsc(x.k),String(x.n),a2Pct(x.n,paxTot)+"%",fmt(x.rev),fmt(x.n?Math.round(x.rev/x.n):0)];}));
+  /* ---- collections by month: received vs pending, by tour start ---- */
+  var colRec={},colPen={};
+  (bookings||[]).filter(function(x){if(x.status==="Cancelled")return false;if(!x.tour)return true;var t=tours.find(function(y){return y.id===x.tour;});if(!t||!t.pocId)return true;return x.id===t.pocId;}).forEach(function(x){var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;var d=(t&&t.start)||x.start||"";if(!d||!a2In(d,b))return;var k=d.slice(0,7);colRec[k]=(colRec[k]||0)+bookingDeposit(x);colPen[k]=(colPen[k]||0)+bookingPending(x);});
+  var recA=keys.map(function(k){return colRec[k]||0;}),penA=keys.map(function(k){return colPen[k]||0;});
+  var recT=recA.reduce(function(a,c){return a+c;},0),penT=penA.reduce(function(a,c){return a+c;},0);
+  var collBody=(recT||penT)?a2Bars(lbl,[{name:"Received",values:recA,color:GOOD},{name:"Pending",values:penA,color:"#eda100"}],{stack:true,height:200}):"<div class='empty'>No bookings with money in this range.</div>";
+  var collTbl=a2Table(["Month","Received","Pending","Collected"],keys.map(function(k,i){return [a2Mon(k),fmt(recA[i]),fmt(penA[i]),pct((recA[i]+penA[i])?Math.round(recA[i]/(recA[i]+penA[i])*100):null)];}));
+  /* ---- margin by tour category ---- */
+  var byCat={};
+  T.forEach(function(t){var p=autoTourProfit(t);if(!(p.rev>0))return;var c=(catalog.cats||[]).find(function(x){return x.id===t.cat;});var k=c?c.name:(t.cat||"Uncategorised");byCat[k]=byCat[k]||{rev:0,exp:0,n:0};byCat[k].rev+=p.rev;byCat[k].exp+=(p.exp||0);byCat[k].n++;});
+  var catRows=Object.keys(byCat).map(function(k){var x=byCat[k];return {k:k,rev:x.rev,exp:x.exp,n:x.n,m:x.rev?Math.round((x.rev-x.exp)/x.rev*100):null};}).sort(function(a,c){return (c.m||0)-(a.m||0);});
+  var catBody=catRows.length?a2HBars(catRows.map(function(x){return {k:anaEsc(x.k),v:x.m!=null?x.m:0,d:x.m!=null?x.m+"% margin":"—",c:x.m!=null&&x.m<minM?WARN:(x.m<0?BAD:a2col(2)),s:"Revenue "+fmt(x.rev)+" · cost "+fmt(x.exp)+" · "+x.n+" tour"+(x.n===1?"":"s"),tip:x.k+": "+(x.m!=null?x.m+"% margin":"no costs")};})):"<div class='empty'>No tours with revenue in this range.</div>";
+  var catTbl=a2Table(["Category","Tours","Revenue","Cost","Margin"],catRows.map(function(x){return [anaEsc(x.k),String(x.n),fmt(x.rev),fmt(x.exp),pct(x.m)];}));
+  /* ---- quotation win rate by client type and product ---- */
+  var qGroups=[["Indian clients",function(q){return q.typeRaw!=="foreign";}],["Foreign clients",function(q){return q.typeRaw==="foreign";}],["Group tours",function(q){return (q.kind||q.invMode)!=="session";}],["Sessions",function(q){return (q.kind||q.invMode)==="session";}]];
+  var qRows=qGroups.map(function(g){var list=qs.filter(g[1]);var dec=list.filter(function(q){return q.status==="Accepted"||q.status==="Lost"||q.status==="Cancelled";}).length,acc=list.filter(function(q){return q.status==="Accepted";}).length;return {k:g[0],n:list.length,dec:dec,acc:acc,pct:dec?Math.round(acc/dec*100):null,val:list.reduce(function(s,q){return s+(+q.total||0);},0)};}).filter(function(x){return x.n;});
+  var winBody=qRows.length?a2HBars(qRows.map(function(x,i){return {k:x.k,v:x.pct||0,d:x.pct!=null?x.pct+"% won":"no decision yet",c:a2col(i),s:x.acc+" accepted of "+x.dec+" decided · "+x.n+" quotation"+(x.n===1?"":"s")+" · "+fmt(x.val),tip:x.k+": "+(x.pct!=null?x.pct+"% won":"nothing decided yet")};})):"<div class='empty'>No quotations yet.</div>";
+  var winTbl=a2Table(["Segment","Quotations","Decided","Accepted","Win rate","Value"],qRows.map(function(x){return [x.k,String(x.n),String(x.dec),String(x.acc),pct(x.pct),fmt(x.val)];}));
+  /* ---- revenue per guide (a tour's revenue split across its guides) ---- */
+  var gRev={};
+  T.forEach(function(t){var gs=tourGuides(t).filter(function(g){return g.name&&g.name!=="—";});if(!gs.length)return;var r=autoTourProfit(t).rev/gs.length;gs.forEach(function(g){var p=gRev[g.name]=gRev[g.name]||{rev:0,n:0,role:/assist/i.test(g.role||"")?"Assistant":"Guide"};p.rev+=r;p.n++;});});
+  var gRows=Object.keys(gRev).map(function(k){return {k:k,rev:gRev[k].rev,n:gRev[k].n,role:gRev[k].role};}).sort(function(a,c){return c.rev-a.rev;}).slice(0,10);
+  var guideBody=gRows.length?a2HBars(gRows.map(function(x){return {k:anaEsc(x.k),v:x.rev,d:fmt(Math.round(x.rev)),c:x.role==="Assistant"?a2col(5):a2col(0),s:x.role+" · "+x.n+" tour"+(x.n===1?"":"s")+" · "+fmt(Math.round(x.rev/x.n))+" per tour",tip:x.k+": "+fmt(Math.round(x.rev))};})):"<div class='empty'>No guides assigned in this range.</div>";
+  var guideTbl=a2Table(["Guide","Role","Tours","Revenue","Per tour"],gRows.map(function(x){return [anaEsc(x.k),x.role,String(x.n),fmt(Math.round(x.rev)),fmt(Math.round(x.rev/x.n))];}));
+  /* ---- guests by year: first-time vs returning ---- */
+  var seenG={},yrNew={},yrRet={};
+  (bookings||[]).filter(function(x){return x.status!=="Cancelled";}).map(function(x){var t=x.tour?tours.find(function(y){return y.id===x.tour;}):null;return {x:x,d:(t&&t.start)||x.start||""};}).filter(function(o){return o.d;}).sort(function(a,c){return a.d.localeCompare(c.d);}).forEach(function(o){var nm=String(o.x.guest||"").trim().toLowerCase();var y=o.d.slice(0,4),n=parseInt(o.x.party,10)||1;if(nm&&seenG[nm]){yrRet[y]=(yrRet[y]||0)+n;}else{yrNew[y]=(yrNew[y]||0)+n;}if(nm)seenG[nm]=1;});
+  var yrs2=Object.keys(Object.assign({},yrNew,yrRet)).sort();
+  var yrBody=yrs2.length?a2Bars(yrs2,[{name:"First-time",values:yrs2.map(function(y){return yrNew[y]||0;}),color:a2col(0)},{name:"Returning",values:yrs2.map(function(y){return yrRet[y]||0;}),color:a2col(2)}],{stack:true,height:190}):"<div class='empty'>No bookings yet.</div>";
+  var yrTbl=a2Table(["Year","First-time","Returning","Returning share"],yrs2.map(function(y){var a=yrNew[y]||0,r=yrRet[y]||0;return [y,String(a),String(r),pct((a+r)?Math.round(r/(a+r)*100):null)];}));
   /* ---- assemble ---- */
   var rangeBtns=A2_RANGES.map(function(r){return "<button class='"+(_a2.range===r[0]?"on":"")+"' onclick=\"a2SetRange('"+r[0]+"')\">"+r[1]+"</button>";}).join("");
   var custom=_a2.range==="custom"?"<div class='a2-custom'><input type='date' class='input mono' id='a2From' value='"+(_a2.from||"")+"' onchange='a2SetCustom()'><span>to</span><input type='date' class='input mono' id='a2To' value='"+(_a2.to||"")+"' onchange='a2SetCustom()'></div>":"";
@@ -5794,15 +5854,24 @@ function renderAnalytics(){
     "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div><div class='a2-live'><i></i>Live · computed "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" from "+(tours||[]).length+" tours, "+(bookings||[]).length+" bookings, "+(leads||[]).length+" leads · recalculates on every visit, range change and sync</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
     overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
     "<div class='a2-grid'>"+
-      a2Card("profit","Profit by tour","completed tours only · revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
       a2Card("cost","Cost breakdown","share of each cost head across the tours in this range · table: per tour",costBody,costTbl,costLegend,(catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%) · ":"")+"<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'>Export (.xlsx)</button>")+
+      a2Card("guests","Guests & markets","who travels with you · by nationality",guestsStats+guestsBody,guestsTbl,"","")+
     "</div>"+
+    a2Card("profit","Profit by tour","completed tours only · revenue minus costs · "+minM+"% margin target",profitBody,profitTbl,"",below?"<span class='a2-chip bad'>"+below+" tour"+(below===1?"":"s")+" below the "+minM+"% target</span> Set the target in Settings → Preferences.":"")+
     a2Card("heat","Guests by month","guests booked, by departure month",heatBody,heatTbl,"",yList.length?"<b>"+totBk+"</b> guest"+(totBk===1?"":"s")+" on "+totCap+" seats offered in this range"+(gaps.length?" · no departures in <b>"+gaps.join(", ")+"</b>":""):"")+
+    "<div class='a2-grid'>"+
+      a2Card("coll","Collections by month","money received and still pending, by tour start",collBody,collTbl,(recT||penT)?a2Legend([["Received",GOOD,fmt(recT)],["Pending","#eda100",fmt(penT)]]):"",(recT||penT)?"<b>"+a2Pct(recT,recT+penT)+"%</b> of the money in this range is in":"")+
+      a2Card("catm","Margin by tour category","which products earn best · "+minM+"% target",catBody,catTbl,"",catRows.length?"Best: <b>"+anaEsc(catRows[0].k)+"</b> "+(catRows[0].m!=null?catRows[0].m+"%":"—"):"")+
+    "</div>"+
+    "<div class='a2-grid'>"+
+      a2Card("win","Quotation win rate","accepted quotations by client type and product",winBody,winTbl,"",qs.length?"<b>"+qc.pct+"%</b> overall · "+qc.counts.Accepted+" accepted of "+qc.decided+" decided":"")+
+      a2Card("grev","Revenue per guide","tour revenue credited to the guides on it",guideBody,guideTbl,gRows.length?a2Legend([["Guide",a2col(0)],["Assistant",a2col(5)]]):"",gRows.length?"Top: <b>"+anaEsc(gRows[0].k)+"</b> "+fmt(Math.round(gRows[0].rev)):"")+
+    "</div>"+
     "<div class='a2-grid'>"+
       a2Card("util","Team utilisation","days on tour per person per month",utilBody,utilTbl,utilLegend,pl.length?"Busiest: <b>"+anaEsc(pl[0].n)+"</b> "+pl[0].p.days+" days":"")+
       a2Card("funnel","Sales funnel","leads by stage, quotations, sources",funnelStats+funnelBody,funnelTbl,"",funnelFoot)+
     "</div>"+
-    a2Card("guests","Guests & markets","who travels with you",guestsStats+guestsBody,guestsTbl,"","");
+    a2Card("years","Guests by year","first-time and returning guests, all time",yrBody,yrTbl,yrs2.length?a2Legend([["First-time",a2col(0)],["Returning",a2col(2)]]):"",yrs2.length?"Returning guests in <b>"+yrs2[yrs2.length-1]+"</b>: <b>"+(yrRet[yrs2[yrs2.length-1]]||0)+"</b>":"");
   anaBindTips(el);
 }
 
@@ -10094,7 +10163,7 @@ function renderRequests(){
       }else if(Array.isArray(v)){
         if(k==="vehicles")html=v.map(function(x){return x&&(x.name||"")+(x.reg?" ("+x.reg+")":"")+(x.seats?" · "+x.seats+" seats":"");}).filter(Boolean).join(", ")||"—";
         else if(k==="participants")html=v.map(function(x){if(!x)return "";var bits=[x.gender,x.phone,x.email,x.hotel].filter(Boolean).join(" · ");return (x.name||"—")+(bits?" ("+bits+")":"");}).filter(Boolean).join("<br>")||"—";
-        else html=v.map(function(x){return (x&&typeof x==="object")?(x.name||"item"):String(x);}).join(", ");
+        else html=v.map(function(x){return (x&&typeof x==="object")?(x.name||"item"):String(fmtVal(x));}).join(", ");
       }else if(typeof v==="object"){
         html=(v.name||JSON.stringify(v));
       }else if(v===true){
@@ -10738,49 +10807,56 @@ function profitSheetRow(t){var e=(t.profitExp)||{};var row={"Tour ID":tourCode(t
 function viewProfitCalc(){
   if(!tours.length)return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+"<div class='empty'>Create a tour first to use the cost based analysis.</div></section>";
   return "<section class='view' id='v-profit'>"+calcTabsBar('profit')+
-    "<div class='section-head' style='flex-wrap:wrap;gap:10px'><div><div class='eyebrow'>Finance</div><div class='h-sec'>Cost based analysis</div></div>"+
-      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'><select class='input' style='width:auto' id='pc_tour' onchange='pcTourChanged()'>"+tours.map(function(t){return "<option value='"+t.id+"'>"+tourCode(t)+" — "+tourLabel(t)+" ("+dShort(t.start)+" – "+dShort(t.end)+")</option>";}).join("")+"</select>"+
-      "<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export (.xlsx)</button></div>"+
+    "<div class='section-head' style='flex-wrap:wrap;gap:10px'><div><div class='eyebrow'>Finance</div><div class='h-sec'>Cost based analysis</div><div style='font-size:12.5px;color:var(--ink-soft);margin-top:2px'>Pick a tour, enter what it actually cost, save — the saved analysis feeds Analytics.</div></div>"+
+      "<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export (.xlsx)</button>"+
     "</div>"+
     "<div id='pcBody'></div>"+
   "</section>";
 }
-/* Switching the tour while editing a saved calc must NOT let "Update" overwrite
-   the other tour's row — exit edit mode so it becomes a fresh Save for the new
-   tour. This is the bug that put T3's numbers inside the T6 row. */
+/* The tour whose analysis is on screen (the select lives inside the panel). */
+var _pcTourId="";
 function pcTourChanged(){
+  var sel=document.getElementById("pc_tour");if(sel)_pcTourId=sel.value;
   if(window._pcEditId){
     var l=profitLogs.find(function(x){return x.id===window._pcEditId;});
-    var sel=document.getElementById("pc_tour");
-    if(l&&sel&&l.tourId!==sel.value){window._pcEditId=null;window._pcEditExp=null;}
+    if(l&&l.tourId!==_pcTourId){window._pcEditId=null;window._pcEditExp=null;}
   }
   renderProfitCalc();
 }
+function pcLatestLog(tid){return (profitLogs||[]).filter(function(x){return x.tourId===tid;}).sort(function(a,b){return (b.savedAt||"").localeCompare(a.savedAt||"");})[0]||null;}
+function pcStartEdit(){var t=tours.find(function(x){return x.id===_pcTourId;});if(!t)return;var l=pcLatestLog(t.id);if(l){window._pcEditId=l.id;window._pcEditExp=Object.assign({},l.exp||{});}else{window._pcEditId="new";window._pcEditExp=Object.assign({},t.profitExp||{});}renderProfitCalc();}
 function renderProfitCalc(){
   var el=document.getElementById("pcBody");if(!el)return;
-  var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:tours[0].id);});if(!t)return;
-  var e=window._pcEditExp||t.profitExp||{};   /* when editing a saved calc, prefill from it */
+  if(!_pcTourId||!tours.some(function(x){return x.id===_pcTourId;}))_pcTourId=(tours[0]||{}).id||"";
+  var t=tours.find(function(x){return x.id===_pcTourId;});if(!t)return;
+  var latest=pcLatestLog(t.id);
+  var editing=!!window._pcEditId;
+  /* A tour with a saved analysis opens read-only; Edit switches the lines to
+     inputs. A tour without one goes straight to inputs. */
+  var mode=editing?"edit":(latest?"view":"edit");
+  var e=window._pcEditExp||(latest?(latest.exp||{}):(t.profitExp||{}));
+  var tot=PROFIT_EXP_FIELDS.reduce(function(s,f){return s+(+e[f[0]]||0);},0),cost=tourRevenue(t);
   _lineParts={};
-  /* Compact panel: one stat strip (cost / expenses / profit), then each expense as a
-     "label : amount [+]" line — the + adds another cost on top of the figure — and
-     uniform action buttons. Two line columns on wide screens, one on a phone. */
-  el.innerHTML="<div class='card card-pad pc-panel'>"+
-    (window._pcEditId?"<div class='eyebrow' style='color:var(--amber);margin-bottom:8px'>Editing a saved calculation</div>":"")+
-    "<div class='pc-stats'>"+
-      "<div class='s'><div class='l'>Total Tour Cost</div><div class='v mono' id='pc_cost'>"+fmt(tourRevenue(t))+"</div><div class='h'>from bookings"+(status(t)==="completed"?"":" · tour not completed yet")+"</div></div>"+
-      "<div class='s'><div class='l'>Total Expenses</div><div class='v mono' style='color:var(--coral)' id='pc_totexp'>—</div></div>"+
-      "<div class='s'><div class='l'>Profit</div><div class='v mono' style='color:var(--forest)' id='pc_profit'>—</div></div>"+
-    "</div>"+
-    "<div class='pc-lines'>"+PROFIT_EXP_FIELDS.map(function(f){var id="pc_"+f[0];
+  var tourSel="<div class='pc-pick'><label>Tour</label><select class='input' id='pc_tour' onchange='pcTourChanged()'>"+tours.map(function(x){return "<option value='"+x.id+"' "+(x.id===t.id?"selected":"")+">"+tourCode(x)+" — "+tourLabel(x)+" ("+dShort(x.start)+" – "+dShort(x.end)+")</option>";}).join("")+"</select>"+
+    "<span class='pc-state "+(mode==="edit"?"edit":"view")+"'>"+(mode==="edit"?(latest&&window._pcEditId!=="new"?"Editing the saved analysis":"New analysis — not saved yet"):"Saved "+dShort(latest.savedAt))+"</span></div>";
+  var lines=mode==="edit"
+    ?"<div class='pc-lines'>"+PROFIT_EXP_FIELDS.map(function(f){var id="pc_"+f[0];
       return "<div class='pc-line'><div class='ln'><label for='"+id+"'>"+f[1]+"</label><span class='ln-r'><input class='input mono' type='number' min='0' id='"+id+"' value='"+(e[f[0]]||0)+"' oninput=\"linePartsClear('"+id+"');pcRecalc()\"><button type='button' class='ln-add' title='Add another "+f[1].toLowerCase()+" cost to this line' aria-label='Add to "+f[1]+"' onclick=\"lineAddOpen('"+id+"')\">+</button></span></div>"+
-        lineAddRowHtml(id,"lineAddApply('"+id+"',pcRecalc)")+"</div>";}).join("")+"</div>"+
-    "<div class='pc-actions'>"+
-      "<button class='btn btn-primary btn-sm' onclick='saveProfitCalc()'>"+(window._pcEditId?"Update saved calculation":"Save calculation")+"</button>"+
-      (window._pcEditId?"<button class='btn btn-ghost btn-sm' onclick='cancelProfitEdit()'>Cancel</button>":"")+
-    "</div>"+
+        lineAddRowHtml(id,"lineAddApply('"+id+"',pcRecalc)")+"</div>";}).join("")+"</div>"
+    :"<div class='pc-lines'>"+PROFIT_EXP_FIELDS.map(function(f){return "<div class='pc-line'><div class='ln'><label>"+f[1]+"</label><span class='ln-r'><b class='mono pc-ro'>"+fmt(+e[f[0]]||0)+"</b></span></div></div>";}).join("")+"</div>";
+  var acts=mode==="edit"
+    ?"<button class='btn btn-primary btn-sm' onclick='saveProfitCalc()'>"+(latest&&window._pcEditId!=="new"?"Save changes":"Save analysis")+"</button>"+(latest?"<button class='btn btn-ghost btn-sm' onclick='cancelProfitEdit()'>Cancel</button>":"")
+    :"<button class='btn btn-primary btn-sm' onclick='pcStartEdit()'>Edit analysis</button>";
+  el.innerHTML="<div class='card card-pad pc-panel'>"+tourSel+
+    "<div class='pc-stats'>"+
+      "<div class='s'><div class='l'>Total Tour Cost</div><div class='v mono' id='pc_cost'>"+fmt(cost)+"</div><div class='h'>from bookings"+(status(t)==="completed"?"":" · tour not completed yet")+"</div></div>"+
+      "<div class='s'><div class='l'>Total Expenses</div><div class='v mono' style='color:var(--coral)' id='pc_totexp'>"+fmt(tot)+"</div></div>"+
+      "<div class='s'><div class='l'>Profit</div><div class='v mono' style='color:"+(cost-tot>=0?"var(--forest)":"var(--coral)")+"' id='pc_profit'>"+fmt(cost-tot)+"</div></div>"+
+    "</div>"+lines+
+    "<div class='pc-actions'>"+acts+"</div>"+
   "</div>"+profitLogsCard();
   window._pcEditExp=null;
-  pcRecalc();
+  if(mode==="edit")pcRecalc();
 }
 /* Saved profit calculations — a per-calc folder with Edit / Delete on each. */
 function profitLogsCard(){
@@ -10805,7 +10881,7 @@ function profitLogsCard(){
         "<div class='doc-acts'><button class='btn btn-ghost btn-sm' onclick=\"editProfitLog('"+l.id+"')\">Edit</button>"+
         "<button class='btn btn-ghost btn-sm' style='color:var(--coral)' onclick=\"deleteProfitLog('"+l.id+"')\">Delete</button></div>"+
       "</div></div>";
-  }).join(""):"<div class='empty'>No saved calculations yet — fill in the expenses above and tap <b>Save calculation</b>.</div>";
+  }).join(""):"<div class='empty'>Nothing saved yet — enter the expenses above and tap <b>Save analysis</b>.</div>";
   var nSel=Object.keys(_pcSelected).filter(function(k){return _pcSelected[k];}).length;
   var toolbar=logs.length?"<div class='pc-toolbar' style='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px'>"+
     "<label style='display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;cursor:pointer'><input type='checkbox' id='pcSelAll' "+(nSel&&nSel===logs.length?"checked":"")+" onchange='pcSelectAll(this.checked)' style='width:16px;height:16px;accent-color:#0a6ed1'> Select all</label>"+
@@ -10814,7 +10890,7 @@ function profitLogsCard(){
     "<button class='btn btn-ghost btn-sm' id='pcExpSelBtn' onclick='exportProfitXlsx(true)'"+(nSel?"":" disabled style='opacity:.5'")+"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export selected (.xlsx)</button>"+
     "<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'/></svg>Export all (.xlsx)</button>"+
   "</div>":"";
-  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Saved</div><div class='h-sec' style='font-size:15px'>Saved profit calculations</div></div><span class='pill plain'>"+logs.length+"</span></div>"+toolbar+body+"</div>";
+  return "<div class='card card-pad' style='margin-top:16px'><div class='section-head' style='margin-bottom:8px'><div><div class='eyebrow'>Saved</div><div class='h-sec' style='font-size:15px'>Saved cost based analysis</div></div><span class='pill plain'>"+logs.length+"</span></div>"+toolbar+body+"</div>";
 }
 /* Excel-like row selection for the saved profit calcs. */
 var _pcSelected={};
@@ -10856,18 +10932,18 @@ function exportProfitXlsx(selectedOnly){
   }).catch(function(e){alert("Couldn't build the Excel file: "+((e&&e.message)||e)+"\n\n(The formatter needs a network connection the first time.)");});
 }
 function pcRecalc(){
-  var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:"");});if(!t)return;
+  var t=tours.find(function(x){return x.id===_pcTourId;});if(!t)return;
   var tot=0;PROFIT_EXP_FIELDS.forEach(function(f){tot+=parseFloat((document.getElementById("pc_"+f[0])||{}).value)||0;});
   var cost=tourRevenue(t);
   var ce=document.getElementById("pc_cost"),te=document.getElementById("pc_totexp"),pe=document.getElementById("pc_profit");
   if(ce)ce.textContent=fmt(cost);if(te)te.textContent=fmt(tot);if(pe)pe.textContent=fmt(cost-tot);
 }
 function saveProfitCalc(){
-  var sel=document.getElementById("pc_tour");var t=tours.find(function(x){return x.id===(sel?sel.value:"");});if(!t)return;
+  var t=tours.find(function(x){return x.id===_pcTourId;});if(!t)return;
   var e={},tot=0;PROFIT_EXP_FIELDS.forEach(function(f){var v=parseFloat((document.getElementById("pc_"+f[0])||{}).value)||0;e[f[0]]=v;tot+=v;});
   var cost=tourRevenue(t);
   t.profitExp=e;                                          /* keep per-tour expenses in sync */
-  if(window._pcEditId){
+  if(window._pcEditId&&window._pcEditId!=="new"){
     var ex=profitLogs.find(function(x){return x.id===window._pcEditId;});
     if(ex){
       /* refresh the name to match the tour when it was changed, OR when the old
@@ -10879,16 +10955,14 @@ function saveProfitCalc(){
     }
     window._pcEditId=null;window._pcEditExp=null;persistData();renderProfitCalc();return;
   }
-  var def=tourCode(t)+" · "+dShort(t.start);
-  var name=prompt("Name this profit calculation:",def);
-  if(name===null)return;
-  profitLogs.unshift({id:"PL"+Date.now()+Math.floor(Math.random()*100),name:(name.trim()||def),tourId:t.id,tourCode:tourCode(t),tourLabel:tourLabel(t),exp:e,cost:cost,totalExp:tot,savedAt:new Date().toISOString()});
+  var def=tourCode(t)+" · "+tourLabel(t);
+  window._pcEditId=null;window._pcEditExp=null;
+  profitLogs.unshift({id:"PL"+Date.now()+Math.floor(Math.random()*100),name:def,tourId:t.id,tourCode:tourCode(t),tourLabel:tourLabel(t),exp:e,cost:cost,totalExp:tot,savedAt:new Date().toISOString()});
   persistData();renderProfitCalc();
 }
 function editProfitLog(id){
   var l=profitLogs.find(function(x){return x.id===id;});if(!l)return;
-  var sel=document.getElementById("pc_tour");
-  if(sel&&tours.some(function(t){return t.id===l.tourId;}))sel.value=l.tourId;
+  if(tours.some(function(t){return t.id===l.tourId;}))_pcTourId=l.tourId;
   window._pcEditExp=Object.assign({},l.exp||{});window._pcEditId=id;
   renderProfitCalc();
   var b=document.getElementById("pcBody");if(b&&b.scrollIntoView)b.scrollIntoView({behavior:"smooth",block:"start"});
