@@ -1823,7 +1823,7 @@ html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 331</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 332</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1832,7 +1832,7 @@ html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 331</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 332</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2254,7 +2254,7 @@ var payAccounts=[]; /* saved bank accounts (India + international) — see PAYME
 let integCfg={sheets:true,maps:true,whatsapp:true,email:true};
 /* Console preferences (synced): thresholds that drive the dashboard early-warning
    cards and the analytics margin alert. Editable in Settings → Preferences. */
-var PREFS_DEFAULT={marginMin:20,fillWarnDays:45,fillWarnPct:50};
+var PREFS_DEFAULT={marginMin:20,fillWarnDays:45,fillWarnPct:50,calToken:""};
 let prefs=Object.assign({},PREFS_DEFAULT);
 function toggleInteg(k){
   integCfg[k]=integCfg[k]===false;
@@ -6179,6 +6179,7 @@ function viewCalendar(){
       "<select class='cal-sel' id='calMonth' onchange='calM=+this.value;renderCalendar()'>"+MONTHS.map((m,i)=>"<option value='"+i+"'>"+m+"</option>").join("")+"</select>"+
       "<select class='cal-sel' id='calYear' onchange='calY=+this.value;renderCalendar()'>"+yearOptions(calY)+"</select>"+
       "<button type='button' class='cal-today' onclick='calResetToday();renderCalendar()'>Today</button>"+
+      "<button type='button' class='cal-today' onclick='shareCalendar()' title='Shareable read-only link to this calendar'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px;vertical-align:-2px;margin-right:5px'><path d='M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13'/></svg>Share</button>"+
     "</div>"+
     "<div class='card card-pad cal-card'><div class='cal-head' id='calHead'></div><div class='cal-scroll'><div class='cal' id='calGrid'></div></div><div class='legend' id='calLegend'></div></div>"+
   "</section>";
@@ -9640,6 +9641,36 @@ var _submissions=[];
    tagged with it would be readable by nobody — so it maps to island-explorer. */
 function wsTag(){var w="";try{w=sbConfig().ws||"";}catch(e){}return (w&&w!=="default")?w:"island-explorer";}
 function formLink(type){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"register.html?type="+type+"&ws="+encodeURIComponent(wsTag());}
+/* Shareable read-only calendar (calendar.html). The link carries the workspace
+   and a private token kept in prefs (synced with the workspace); the page reads
+   the schedule through get_public_calendar (public-calendar.sql) — tour names,
+   dates, seats and guide only. A new token revokes every earlier link. */
+function calShareToken(rotate){
+  if(!prefs.calToken||rotate){
+    var a=new Uint8Array(12);try{crypto.getRandomValues(a);}catch(e){for(var i=0;i<a.length;i++)a[i]=Math.floor(Math.random()*256);}
+    prefs.calToken=Array.prototype.map.call(a,function(x){return ("0"+x.toString(16)).slice(-2);}).join("");
+    persistData();
+    try{if(typeof cloudPush==="function")cloudPush(true);}catch(e){}
+  }
+  return prefs.calToken;
+}
+function calShareLink(){var base=location.href.split("#")[0].replace(/[^/]*$/,"");return base+"calendar.html?ws="+encodeURIComponent(wsTag())+"&t="+encodeURIComponent(calShareToken(false));}
+function shareCalendar(){
+  var url=calShareLink();
+  document.getElementById("modal").innerHTML="<div class='modal-head'><div><div class='eyebrow'>Calendar</div><div class='h-sec'>Share your calendar</div></div>"+XBTN+"</div>"+
+    "<div class='modal-body'>"+
+      "<p style='font-size:13px;color:var(--ink-soft);margin:0 0 12px'>Anyone with this link sees your tour schedule as a read-only calendar: tour names, codes, dates, seats left and the guide. No guest names, contacts or money. It updates by itself whenever your tours change.</p>"+
+      "<div class='field full'><label>Link</label><input class='input mono' id='calShareUrl' value='"+url.replace(/'/g,"%27")+"' readonly onclick='this.select()'></div>"+
+      "<div class='btn-row' style='margin-top:10px'>"+
+        "<button class='btn btn-primary' onclick=\"try{navigator.clipboard.writeText(document.getElementById('calShareUrl').value);}catch(e){}this.textContent='Copied ✓'\">Copy link</button>"+
+        "<button class='btn btn-sea' onclick=\"waShare('Our tour calendar (live): '+document.getElementById('calShareUrl').value,'')\">WhatsApp</button>"+
+        "<button class='btn btn-ghost' onclick=\"window.open(document.getElementById('calShareUrl').value,'_blank')\">Open</button>"+
+      "</div>"+
+      "<p style='font-size:11.5px;color:var(--ink-soft);margin:14px 0 0'>Shared with the wrong person? <a href='#' onclick=\"event.preventDefault();if(confirm('Make a new link? Everyone holding the old link loses access.')){calShareToken(true);shareCalendar();}\">Make a new link</a> — the old one stops working at once.</p>"+
+      "<p style='font-size:11.5px;color:var(--ink-soft);margin:6px 0 0'>One-time setup: run <b>supabase/saas/public-calendar.sql</b> in the SQL editor so the page can read the schedule.</p>"+
+    "</div>";
+  openScrim();
+}
 /* Shareable public departures board (departures.html) — copies the link and opens
    it. Live data comes from get_public_departures (public-departures.sql), which
    returns only marketing fields for approved workspaces. */

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tour Calendar · Island Explorer Birding Tours</title>
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--sea:#3454d1;--sea-soft:#e8edfb;--ink:#283c50;--ink-soft:#58667a;--line:#e5e7eb;--line-soft:#eef0f4;--surface:#fff;--canvas:#f0f2f8}
+  *{box-sizing:border-box;margin:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--canvas);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+  .page{max-width:980px;margin:0 auto;padding:22px 16px 60px}
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .brand img{max-height:56px;max-width:220px;object-fit:contain}
+  .brand .co{font-weight:700;font-size:15px}
+  .brand .sub{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;color:#0f7a43;background:#e3f7ec;border-radius:99px;padding:4px 11px;text-transform:uppercase}
+  .live i{width:7px;height:7px;border-radius:50%;background:#17c666;animation:pulse 1.6s infinite}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px -1px rgba(0,0,0,.08);padding:16px}
+  .bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+  .bar button{font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer}
+  .bar button:hover{background:#f3f4f6}
+  .bar .mon{font-size:18px;font-weight:700;flex:1;min-width:160px}
+  .bar .mon span{color:var(--ink-soft);font-weight:500;margin-left:6px}
+  .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .dow{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);text-align:center;padding:4px 0}
+  .cell{min-height:74px;border:1px solid var(--line-soft);border-radius:6px;padding:4px 5px;background:#fff;display:flex;flex-direction:column;gap:3px}
+  .cell.dim{background:transparent;border-color:transparent}
+  .cell.today{border-color:var(--sea);box-shadow:inset 0 0 0 1px var(--sea)}
+  .dn{font-size:12px;font-weight:600;color:var(--ink-soft)}
+  .cell.today .dn{color:var(--sea)}
+  .span{height:16px;border-radius:4px;font-size:10px;font-weight:700;color:#fff;padding:0 5px;line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .span.cont{opacity:.75}
+  .legend{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+  .lg{display:flex;align-items:center;gap:10px;font-size:13px;padding:8px 10px;border:1px solid var(--line-soft);border-radius:6px}
+  .lg .sw{width:12px;height:12px;border-radius:3px;flex:none}
+  .lg .t{flex:1;min-width:0}
+  .lg .t b{display:block;font-weight:600}
+  .lg .t small{color:var(--ink-soft);font-size:12px}
+  .lg .seats{font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;background:#e3f7ec;color:#0f7a43;white-space:nowrap}
+  .lg .seats.few{background:#fff3dc;color:#9a5b00}.lg .seats.full{background:#fdecec;color:#b42318}
+  .empty{padding:30px 12px;text-align:center;color:var(--ink-soft);font-size:13.5px}
+  .foot{text-align:center;color:var(--ink-soft);font-size:12px;padding:22px 10px 0}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media(max-width:600px){.cell{min-height:58px;padding:3px}.span{height:8px;font-size:0;padding:0}.dn{font-size:11px}.card{padding:12px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="brand">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
+      <div><div class="co" id="coName">Island Explorer Birding Tours</div><div class="sub">Tour calendar · shared schedule</div></div>
+    </div>
+    <span class="live"><i></i>Live</span>
+  </div>
+  <div class="card">
+    <div class="bar">
+      <button onclick="step(-1)" aria-label="Previous month">‹</button>
+      <button onclick="step(1)" aria-label="Next month">›</button>
+      <div class="mon" id="monLbl"></div>
+      <button onclick="today()">Today</button>
+    </div>
+    <div class="grid" id="grid"><div class="empty" style="grid-column:1/-1">Loading schedule…</div></div>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="foot" id="footLine">Updates automatically · no booking details are shown here</div>
+</div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.url)||"https://tbxzxfjumlnciczizols.supabase.co";
+const SB_KEY=(window.APP_CONFIG&&window.APP_CONFIG.supabase&&window.APP_CONFIG.supabase.key)||"sb_publishable_IyJJjmOHgA-dbCMH19oY3Q_GzLoZ2ss";
+const Q=new URLSearchParams(location.search);
+const WS=Q.get("ws")||"island-explorer",TOKEN=Q.get("t")||"";
+const B=(window.APP_CONFIG&&window.APP_CONFIG.brand)||{};
+if(B.company)document.getElementById("coName").textContent=B.company;
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const COLORS=["#3454d1","#eb6834","#1baf7a","#eda100","#e87ba4","#6250d6","#0e8fa8","#b45309"];
+let TOURS=[],Y,M;
+const todayISO=(function(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");})();
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function dd(iso){if(!iso)return "";var p=String(iso).slice(0,10).split("-");return p.length===3?(p[2]+"-"+p[1]+"-"+p[0]):iso;}
+function color(i){return COLORS[Math.abs(i)%COLORS.length];}
+function today(){var d=new Date();Y=d.getFullYear();M=d.getMonth();render();}
+function step(n){M+=n;if(M<0){M=11;Y--;}if(M>11){M=0;Y++;}render();}
+function render(){
+  var grid=document.getElementById("grid"),first=new Date(Y,M,1),startDow=(first.getDay()+6)%7,days=new Date(Y,M+1,0).getDate();
+  var iso=function(d){return Y+"-"+String(M+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");};
+  document.getElementById("monLbl").innerHTML=MONTHS[M]+"<span>"+Y+"</span>";
+  var monthTours=TOURS.filter(function(t){return (t.start||"")<=iso(days)&&(t.end||t.start||"")>=iso(1);});
+  var html=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(function(d){return "<div class='dow'>"+d+"</div>";}).join("");
+  for(var i=0;i<startDow;i++)html+="<div class='cell dim'></div>";
+  for(var d=1;d<=days;d++){
+    var date=iso(d);
+    var spans=monthTours.map(function(t,i){
+      var sess=t.type==="session"&&t.dates&&t.dates.length;
+      var on=sess?t.dates.indexOf(date)>-1:(date>=t.start&&date<=(t.end||t.start));
+      if(!on)return "";
+      var isStart=sess?true:date===t.start;
+      var ci=TOURS.indexOf(t);
+      return "<div class='span "+(isStart?"":"cont")+"' style='background:"+color(ci)+"' title='"+esc(t.name)+"'>"+(isStart?esc(t.code||t.name):"")+"</div>";
+    }).join("");
+    html+="<div class='cell "+(date===todayISO?"today":"")+"'><div class='dn'>"+d+"</div>"+spans+"</div>";
+  }
+  grid.innerHTML=html;
+  document.getElementById("legend").innerHTML=monthTours.length?monthTours.map(function(t){
+    var ci=TOURS.indexOf(t),left=Math.max((t.cap||0)-(t.booked||0),0);
+    var seats=t.cap>0?"<span class='seats "+(left<=0?"full":(left<=2?"few":""))+"'>"+(left<=0?"Fully booked":left+" seat"+(left===1?"":"s")+" left")+"</span>":"";
+    var when=(t.type==="session"&&t.dates&&t.dates.length)?t.dates.map(dd).join(", "):(dd(t.start)+(t.end&&t.end!==t.start?" → "+dd(t.end):""));
+    return "<div class='lg'><span class='sw' style='background:"+color(ci)+"'></span><div class='t'><b>"+(t.code?esc(t.code)+" · ":"")+esc(t.name)+"</b><small>"+when+(t.guide?" · "+esc(t.guide):"")+"</small></div>"+seats+"</div>";
+  }).join(""):"<div class='empty'>No tours this month.</div>";
+}
+async function load(){
+  try{
+    var sb=window.supabase.createClient(SB_URL,SB_KEY);
+    var r=await sb.rpc("get_public_calendar",{p_workspace:WS,p_token:TOKEN});
+    if(r.error||!r.data){document.getElementById("grid").innerHTML="<div class='empty' style='grid-column:1/-1'>This calendar link is not active. Please ask for a fresh link.</div>";return;}
+    if(r.data.company)document.getElementById("coName").textContent=r.data.company;
+    TOURS=(r.data.tours||[]).filter(function(t){return t.start;});
+    render();
+  }catch(e){document.getElementById("grid").innerHTML="<div class='empty' style='grid-column:1/-1'>Couldn't load the calendar right now — please try again in a minute.</div>";}
+}
+today();
+load();
+setInterval(load,300000);
+</script>
+</body>
+</html>
