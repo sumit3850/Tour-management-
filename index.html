@@ -1842,7 +1842,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 337</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 338</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1851,7 +1851,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 337</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 338</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4719,7 +4719,7 @@ function departuresCard(){
      ones (a session tour with dates still ahead, a group tour on the road) by
      their next date. */
   var nextDate=function(t){var ds=tourDates(t);if(t.tourType==="session"&&t.sessionDates&&t.sessionDates.length){var f=t.sessionDates.slice().sort().filter(function(x){return x>=todayISO;});return f[0]||ds.end;}return (ds.start>=todayISO)?ds.start:todayISO;};
-  var ups=live.filter(function(t){var ds=tourDates(t);return ds.start&&ds.end>=todayISO&&!tourDone(t);}).map(function(t){return {t:t,d:nextDate(t)};}).sort(function(a,b){return a.d.localeCompare(b.d)||(a.t.start||"").localeCompare(b.t.start||"");}).slice(0,8);
+  var ups=live.filter(function(t){var ds=tourDates(t);return ds.start&&ds.end>=todayISO&&!tourDone(t);}).map(function(t){return {t:t,d:nextDate(t)};}).sort(function(a,b){return a.d.localeCompare(b.d)||(a.t.start||"").localeCompare(b.t.start||"");});
   var MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   var anyRisk=false;
   var rows=ups.map(function(x){
@@ -9304,10 +9304,10 @@ function viewLogistics(){
 var _logTab="Vehicles & Drivers"; /* remembered so a background refresh keeps you on the current sub-tab */
 /* Operations Board now lives on the Dashboard (mobile-friendly). This markup is shared. */
 function opsBoardMarkup(){
-  /* Dashboard shows only the next 4 upcoming (non-completed) operations, soonest first;
-     as each completes it drops off and the next upcoming one takes its place. */
-  var up=realOps().filter(function(o){var s=(o.status||"").toLowerCase();return s!=="completed"&&s!=="cancelled";}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");}).slice(0,4);
-  return "<div class='section-head'><div class='h-sec' style='font-size:15px'>Operations Board</div><div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-ghost btn-sm' onclick=\"go('operations')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M5 12h14M13 6l6 6-6 6'/></svg>Go to board</button><button class='btn btn-ghost btn-sm' onclick='syncOpsFromTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Sync from Tours</button><button class='btn btn-primary btn-sm' onclick='openAddOp()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Operation</button></div></div>"+
+  /* Every operation that is not finished, soonest first — no cap, so a session
+     tour scheduled after the next few group tours is never hidden. */
+  var up=realOps().filter(function(o){var s=(o.status||"").toLowerCase();return s!=="completed"&&s!=="cancelled";}).sort(function(a,b){return (a.startISO||"").localeCompare(b.startISO||"");});
+  return "<div class='section-head'><div class='h-sec' style='font-size:15px'>Operations Board <span class='pill plain' style='margin-left:6px'>"+up.length+" upcoming</span></div><div style='display:flex;gap:8px;flex-wrap:wrap'><button class='btn btn-ghost btn-sm' onclick=\"go('operations')\"><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M5 12h14M13 6l6 6-6 6'/></svg>Go to board</button><button class='btn btn-ghost btn-sm' onclick='syncOpsFromTours()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:14px;height:14px'><path d='M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0 1 14.8-3.4L23 10M1 14l4.7 4.4A9 9 0 0 0 20.5 15'/></svg>Sync from Tours</button><button class='btn btn-primary btn-sm' onclick='openAddOp()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Add Operation</button></div></div>"+
     "<div class='ops-grid'>"+(up.length?up.map(opCard).join(""):"<div class='empty'>No upcoming operations.</div>")+"</div>";
 }
 function renderDashOps(){var el=document.getElementById("dashOpsBoard");if(el)el.innerHTML=opsBoardMarkup();if(typeof renderOperations==="function")renderOperations();}
