@@ -1842,7 +1842,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 334</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 335</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1851,7 +1851,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 334</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 335</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -3939,6 +3939,9 @@ function tourDone(t){
   if(d.end&&d.end<todayISO)return true;                 /* last date has passed */
   if(d.start&&d.start>todayISO)return false;            /* not started yet: a Completed mark on it (or its operation) is a slip, not a finished tour */
   if(t.status==="completed")return true;
+  /* A session tour with dates still ahead is not finished because its operation
+     was marked Completed after one of the earlier dates. */
+  if(t.tourType==="session"&&d.end&&d.end>=todayISO)return false;
   return (typeof ops!=="undefined"?ops:[]).some(function(o){return o.fromTour===t.id&&!o.shadowOf&&String(o.status||"").toLowerCase()==="completed";});
 }
 function tourPhase(t){
@@ -6049,7 +6052,7 @@ function tourTabOf(t){
 }
 function refreshTourTabCounts(){
   var c={All:0,Upcoming:0,Ongoing:0,Completed:0,Archived:0,Trash:(trash||[]).length};
-  (tours||[]).forEach(function(t){var tab=tourTabOf(t);if(tab!=="Archived")c.All++;if(c[tab]!=null&&tab!=="All")c[tab]++;});
+  (tours||[]).forEach(function(t){var tab=tourTabOf(t);if(tab!=="Archived")c.All++;if(c[tab]!=null&&tab!=="All")c[tab]++;if(tab==="Ongoing")c.Upcoming++;});
   document.querySelectorAll("#tourTabs .tab").forEach(function(b){
     var k=b.dataset.arg;if(c[k]==null)return;
     b.textContent=k+" ("+c[k]+")";
@@ -6185,7 +6188,7 @@ function renderTours(filter=curTab){
   if(filter==="Trash"){renderTrash(grid);applyTourZoom();return;}
   const list=tours.filter(t=>{if(t.archived)return false;const p=tourPhase(t);
     if(filter==="Completed")return p==="completed";
-    if(filter==="Upcoming")return p==="upcoming";
+    if(filter==="Upcoming")return p==="upcoming"||p==="ongoing";
     if(filter==="Ongoing")return p==="ongoing";
     return true;});
   const order=(catalog.cats||[]).map(function(c){return c.id;}).concat(["__sessions"]);
