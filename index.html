@@ -1842,7 +1842,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 336</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 337</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1851,7 +1851,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 336</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 337</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -2381,7 +2381,12 @@ function applyStore(d,cloudTs){
      (its own clock is newer than the blob's). Everything else follows the cloud. */
   var pending=false;try{pending=localStorage.getItem("ieo_record_pending")==="1"||(typeof _localDirty!=="undefined"&&_localDirty);}catch(e){}
   var keep=function(l){if(pending)return true;var ts=l&&(l.updatedAt||l.savedAt||l.createdAt||"");return !!(cloudTs&&ts&&ts>cloudTs);};
-  var skipKeys=(typeof _perRecordActive!=="undefined"&&_perRecordActive&&typeof PER_RECORD_KEYS!=="undefined")?PER_RECORD_KEYS:[];
+  var perRec=false;try{perRec=(typeof _perRecordActive!=="undefined"&&_perRecordActive)||localStorage.getItem("ieo_per_record")==="1";}catch(e){}
+  /* Once this device has synced with the per-record tables, the tables are the
+     only source for those lists — on every later load too, so a stale blob from
+     another device can never drop a tour that only the tables (or this device)
+     still hold. */
+  var skipKeys=(perRec&&typeof PER_RECORD_KEYS!=="undefined")?PER_RECORD_KEYS:[];
   STORE.forEach(function(s){
     if(skipKeys.indexOf(s.k)>-1)return;
     if(d[s.k]!==undefined&&d[s.k]!==null){
@@ -3871,6 +3876,7 @@ async function pullAllRecords(){
       _lastRecordSnapshot[key]=snap;
     });
     _recordsChanged=changed;
+    try{localStorage.setItem("ieo_per_record","1");}catch(e){}
     if(keptLocal){_localDirty=true;try{localStorage.setItem("ieo_record_pending","1");}catch(e){}if(typeof scheduleRecordPush==="function")setTimeout(scheduleRecordPush,50);}
     return true;
   }catch(e){return false;}
@@ -5923,7 +5929,7 @@ function viewTours(){
   return "<section class='view' id='v-tours'>"+
     "<div class='section-head'>"+
       "<div class='tabs' id='tourTabs'>"+["All","Upcoming","Ongoing","Completed","Archived","Trash"].map((t,i)=>"<button class='tab "+(t===curTab?"active":"")+"' data-action='filterTours' data-arg='"+t+"'>"+t+"</button>").join("")+"</div>"+
-      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button>"+
+      "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center'>"+dlBtn('exportToursCSV')+"<button class='btn btn-ghost btn-sm' onclick='restoreTourFromLink()' title='Rebuild a missing tour from its registration link'>Restore from link</button><button class='btn btn-ghost btn-sm' onclick='openPublicDepartures()' title='Shareable departures board for customers'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round' style='width:15px;height:15px'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3'/></svg>Public page</button>"+
       "<span class='tz-ctl' style='display:inline-flex;gap:4px;align-items:center'><button class='btn btn-ghost btn-sm' onclick='tourZoom(-1)' title='Zoom out' style='min-width:34px;font-weight:800'>−</button><span class='mono' id='tzPct' style='font-size:11px;color:var(--ink-soft);min-width:36px;text-align:center'>100%</span><button class='btn btn-ghost btn-sm' onclick='tourZoom(1)' title='Zoom in' style='min-width:34px;font-weight:800'>+</button></span>"+
       "<button class='btn btn-primary' onclick='openCreateTour()'><svg viewBox='0 0 24 24' fill='none' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Create Tour</button></div>"+
     "</div>"+
@@ -11969,6 +11975,34 @@ function collectTourGuides(pre){
   });
   out.forEach(function(g){var c=guideContact(g.name,g);g.phone=c.phone;g.email=c.email;});
   return out.filter(function(g,i){return i===0||g.name;});
+}
+/* A registration link carries everything about its tour (id, code, name,
+   category, dates, activity). Paste one here to rebuild a tour that went
+   missing — same ID, so the link, its submissions and bookings attach again. */
+function restoreTourFromLink(link){
+  if(link==null){link=prompt("Paste the registration link of the tour (the one that starts with https://…/register.html?…):","");if(!link)return;}
+  var q;try{q=new URL(String(link).trim()).searchParams;}catch(e){var m=String(link).match(/\?(.*)$/);q=new URLSearchParams(m?m[1]:"");}
+  var tid=(q.get("tid")||"").trim(),name=(q.get("tour")||"").trim();
+  if(!tid||!name){alert("That link does not carry a tour ID and name. Copy the full registration link, including everything after the question mark.");return;}
+  var ex=tours.find(function(x){return x.id===tid;});
+  if(ex){alert("This tour is still in your workspace: "+tourCode(ex)+" · "+(ex.name||"")+" — under Tours → "+tourTabOf(ex)+".");go("tours");renderTours(tourTabOf(ex)==="Archived"?"Archived":"All");return;}
+  var tr=(trash||[]).find(function(x){return x.kind==="tour"&&x.data&&x.data.id===tid;});
+  if(tr){if(confirm("This tour is in the Trash. Restore it from there?")){go("tours");renderTours("Trash");}return;}
+  var dates=(q.get("dates")||"").split(",").map(function(x){return x.trim();}).filter(function(x){return /^\d{4}-\d{2}-\d{2}$/.test(x);}).sort();
+  var start=q.get("start")||dates[0]||"",end=q.get("end")||dates[dates.length-1]||start;
+  if(!start){alert("The link has no dates — create the tour by hand instead.");return;}
+  var cat=q.get("cat")||"",isSess=dates.length>0;
+  if(cat&&!(catalog.cats||[]).some(function(c){return c.id===cat;}))cat=((catalog.cats||[])[0]||{}).id||cat;
+  var nt={id:tid,name:name,tourType:isSess?"session":"group",sessionDates:isSess?dates:undefined,activity:q.get("act")||"Birding tour",cat:cat,start:start,end:end,cap:8,status:"open",pickup:"—",startLoc:"—",stay:"—",tourCost:0,tourDeposit:0,due:"",species:"",restoredAt:new Date().toISOString()};
+  tours.push(nt);if(typeof ensureTourCodes==="function")ensureTourCodes();
+  nt.updatedAt=new Date().toISOString();
+  audit("tour","restored from link",tourCode(nt)+" · "+name);
+  if(typeof opFromTour==="function")opFromTour(nt);
+  persistData();
+  try{if(typeof flushLocal==="function")flushLocal();}catch(e){}
+  go("tours");renderTours("All");renderCalendar();
+  if(typeof refreshDashboardIfActive==="function")refreshDashboardIfActive();
+  alert("Restored "+tourCode(nt)+" · "+name+"\n\nDates: "+(isSess?dates.map(dShort).join(", "):dShort(start)+" – "+dShort(end))+"\nCapacity set to 8 and price left blank — open Edit on the card to adjust.\n\nThe registration link and any bookings made from it now point to this tour again.");
 }
 function openCreateTour(){
   modalForm("New tour","Create a tour","<div class='form-grid'>"+
