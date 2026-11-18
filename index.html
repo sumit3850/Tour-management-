@@ -1842,7 +1842,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 335</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 336</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1851,7 +1851,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 335</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 336</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -4709,14 +4709,20 @@ function departuresCard(){
     .concat(live.filter(function(t){return in7(t.start);}).sort(function(a,b){return a.start.localeCompare(b.start);}).map(function(t){return item("Departs · "+esc(shortName(t))+" · "+booked(t.id)+"/"+t.cap+" pax"+(t.guide&&t.guide!=="—"?" · "+esc(t.guide):""),lab(t.start),"openTour",t.id,"dep");}))
     .concat(realOps().filter(opActive).filter(function(o){return in7(o.pickupDate);}).sort(function(a,b){return String(a.pickupDate).localeCompare(String(b.pickupDate));}).map(function(o){return item("Pickup · "+esc(o.tour)+(o.pickupLoc?" · "+esc(o.pickupLoc):"")+(o.driver&&o.driver!=="—"?" · "+esc(o.driver):""),lab(o.pickupDate),"gotoAlert","op|"+o.id,"pick");}))
     .concat(live.filter(function(t){return in7(t.end)&&t.end!==t.start;}).sort(function(a,b){return a.end.localeCompare(b.end);}).map(function(t){return item("Returns · "+esc(shortName(t)),lab(t.end),"openTour",t.id,"ret");}));
-  var ups=live.filter(function(t){return t.start&&t.start>=todayISO&&status(t)!=="completed";}).sort(function(a,b){return a.start.localeCompare(b.start);}).slice(0,8);
+  /* Every tour that is not finished: upcoming ones by start date, and ongoing
+     ones (a session tour with dates still ahead, a group tour on the road) by
+     their next date. */
+  var nextDate=function(t){var ds=tourDates(t);if(t.tourType==="session"&&t.sessionDates&&t.sessionDates.length){var f=t.sessionDates.slice().sort().filter(function(x){return x>=todayISO;});return f[0]||ds.end;}return (ds.start>=todayISO)?ds.start:todayISO;};
+  var ups=live.filter(function(t){var ds=tourDates(t);return ds.start&&ds.end>=todayISO&&!tourDone(t);}).map(function(t){return {t:t,d:nextDate(t)};}).sort(function(a,b){return a.d.localeCompare(b.d)||(a.t.start||"").localeCompare(b.t.start||"");}).slice(0,8);
   var MON=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
   var anyRisk=false;
-  var rows=ups.map(function(t){
-    var d=new Date(t.start+"T00:00:00"),n=daysBetween(todayISO,t.start),bk=booked(t.id),cap=parseInt(t.cap,10)||0,pct=cap?Math.min(Math.round(bk/cap*100),100):0;
+  var rows=ups.map(function(x){
+    var t=x.t,ds=tourDates(t),going=ds.start<=todayISO;
+    var d=new Date(x.d+"T00:00:00"),n=daysBetween(todayISO,x.d),bk=booked(t.id),cap=parseInt(t.cap,10)||0,pct=cap?Math.min(Math.round(bk/cap*100),100):0;
     var r=fillRisk(t);if(r)anyRisk=true;
     var pb=t.pocId?bookings.find(function(b){return b.id===t.pocId;}):null;
-    var bits=[dShort(t.start)+(t.end&&t.end!==t.start?" – "+dShort(t.end):""),n===0?"today":(n===1?"tomorrow":"in "+n+" days"),(t.guide&&t.guide!=="—")?esc(t.guide):"",pb&&pb.guest?esc(pb.guest):""].filter(Boolean);
+    var when=t.tourType==="session"&&t.sessionDates&&t.sessionDates.length?t.sessionDates.slice().sort().map(dShort).join(", "):(dShort(ds.start)+(ds.end&&ds.end!==ds.start?" – "+dShort(ds.end):""));
+    var bits=[when,going?(t.tourType==="session"?"ongoing · next "+(n===0?"today":(n===1?"tomorrow":"in "+n+" days")):"on tour · ends "+dShort(ds.end)):(n===0?"today":(n===1?"tomorrow":"in "+n+" days")),(t.guide&&t.guide!=="—")?esc(t.guide):"",pb&&pb.guest?esc(pb.guest):""].filter(Boolean);
     return "<div class='list-row dep-row' data-action='openTour' data-arg='"+t.id+"' style='cursor:pointer'>"+
       "<div class='dep-date'><b>"+d.getDate()+"</b><span>"+MON[d.getMonth()]+"</span></div>"+
       "<div class='meta'><div class='t'>"+esc(shortName(t))+" <span class='dep-code mono'>"+tourCode(t)+"</span>"+(t.tourType==="session"?"":"<span class='dep-n'>"+durNights(t)+"N</span>")+"</div>"+
