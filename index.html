@@ -1805,9 +1805,16 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
 .a2-twin-col+.a2-twin-col{border-left:1px solid var(--line-soft);padding-left:18px}
 .a2-twin-t{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
 .a2-twin .a2-pie{flex-direction:column;align-items:stretch;gap:10px}.a2-twin .a2-pie svg{width:210px;height:210px}
+.a2-twin .a2-pie .pg{min-width:0;width:100%;max-width:100%}.a2-twin .a2-pie .pg .k small{white-space:normal}
 .a2-pie .pg b.up{color:#0f9a4f}.a2-pie .pg b.down{color:#ea4d4d}
 @media(max-width:900px){.a2-twin{grid-template-columns:1fr}.a2-twin-col+.a2-twin-col{border-left:0;padding-left:0;border-top:1px solid var(--line-soft);padding-top:14px}}
 .a2-twin-src{font-size:11.5px;color:var(--ink-soft);margin-top:8px}
+.a2-twinbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}.a2-twinbar .input{width:auto;padding:6px 9px;font-size:12.5px}.a2-twinbar select.input{padding-right:28px;background-position:right 8px center}.a2-twinbar span{font-size:12px;color:var(--ink-soft)}
+.a2-twinseg{display:flex;gap:2px;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:3px}.a2-twinseg button{padding:5px 11px;border-radius:4px;font-size:12px;font-weight:600;color:var(--ink-soft);white-space:nowrap}.a2-twinseg button.on{background:var(--sea-soft);color:var(--sea)}
+.a2-twinnote{font-size:12px;color:var(--ink-soft)}
+.a2-twin.one{grid-template-columns:1fr}.a2-twin.one .a2-pie{flex-direction:row;align-items:center}.a2-twin.one .a2-twin-col{padding-left:0;border-left:0}
+.a2-twin-col .empty small{display:block;margin-top:4px;font-size:11.5px}
+@media(max-width:600px){.a2-twinbar{gap:6px}.a2-twinseg{width:100%}.a2-twinseg button{flex:1;padding:6px 4px}.a2-twinbar .input{flex:1 1 38%;min-width:0;max-width:100%;box-sizing:border-box}.a2-twinbar .btn,.a2-twinnote{flex-basis:100%}.a2-twin.one .a2-pie{flex-direction:column}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1851,7 +1858,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 340</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 341</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1860,7 +1867,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 340</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 341</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5635,6 +5642,9 @@ function a2Save(){try{localStorage.setItem("ieo_ana2",JSON.stringify(_a2));}catc
 function a2SetRange(v){_a2.range=v;a2Save();renderAnalytics();}
 function a2SetCustom(){_a2.from=(document.getElementById("a2From")||{}).value||"";_a2.to=(document.getElementById("a2To")||{}).value||"";_a2.range="custom";a2Save();renderAnalytics();}
 function a2Toggle(id){_a2.tbl=_a2.tbl||{};_a2.tbl[id]=!_a2.tbl[id];a2Save();renderAnalytics();}
+/* Session-vs-group card: its own filter (year, month, dates, type). Empty = the page range. */
+function a2TwinSet(k,v){_a2.twin=_a2.twin||{};_a2.twin[k]=v;if(k==="year"&&v)_a2.twin.from=_a2.twin.to="";if((k==="from"||k==="to")&&v){_a2.twin.year="";_a2.twin.month="";}a2Save();renderAnalytics();}
+function a2TwinClear(){_a2.twin={};a2Save();renderAnalytics();}
 function a2Bounds(){
   var y=new Date().getFullYear(),m=new Date().getMonth();
   var p=function(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
@@ -5909,39 +5919,66 @@ function renderAnalytics(){
   var yrBody=yrs2.length?a2Bars(yrs2,[{name:"First-time",values:yrs2.map(function(y){return yrNew[y]||0;}),color:a2col(0)},{name:"Returning",values:yrs2.map(function(y){return yrRet[y]||0;}),color:a2col(2)}],{stack:true,height:190}):"<div class='empty'>No bookings yet.</div>";
   var yrTbl=a2Table(["Year","First-time","Returning","Returning share"],yrs2.map(function(y){var a=yrNew[y]||0,r=yrRet[y]||0;return [y,String(a),String(r),pct((a+r)?Math.round(r/(a+r)*100):null)];}));
   /* ---- session tours vs group tours: total tour cost, expenses, profit ---- */
+  /* Only finished tours whose costs were entered in Cost based analysis count
+     here; ongoing or future tours, and finished ones without an analysis, are
+     listed as waiting. */
+  var TW=_a2.twin||{};
+  var twinOwn=!!(TW.year||TW.month||TW.from||TW.to);
+  var twinIn=function(t){var ds=tourDates(t);var d=ds.start||"";if(!d)return false;
+    if(!twinOwn)return a2In(d,b);
+    if(TW.from&&d<TW.from)return false;if(TW.to&&d>TW.to)return false;
+    if(TW.year&&d.slice(0,4)!==String(TW.year))return false;
+    if(TW.month&&d.slice(5,7)!==String(TW.month).padStart(2,"0"))return false;
+    return true;};
+  var TWALL=(tours||[]).filter(function(t){return !t.archived&&twinIn(t);});
   var typeStats=function(list){
-    var revAll=0,rev=0,exp=0,guests=0,n={actual:0,log:0,estimate:0,none:0},persons={},bookN=0;
-    list.forEach(function(t){var p=autoTourProfit(t);revAll+=p.rev;guests+=tourPaxBooked(t);n[p.src]=(n[p.src]||0)+1;
-      if(p.src!=="none"){rev+=p.rev;exp+=(p.exp||0);}
-      (bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";}).forEach(function(b){bookN++;bookingPersons(b).forEach(function(k){persons[k]=1;});});});
-    var costed=list.length-n.none;
-    return {tours:list.length,revAll:revAll,rev:rev,exp:exp,profit:rev-exp,margin:rev?Math.round((rev-exp)/rev*100):null,guests:guests,clients:Object.keys(persons).length,bookings:bookN,costed:costed,n:n};
+    var revAll=0,rev=0,exp=0,guests=0,persons={},bookN=0,rows=[],waitDone=0,waitOpen=0,done=0;
+    list.forEach(function(t){
+      if(!tourDone(t)){waitOpen++;return;}
+      var p=autoTourProfit(t);
+      if(p.src!=="actual"&&p.src!=="log"){waitDone++;return;}
+      done++;rev+=p.rev;exp+=(p.exp||0);revAll+=p.rev;guests+=tourPaxBooked(t);
+      var ppl={};(bookings||[]).filter(function(b){return b.tour===t.id&&b.status!=="Cancelled";}).forEach(function(b){bookN++;bookingPersons(b).forEach(function(k){persons[k]=1;ppl[k]=1;});});
+      rows.push({t:t,rev:p.rev,exp:p.exp||0,profit:p.profit,pct:p.pct,clients:Object.keys(ppl).length});
+    });
+    return {tours:done,all:list.length,revAll:revAll,rev:rev,exp:exp,profit:rev-exp,margin:rev?Math.round((rev-exp)/rev*100):null,guests:guests,clients:Object.keys(persons).length,bookings:bookN,costed:done,waitDone:waitDone,waitOpen:waitOpen,rows:rows.sort(function(a,c){return (c.t.start||"").localeCompare(a.t.start||"");})};
   };
   var typePie=function(label,list){
     var S=typeStats(list);
-    if(!list.length||!S.revAll)return "<div class='a2-twin-col'><div class='a2-twin-t'>"+label+"</div><div class='empty'>No "+label.toLowerCase()+" with money in this range.</div></div>";
-    var src=[S.n.actual?S.n.actual+" with saved analysis":"",S.n.log?S.n.log+" from the saved list":"",S.n.estimate?S.n.estimate+" estimated from the cost sheet":"",S.n.none?S.n.none+" without cost data":""].filter(Boolean).join(" · ");
+    var wait=[S.waitOpen?S.waitOpen+" not finished yet":"",S.waitDone?S.waitDone+" finished but no cost analysis saved":""].filter(Boolean).join(" · ");
+    if(!S.tours)return "<div class='a2-twin-col'><div class='a2-twin-t'>"+label+"</div><div class='empty'>No completed "+label.toLowerCase()+" with a cost analysis in this range."+(wait?"<br><small>"+wait+"</small>":"")+"</div></div>";
+    var src=S.tours+" completed tour"+(S.tours===1?"":"s")+" with cost analysis counted"+(wait?" · waiting: "+wait:"");
     var profit=S.profit,margin=S.margin;
     var ring=S.costed?(profit>=0?[{k:"Expenses",n:S.exp,c:a2col(1)},{k:"Profit",n:profit,c:GOOD}]:[{k:"Total tour cost",n:S.rev,c:a2col(0)},{k:"Loss",n:-profit,c:BAD}]):[{k:"No cost data yet",n:1,c:NEUT}];
     var legend=[
       {k:"Clients",v:String(S.clients),s:S.guests+" guest"+(S.guests===1?"":"s")+" (seats) on "+S.bookings+" booking"+(S.bookings===1?"":"s"),c:"",tip:S.clients+" unique people chose "+label.toLowerCase()},
-      {k:"Total tour cost",v:fmt(S.revAll),s:S.tours+" tour"+(S.tours===1?"":"s")+(S.clients?" · "+fmt(Math.round(S.revAll/S.clients))+" per client":""),c:profit>=0||!S.costed?"":a2col(0),tip:"Total tour cost "+fmt(S.revAll)},
-      {k:"Expenses",v:S.costed?fmt(S.exp):"—",s:S.costed?(S.costed<S.tours?"on "+S.costed+" of "+S.tours+" tours with cost data · ":"")+a2Pct(S.exp,S.rev)+"% of their tour cost":"enter them in Cost based analysis",c:a2col(1),p:S.costed?a2Pct(S.exp,S.rev)+"%":null},
-      {k:S.costed?(profit>=0?"Profit":"Loss"):"Profit",v:S.costed?fmt(Math.abs(profit)):"—",s:S.costed?(margin!=null?margin+"% margin on the costed tours":""):"",c:profit>=0?GOOD:BAD,p:S.costed&&margin!=null?margin+"%":null,cls:profit>=0?"up":"down"}
+      {k:"Total tour cost",v:fmt(S.revAll),s:S.tours+" completed tour"+(S.tours===1?"":"s")+(S.clients?" · "+fmt(Math.round(S.revAll/S.clients))+" per client":""),c:profit>=0?"":a2col(0),tip:"Total tour cost "+fmt(S.revAll)},
+      {k:"Expenses",v:fmt(S.exp),s:"from Cost based analysis · "+a2Pct(S.exp,S.rev)+"% of tour cost",c:a2col(1),p:a2Pct(S.exp,S.rev)+"%"},
+      {k:profit>=0?"Profit":"Loss",v:fmt(Math.abs(profit)),s:margin!=null?margin+"% margin":"",c:profit>=0?GOOD:BAD,p:margin!=null?margin+"%":null,cls:profit>=0?"up":"down"}
     ];
-    return "<div class='a2-twin-col'><div class='a2-twin-t'>"+label+"</div>"+a2Pie(ring,{tip:function(x){return S.costed?fmt(x.n):"no cost data";},center:S.costed?fmt(Math.abs(profit)):"—",centerLabel:S.costed?((profit>=0?"profit":"loss")+(margin!=null?" · "+margin+"%":"")):"no cost data",legend:legend})+
-      "<div class='a2-twin-src'>Cost data: "+src+".</div></div>";
+    var perTour=(TW.type&&TW.type!=="both")?"<div class='a2-tbl' style='margin-top:10px'><table><thead><tr><th>Tour</th><th class='num'>Clients</th><th class='num'>Tour cost</th><th class='num'>Expenses</th><th class='num'>Profit</th><th class='num'>Margin</th></tr></thead><tbody>"+S.rows.map(function(r){return "<tr><td>["+tourCode(r.t)+"] "+anaEsc(shortName(r.t))+"<div class='a2-dim'>"+dDash(tourDates(r.t).start)+(tourDates(r.t).end!==tourDates(r.t).start?" – "+dDash(tourDates(r.t).end):"")+"</div></td><td class='num mono'>"+r.clients+"</td><td class='num mono'>"+fmt(r.rev)+"</td><td class='num mono'>"+fmt(r.exp)+"</td><td class='num mono' style='color:"+(r.profit>=0?GOOD:BAD)+"'>"+fmt(r.profit)+"</td><td class='num mono'>"+pct(r.pct)+"</td></tr>";}).join("")+"</tbody></table></div>":"";
+    return "<div class='a2-twin-col'><div class='a2-twin-t'>"+label+"</div>"+a2Pie(ring,{tip:function(x){return fmt(x.n);},center:fmt(Math.abs(profit)),centerLabel:(profit>=0?"profit":"loss")+(margin!=null?" · "+margin+"%":""),legend:legend})+
+      "<div class='a2-twin-src'>"+src+".</div>"+perTour+"</div>";
   };
-  var sessT=T.filter(function(t){return t.tourType==="session";}),grpT=T.filter(function(t){return t.tourType!=="session";});
-  var twinBody="<div class='a2-twin'>"+typePie("Session tours",sessT)+typePie("Group tours",grpT)+"</div>";
-  var twinTbl=a2Table(["Type","Tours","Clients","Guests","Total tour cost","Tours with cost data","Expenses","Profit","Margin"],[["Session tours",sessT],["Group tours",grpT]].map(function(x){var S=typeStats(x[1]);return [x[0],String(S.tours),String(S.clients),String(S.guests),fmt(S.revAll),S.costed+" of "+S.tours,S.costed?fmt(S.exp):"—",S.costed?fmt(S.profit):"—",pct(S.margin)];}));
+  var sessT=TWALL.filter(function(t){return t.tourType==="session";}),grpT=TWALL.filter(function(t){return t.tourType!=="session";});
+  var twYears=(function(){var ys={};(tours||[]).forEach(function(t){var d=tourDates(t).start;if(d)ys[d.slice(0,4)]=1;});return Object.keys(ys).sort();})();
+  var twType=TW.type||"both";
+  var twinFilter="<div class='a2-twinbar'>"+
+    "<div class='a2-twinseg'>"+[["both","Both"],["session","Sessions"],["group","Group tours"]].map(function(x){return "<button class='"+(twType===x[0]?"on":"")+"' onclick=\"a2TwinSet('type','"+x[0]+"')\">"+x[1]+"</button>";}).join("")+"</div>"+
+    "<select class='input' onchange=\"a2TwinSet('year',this.value)\"><option value=''>Any year</option>"+twYears.map(function(y){return "<option value='"+y+"' "+(String(TW.year)===y?"selected":"")+">"+y+"</option>";}).join("")+"</select>"+
+    "<select class='input' onchange=\"a2TwinSet('month',this.value)\"><option value=''>Any month</option>"+MN.map(function(m,i){var v=String(i+1).padStart(2,"0");return "<option value='"+v+"' "+(String(TW.month||"").padStart(2,"0")===v&&TW.month?"selected":"")+">"+m+"</option>";}).join("")+"</select>"+
+    "<input type='date' class='input mono' value='"+(TW.from||"")+"' onchange=\"a2TwinSet('from',this.value)\" title='From'><span>to</span><input type='date' class='input mono' value='"+(TW.to||"")+"' onchange=\"a2TwinSet('to',this.value)\" title='To'>"+
+    (twinOwn?"<button class='btn btn-ghost btn-sm' onclick='a2TwinClear()'>Use page range</button>":"<span class='a2-twinnote'>following the page range · "+b.label+"</span>")+
+  "</div>";
+  var twinBody=twinFilter+"<div class='a2-twin"+(twType!=="both"?" one":"")+"'>"+(twType!=="group"?typePie("Session tours",sessT):"")+(twType!=="session"?typePie("Group tours",grpT):"")+"</div>";
+  var twinTbl=a2Table(["Type","Completed tours counted","Clients","Guests","Total tour cost","Expenses","Profit","Margin","Waiting"],[["Session tours",sessT],["Group tours",grpT]].map(function(x){var S=typeStats(x[1]);return [x[0],String(S.tours),String(S.clients),String(S.guests),fmt(S.revAll),fmt(S.exp),fmt(S.profit),pct(S.margin),(S.waitOpen+S.waitDone)?(S.waitOpen+" not finished · "+S.waitDone+" no analysis"):"—"];}));
   /* ---- assemble ---- */
   var rangeBtns=A2_RANGES.map(function(r){return "<button class='"+(_a2.range===r[0]?"on":"")+"' onclick=\"a2SetRange('"+r[0]+"')\">"+r[1]+"</button>";}).join("");
   var custom=_a2.range==="custom"?"<div class='a2-custom'><input type='date' class='input mono' id='a2From' value='"+(_a2.from||"")+"' onchange='a2SetCustom()'><span>to</span><input type='date' class='input mono' id='a2To' value='"+(_a2.to||"")+"' onchange='a2SetCustom()'></div>":"";
   el.innerHTML=
     "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div><div class='a2-live'><i></i>Live · computed "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" from "+(tours||[]).length+" tours, "+(bookings||[]).length+" bookings, "+(leads||[]).length+" leads · recalculates on every visit, range change and sync</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
     overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
-    a2Card("twin","Session tours vs group tours","clients, total tour cost, expenses and profit for each type · expenses come from Cost based analysis (group tours without one use the cost-sheet estimate)",twinBody,twinTbl,"","")+
+    a2Card("twin","Session tours vs group tours","completed tours with a saved Cost based analysis only · a tour joins the moment it is finished and its costs are entered",twinBody,twinTbl,"","")+
     "<div class='a2-grid'>"+
       a2Card("cost","Cost breakdown","share of each cost head across the tours in this range · table: per tour",costBody,costTbl,costLegend,(catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%) · ":"")+"<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'>Export (.xlsx)</button>")+
       a2Card("guests","Clients & markets","unique people, matched by phone, email and name · by nationality",guestsStats+guestsBody,guestsTbl,"","")+
