@@ -1799,6 +1799,14 @@ html.dark .dep-date{background:#26272e;border-color:#33353d}html.dark .dep-risk{
 @media(max-width:900px){.a2-stats.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.a2-pie{gap:12px}.a2-pie svg{width:210px;height:210px}.a2-pie .pg{flex-basis:100%}.a2-stats.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
 html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{background:#3b2f0e;color:#f0c96a}
+
+.a2-twin{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.a2-twin-col{min-width:0;padding:4px 0}
+.a2-twin-col+.a2-twin-col{border-left:1px solid var(--line-soft);padding-left:18px}
+.a2-twin-t{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px}
+.a2-twin .a2-pie{flex-direction:column;align-items:stretch;gap:10px}.a2-twin .a2-pie svg{width:210px;height:210px}
+.a2-pie .pg b.up{color:#0f9a4f}.a2-pie .pg b.down{color:#ea4d4d}
+@media(max-width:900px){.a2-twin{grid-template-columns:1fr}.a2-twin-col+.a2-twin-col{border-left:0;padding-left:0;border-top:1px solid var(--line-soft);padding-top:14px}}
 </style>
 <script src="config.js"></script>
 </head>
@@ -1842,7 +1850,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install app
       </button>
       <div id="lgInstallHint" style="display:none;font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.5"></div>
-      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 338</span></div>
+      <div class="lg-foot"><span id="brandFootName">Island Explorer Birding Tours</span> · <span id="lgBuild">build 339</span></div>
       <div class="lg-dev">Designed &amp; developed by <b>Dr. Sumit Kumar Rao</b><br><a href="tel:+919933202175">+91 99332 02175</a> · <a href="mailto:info@islandexplorer.in">info@islandexplorer.in</a></div>
     </div>
   </div>
@@ -1851,7 +1859,7 @@ html.dark .pc-state{background:#15301f;color:#7fd3a0}html.dark .pc-state.edit{ba
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img class="brand-logo" id="brandSideLogo" src="assets/logo.png" alt="" onerror="if(this.src.indexOf('logo.png')>-1){this.src='assets/logo.jpg';}else{this.style.display='none';}">
-      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 338</span></div>
+      <div class="brand-meta" style="min-width:0"><div class="name" id="brandSideName">Island Explorer Birding Tours</div><div class="sub">Ops Console</div><span class="build-badge" id="sideBuild">build 339</span></div>
     </div>
     <nav class="nav" id="nav"></nav>
     <div class="nav-foot"><div class="av">SK</div><div style="flex:1;min-width:0"><div class="who">Sumit Kumar</div><div class="role">Owner</div><div class="uid" id="navUid"></div></div><button class="iconbtn" onclick="logout()" title="Sign out" aria-label="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
@@ -5756,7 +5764,7 @@ function a2Pie(items,opt){
     off+=f*C;});
   return "<div class='a2-pie'><svg viewBox='0 0 220 220'><g transform='rotate(-90 110 110)'>"+segs+"</g>"+labels+
     "<text class='ctr' x='110' y='107' text-anchor='middle'>"+anaEsc(opt.center!=null?opt.center:tot)+"</text><text class='ctr2' x='110' y='125' text-anchor='middle'>"+anaEsc(opt.centerLabel||"total")+"</text></svg>"+
-    "<div class='pg'>"+items.map(function(x,i){return "<div class='r' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'><i style='background:"+(x.c||a2col(i))+"'></i><span class='k'>"+anaEsc(x.k)+(x.s?"<small>"+anaEsc(x.s)+"</small>":"")+"</span><b>"+anaEsc(opt.val?opt.val(x):x.n)+"</b><span class='p'>"+Math.round(x.n/tot*100)+"%</span></div>";}).join("")+"</div></div>";
+    "<div class='pg'>"+(opt.legend?opt.legend.map(function(r){return "<div class='r'"+(r.tip?" data-tip='"+anaEsc(r.tip)+"'":"")+"><i style='background:"+(r.c||"transparent")+(r.c?"":";border:1px solid var(--line)")+"'></i><span class='k'>"+anaEsc(r.k)+(r.s?"<small>"+anaEsc(r.s)+"</small>":"")+"</span><b"+(r.cls?" class='"+r.cls+"'":"")+">"+anaEsc(r.v)+"</b>"+(r.p!=null?"<span class='p'>"+anaEsc(r.p)+"</span>":"")+"</div>";}).join(""):items.map(function(x,i){return "<div class='r' data-tip='"+anaEsc(x.k)+": "+anaEsc(opt.tip?opt.tip(x):x.n)+" ("+Math.round(x.n/tot*100)+"%)'><i style='background:"+(x.c||a2col(i))+"'></i><span class='k'>"+anaEsc(x.k)+(x.s?"<small>"+anaEsc(x.s)+"</small>":"")+"</span><b>"+anaEsc(opt.val?opt.val(x):x.n)+"</b><span class='p'>"+Math.round(x.n/tot*100)+"%</span></div>";}).join(""))+"</div></div>";
 }
 function a2Stat(l,v,s,cls){return "<div class='a2-stat'><div class='l'>"+l+"</div><div class='v "+(cls||"")+"'>"+v+"</div>"+(s?"<div class='s'>"+s+"</div>":"")+"</div>";}
 /* ---------------- the page ---------------- */
@@ -5895,12 +5903,25 @@ function renderAnalytics(){
   var yrs2=Object.keys(Object.assign({},yrNew,yrRet)).sort();
   var yrBody=yrs2.length?a2Bars(yrs2,[{name:"First-time",values:yrs2.map(function(y){return yrNew[y]||0;}),color:a2col(0)},{name:"Returning",values:yrs2.map(function(y){return yrRet[y]||0;}),color:a2col(2)}],{stack:true,height:190}):"<div class='empty'>No bookings yet.</div>";
   var yrTbl=a2Table(["Year","First-time","Returning","Returning share"],yrs2.map(function(y){var a=yrNew[y]||0,r=yrRet[y]||0;return [y,String(a),String(r),pct((a+r)?Math.round(r/(a+r)*100):null)];}));
+  /* ---- session tours vs group tours: total tour cost, expenses, profit ---- */
+  var typePie=function(label,list){
+    var rev=0,exp=0,guests=0;list.forEach(function(t){var p=autoTourProfit(t);rev+=p.rev;exp+=(p.exp||0);guests+=tourPaxBooked(t);});
+    var profit=rev-exp,margin=rev?Math.round(profit/rev*100):null;
+    if(!list.length||(!rev&&!exp))return "<div class='a2-twin-col'><div class='a2-twin-t'>"+label+"</div><div class='empty'>No "+label.toLowerCase()+" with money in this range.</div></div>";
+    var items=profit>=0?[{k:"Expenses",n:exp,c:a2col(1)},{k:"Profit",n:profit,c:GOOD}]:[{k:"Total tour cost",n:rev,c:a2col(0)},{k:"Loss",n:-profit,c:BAD}];
+    var legend=[{k:"Total tour cost",v:fmt(rev),s:list.length+" tour"+(list.length===1?"":"s")+" · "+guests+" guest"+(guests===1?"":"s"),c:profit>=0?"":a2col(0),tip:"Total tour cost "+fmt(rev)},{k:"Expenses",v:fmt(exp),s:rev?a2Pct(exp,rev)+"% of tour cost":"",c:a2col(1),p:rev?a2Pct(exp,rev)+"%":null},{k:profit>=0?"Profit":"Loss",v:fmt(Math.abs(profit)),s:margin!=null?margin+"% margin":"",c:profit>=0?GOOD:BAD,p:margin!=null?margin+"%":null,cls:profit>=0?"up":"down"}];
+    return "<div class='a2-twin-col'><div class='a2-twin-t'>"+label+"</div>"+a2Pie(items,{tip:function(x){return fmt(x.n);},center:fmt(Math.abs(profit)),centerLabel:(profit>=0?"profit":"loss")+(margin!=null?" · "+margin+"%":""),legend:legend})+"</div>";
+  };
+  var sessT=T.filter(function(t){return t.tourType==="session";}),grpT=T.filter(function(t){return t.tourType!=="session";});
+  var twinBody="<div class='a2-twin'>"+typePie("Session tours",sessT)+typePie("Group tours",grpT)+"</div>";
+  var twinTbl=a2Table(["Type","Tours","Guests","Total tour cost","Expenses","Profit","Margin"],[["Session tours",sessT],["Group tours",grpT]].map(function(x){var rev=0,exp=0,g=0;x[1].forEach(function(t){var p=autoTourProfit(t);rev+=p.rev;exp+=(p.exp||0);g+=tourPaxBooked(t);});return [x[0],String(x[1].length),String(g),fmt(rev),fmt(exp),fmt(rev-exp),pct(rev?Math.round((rev-exp)/rev*100):null)];}));
   /* ---- assemble ---- */
   var rangeBtns=A2_RANGES.map(function(r){return "<button class='"+(_a2.range===r[0]?"on":"")+"' onclick=\"a2SetRange('"+r[0]+"')\">"+r[1]+"</button>";}).join("");
   var custom=_a2.range==="custom"?"<div class='a2-custom'><input type='date' class='input mono' id='a2From' value='"+(_a2.from||"")+"' onchange='a2SetCustom()'><span>to</span><input type='date' class='input mono' id='a2To' value='"+(_a2.to||"")+"' onchange='a2SetCustom()'></div>":"";
   el.innerHTML=
     "<div class='a2-top'><div><div class='eyebrow'>Analytics</div><div class='h-sec'>"+b.label.charAt(0).toUpperCase()+b.label.slice(1)+"</div><div class='a2-live'><i></i>Live · computed "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" from "+(tours||[]).length+" tours, "+(bookings||[]).length+" bookings, "+(leads||[]).length+" leads · recalculates on every visit, range change and sync</div></div><div class='a2-range'>"+rangeBtns+"</div></div>"+custom+
     overview+a2Card("money","Money by month","revenue, costs and profit by tour start",moneyBody,moneyTbl,sumR||sumC?a2Legend([["Revenue",a2col(0),fmt(sumR)],["Cost",a2col(1),fmt(sumC)],["Profit",a2col(2),fmt(sumP)]]):"")+
+    a2Card("twin","Session tours vs group tours","total tour cost, expenses and profit for each type · the ring splits the tour cost into expenses and profit",twinBody,twinTbl,"","")+
     "<div class='a2-grid'>"+
       a2Card("cost","Cost breakdown","share of each cost head across the tours in this range · table: per tour",costBody,costTbl,costLegend,(catTot.length&&catTot[0].v?"Biggest line: <b>"+catTot[0].k+"</b> "+fmt(catTot[0].v)+" ("+a2Pct(catTot[0].v,catTot.reduce(function(s,x){return s+x.v;},0))+"%) · ":"")+"<button class='btn btn-ghost btn-sm' onclick='exportProfitXlsx(false)'>Export (.xlsx)</button>")+
       a2Card("guests","Clients & markets","unique people, matched by phone, email and name · by nationality",guestsStats+guestsBody,guestsTbl,"","")+
